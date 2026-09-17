@@ -55,7 +55,7 @@ Windows の PowerShell では `./gradlew` の代わりに `.\gradlew.bat` を使
 |----|--------|
 | [第 1 章](01-machine-learning-and-first-test.md) | 機械学習とはじめてのテスト |
 | [第 2 章](02-data-preprocessing-and-triangulation.md) | データの前処理と三角測量 |
-| 第 3 章（未執筆） | 決定木による分類と明白な実装 |
+| [第 3 章](03-decision-tree-and-obvious-implementation.md) | 決定木による分類と明白な実装 |
 
 ### 第 2 部: 開発環境と自動化
 

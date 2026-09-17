@@ -1,16 +1,14 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Kotlin 第 3 章](/article/getting-start-ml/kotlin/03-decision-tree-and-obvious-implementation.md) を新規作成。Tribuo の CART と予測が一致しない原因を調べた結果を含む。
 * **Creation**: [Kotlin 第 2 章](/article/getting-start-ml/kotlin/02-data-preprocessing-and-triangulation.md) を新規作成。第 1 章に captureStdout の移動を追記。
 * **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) を訂正。Kandy 0.8.5 が DataFrame 1.0.0-rc01 に依存していたため当初の検証が 1.0.0-rc01 のものだったと判明し、DataFrame 0.15.0 と組み合わせられる Kandy 0.8.0 に改め、Kotlin Notebook を IDE なしで実行できることを追記。[執筆計画](/article/getting-start-ml/outline.md) の該当箇所も修正。
-* **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) を訂正。Kandy 0.8.5 が DataFrame 1.0.0-rc01 に依存していたため当初の検証が 1.0.0-rc01 のものだったと判明し、DataFrame 0.15.0 と組み合わせられる Kandy 0.8.0 に改め、Kotlin Notebook を IDE なしで実行できることを追記。[執筆計画](/article/getting-start-ml/outline.md) の該当箇所も修正。
-* **Update**: Kotlin 版 B7 の進行に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Update**: Kotlin 版 B7 の進行に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [機械学習から始めるプログラミング入門 Kotlin 第 1 章](/article/getting-start-ml/kotlin/01-machine-learning-and-first-test.md) を新規作成。
 * **Creation**: [002-kotlin-ml-libraries](/adr/002-kotlin-ml-libraries.md) を作成（claude-code/claude-opus-5）
 * **Verification**: [outline](/article/getting-start-ml/outline.md) を human:kakimomokuri が検証
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に Kotlin 版執筆計画（確認した事実、ライブラリ方針、前提整備、章別計画、Python 版との数値の違い、Bolt 計画、承認事項）を追加。
-* **Update**: Python 版の全章完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備・Bolt 計画の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Update**: Python 版の全章完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備・Bolt 計画の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [Python 第 10 章](/article/getting-start-ml/python/10-logistic-regression-and-ensemble.md) を新規作成。
 * **Creation**: [Python 第 15 章](/article/getting-start-ml/python/15-machine-learning-api-and-module-design.md) を新規作成。
@@ -28,7 +26,6 @@
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 3 章](/article/getting-start-ml/python/03-decision-tree-and-obvious-implementation.md) を新規作成。
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 2 章](/article/getting-start-ml/python/02-data-preprocessing-and-triangulation.md) を新規作成。
 * **Creation**: [001-python-ml-libraries](/adr/001-python-ml-libraries.md) を作成（claude-code/claude-opus-5）
-* **Update**: [執筆計画](/article/getting-start-ml/outline.md) の前提整備の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を B1 完了に合わせて更新。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) の前提整備の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を B1 完了に合わせて更新。
 * **Creation**: [機械学習から始めるプログラミング入門 執筆ワークフロー](/article/getting-start-ml/workflow.md) を新規作成。
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 1 章](/article/getting-start-ml/python/01-machine-learning-and-first-test.md) を新規作成。
