@@ -4,7 +4,7 @@ title: "第 3 章: 決定木による分類と明白な実装"
 description: "決定木を TDD で自作し、Tribuo の CART と予測が一致しない原因（同数の多数決・同じ不純度の分割候補の選び方）をテストで突き止める。"
 tags: [article,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:14:34Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T05:29:57Z }
 ---
 
 # 第 3 章: 決定木による分類と明白な実装
@@ -784,10 +784,10 @@ class IrisDataTest {
         assumeTrue(csvFile.exists(), "学習データ iris.csv が配置されていない（gulp data:setup）")
     }
 
-    private fun irisSplit(): TrainTestSplit = prepareIris(csvFile, testSize = 0.3, seed = 0)
+    private fun irisSplit(): TrainTestSplit<String> = prepareIris(csvFile, testSize = 0.3, seed = 0)
 
     private fun countDifferences(
-        split: TrainTestSplit,
+        split: TrainTestSplit<String>,
         maxDepth: Int?,
     ): Int {
         val mine = DecisionTree(maxDepth).fit(split.xTrain, split.tTrain).predict(split.xTest)

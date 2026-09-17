@@ -4,7 +4,7 @@ title: "第 2 章: データの前処理と三角測量"
 description: "Kotlin DataFrame で iris データの欠損値を訓練データの平均値で補完し、Random(seed) による訓練・テストデータ分割を TDD で実装する。"
 tags: [article,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:55:25Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T05:29:57Z }
 ---
 
 # 第 2 章: データの前処理と三角測量
@@ -477,6 +477,20 @@ Python 版と同じく、先頭から順に分けるだけでは最後のテス�
 - `kotlin.random.Random(seed)` は、シードが同じなら同じ乱数列を返す生成器です。`shuffled` にこれを渡すと、再現性のあるシャッフルになります
 - `x[train]` は、行の位置のリストで行を取り出します。`t.slice(train)` はリストで同じことをします
 
+第 7 章からは、価格や興行収入のような数値の正解ラベルも同じ関数で分けます。そのため、第 7 章に入る前に `TrainTestSplit<T>` と `fun <T> splitTrainTest(...)` のように **型引数** `T` を持たせ、正解ラベルの型を呼び出し側が決められるようにしました。`prepareIris` の戻り値は `TrainTestSplit<String>` です。数値の正解ラベルでも特徴量との対応が保たれることは、次のテストで確かめています。
+
+```kotlin
+    @Test
+    fun `数値の正解ラベルも特徴量との対応を保ったまま分ける`() {
+        val x = dataFrameOf("x" to (0 until 10).toList())
+        val t = (0 until 10).map { it * 0.5 }
+
+        val split = splitTrainTest(x, t, testSize = 0.3, seed = 0)
+
+        assertEquals(split.xTest["x"].values().map { (it as Int) * 0.5 }, split.tTest)
+    }
+```
+
 ```text
 BUILD SUCCESSFUL in 3s
 ```
@@ -619,7 +633,7 @@ fun main() {
 ./gradlew test --tests "chapter02.*"
 ```
 
-第 2 章のテストは 18 件すべて通ります。データが無い環境では、実データのテスト 3 件がスキップされます。
+第 2 章のテストは 18 件すべて通ります（第 7 章の準備で数値の正解ラベルのテストを足した後は 19 件）。データが無い環境では、実データのテスト 3 件がスキップされます。
 
 ```text
 IrisDataTest > 実行すると前処理の結果を表示する() SKIPPED
@@ -756,6 +770,8 @@ Notebook の出力セルにはデータが残るので、コミットの前に�
 <details>
 <summary>この章の完成コード（src/main/kotlin/chapter02/IrisPreprocessing.kt）</summary>
 
+第 7 章に入る前に、分割に型引数 `T` を持たせた後のコードです。
+
 ```kotlin
 package chapter02
 
@@ -798,19 +814,19 @@ fun splitFeaturesAndTarget(
     target: String,
 ): Pair<AnyFrame, List<String>> = df.remove(target) to df[target].values().map { it.toString() }
 
-data class TrainTestSplit(
+data class TrainTestSplit<T>(
     val xTrain: AnyFrame,
     val xTest: AnyFrame,
-    val tTrain: List<String>,
-    val tTest: List<String>,
+    val tTrain: List<T>,
+    val tTest: List<T>,
 )
 
-fun splitTrainTest(
+fun <T> splitTrainTest(
     x: AnyFrame,
-    t: List<String>,
+    t: List<T>,
     testSize: Double,
     seed: Int,
-): TrainTestSplit {
+): TrainTestSplit<T> {
     val positions = (0 until x.rowsCount()).shuffled(Random(seed))
     val nTrain = x.rowsCount() - ceil(x.rowsCount() * testSize).toInt()
     val train = positions.take(nTrain)
@@ -829,7 +845,7 @@ fun prepareIris(
     csvFile: File,
     testSize: Double,
     seed: Int,
-): TrainTestSplit {
+): TrainTestSplit<String> {
     val (x, t) = splitFeaturesAndTarget(loadIris(csvFile), TARGET)
     val split = splitTrainTest(x, t, testSize, seed)
     val means = columnMeans(split.xTrain, x.columnNames())
