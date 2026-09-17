@@ -2,9 +2,8 @@ package chapter01
 
 import dataset.dataDir
 import org.junit.jupiter.api.Assumptions.assumeTrue
-import java.io.ByteArrayOutputStream
+import support.captureStdout
 import java.io.File
-import java.io.PrintStream
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.test.BeforeTest
@@ -132,16 +131,4 @@ class KvsTDataTest {
 
         assertEquals("データ件数: 19\nルールによる判定の正解率: 0.7368\n", output)
     }
-}
-
-private fun captureStdout(block: () -> Unit): String {
-    val original = System.out
-    val buffer = ByteArrayOutputStream()
-    System.setOut(PrintStream(buffer, true, Charsets.UTF_8))
-    try {
-        block()
-    } finally {
-        System.setOut(original)
-    }
-    return buffer.toString(Charsets.UTF_8).replace("\r\n", "\n")
 }

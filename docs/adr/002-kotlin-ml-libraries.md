@@ -48,6 +48,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
 | 機械学習 | Tribuo | 4.3.2 | Apache License 2.0 | 第 3 章 |
 | 可視化 | Kandy（lets-plot） | 0.8.0 | Apache License 2.0 | 第 2 章 |
 | API | Ktor、kotlinx.serialization | 3.6.0、1.11.0 | Apache License 2.0 | 第 15 章 |
+| ログ（警告の抑止） | slf4j-nop | 2.0.16 | MIT License | 第 2 章 |
 | 静的解析・カバレッジ | detekt、ktlint、Kover | 1.23.8、1.8.0、0.9.9 | Apache License 2.0（detekt・Kover）、MIT（ktlint） | 第 5 章 |
 
 ライブラリは使う章に入ってから `gradle/libs.versions.toml` に追加する。detekt・Kover・Ktor・kotlinx.serialization（Apache License 2.0）と ktlint（MIT）のライセンスは、Maven Central の POM で確認した。
