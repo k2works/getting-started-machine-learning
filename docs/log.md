@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [機械学習から始めるプログラミング入門 TypeScript 版トップ](/article/getting-start-ml/typescript/index.md) を新規作成。
+* **Creation**: [機械学習から始めるプログラミング入門 TypeScript 第 1 章](/article/getting-start-ml/typescript/01-machine-learning-and-first-test.md) を新規作成。
 * **Creation**: [ADR 003](/adr/003-typescript-ml-libraries.md) を新規作成。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に TypeScript 版執筆計画を追加。
 * **Update**: Kotlin 版 B10〜B12 の完了（全 15 章）に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 002](/adr/002-kotlin-ml-libraries.md) に各章で確かめた Tribuo の振る舞いを追記。
