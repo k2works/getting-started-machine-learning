@@ -42,12 +42,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nix-python-
 
+      # nix develop が PYTHONPATH に Nix の Python パッケージを追加し、uv の仮想環境の依存関係より優先されるため外す
+      - name: Show Python path from Nix
+        run: nix develop .#python --command bash -c 'echo "PYTHONPATH=${PYTHONPATH:-}" | tr ":" "\n"'
+
       # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
       - name: Run tests
-        run: nix develop .#python --command bash -c "cd apps/python && uv sync && uv run tox -e test"
+        run: nix develop .#python --command bash -c "unset PYTHONPATH && cd apps/python && uv sync && uv run tox -e test"
 
       - name: Run lint
-        run: nix develop .#python --command bash -c "cd apps/python && uv run tox -e lint"
+        run: nix develop .#python --command bash -c "unset PYTHONPATH && cd apps/python && uv run tox -e lint"
 
       - name: Run type check
-        run: nix develop .#python --command bash -c "cd apps/python && uv run tox -e type"
+        run: nix develop .#python --command bash -c "unset PYTHONPATH && cd apps/python && uv run tox -e type"
