@@ -1,5 +1,6 @@
 package chapter02
 
+import org.jetbrains.kotlinx.dataframe.AnyCol
 import org.jetbrains.kotlinx.dataframe.AnyFrame
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.fillNulls
@@ -12,13 +13,9 @@ import kotlin.random.Random
 
 fun loadIris(csvFile: File): AnyFrame = DataFrame.readCSV(csvFile)
 
-fun countMissing(df: AnyFrame): Map<String, Int> =
-    df.columns().associate { column ->
-        column.name() to
-            column.values().count {
-                it == null
-            }
-    }
+private fun AnyCol.countNulls(): Int = values().count { it == null }
+
+fun countMissing(df: AnyFrame): Map<String, Int> = df.columns().associate { it.name() to it.countNulls() }
 
 fun columnMeans(
     df: AnyFrame,

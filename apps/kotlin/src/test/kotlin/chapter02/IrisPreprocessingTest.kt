@@ -42,16 +42,10 @@ class CountMissingTest {
     @Test
     fun `列ごとの欠損値の数を数える`() {
         val df =
-            dataFrameOf("がく片長さ", "がく片幅", "種類")(
-                0.1,
-                0.2,
-                "Iris-setosa",
-                null,
-                0.3,
-                "Iris-setosa",
-                null,
-                null,
-                "Iris-virginica",
+            dataFrameOf(
+                "がく片長さ" to listOf(0.1, null, null),
+                "がく片幅" to listOf(0.2, 0.3, null),
+                "種類" to listOf("Iris-setosa", "Iris-setosa", "Iris-virginica"),
             )
 
         assertEquals(mapOf("がく片長さ" to 2, "がく片幅" to 1, "種類" to 0), countMissing(df))
@@ -62,13 +56,9 @@ class ColumnMeansTest {
     @Test
     fun `欠損値を除いて列ごとの平均値を求める`() {
         val df =
-            dataFrameOf("がく片長さ", "がく片幅")(
-                0.1,
-                0.2,
-                null,
-                0.4,
-                0.3,
-                0.9,
+            dataFrameOf(
+                "がく片長さ" to listOf(0.1, null, 0.3),
+                "がく片幅" to listOf(0.2, 0.4, 0.9),
             )
 
         val means = columnMeans(df, listOf("がく片長さ", "がく片幅"))
@@ -82,11 +72,9 @@ class FillMissingTest {
     @Test
     fun `欠損値を列ごとに指定した値で補完する`() {
         val df =
-            dataFrameOf("がく片長さ", "がく片幅")(
-                0.1,
-                null,
-                null,
-                0.4,
+            dataFrameOf(
+                "がく片長さ" to listOf(0.1, null),
+                "がく片幅" to listOf(null, 0.4),
             )
 
         val filled = fillMissing(df, mapOf("がく片長さ" to 0.2, "がく片幅" to 0.5))
@@ -97,7 +85,7 @@ class FillMissingTest {
 
     @Test
     fun `元のデータフレームは変更しない`() {
-        val df = dataFrameOf("がく片長さ")(0.1, null)
+        val df = dataFrameOf("がく片長さ" to listOf(0.1, null))
 
         fillMissing(df, mapOf("がく片長さ" to 0.2))
 
@@ -109,13 +97,10 @@ class SplitFeaturesAndTargetTest {
     @Test
     fun `特徴量の列と正解ラベルの列に分ける`() {
         val df =
-            dataFrameOf("がく片長さ", "花弁幅", "種類")(
-                0.1,
-                0.4,
-                "Iris-setosa",
-                0.5,
-                0.8,
-                "Iris-virginica",
+            dataFrameOf(
+                "がく片長さ" to listOf(0.1, 0.5),
+                "花弁幅" to listOf(0.4, 0.8),
+                "種類" to listOf("Iris-setosa", "Iris-virginica"),
             )
 
         val (x, t) = splitFeaturesAndTarget(df, "種類")
@@ -126,7 +111,7 @@ class SplitFeaturesAndTargetTest {
 }
 
 private fun numberedDataset(size: Int): Pair<AnyFrame, List<String>> {
-    val x = dataFrameOf("x")(*(0 until size).toList().toTypedArray())
+    val x = dataFrameOf("x" to (0 until size).toList())
     val t = (0 until size).map { "label$it" }
     return x to t
 }
@@ -198,7 +183,7 @@ class SplitTrainTestTest {
 class DataFrameMeanLearningTest {
     @Test
     fun `DataFrameのmeanも欠損値を除いて平均値を求める`() {
-        val df = dataFrameOf("がく片長さ")(0.1, null, 0.3)
+        val df = dataFrameOf("がく片長さ" to listOf(0.1, null, 0.3))
 
         assertEquals(columnMeans(df, listOf("がく片長さ")).getValue("がく片長さ"), df["がく片長さ"].cast<Double?>().mean(), absoluteTolerance = 1e-12)
     }
