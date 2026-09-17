@@ -26,6 +26,7 @@
           clojure = import ./ops/nix/environments/clojure/shell.nix { inherit packages; };
           elixir = import ./ops/nix/environments/elixir/shell.nix { inherit packages; };
           scala = import ./ops/nix/environments/scala/shell.nix { inherit packages; };
+          kotlin = import ./ops/nix/environments/kotlin/shell.nix { inherit packages; };
         };
       }
     );
