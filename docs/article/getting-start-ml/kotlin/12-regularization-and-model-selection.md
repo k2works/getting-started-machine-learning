@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 12 章: 正則化とモデル選択"
+description: "リッジ回帰を閉形式で TDD で自作し、検証データで正則化の強さを選んで data class の copy で実験結果を記録する。Tribuo の ElasticNetCDTrainer でラッソ回帰とリッジ回帰を表し、係数を突き合わせる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:04:39Z }
+---
+
 # 第 12 章: 正則化とモデル選択
 
 ## 12.1 はじめに

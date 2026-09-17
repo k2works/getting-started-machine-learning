@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Kotlin 第 12 章](/article/getting-start-ml/kotlin/12-regularization-and-model-selection.md) を新規作成。
 * **Creation**: [Kotlin 第 15 章](/article/getting-start-ml/kotlin/15-machine-learning-api-and-module-design.md) を新規作成。
 * **Creation**: [Kotlin 第 14 章](/article/getting-start-ml/kotlin/14-k-means-clustering.md) を新規作成。
 * **Creation**: [Kotlin 第 13 章](/article/getting-start-ml/kotlin/13-principal-component-analysis.md) を新規作成。
