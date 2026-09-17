@@ -5,9 +5,13 @@ import chapter02.prepareIris
 import dataset.dataDir
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.tribuo.Trainer
+import org.tribuo.classification.dtree.CARTClassificationTrainer
+import org.tribuo.classification.dtree.impurity.GiniIndex
+import org.tribuo.classification.ensemble.VotingCombiner
 import org.tribuo.classification.sgd.linear.LinearSGDTrainer
 import org.tribuo.classification.sgd.linear.LogisticRegressionTrainer
 import org.tribuo.classification.sgd.objectives.LogMulticlass
+import org.tribuo.common.tree.RandomForestTrainer
 import org.tribuo.math.optimisers.AdaGrad
 import support.captureStdout
 import java.io.File
@@ -62,6 +66,17 @@ class IrisModelsTest {
         val score = evaluate(tribuoRandomForest(nEstimators = 100, maxDepth = null, seed = 0L), irisSplit())
 
         assertEquals(41.0 / 45, score.test, absoluteTolerance = 1e-12)
+    }
+
+    @Test
+    fun `Tribuoのランダムフォレストは最小の重みを1にすると訓練データを分け切る`() {
+        val tree = CARTClassificationTrainer(Int.MAX_VALUE, 1.0f, 0.0f, 0.5f, GiniIndex(), 0L)
+        val forest = TribuoClassifier(RandomForestTrainer(tree, VotingCombiner(), 100, 0L))
+
+        val score = evaluate(forest, irisSplit())
+
+        assertEquals(1.0, score.train)
+        assertEquals(43.0 / 45, score.test, absoluteTolerance = 1e-12)
     }
 
     @Test
