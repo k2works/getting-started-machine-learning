@@ -5294,6 +5294,17 @@ SplitTrainTestTest &gt; すべての行を重複なく訓練データとテス�
 <li><code>kotlin.random.Random(seed)</code> は、シードが同じなら同じ乱数列を返す生成器です。<code>shuffled</code> にこれを渡すと、再現性のあるシャッフルになります</li>
 <li><code>x[train]</code> は、行の位置のリストで行を取り出します。<code>t.slice(train)</code> はリストで同じことをします</li>
 </ul>
+<p>第 7 章からは、価格や興行収入のような数値の正解ラベルも同じ関数で分けます。そのため、第 7 章に入る前に <code>TrainTestSplit&lt;T&gt;</code> と <code>fun &lt;T&gt; splitTrainTest(...)</code> のように <strong>型引数</strong> <code>T</code> を持たせ、正解ラベルの型を呼び出し側が決められるようにしました。<code>prepareIris</code> の戻り値は <code>TrainTestSplit&lt;String&gt;</code> です。数値の正解ラベルでも特徴量との対応が保たれることは、次のテストで確かめています。</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nd">@Test</span>
+<span class="w">    </span><span class="kd">fun</span><span class="w"> </span><span class="err">`数値の正解ラベルも特徴量との対応を保ったまま分ける`() {</span>
+<span class="w">        </span><span class="kd">val</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dataFrameOf</span><span class="p">(</span><span class="s">"x"</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="p">(</span><span class="m">0</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="m">10</span><span class="p">).</span><span class="na">toList</span><span class="p">())</span>
+<span class="w">        </span><span class="kd">val</span><span class="w"> </span><span class="nv">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="m">0</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="m">10</span><span class="p">).</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">it</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="m">0.5</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">        </span><span class="kd">val</span><span class="w"> </span><span class="nv">split</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">splitTrainTest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">testSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.3</span><span class="p">,</span><span class="w"> </span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="p">)</span>
+
+<span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="n">split</span><span class="p">.</span><span class="na">xTest</span><span class="o">[</span><span class="s">"x"</span><span class="o">]</span><span class="p">.</span><span class="na">values</span><span class="p">().</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="nb">it</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">Int</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="m">0.5</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="n">split</span><span class="p">.</span><span class="na">tTest</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
 <div class="highlight"><pre><span></span><code>BUILD SUCCESSFUL in 3s
 </code></pre></div>
 <h2 id="29">2.9 前処理をまとめる<a class="headerlink" href="#29" title="Permanent link">&para;</a></h2>
@@ -5413,7 +5424,7 @@ SplitTrainTestTest &gt; すべての行を重複なく訓練データとテス�
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--tests<span class="w"> </span><span class="s2">"chapter02.*"</span>
 </code></pre></div>
-<p>第 2 章のテストは 18 件すべて通ります。データが無い環境では、実データのテスト 3 件がスキップされます。</p>
+<p>第 2 章のテストは 18 件すべて通ります（第 7 章の準備で数値の正解ラベルのテストを足した後は 19 件）。データが無い環境では、実データのテスト 3 件がスキップされます。</p>
 <div class="highlight"><pre><span></span><code>IrisDataTest &gt; 実行すると前処理の結果を表示する() SKIPPED
 IrisDataTest &gt; 実データを105件と45件に分けて欠損値を補完する() SKIPPED
 IrisDataTest &gt; 実データの列ごとの欠損値の数を数える() SKIPPED
@@ -5532,6 +5543,8 @@ BUILD SUCCESSFUL in 13s
 <details>
 <summary>この章の完成コード（src/main/kotlin/chapter02/IrisPreprocessing.kt）</summary>
 
+第 7 章に入る前に、分割に型引数 `T` を持たせた後のコードです。
+
 <div class="highlight"><pre><span></span><code><span class="k">package</span><span class="w"> </span><span class="nn">chapter02</span>
 
 <span class="k">import</span><span class="w"> </span><span class="nn">org.jetbrains.kotlinx.dataframe.AnyCol</span>
@@ -5573,19 +5586,19 @@ BUILD SUCCESSFUL in 13s
 <span class="w">    </span><span class="n">target</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">,</span>
 <span class="p">):</span><span class="w"> </span><span class="n">Pair</span><span class="o">&lt;</span><span class="n">AnyFrame</span><span class="p">,</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">df</span><span class="o">[</span><span class="n">target</span><span class="o">]</span><span class="p">.</span><span class="na">values</span><span class="p">().</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">it</span><span class="p">.</span><span class="na">toString</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
 
-<span class="kd">data</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">TrainTestSplit</span><span class="p">(</span>
+<span class="kd">data</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">TrainTestSplit</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">xTrain</span><span class="p">:</span><span class="w"> </span><span class="n">AnyFrame</span><span class="p">,</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">xTest</span><span class="p">:</span><span class="w"> </span><span class="n">AnyFrame</span><span class="p">,</span>
-<span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">tTrain</span><span class="p">:</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">tTest</span><span class="p">:</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">tTrain</span><span class="p">:</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">tTest</span><span class="p">:</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kd">fun</span><span class="w"> </span><span class="nf">splitTrainTest</span><span class="p">(</span>
+<span class="kd">fun</span><span class="w"> </span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">splitTrainTest</span><span class="p">(</span>
 <span class="w">    </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="n">AnyFrame</span><span class="p">,</span>
-<span class="w">    </span><span class="n">t</span><span class="p">:</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">t</span><span class="p">:</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="w">    </span><span class="n">testSize</span><span class="p">:</span><span class="w"> </span><span class="kt">Double</span><span class="p">,</span>
 <span class="w">    </span><span class="n">seed</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span>
-<span class="p">):</span><span class="w"> </span><span class="n">TrainTestSplit</span><span class="w"> </span><span class="p">{</span>
+<span class="p">):</span><span class="w"> </span><span class="n">TrainTestSplit</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">positions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="m">0</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="na">rowsCount</span><span class="p">()).</span><span class="na">shuffled</span><span class="p">(</span><span class="n">Random</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">nTrain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="na">rowsCount</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ceil</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="na">rowsCount</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">testSize</span><span class="p">).</span><span class="na">toInt</span><span class="p">()</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">positions</span><span class="p">.</span><span class="na">take</span><span class="p">(</span><span class="n">nTrain</span><span class="p">)</span>
@@ -5604,7 +5617,7 @@ BUILD SUCCESSFUL in 13s
 <span class="w">    </span><span class="n">csvFile</span><span class="p">:</span><span class="w"> </span><span class="n">File</span><span class="p">,</span>
 <span class="w">    </span><span class="n">testSize</span><span class="p">:</span><span class="w"> </span><span class="kt">Double</span><span class="p">,</span>
 <span class="w">    </span><span class="n">seed</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span>
-<span class="p">):</span><span class="w"> </span><span class="n">TrainTestSplit</span><span class="w"> </span><span class="p">{</span>
+<span class="p">):</span><span class="w"> </span><span class="n">TrainTestSplit</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="p">(</span><span class="nv">x</span><span class="p">,</span><span class="w"> </span><span class="nv">t</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">splitFeaturesAndTarget</span><span class="p">(</span><span class="n">loadIris</span><span class="p">(</span><span class="n">csvFile</span><span class="p">),</span><span class="w"> </span><span class="n">TARGET</span><span class="p">)</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">split</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">splitTrainTest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">testSize</span><span class="p">,</span><span class="w"> </span><span class="n">seed</span><span class="p">)</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">means</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">columnMeans</span><span class="p">(</span><span class="n">split</span><span class="p">.</span><span class="na">xTrain</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="na">columnNames</span><span class="p">())</span>
