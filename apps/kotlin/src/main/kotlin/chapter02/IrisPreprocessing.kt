@@ -39,19 +39,19 @@ fun splitFeaturesAndTarget(
     target: String,
 ): Pair<AnyFrame, List<String>> = df.remove(target) to df[target].values().map { it.toString() }
 
-data class TrainTestSplit(
+data class TrainTestSplit<T>(
     val xTrain: AnyFrame,
     val xTest: AnyFrame,
-    val tTrain: List<String>,
-    val tTest: List<String>,
+    val tTrain: List<T>,
+    val tTest: List<T>,
 )
 
-fun splitTrainTest(
+fun <T> splitTrainTest(
     x: AnyFrame,
-    t: List<String>,
+    t: List<T>,
     testSize: Double,
     seed: Int,
-): TrainTestSplit {
+): TrainTestSplit<T> {
     val positions = (0 until x.rowsCount()).shuffled(Random(seed))
     val nTrain = x.rowsCount() - ceil(x.rowsCount() * testSize).toInt()
     val train = positions.take(nTrain)
@@ -70,7 +70,7 @@ fun prepareIris(
     csvFile: File,
     testSize: Double,
     seed: Int,
-): TrainTestSplit {
+): TrainTestSplit<String> {
     val (x, t) = splitFeaturesAndTarget(loadIris(csvFile), TARGET)
     val split = splitTrainTest(x, t, testSize, seed)
     val means = columnMeans(split.xTrain, x.columnNames())

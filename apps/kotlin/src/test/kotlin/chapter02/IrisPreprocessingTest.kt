@@ -178,6 +178,16 @@ class SplitTrainTestTest {
 
         assertNotEquals(first.tTest, second.tTest)
     }
+
+    @Test
+    fun `数値の正解ラベルも特徴量との対応を保ったまま分ける`() {
+        val x = dataFrameOf("x" to (0 until 10).toList())
+        val t = (0 until 10).map { it * 0.5 }
+
+        val split = splitTrainTest(x, t, testSize = 0.3, seed = 0)
+
+        assertEquals(split.xTest["x"].values().map { (it as Int) * 0.5 }, split.tTest)
+    }
 }
 
 class DataFrameMeanLearningTest {

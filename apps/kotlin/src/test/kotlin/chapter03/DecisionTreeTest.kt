@@ -175,10 +175,10 @@ class IrisDataTest {
         assumeTrue(csvFile.exists(), "学習データ iris.csv が配置されていない（gulp data:setup）")
     }
 
-    private fun irisSplit(): TrainTestSplit = prepareIris(csvFile, testSize = 0.3, seed = 0)
+    private fun irisSplit(): TrainTestSplit<String> = prepareIris(csvFile, testSize = 0.3, seed = 0)
 
     private fun countDifferences(
-        split: TrainTestSplit,
+        split: TrainTestSplit<String>,
         maxDepth: Int?,
     ): Int {
         val mine = DecisionTree(maxDepth).fit(split.xTrain, split.tTrain).predict(split.xTest)
