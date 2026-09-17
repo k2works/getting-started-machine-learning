@@ -38,7 +38,10 @@ fun splitFeaturesAndLabels(people: List<Person>): Pair<List<Features>, List<Stri
     return features to labels
 }
 
-fun predictByRule(features: Features): String = if (features.ageGroup == 20) "きのこ" else "たけのこ"
+/** 「20 代ならきのこ派」というルールの年代 */
+private const val KINOKO_AGE_GROUP = 20
+
+fun predictByRule(features: Features): String = if (features.ageGroup == KINOKO_AGE_GROUP) "きのこ" else "たけのこ"
 
 fun accuracy(
     predictions: List<String>,
