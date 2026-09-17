@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: Kotlin 版 B9 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新。
 * **Update**: [Python 第 6 章](/article/getting-start-ml/python/06-task-runner-and-ci-cd.md) のワークフローから、効いていなかった Nix ストアのキャッシュのステップを削除。
 * **Creation**: [Kotlin 第 6 章](/article/getting-start-ml/kotlin/06-task-runner-and-ci-cd.md) を新規作成。
 * **Creation**: [Kotlin 第 5 章](/article/getting-start-ml/kotlin/05-package-management-and-static-analysis.md) を新規作成。[第 1 章](/article/getting-start-ml/kotlin/01-machine-learning-and-first-test.md) の完成コードを定数化に合わせて更新。

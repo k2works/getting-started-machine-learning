@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:18:26Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:55:49Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -458,7 +458,7 @@ PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribu
 | 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 完了 |
 | Notebook 環境 | `apps/kotlin/notebooks/` に Kotlin Notebook を置く。出力セルの削除（`notebookStrip`）・検査（`notebookVerify`）・IDE なしの実行（`notebookExecute`）を Gradle タスクにする | 完了（B8。`notebookVerify` は `check` に組み込み CI で実行。`notebookExecute` は uv で kotlin-jupyter-kernel を一時取得する） |
 | ライブラリ選定 | ADR 002（Kotlin 版のライブラリ）を作成する | 完了（ADR 002） |
-| CI | `.github/workflows/kotlin-ci.yml`（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする | 一部完了（B7。`./gradlew check` でテスト・ktlint・Notebook の出力検査を行う。detekt・Kover は B9 で追加する） |
+| CI | `.github/workflows/kotlin-ci.yml`（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする | 完了（B7 で追加し、B9 で detekt・Kover を追加。`./gradlew check` でテスト・ktlint・detekt・Notebook の出力検査を行い、`koverLog` でカバレッジを表示する。Gradle のキャッシュは `~/.gradle/caches`・`~/.gradle/wrapper`） |
 
 ### 章別執筆計画（Kotlin）
 
@@ -515,7 +515,7 @@ Python 版と同じく、B7・B8 で型（プロジェクト構成・テスト�
 - [x] 付録 A の Kotlin 版を作らないこと
 - [x] B7（ウォーキングスケルトン）の範囲
 
-B7〜B8（Kotlin 版の第 1 部）は 2026-09-17 に完了した。
+B7〜B8（Kotlin 版の第 1 部）と B9（第 2 部）は 2026-09-17 に完了した。B9 では、detekt 1.23.8 が JDK 25 で動かないため Gradle デーモンの JDK を 21 に固定し（ADR 002）、MagicNumber の指摘のうち `MAX_DEPTHS` の値は設定（`ignorePropertyDeclaration`）で対象外にした。あわせて、Python CI の効いていなかった Nix ストアのキャッシュのステップを削除した。
 
 TypeScript 版の章別執筆計画は、Kotlin 版の B8 の完了後に本ファイルへ追加する。
 
