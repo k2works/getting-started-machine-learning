@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: [執筆計画](/article/getting-start-ml/outline.md) の前提整備の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を B1 完了に合わせて更新。
+* **Update**: [執筆計画](/article/getting-start-ml/outline.md) の前提整備の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を B1 完了に合わせて更新。
 * **Creation**: [機械学習から始めるプログラミング入門 執筆ワークフロー](/article/getting-start-ml/workflow.md) を新規作成。
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 1 章](/article/getting-start-ml/python/01-machine-learning-and-first-test.md) を新規作成。
 * **Verification**: [outline](/article/getting-start-ml/outline.md) を human:kakimomokuri が検証

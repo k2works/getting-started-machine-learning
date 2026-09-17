@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T01:45:34Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T02:22:31Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
 ---
@@ -381,11 +381,11 @@ apps/
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| 学習データ | `apps/data/sukkiri-ml/` への配置手順、`.gitignore` への `apps/data/` 追加、`data:check` タスク | 未着手 |
-| シリーズ骨子 | `index.md`・`workflow.md`、`docs/article/index.md` のシリーズ一覧、`mkdocs.yml` の nav | 未着手 |
-| Nix 環境 | `python`・`node` は既存。`kotlin`（JDK 21 + kotlin + gradle）は `tmp/getting-started-tdd/ops/nix/environments/kotlin/` を雛形に追加し flake に登録する。ML ライブラリの導入に必要なネイティブ依存（BLAS 等）の有無を確認 | 未着手 |
+| 学習データ | `apps/data/sukkiri-ml/` への配置手順、`.gitignore` への `apps/data/` 追加、`data:setup`・`data:check` タスク | 完了 |
+| シリーズ骨子 | `index.md`・`workflow.md`、`docs/article/index.md` のシリーズ一覧、`mkdocs.yml` の nav | 完了 |
+| Nix 環境 | `python`・`node` は既存。`kotlin`（JDK 21 + kotlin + gradle）は `tmp/getting-started-tdd/ops/nix/environments/kotlin/` を雛形に追加し flake に登録する。ML ライブラリの導入に必要なネイティブ依存（BLAS 等）の有無を確認 | 進行中（`python` は CI で動作確認済み。`kotlin` は未着手） |
 | Notebook 環境 | Python は Jupyter Lab を開発依存に追加。Kotlin は IntelliJ IDEA の Kotlin Notebook で Kotlin DataFrame・Kandy が読み込めることを確認。両言語とも出力セルを消す仕組み（pre-commit フックやタスク）を用意 | 未着手 |
-| アプリ雛形 | `apps/python/`・`apps/kotlin/`・`apps/node/` にテストが 1 本通る最小構成 | 未着手 |
+| アプリ雛形 | `apps/python/`・`apps/kotlin/`・`apps/node/` にテストが 1 本通る最小構成 | 進行中（`apps/python/` 完了） |
 | ライブラリ選定 | 第 1 波 3 言語の ML ライブラリと、Python・Kotlin の可視化ライブラリを ADR で確定 | 未着手 |
 
 ### 章別執筆計画（Python）
@@ -397,7 +397,7 @@ apps/
 | 3 | 決定木による分類と明白な実装 | `dataclass` による木のノード、再帰、scikit-learn `DecisionTreeClassifier` との突き合わせ |
 | 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`.gitignore`、`random_state` |
 | 5 | パッケージ管理と静的解析 | uv、Ruff、mypy、pytest-cov |
-| 6 | タスクランナーと CI/CD | tox によるタスク、GitHub Actions、`pytest.mark.skipif` による実データテストの分離、Jupyter Lab の導入と出力セルの除去 |
+| 6 | タスクランナーと CI/CD | tox によるタスク、GitHub Actions、`pytest.mark.skipif` による実データテストの分離、`nix develop` が設定する `PYTHONPATH` と uv の仮想環境の衝突の回避、Jupyter Lab の導入と出力セルの除去 |
 | 7 | 線形回帰による数値予測 | NumPy による正規方程式、`LinearRegression` との突き合わせ |
 | 8 | 実践的な分類と前処理パイプライン | `groupby` による補完、`get_dummies`、`Pipeline`、`pickle`／joblib |
 | 9 | 特徴量エンジニアリング | `StandardScaler`、`PolynomialFeatures`、`merge` |
