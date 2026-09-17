@@ -13,6 +13,11 @@ val ktlint: Configuration = configurations.create("ktlint")
 dependencies {
     implementation(libs.dataframe)
     implementation(libs.tribuo.classification.tree)
+    implementation(libs.tribuo.classification.sgd)
+    implementation(libs.tribuo.regression.slm)
+    implementation(libs.tribuo.regression.sgd)
+    implementation(libs.tribuo.clustering.kmeans)
+    implementation(libs.tribuo.math)
     // DataFrame・Tribuo が使う SLF4J の警告を出さないための、何もしないログ実装
     runtimeOnly(libs.slf4j.nop)
     testImplementation(kotlin("test"))
