@@ -8,6 +8,7 @@
 
 | シリーズ | テーマ | 言語数 | 特徴 |
 |------|------|------|------|
+| [機械学習から始めるプログラミング入門](getting-start-ml/index.md) | 機械学習を題材にした言語入門 | 14（執筆中） | 機械学習のアルゴリズムを TDD で自作し、各言語のライブラリに置き換えながら、データ処理・学習・評価・API 化を多言語で比較できます。 |
 | [テスト駆動開発から始めるプログラミング入門](getting-start-tdd/index.md) | TDD を軸にした言語入門 | 14 | 共通題材で Red-Green-Refactor を体験し、言語ごとの設計思想を比較できます。 |
 | [Grokking Functional Programming](grokkingfp/index.md) | 関数型プログラミング | 11 | 純粋関数、イミュータブルデータ、Option/Either、IO、並行処理まで体系的に学べます。 |
 | [Grokking Concurrency](grokking-concurrency/index.md) | 並行処理プログラミング | 8 | スレッド、同期、非同期、ノンブロッキング I/O、分散並列処理を多言語で比較できます。 |
@@ -17,6 +18,7 @@
 
 ## 学び方のガイド
 
+- 機械学習を題材に言語の基礎を学ぶ場合は、[機械学習から始めるプログラミング入門](getting-start-ml/index.md) から読み始めてください。
 - TDD を起点に言語の基礎を学ぶ場合は、[テスト駆動開発から始めるプログラミング入門](getting-start-tdd/index.md) から読み始めてください。
 - 関数型プログラミングを体系的に学ぶ場合は、[Grokking Functional Programming](grokkingfp/index.md) を参照してください。
 - 並行処理を重点的に学ぶ場合は、[Grokking Concurrency](grokking-concurrency/index.md) を参照してください。
