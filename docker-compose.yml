@@ -1,0 +1,33 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_MAJOR: 22
+    volumes:
+      - .:/srv
+    tty: true
+    stdin_open: true
+
+  mkdocs:
+    build:
+      context: .
+      dockerfile: ./ops/docker/mkdoc/Dockerfile
+    environment:
+        PLANTUML_SERVER_URL: http://plantuml:8080/plantuml
+    volumes:
+      - ./docs:/docs/docs
+      - ./README.md:/docs/README.md
+      - ./mkdocs.yml:/docs/mkdocs.yml
+      - ./site:/docs/site
+    ports:
+      - "8000:8000"
+    command: mkdocs serve --dev-addr=0.0.0.0:8000 --livereload
+    links:
+      - plantuml
+
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    environment:
+      BASE_URL: plantuml
