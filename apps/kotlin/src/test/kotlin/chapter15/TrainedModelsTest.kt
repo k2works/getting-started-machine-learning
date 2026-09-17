@@ -1,6 +1,7 @@
 package chapter15
 
 import dataset.dataDir
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
@@ -36,7 +37,7 @@ class TrainedModelsTest {
     @BeforeTest
     fun requireData() = requireTrainingData()
 
-    private fun trainedApiTest(block: suspend (client: io.ktor.client.HttpClient) -> Unit) =
+    private fun trainedApiTest(block: suspend (client: HttpClient) -> Unit) =
         testApplication {
             application { predictionModule(PredictionService(FileModelStore(trainedModelDir))) }
             block(createClient { install(ContentNegotiation) { json() } })
