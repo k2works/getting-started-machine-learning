@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Verification**: [outline](/article/getting-start-ml/outline.md) を human:kakimomokuri が検証
+* **Update**: [執筆計画](/article/getting-start-ml/outline.md) に Kotlin 版執筆計画（確認した事実、ライブラリ方針、前提整備、章別計画、Python 版との数値の違い、Bolt 計画、承認事項）を追加。
 * **Update**: Python 版の全章完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備・Bolt 計画の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Update**: Python 版の全章完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備・Bolt 計画の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [Python 第 10 章](/article/getting-start-ml/python/10-logistic-regression-and-ensemble.md) を新規作成。

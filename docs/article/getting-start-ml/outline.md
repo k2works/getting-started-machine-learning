@@ -4,9 +4,10 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:02:09Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:07:15Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
+  - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
 ---
 
 # 執筆計画アウトライン
@@ -148,7 +149,7 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 | 波 | 環境名 | 言語 | テスト基盤 | ML ライブラリ候補 | 備考 |
 |----|--------|------|-----------|------------------|------|
 | 1 | python | Python | pytest（uv） | pandas, scikit-learn | 参照実装。Wiki 記事と同じ言語 |
-| 1 | kotlin | Kotlin | kotlin.test（Gradle） | Kotlin DataFrame, Smile | 静的型付け・OOP と FP の融合。Kotlin Notebook による可視化を扱う |
+| 1 | kotlin | Kotlin | kotlin.test（Gradle） | Kotlin DataFrame, Tribuo（「Kotlin 版執筆計画」を参照） | 静的型付け・OOP と FP の融合。Kotlin Notebook による可視化を扱う |
 | 1 | node | TypeScript | Vitest（npm） | danfo.js, ml.js 系パッケージ | ML ライブラリが未成熟な言語での自作の価値を示す |
 | 2 | java | Java | JUnit 5（Gradle） | Tribuo, Smile | 静的型付け OOP の代表。Kotlin 版の実装と対比する |
 | 2 | dotnet | C# | xUnit | ML.NET, Microsoft.Data.Analysis | |
@@ -410,7 +411,111 @@ B1〜B6（Python 版の全章）は 2026-09-17 に完了した。第 2 章以降
 | 14 | K-means によるクラスタリング | NumPy による自作、`KMeans`、エルボー法 |
 | 15 | 機械学習 API とモジュール設計 | FastAPI、Pydantic、レイヤードアーキテクチャ、`TestClient` による統合テスト |
 
-Kotlin・TypeScript の章別執筆計画は、B6 で Python の節構成を確定した後、B7 の着手前に本ファイルへ追加する。
+## Kotlin 版執筆計画
+
+Kotlin は JVM 上で動く静的型付けの言語で、data class・sealed interface・null 安全・拡張関数・高階関数を備える。Python 版で確定した 5 部 15 章の節構成に合わせ、同じ題材を Kotlin で書き起こす。Python 版との対比の軸は次の 3 つとする。
+
+- **型**: Python の型ヒント（実行時には検査されない）に対し、Kotlin はコンパイル時に型と null を検査する。欠損値は `Double?` のような null 許容型で表し、補完するまでモデルに渡せないことを型で保証する
+- **データの表現**: pandas・NumPy に対し、Kotlin DataFrame と `DoubleArray`・行列で表す。列名を文字列で扱う箇所と、data class で型付けする箇所の使い分けを見せる
+- **探索**: Jupyter Lab に対し、IntelliJ IDEA の Kotlin Notebook と Kandy で探索する
+
+付録 A（総合演習）は、計画どおり解答例を Python のみとし、Kotlin 版の記事は作らない（Kotlin 版トップから Python 版の付録 A へ案内する）。
+
+### 確認した事実（2026-09-17 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| ローカル環境 | JDK 25.0.2、Gradle 8.11.1（scoop）。Kotlin コンパイラは未導入 | コマンドの `--version` |
+| 参照実装 | `tmp/getting-started-tdd/apps/kotlin/` は Kotlin 2.1.0（Gradle プラグイン）、`jvmToolchain(21)`、`kotlin("test")` + JUnit Platform、CI は `nix develop .#kotlin` で `gradle build` / `gradle test` | ファイルを読んだ |
+| Smile | 最新 6.3.0 のライセンスは GPL-3.0、2.6.0 は LGPL-3.0 | Maven Central の POM |
+| Tribuo | 最新 4.3.2、Apache License 2.0。決定木・ランダムフォレスト（`RandomForestTrainer`）・K-means・線形モデルのモジュールがあり、行列の固有値分解（`DenseMatrix.EigenDecomposition`）を持つ。PCA のモジュールは見当たらない | Maven Central のモジュール一覧・JAR の中身 |
+| Kotlin DataFrame | 安定版の最新 0.15.0（1.0.0 は開発版のみ）、Apache License 2.0 | Maven Central |
+| Kandy（lets-plot） | 安定版の最新 0.8.5、Apache License 2.0 | Maven Central |
+| そのほか | Kotlin 2.4.20、Ktor 3.6.0、kotlinx.serialization 1.11.0、Kover 0.9.9、detekt 1.23.8、ktlint 1.8.0、multik 0.3.1（Apache License 2.0） | Maven Central |
+
+Tribuo の各アルゴリズムの細部（決定木の分割基準をジニ不純度にできるか、クラスの重み付け、ラッソ回帰の有無など）は未検証。B7 の ADR 002 で、章ごとに置き換え可能かを確かめてから確定する。
+
+### ライブラリ方針（ADR 002 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| データフレーム | Kotlin DataFrame 0.15.0 | JetBrains 製で Kotlin Notebook と統合されている | 標準ライブラリのコレクションと data class のみ |
+| 行列演算 | 自作の小さな行列型（`DoubleArray`）と Tribuo の `DenseMatrix` | 正規方程式・固有値分解の仕組みを見せるため。依存を増やさない | multik 0.3.1 |
+| 機械学習 | Tribuo 4.3.2 | Apache License 2.0 で、決定木・ランダムフォレスト・線形モデル・K-means がそろう | Smile 2.6.0（LGPL-3.0）。Smile 6.x は GPL-3.0 のため、採用するならリポジトリのライセンスとの整合を先に判断する |
+| 可視化 | Kandy 0.8.5 | Kotlin Notebook で表示でき、Apache License 2.0 | lets-plot を直接使う |
+| API | Ktor 3.6.0 + kotlinx.serialization | Kotlin 製で、`testApplication` による統合テストがある | Spring Boot |
+| 静的解析・カバレッジ | detekt、ktlint、Kover | Kotlin の標準的な組み合わせ | — |
+
+PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribuo の固有値分解を利用）を最終実装とし、ライブラリへの置き換えの節は「ライブラリ未対応」と理由を書いて省略する。
+
+### 前提整備（Kotlin）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `ops/nix/environments/kotlin/shell.nix`（JDK 21 + kotlin + gradle）を参照実装から追加し、`flake.nix` の `devShells` に登録する | 未着手 |
+| JDK とビルド | ローカルは JDK 25、Nix は JDK 21 なので、Gradle Wrapper でバージョンを固定し、`jvmToolchain(21)` で JDK を自動取得させる。ローカルの Gradle 8.11.1 で JDK 25 から Wrapper を動かせるかを最初に確認する | 未着手 |
+| アプリ雛形 | `apps/kotlin/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・`src/main/kotlin`・`src/test/kotlin`）にテストが 1 本通る最小構成 | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 未着手 |
+| Notebook 環境 | `apps/kotlin/notebooks/` に Kotlin Notebook を置く。出力セルは `nbstripout` で消し、検査は Python 版の `tools/notebooks.py` と同じく Gradle タスクから呼ぶ（呼び出し方は B7 で決める） | 未着手 |
+| ライブラリ選定 | ADR 002（Kotlin 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/kotlin-ci.yml`（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする | 未着手 |
+
+### 章別執筆計画（Kotlin）
+
+| 章 | テーマ | Kotlin での焦点 | ライブラリへの置き換え |
+|----|--------|----------------|--------------------|
+| 1 | 機械学習とはじめてのテスト | `kotlin.test`、data class、`File.readLines` と BOM（`U+FEFF`）の除去、`Assumptions` による実データテストのスキップ | — |
+| 2 | データの前処理と三角測量 | Kotlin DataFrame の CSV 読み込み、欠損値を `Double?` で表す null 安全、`kotlin.random.Random(seed)` による分割 | DataFrame の `fillNulls` と自作補完の突き合わせ |
+| 3 | 決定木による分類と明白な実装 | sealed interface による `Leaf`／`Node`、`when` の網羅性、再帰、浮動小数点数の比較（`assertEquals` の許容誤差） | Tribuo の CART |
+| 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`build/`・`.gradle/`・`.kotlin/` の除外、乱数シード | — |
+| 5 | パッケージ管理と静的解析 | Gradle Kotlin DSL、バージョンカタログ（`libs.versions.toml`）、Gradle Wrapper、detekt・ktlint、Kover | — |
+| 6 | タスクランナーと CI/CD | Gradle タスク、GitHub Actions と Nix、JDK ツールチェーン、Kotlin Notebook の導入と出力セルの削除 | — |
+| 7 | 線形回帰による数値予測 | 自作の行列型と演算子オーバーロード（`times`・`plus`）、正規方程式、拡張関数による評価指標 | Tribuo の線形回帰 |
+| 8 | 実践的な分類と前処理パイプライン | DataFrame の `groupBy` による補完、ダミー変数化、前処理を `interface Transformer` で合成、モデルの保存と読み込み | Tribuo の決定木とクラスの重み付け（可否は ADR 002 で確認） |
+| 9 | 特徴量エンジニアリング | 標準化・多項式特徴量の自作、DataFrame の `join`、Shift_JIS の読み込み（`Charsets`） | 自作と Tribuo の標準化の突き合わせ（可否は ADR 002 で確認） |
+| 10 | ロジスティック回帰とアンサンブル学習 | ソフトマックスと勾配降下、第 3 章の決定木を再利用したランダムフォレスト、`interface Classifier` による共通化 | Tribuo のロジスティック回帰・`RandomForestTrainer` |
+| 11 | 評価指標と交差検証 | 関数型（`(List<T>, List<T>) -> Double`）で評価関数を渡す、K 分割、`Sequence` | Tribuo の評価器 |
+| 12 | 正則化とモデル選択 | リッジ回帰の閉形式、data class の `copy` による実験結果の記録 | Tribuo の正則化付き線形モデル（ラッソの有無は ADR 002 で確認） |
+| 13 | 主成分分析による次元削減 | 分散共分散行列と Tribuo の固有値分解、固有ベクトルの符号の扱い | ライブラリ未対応（理由を記事に書く） |
+| 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、エルボー法、`generateSequence` による反復 | Tribuo の K-means（同じ初期中心を渡せるかは ADR 002 で確認） |
+| 15 | 機械学習 API とモジュール設計 | Ktor・kotlinx.serialization、レイヤードアーキテクチャ、`testApplication` による統合テスト、`Result`・sealed class によるエラー表現 | — |
+
+可視化の節は、Python 版と同じ第 2・3・7〜14 章に設ける（Kandy で書き起こす）。
+
+### Python 版との数値の違い
+
+分割は Python 版と同じ手順（シード付きでシャッフルし、テスト件数を切り上げる）で自作するが、乱数生成器が NumPy と Kotlin で異なるため、**どの行が訓練データ・テストデータに入るかは Python 版と一致しない**。そのため正解率や係数などの数値は Python 版と一致しない。
+
+- 件数（例: iris の 105 件と 45 件）は一致させる
+- 記事の数値は Kotlin 版の実装で実測したものだけを載せる
+- 同じ章で「自作」と「Tribuo」の結果を突き合わせる検証は、Kotlin 版の中で完結させる
+- Python 版との比較は、傾向（深さと過学習の関係など）の比較にとどめ、多言語統合解説でまとめる
+
+### Bolt 計画（Kotlin）
+
+| Bolt | 内容 | 完了条件 |
+|------|------|---------|
+| B7 ウォーキングスケルトン | Kotlin の前提整備（Nix 環境・Gradle Wrapper・雛形・データ参照）、ADR 002、第 1 章の実装と記事、Kotlin 版トップ、nav、Kotlin CI | `apps/kotlin/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
+| B8 | 第 2〜3 章（Kotlin DataFrame・Tribuo の導入、最初の Kotlin Notebook と出力削除の仕組み） | 自作決定木と Tribuo の結果を並べて載せられる。Notebook の出力が CI の検査で残っていない |
+| B9 | 第 4〜6 章 | Gradle タスク・detekt・Kover・CI が記事どおりに動く |
+| B10 | 第 7〜9 章 | |
+| B11 | 第 10〜12 章 | |
+| B12 | 第 13〜15 章 | Kotlin 版の全章完了。Python 版と節構成がそろっている |
+
+Python 版と同じく、B7・B8 で型（プロジェクト構成・テストの書き方・Notebook の運用・記事の体裁）を固めてから、B9 以降は依存関係の無い章をサブエージェントで並行して進める。第 10 章は第 3 章、第 15 章は第 7・8 章の実装に依存するので、依存先の完了後に着手する。
+
+### 承認が必要な事項（Kotlin）
+
+次の点を確認した（2026-09-17 承認）。
+
+- [x] ライブラリの第一候補を Tribuo（Apache License 2.0）とし、GPL-3.0 の Smile 6.x を採用しないこと
+- [x] PCA のライブラリへの置き換えを省略すること
+- [x] 乱数生成器の違いにより、数値が Python 版と一致しないことを受け入れること
+- [x] JDK 21 のツールチェーンと Gradle Wrapper でビルド環境を固定すること
+- [x] 付録 A の Kotlin 版を作らないこと
+- [x] B7（ウォーキングスケルトン）の範囲
+
+TypeScript 版の章別執筆計画は、Kotlin 版の B8 の完了後に本ファイルへ追加する。
 
 ## リスクと対応
 
