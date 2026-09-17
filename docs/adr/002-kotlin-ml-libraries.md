@@ -4,7 +4,7 @@ title: "002 Kotlin 版の機械学習・データ・可視化・API ライブラ
 description: "Kotlin 版のライブラリに Kotlin DataFrame・Tribuo・Kandy・Ktor を採用し、Tribuo で確認した機能に基づいて章ごとの置き換え範囲を決める。"
 tags: [adr,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:40:47Z }
 ---
 
 # 002 Kotlin 版の機械学習・データ・可視化・API ライブラリの選定
@@ -37,6 +37,10 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
 | Kotlin DataFrame 0.15.0 | Kotlin 2.4.20 でコンパイルできる。読み込み関数は `DataFrame.readCSV`（`readCsv` は 1.0 系の名前で、0.15.0 には無い）。BOM を取り除いて列名を読み、欠損を含む数値列を `Double?` として読む（iris.csv で 150 行・4 列が `Double?`、1 列が `String`） | DataFrame だけを依存に持つプロジェクトで実行し、読み込んだ JAR が `dataframe-core-0.15.0.jar` であることと、列名の先頭の文字コード・列の型を出力 |
 | Kandy の版と DataFrame の版の対応 | `kandy-api` の POM によると、0.8.0 は DataFrame 0.15.0、0.8.1 は 1.0.0-Beta3、0.8.3 は 1.0.0-Beta4、0.8.4 は 1.0.0-Beta5、0.8.5 は 1.0.0-rc01 に依存する | Maven Central の POM |
 | Kotlin Notebook の実行 | kotlin-jupyter-kernel 0.19.0.944（PyPI、Apache License 2.0）で、IDE なしで `jupyter nbconvert --execute` により Notebook を実行できる。`%use dataframe(0.15.0), kandy(0.8.0)` と `%use dataframe(1.0.0-rc01), kandy(0.8.5)` はどちらも iris.csv の読み込みと散布図のセルが成功した。`@file:DependsOn` でプロジェクトの JAR を読み込み、テスト済みの関数を呼べる | uvx で一時的に導入したカーネルで実行 |
+| detekt の版（B9） | 安定版の最新は 1.23.8（`io.gitlab.arturbosch.detekt`）。2.0 系（`dev.detekt`）は 2.0.0-alpha.6 までで、安定版が出ていない | Maven Central・Gradle Plugin Portal のメタデータ |
+| detekt 1.23.8 と JDK（B9） | Gradle デーモンが JDK 25 で動くと、`detekt` タスクが `25.0.2` というメッセージだけで失敗する。デーモンを JDK 21 で動かすと解析まで進む。`./gradlew updateDaemonJvm --jvm-version=21` で `gradle/gradle-daemon-jvm.properties` を作ると、既定の JDK が 25 の環境でもデーモンが JDK 21 で動き、解析まで進んだ | 本リポジトリの `apps/kotlin` の複製に detekt を追加して実行 |
+| detekt 1.23.8 と Gradle 9.7.1（B9） | `DetektPlugin.apply` が、Gradle 10 で削除予定の `ReportingExtension.file(String)` を呼ぶ非推奨警告を出す | `--warning-mode all` と `-Dorg.gradle.deprecation.trace=true` の出力 |
+| Kover 0.9.9（B9） | Kotlin 2.4.20・Gradle 9.7.1 で `koverXmlReport`・`koverLog` が成功した | 同上の複製で実行 |
 
 ## 決定
 
@@ -52,6 +56,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
 | 静的解析・カバレッジ | detekt、ktlint、Kover | 1.23.8、1.8.0、0.9.9 | Apache License 2.0（detekt・Kover）、MIT（ktlint） | 第 5 章 |
 
 ライブラリは使う章に入ってから `gradle/libs.versions.toml` に追加する。detekt・Kover・Ktor・kotlinx.serialization（Apache License 2.0）と ktlint（MIT）のライセンスは、Maven Central の POM で確認した。
+
+detekt は alpha 版の 2.0 系ではなく安定版の 1.23.8 を使い、`gradle/gradle-daemon-jvm.properties` で Gradle デーモンの JDK を 21 に固定する（B9、人の承認による）。1.23.8 は Gradle 10 で削除される API を使っているので、Gradle 10 に上げる前に detekt 2.0 系の安定版へ移行する。
 
 ### 章ごとのライブラリへの置き換え方針
 
@@ -85,6 +91,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
 - 良い影響: Kotlin DataFrame が BOM と欠損値（`Double?`）を扱うので、Python 版の pandas と同じ節構成で第 2 章を書ける
 - 悪い影響: Tribuo には PCA が無く、クラスの重み付けと K-means の初期中心の指定もできないので、第 8・13・14 章は Python 版より置き換えの範囲が狭い
 - 悪い影響: Kotlin DataFrame・Kandy は 1.0 未満で、API が変わる可能性がある。記事のコードは CI でビルドして検証する
+- 悪い影響: detekt 1.23.8 のために、Gradle デーモンの JDK を 21 に固定し、Gradle を 9 系にとどめる必要がある
 
 ## コンプライアンス
 

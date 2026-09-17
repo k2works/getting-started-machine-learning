@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) に B9 で確かめた detekt 1.23.8・Kover 0.9.9 の動作と、Gradle デーモンの JDK を 21 に固定する決定を追記。
 * **Update**: Kotlin 版 B8 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）・Bolt の状態と、[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を更新。
 * **Creation**: [Kotlin 第 3 章](/article/getting-start-ml/kotlin/03-decision-tree-and-obvious-implementation.md) を新規作成。Tribuo の CART と予測が一致しない原因を調べた結果を含む。
 * **Creation**: [Kotlin 第 2 章](/article/getting-start-ml/kotlin/02-data-preprocessing-and-triangulation.md) を新規作成。第 1 章に captureStdout の移動を追記。
