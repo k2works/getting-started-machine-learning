@@ -128,12 +128,7 @@ class TribuoCrossValidateTest {
                 LabelEvaluator().evaluate(model, toTribuoDataset(x[fold.test], t.slice(fold.test))).accuracy()
             }
 
-        assertEquals(
-            tribuoScores.average(),
-            crossValidate({
-                TribuoTree(maxDepth = 1)
-            }, x, t, folds, ::accuracy).average(),
-            absoluteTolerance = 1e-12,
-        )
+        val scores = crossValidate({ TribuoTree(maxDepth = 1) }, x, t, folds, ::accuracy)
+        assertEquals(tribuoScores.average(), scores.average(), absoluteTolerance = 1e-12)
     }
 }
