@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 10 章: ロジスティック回帰とアンサンブル学習"
+description: "ソフトマックスと勾配降下のロジスティック回帰、第 3 章の決定木を再利用したランダムフォレストと特徴量の重要度を TDD で自作し、interface Classifier で共通化して Tribuo と正解率を比べる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T05:59:05Z }
+---
+
 # 第 10 章: ロジスティック回帰とアンサンブル学習
 
 ## 10.1 はじめに
