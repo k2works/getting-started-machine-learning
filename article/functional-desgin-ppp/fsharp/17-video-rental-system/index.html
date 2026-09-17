@@ -1,0 +1,3566 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="本章では、Martin Fowler の「リファクタリング」で有名なビデオレンタルシステムを F# で実装します。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>第17章: ビデオレンタルシステム - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#17" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第17章: ビデオレンタルシステム
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../reference/" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical-database-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-docker-kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/SonarQube%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="17">第17章: ビデオレンタルシステム<a class="headerlink" href="#17" title="Permanent link">&para;</a></h1>
+<h2 id="_1">はじめに<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>本章では、Martin Fowler の「リファクタリング」で有名なビデオレンタルシステムを F# で実装します。このシステムは、異なる種類のビデオに対する料金計算とポイント計算を行います。</p>
+<h2 id="1">1. 問題の説明<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>ビデオレンタルシステムは以下の機能を提供します：</p>
+<ul>
+<li><strong>料金計算</strong>: ビデオの種類と日数に基づいて料金を計算</li>
+<li><strong>ポイント計算</strong>: レンタルに応じたポイントを付与</li>
+<li><strong>明細書生成</strong>: 顧客のレンタル明細を生成</li>
+</ul>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJDTEFTUyIgc3R5bGU9IndpZHRoOjM5NHB4O2hlaWdodDo2MjlweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iMzk0cHgiIGhlaWdodD0iNjI5cHgiIHZpZXdCb3g9IjAgMCAzOTQgNjI5IiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMTE2Ljg3MSIgeT0iMjIuOTk1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNTMuOTk5IiBmb250LXdlaWdodD0iNzAwIj7jg5Pjg4fjgqrjg6zjg7Pjgr/jg6vjgrfjgrnjg4bjg6A8L3RleHQ+PC9nPjwhLS1jbGFzcyBDdXN0b21lci0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9IkN1c3RvbWVyIiBpZD0iZW50MDAwMSIgZGF0YS1zb3VyY2UtbGluZT0iMyI+PHJlY3QgeD0iMTQ3LjczIiB5PSI0NC4yOTciIHdpZHRoPSIxNTcuODE3IiBoZWlnaHQ9IjgwLjU5NCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PGVsbGlwc2UgY3g9IjE4OC43NDYiIGN5PSI2MC4yOTciIHJ4PSIxMSIgcnk9IjExIiBmaWxsPSIjQUREMUIyIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBhdGggZD0iTTE5MS43MTUsNjUuOTM4IFExOTEuMTM3LDY2LjIzNCAxOTAuNDk2LDY2LjM3NSBRMTg5Ljg1NSw2Ni41MzEgMTg5LjE1Miw2Ni41MzEgUTE4Ni42NTIsNjYuNTMxIDE4NS4zMjQsNjQuODkxIFExODQuMDEyLDYzLjIzNCAxODQuMDEyLDYwLjEwOSBRMTg0LjAxMiw1Ni45ODQgMTg1LjMyNCw1NS4zMjggUTE4Ni42NTIsNTMuNjcyIDE4OS4xNTIsNTMuNjcyIFExODkuODU1LDUzLjY3MiAxOTAuNDk2LDUzLjgyOCBRMTkxLjE1Miw1My45ODQgMTkxLjcxNSw1NC4yODEgTDE5MS43MTUsNTcgUTE5MS4wOSw1Ni40MjIgMTkwLjQ5Niw1Ni4xNTYgUTE4OS45MDIsNTUuODc1IDE4OS4yNzcsNTUuODc1IFExODcuOTM0LDU1Ljg3NSAxODcuMjQ2LDU2Ljk1MyBRMTg2LjU1OSw1OC4wMTYgMTg2LjU1OSw2MC4xMDkgUTE4Ni41NTksNjIuMjAzIDE4Ny4yNDYsNjMuMjgxIFExODcuOTM0LDY0LjM0NCAxODkuMjc3LDY0LjM0NCBRMTg5LjkwMiw2NC4zNDQgMTkwLjQ5Niw2NC4wNzggUTE5MS4wOSw2My43OTcgMTkxLjcxNSw2My4yMTkgTDE5MS43MTUsNjUuOTM4IFogIiBmaWxsPSIjMDAwIi8+PHRleHQgeD0iMjA4LjUyNyIgeT0iNjUuMTQ0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI2OC4wMDQiPkN1c3RvbWVyPC90ZXh0PjxsaW5lIHgxPSIxNDguNzMiIHkxPSI3Ni4yOTciIHgyPSIzMDQuNTQ3IiB5Mj0iNzYuMjk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48ZyBkYXRhLXZpc2liaWxpdHktbW9kaWZpZXI9IlBVQkxJQ19GSUVMRCI+PGVsbGlwc2UgY3g9IjE1OC43MyIgY3k9Ijg5Ljk0NSIgcng9IjMiIHJ5PSIzIiBmaWxsPSJub25lIiBzdHlsZT0ic3Ryb2tlOiMwMzgwNDg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjx0ZXh0IHg9IjE2Ny43MyIgeT0iOTMuMjkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI5MC42NTgiPk5hbWU6IHN0cmluZzwvdGV4dD48ZyBkYXRhLXZpc2liaWxpdHktbW9kaWZpZXI9IlBVQkxJQ19GSUVMRCI+PGVsbGlwc2UgY3g9IjE1OC43MyIgY3k9IjEwNi4yNDIiIHJ4PSIzIiByeT0iMyIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMDM4MDQ4O3N0cm9rZS13aWR0aDoxOyIvPjwvZz48dGV4dCB4PSIxNjcuNzMiIHk9IjEwOS41ODkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjEzMS44MTciPlJlbnRhbHM6IFJlbnRhbCBsaXN0PC90ZXh0PjxsaW5lIHgxPSIxNDguNzMiIHkxPSIxMTYuODkxIiB4Mj0iMzA0LjU0NyIgeTI9IjExNi44OTEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjwvZz48IS0tY2xhc3MgUmVudGFsLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iUmVudGFsIiBpZD0iZW50MDAwMiIgZGF0YS1zb3VyY2UtbGluZT0iOCI+PHJlY3QgeD0iMjAuNjIiIHk9IjIxOC4xODciIHdpZHRoPSIxMTguMDMyIiBoZWlnaHQ9IjgwLjU5NCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PGVsbGlwc2UgY3g9IjU0LjAwNyIgY3k9IjIzNC4xODciIHJ4PSIxMSIgcnk9IjExIiBmaWxsPSIjQUREMUIyIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBhdGggZD0iTTU2Ljk3NiwyMzkuODI4IFE1Ni4zOTgsMjQwLjEyNCA1NS43NTcsMjQwLjI2NSBRNTUuMTE3LDI0MC40MjEgNTQuNDEzLDI0MC40MjEgUTUxLjkxMywyNDAuNDIxIDUwLjU4NSwyMzguNzgxIFE0OS4yNzMsMjM3LjEyNCA0OS4yNzMsMjMzLjk5OSBRNDkuMjczLDIzMC44NzQgNTAuNTg1LDIyOS4yMTggUTUxLjkxMywyMjcuNTYyIDU0LjQxMywyMjcuNTYyIFE1NS4xMTcsMjI3LjU2MiA1NS43NTcsMjI3LjcxOCBRNTYuNDEzLDIyNy44NzQgNTYuOTc2LDIyOC4xNzEgTDU2Ljk3NiwyMzAuODkgUTU2LjM1MSwyMzAuMzEyIDU1Ljc1NywyMzAuMDQ2IFE1NS4xNjMsMjI5Ljc2NSA1NC41MzgsMjI5Ljc2NSBRNTMuMTk1LDIyOS43NjUgNTIuNTA3LDIzMC44NDMgUTUxLjgyLDIzMS45MDYgNTEuODIsMjMzLjk5OSBRNTEuODIsMjM2LjA5MyA1Mi41MDcsMjM3LjE3MSBRNTMuMTk1LDIzOC4yMzQgNTQuNTM4LDIzOC4yMzQgUTU1LjE2MywyMzguMjM0IDU1Ljc1NywyMzcuOTY4IFE1Ni4zNTEsMjM3LjY4NyA1Ni45NzYsMjM3LjEwOSBMNTYuOTc2LDIzOS44MjggWiAiIGZpbGw9IiMwMDAiLz48dGV4dCB4PSI3Mi4wOTMiIHk9IjIzOS4wMzQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjQ1LjE3MiI+UmVudGFsPC90ZXh0PjxsaW5lIHgxPSIyMS42MiIgeTE9IjI1MC4xODciIHgyPSIxMzcuNjUyIiB5Mj0iMjUwLjE4NyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PGcgZGF0YS12aXNpYmlsaXR5LW1vZGlmaWVyPSJQVUJMSUNfRklFTEQiPjxlbGxpcHNlIGN4PSIzMS42MiIgY3k9IjI2My44MzUiIHJ4PSIzIiByeT0iMyIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMDM4MDQ4O3N0cm9rZS13aWR0aDoxOyIvPjwvZz48dGV4dCB4PSI0MC42MiIgeT0iMjY3LjE4MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iOTIuMDMyIj5Nb3ZpZTogTW92aWU8L3RleHQ+PGcgZGF0YS12aXNpYmlsaXR5LW1vZGlmaWVyPSJQVUJMSUNfRklFTEQiPjxlbGxpcHNlIGN4PSIzMS42MiIgY3k9IjI4MC4xMzIiIHJ4PSIzIiByeT0iMyIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMDM4MDQ4O3N0cm9rZS13aWR0aDoxOyIvPjwvZz48dGV4dCB4PSI0MC42MiIgeT0iMjgzLjQ3OSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNjIuMzU3Ij5EYXlzOiBpbnQ8L3RleHQ+PGxpbmUgeDE9IjIxLjYyIiB5MT0iMjkwLjc4MSIgeDI9IjEzNy42NTIiIHkyPSIyOTAuNzgxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48L2c+PCEtLWNsYXNzIE1vdmllLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iTW92aWUiIGlkPSJlbnQwMDAzIiBkYXRhLXNvdXJjZS1saW5lPSIxMyI+PHJlY3QgeD0iNyIgeT0iMzc2LjA4NyIgd2lkdGg9IjE0NS4yNzMiIGhlaWdodD0iODAuNTk0IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48ZWxsaXBzZSBjeD0iNTQuNjciIGN5PSIzOTIuMDg3IiByeD0iMTEiIHJ5PSIxMSIgZmlsbD0iI0FERDFCMiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwYXRoIGQ9Ik01Ny42MzksMzk3LjcyNyBRNTcuMDYxLDM5OC4wMjQgNTYuNDIsMzk4LjE2NSBRNTUuNzgsMzk4LjMyMSA1NS4wNzcsMzk4LjMyMSBRNTIuNTc3LDM5OC4zMjEgNTEuMjQ5LDM5Ni42ODEgUTQ5LjkzNiwzOTUuMDI0IDQ5LjkzNiwzOTEuODk5IFE0OS45MzYsMzg4Ljc3NCA1MS4yNDksMzg3LjExOCBRNTIuNTc3LDM4NS40NjIgNTUuMDc3LDM4NS40NjIgUTU1Ljc4LDM4NS40NjIgNTYuNDIsMzg1LjYxOCBRNTcuMDc3LDM4NS43NzQgNTcuNjM5LDM4Ni4wNzEgTDU3LjYzOSwzODguNzkgUTU3LjAxNCwzODguMjEyIDU2LjQyLDM4Ny45NDYgUTU1LjgyNywzODcuNjY1IDU1LjIwMiwzODcuNjY1IFE1My44NTgsMzg3LjY2NSA1My4xNywzODguNzQzIFE1Mi40ODMsMzg5LjgwNiA1Mi40ODMsMzkxLjg5OSBRNTIuNDgzLDM5My45OTMgNTMuMTcsMzk1LjA3MSBRNTMuODU4LDM5Ni4xMzQgNTUuMjAyLDM5Ni4xMzQgUTU1LjgyNywzOTYuMTM0IDU2LjQyLDM5NS44NjggUTU3LjAxNCwzOTUuNTg3IDU3LjYzOSwzOTUuMDA5IEw1Ny42MzksMzk3LjcyNyBaICIgZmlsbD0iIzAwMCIvPjx0ZXh0IHg9Ijc1LjE3IiB5PSIzOTYuOTM0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI0MS40MzMiPk1vdmllPC90ZXh0PjxsaW5lIHgxPSI4IiB5MT0iNDA4LjA4NyIgeDI9IjE1MS4yNzMiIHkyPSI0MDguMDg3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48ZyBkYXRhLXZpc2liaWxpdHktbW9kaWZpZXI9IlBVQkxJQ19GSUVMRCI+PGVsbGlwc2UgY3g9IjE4IiBjeT0iNDIxLjczNSIgcng9IjMiIHJ5PSIzIiBmaWxsPSJub25lIiBzdHlsZT0ic3Ryb2tlOiMwMzgwNDg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjx0ZXh0IHg9IjI3IiB5PSI0MjUuMDgyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI3OS43ODkiPlRpdGxlOiBzdHJpbmc8L3RleHQ+PGcgZGF0YS12aXNpYmlsaXR5LW1vZGlmaWVyPSJQVUJMSUNfRklFTEQiPjxlbGxpcHNlIGN4PSIxOCIgY3k9IjQzOC4wMzIiIHJ4PSIzIiByeT0iMyIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMDM4MDQ4O3N0cm9rZS13aWR0aDoxOyIvPjwvZz48dGV4dCB4PSIyNyIgeT0iNDQxLjM3OSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTE5LjI3MyI+VHlwZTogTW92aWVUeXBlPC90ZXh0PjxsaW5lIHgxPSI4IiB5MT0iNDQ4LjY4MSIgeDI9IjE1MS4yNzMiIHkyPSI0NDguNjgxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48L2c+PCEtLWNsYXNzIE1vdmllVHlwZS0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9Ik1vdmllVHlwZSIgaWQ9ImVudDAwMDQiIGRhdGEtc291cmNlLWxpbmU9IjE4Ij48cmVjdCB4PSIyNS43NSIgeT0iNTE3LjY3NyIgd2lkdGg9IjEwNy43NyIgaGVpZ2h0PSI5Ni44OTEiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjxlbGxpcHNlIGN4PSI0MC43NSIgY3k9IjUzMy42NzciIHJ4PSIxMSIgcnk9IjExIiBmaWxsPSIjRUI5MzdGIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBhdGggZD0iTTQ0Ljg1OSw1MzkuNjc3IEwzNy4xNDEsNTM5LjY3NyBMMzcuMTQxLDUyNy4yODYgTDQ0Ljg1OSw1MjcuMjg2IEw0NC44NTksNTI5LjQ0MyBMMzkuNTk0LDUyOS40NDMgTDM5LjU5NCw1MzIuMTE0IEw0NC4zNTksNTMyLjExNCBMNDQuMzU5LDUzNC4yNzEgTDM5LjU5NCw1MzQuMjcxIEwzOS41OTQsNTM3LjUyMSBMNDQuODU5LDUzNy41MjEgTDQ0Ljg1OSw1MzkuNjc3IFogIiBmaWxsPSIjMDAwIi8+PHRleHQgeD0iNTQuNzUiIHk9IjUzOC41MjQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijc1Ljc3Ij5Nb3ZpZVR5cGU8L3RleHQ+PGxpbmUgeDE9IjI2Ljc1IiB5MT0iNTQ5LjY3NyIgeDI9IjEzMi41MiIgeTI9IjU0OS42NzciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjx0ZXh0IHg9IjMxLjc1IiB5PSI1NjYuNjcyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1NC4zMjUiPlJlZ3VsYXI8L3RleHQ+PHRleHQgeD0iMzEuNzUiIHk9IjU4Mi45NjkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijg1Ljg2NiI+TmV3UmVsZWFzZTwvdGV4dD48dGV4dCB4PSIzMS43NSIgeT0iNTk5LjI2NiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNjUuODUxIj5DaGlsZHJlbnM8L3RleHQ+PGxpbmUgeDE9IjI2Ljc1IiB5MT0iNjA2LjU2OCIgeDI9IjEzMi41MiIgeTI9IjYwNi41NjgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjwvZz48IS0tY2xhc3MgU3RhdGVtZW50LS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iU3RhdGVtZW50IiBpZD0iZW50MDAwNSIgZGF0YS1zb3VyY2UtbGluZT0iMjQiPjxyZWN0IHg9IjE3My41NCIgeT0iMjAxLjg5NyIgd2lkdGg9IjIwNi4yMDIiIGhlaWdodD0iMTEzLjE4OCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PGVsbGlwc2UgY3g9IjIzNS41NTYiIGN5PSIyMTcuODk3IiByeD0iMTEiIHJ5PSIxMSIgZmlsbD0iI0FERDFCMiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwYXRoIGQ9Ik0yMzguNTI0LDIyMy41MzcgUTIzNy45NDYsMjIzLjgzNCAyMzcuMzA2LDIyMy45NzUgUTIzNi42NjUsMjI0LjEzMSAyMzUuOTYyLDIyNC4xMzEgUTIzMy40NjIsMjI0LjEzMSAyMzIuMTM0LDIyMi40OTEgUTIzMC44MjEsMjIwLjgzNCAyMzAuODIxLDIxNy43MDkgUTIzMC44MjEsMjE0LjU4NCAyMzIuMTM0LDIxMi45MjggUTIzMy40NjIsMjExLjI3MiAyMzUuOTYyLDIxMS4yNzIgUTIzNi42NjUsMjExLjI3MiAyMzcuMzA2LDIxMS40MjggUTIzNy45NjIsMjExLjU4NCAyMzguNTI0LDIxMS44ODEgTDIzOC41MjQsMjE0LjYgUTIzNy44OTksMjE0LjAyMiAyMzcuMzA2LDIxMy43NTYgUTIzNi43MTIsMjEzLjQ3NSAyMzYuMDg3LDIxMy40NzUgUTIzNC43NDMsMjEzLjQ3NSAyMzQuMDU2LDIxNC41NTMgUTIzMy4zNjgsMjE1LjYxNiAyMzMuMzY4LDIxNy43MDkgUTIzMy4zNjgsMjE5LjgwMyAyMzQuMDU2LDIyMC44ODEgUTIzNC43NDMsMjIxLjk0NCAyMzYuMDg3LDIyMS45NDQgUTIzNi43MTIsMjIxLjk0NCAyMzcuMzA2LDIyMS42NzggUTIzNy44OTksMjIxLjM5NyAyMzguNTI0LDIyMC44MTkgTDIzOC41MjQsMjIzLjUzNyBaICIgZmlsbD0iIzAwMCIvPjx0ZXh0IHg9IjI1Ni4wNTYiIHk9IjIyMi43NDQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjczLjY3MSI+U3RhdGVtZW50PC90ZXh0PjxsaW5lIHgxPSIxNzQuNTQiIHkxPSIyMzMuODk3IiB4Mj0iMzc4Ljc0MiIgeTI9IjIzMy44OTciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxnIGRhdGEtdmlzaWJpbGl0eS1tb2RpZmllcj0iUFVCTElDX0ZJRUxEIj48ZWxsaXBzZSBjeD0iMTg0LjU0IiBjeT0iMjQ3LjU0NSIgcng9IjMiIHJ5PSIzIiBmaWxsPSJub25lIiBzdHlsZT0ic3Ryb2tlOiMwMzgwNDg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjx0ZXh0IHg9IjE5My41NCIgeT0iMjUwLjg5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTU4LjY2MiI+Q3VzdG9tZXJOYW1lOiBzdHJpbmc8L3RleHQ+PGcgZGF0YS12aXNpYmlsaXR5LW1vZGlmaWVyPSJQVUJMSUNfRklFTEQiPjxlbGxpcHNlIGN4PSIxODQuNTQiIGN5PSIyNjMuODQyIiByeD0iMyIgcnk9IjMiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzAzODA0ODtzdHJva2Utd2lkdGg6MTsiLz48L2c+PHRleHQgeD0iMTkzLjU0IiB5PSIyNjcuMTg5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNzMuNDk2Ij5MaW5lczogU3RhdGVtZW50TGluZSBsaXN0PC90ZXh0PjxnIGRhdGEtdmlzaWJpbGl0eS1tb2RpZmllcj0iUFVCTElDX0ZJRUxEIj48ZWxsaXBzZSBjeD0iMTg0LjU0IiBjeT0iMjgwLjEzOSIgcng9IjMiIHJ5PSIzIiBmaWxsPSJub25lIiBzdHlsZT0ic3Ryb2tlOiMwMzgwNDg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjx0ZXh0IHg9IjE5My41NCIgeT0iMjgzLjQ4NiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTU0LjQ1MSI+VG90YWxBbW91bnQ6IGRlY2ltYWw8L3RleHQ+PGcgZGF0YS12aXNpYmlsaXR5LW1vZGlmaWVyPSJQVUJMSUNfRklFTEQiPjxlbGxpcHNlIGN4PSIxODQuNTQiIGN5PSIyOTYuNDM2IiByeD0iMyIgcnk9IjMiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzAzODA0ODtzdHJva2Utd2lkdGg6MTsiLz48L2c+PHRleHQgeD0iMTkzLjU0IiB5PSIyOTkuNzgzIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxODAuMjAyIj5GcmVxdWVudFJlbnRlclBvaW50czogaW50PC90ZXh0PjxsaW5lIHgxPSIxNzQuNTQiIHkxPSIzMDcuMDg0IiB4Mj0iMzc4Ljc0MiIgeTI9IjMwNy4wODQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjwvZz48IS0tbGluayBDdXN0b21lciB0byBSZW50YWwtLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAwMSIgZGF0YS1lbnRpdHktMj0iZW50MDAwMiIgaWQ9ImxuazYiIGRhdGEtc291cmNlLWxpbmU9IjMxIiBkYXRhLWxpbmstdHlwZT0iZGVwZW5kZW5jeSI+PHBhdGggZD0iTTE5Mi45MSwxMjUuMDM3IEMxNjkuMDksMTUyLjg4NyAxNDAuNTUsMTg2LjI2NyAxMTYuNzEsMjE0LjEzNyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9IkN1c3RvbWVyLXRvLVJlbnRhbCIgY29kZUxpbmU9IjMxIi8+PHBvbHlnb24gcG9pbnRzPSIxMTMuNDYsMjE3LjkzNywxMjIuMzUsMjEzLjY5OCwxMTYuNzEsMjE0LjEzNywxMTYuMjcxLDIwOC40OTgsMTEzLjQ2LDIxNy45MzciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMTc4LjY4NCIgeT0iMTQ1LjA1NSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyI+MTwvdGV4dD48dGV4dCB4PSIxMTIuNjA3IiB5PSIyMDcuMDU3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIj4qPC90ZXh0PjwvZz48IS0tbGluayBSZW50YWwgdG8gTW92aWUtLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAwMiIgZGF0YS1lbnRpdHktMj0iZW50MDAwMyIgaWQ9ImxuazciIGRhdGEtc291cmNlLWxpbmU9IjMyIiBkYXRhLWxpbmstdHlwZT0iZGVwZW5kZW5jeSI+PHBhdGggZD0iTTc5LjY0LDI5OS4yMjcgQzc5LjY0LDMyMi42ODcgNzkuNjQsMzQ3LjI2NyA3OS42NCwzNzAuNzA3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSJub25lIiBpZD0iUmVudGFsLXRvLU1vdmllIiBjb2RlTGluZT0iMzIiLz48cG9seWdvbiBwb2ludHM9Ijc5LjY0LDM3NS43MDcsODMuNjQsMzY2LjcwNyw3OS42NCwzNzAuNzA3LDc1LjY0LDM2Ni43MDcsNzkuNjQsMzc1LjcwNyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48L2c+PCEtLWxpbmsgTW92aWUgdG8gTW92aWVUeXBlLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDMiIGRhdGEtZW50aXR5LTI9ImVudDAwMDQiIGlkPSJsbms4IiBkYXRhLXNvdXJjZS1saW5lPSIzMyIgZGF0YS1saW5rLXR5cGU9ImRlcGVuZGVuY3kiPjxwYXRoIGQ9Ik03OS42NCw0NTYuOTY3IEM3OS42NCw0NzUuNTE3IDc5LjY0LDQ5Mi43NzcgNzkuNjQsNTEyLjI1NyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9Ik1vdmllLXRvLU1vdmllVHlwZSIgY29kZUxpbmU9IjMzIi8+PHBvbHlnb24gcG9pbnRzPSI3OS42NCw1MTcuMjU3LDgzLjY0LDUwOC4yNTcsNzkuNjQsNTEyLjI1Nyw3NS42NCw1MDguMjU3LDc5LjY0LDUxNy4yNTciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PC9nPjwhLS1saW5rIEN1c3RvbWVyIHRvIFN0YXRlbWVudC0tPjxnIGNsYXNzPSJsaW5rIiBkYXRhLWVudGl0eS0xPSJlbnQwMDAxIiBkYXRhLWVudGl0eS0yPSJlbnQwMDA1IiBpZD0ibG5rOSIgZGF0YS1zb3VyY2UtbGluZT0iMzQiIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNMjM4LjExLDEyNS4wMzcgQzI0NC43MSwxNDcuNzI3IDI1MS43MTIsMTcxLjgyNiAyNTguOTkyLDE5Ni44MjYiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtZGFzaGFycmF5OjcsNzsiIGZpbGw9Im5vbmUiIGlkPSJDdXN0b21lci10by1TdGF0ZW1lbnQiIGNvZGVMaW5lPSIzNCIvPjxwb2x5Z29uIHBvaW50cz0iMjYwLjM5LDIwMS42MjcsMjYxLjcxNCwxOTEuODY3LDI1OC45OTIsMTk2LjgyNiwyNTQuMDMzLDE5NC4xMDQsMjYwLjM5LDIwMS42MjciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMjUyLjY0IiB5PSIxNjcuOTY0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSI2NS42NjciPmdlbmVyYXRlczwvdGV4dD48L2c+PD9wbGFudHVtbC1zcmMgTFAweEpXQ240OFB4ZHlCUTRZa0hRQlU4WDhBZTg0QkJOaTFBSGVpYkZ1OFZlMFpIaDJLdTAxVVcxWmVBSENMWHZZQk8tbW9MRlVGdkZWX3RVLTRiSzhvbDY1LW1WU1Z1WVY0QnNyLUM3elgtT19rM3lIZFo2bzVSb1BzWnctMnlLTTNmOHM0UmhnMmFwYmtYNnk4Z3E5dkJMekItR2dMbWRab0RrZzZQTDVWY05ZSFBUbjFzcFd6OThsSkhRRlVJOS1qaVJMdkc3X1FaQmItcDA3SEdTb1RmQWNZMnY5UGl1QTQyMlRtMU1UeUFrUkVXdFJwWG5kQ0ZBWmRBTXFRWV9wSU5HYUNvRGF0Y2thVFlqS2FhUHllNHhLa3dXd3JHTjE5c09VNGtmQzRDMmxSUTlBR1BSNGdqRTJ0ZU9oNlluS2FuSDRBNlA3QXRwd0pkZC1nRVRWZldrTG1Uc0l6ZjBuZmlBanFWPz48L2c+PC9zdmc+" class="uml" alt="uml diagram" title="" /></p>
+<h2 id="2">2. データモデル<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="_2">ビデオの種類<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">/// ビデオの種類</span>
+<span class="o">[&lt;</span><span class="n">RequireQualifiedAccess</span><span class="o">&gt;]</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">MovieType</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Regular</span><span class="w">       </span><span class="c1">// 通常</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">NewRelease</span><span class="w">    </span><span class="c1">// 新作</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Childrens</span><span class="w">     </span><span class="c1">// 子供向け</span>
+</code></pre></div>
+<h3 id="_3">ビデオとレンタル<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">/// ビデオ</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">Movie</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">{</span><span class="w"> </span><span class="n">Title</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">      </span><span class="n">Type</span><span class="o">:</span><span class="w"> </span><span class="n">MovieType</span><span class="w"> </span><span class="o">}</span>
+
+<span class="sd">/// レンタル記録</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">Rental</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">{</span><span class="w"> </span><span class="n">Movie</span><span class="o">:</span><span class="w"> </span><span class="n">Movie</span>
+<span class="w">      </span><span class="n">Days</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">}</span>
+
+<span class="sd">/// 顧客</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">Customer</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">{</span><span class="w"> </span><span class="n">Name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">      </span><span class="n">Rentals</span><span class="o">:</span><span class="w"> </span><span class="n">Rental</span><span class="w"> </span><span class="kt">list</span><span class="w"> </span><span class="o">}</span>
+</code></pre></div>
+<h2 id="3">3. 料金計算<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">料金計算ルール<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ビデオの種類</th>
+<th>基本料金</th>
+<th>追加料金</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通常</td>
+<td>2日まで $2</td>
+<td>3日目から $1.5/日</td>
+</tr>
+<tr>
+<td>新作</td>
+<td>$3/日</td>
+<td>なし</td>
+</tr>
+<tr>
+<td>子供向け</td>
+<td>3日まで $1.5</td>
+<td>4日目から $1.5/日</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nn">Pricing</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="sd">/// 通常ビデオの料金計算</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">regularPrice</span><span class="w"> </span><span class="o">(</span><span class="n">days</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">baseFee</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">.</span><span class="mi">0m</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="n">baseFee</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="o">(</span><span class="kt">decimal</span><span class="w"> </span><span class="o">(</span><span class="n">days</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="o">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="o">.</span><span class="mi">5m</span><span class="o">)</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="n">baseFee</span>
+
+<span class="w">    </span><span class="sd">/// 新作ビデオの料金計算</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">newReleasePrice</span><span class="w"> </span><span class="o">(</span><span class="n">days</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="kt">decimal</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="o">.</span><span class="mi">0m</span>
+
+<span class="w">    </span><span class="sd">/// 子供向けビデオの料金計算</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">childrensPrice</span><span class="w"> </span><span class="o">(</span><span class="n">days</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">baseFee</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">.</span><span class="mi">5m</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="n">baseFee</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="o">(</span><span class="kt">decimal</span><span class="w"> </span><span class="o">(</span><span class="n">days</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">3</span><span class="o">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="o">.</span><span class="mi">5m</span><span class="o">)</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="n">baseFee</span>
+
+<span class="w">    </span><span class="sd">/// レンタル料金を計算</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">calculateRentalPrice</span><span class="w"> </span><span class="o">(</span><span class="n">rental</span><span class="o">:</span><span class="w"> </span><span class="n">Rental</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Movie</span><span class="o">.</span><span class="n">Type</span><span class="w"> </span><span class="k">with</span>
+<span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">Regular</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">regularPrice</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Days</span>
+<span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">NewRelease</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">newReleasePrice</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Days</span>
+<span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">Childrens</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">childrensPrice</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Days</span>
+</code></pre></div>
+<h3 id="_5">料金計算の図解<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJBQ1RJVklUWSIgc3R5bGU9IndpZHRoOjc0N3B4O2hlaWdodDo0NjNweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNzQ3cHgiIGhlaWdodD0iNDYzcHgiIHZpZXdCb3g9IjAgMCA3NDcgNDYzIiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMzIzLjk2MiIgeT0iMzIuOTk1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI5OCIgZm9udC13ZWlnaHQ9IjcwMCI+5paZ6YeR6KiI566X44Or44O844OrPC90ZXh0PjwvZz48ZWxsaXBzZSBjeD0iMzY0Ljk3OCIgY3k9IjYyLjI5NyIgcng9IjEwIiByeT0iMTAiIGZpbGw9IiMyMjIiIHN0eWxlPSJzdHJva2U6IzIyMjtzdHJva2Utd2lkdGg6MTsiLz48cmVjdCB4PSIzMDAuOTc4IiB5PSI5Mi4yOTciIHdpZHRoPSIxMjguMDAxIiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSIzMTAuOTc4IiB5PSIxMTMuNDM2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIxMDguMDAxIj7jg5Pjg4fjgqrjgr/jgqTjg5fjgpLnorroqo08L3RleHQ+PHBvbHlnb24gcG9pbnRzPSIzNDguNDc5LDE0Ni4yNjYsMzgxLjQ3OCwxNDYuMjY2LDM5My40NzgsMTU4LjI2NiwzODEuNDc4LDE3MC4yNjYsMzQ4LjQ3OSwxNzAuMjY2LDMzNi40NzksMTU4LjI2NiwzNDguNDc5LDE0Ni4yNjYiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48dGV4dCB4PSIzNDguNDc5IiB5PSIxNjIuMDc0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjExIiB0ZXh0TGVuZ3RoPSIzMyI+44K/44Kk44OXPC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iMTUwLjM1MSwyMDUuODc1LDIwMS4zOTgsMjA1Ljg3NSwyMTMuMzk4LDIxNy44NzUsMjAxLjM5OCwyMjkuODc1LDE1MC4zNTEsMjI5Ljg3NSwxMzguMzUxLDIxNy44NzUsMTUwLjM1MSwyMDUuODc1IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMTUwLjM1MSIgeT0iMjIxLjY4MyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMSIgdGV4dExlbmd0aD0iNTEuMDQ3Ij7ml6XmlbAgPiAyPzwvdGV4dD48dGV4dCB4PSIxMTkuMzQzIiB5PSIyMTUuMjgxIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjExIiB0ZXh0TGVuZ3RoPSIxOS4wMDgiPnllczwvdGV4dD48dGV4dCB4PSIyMTMuMzk4IiB5PSIyMTUuMjgxIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjExIiB0ZXh0TGVuZ3RoPSIxMy43MDIiPm5vPC90ZXh0PjxyZWN0IHg9IjE2IiB5PSIyMzkuODc1IiB3aWR0aD0iMTc2LjcyNyIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iMjYiIHk9IjI2MS4wMTQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjE1Ni43MjciPuaWmemHkSA9IDIgKyAo5pel5pWwIC0gMikgw5cgMS41PC90ZXh0PjxyZWN0IHg9IjIxMi43MjciIHk9IjIzOS44NzUiIHdpZHRoPSI2OS4zMTkiIGhlaWdodD0iMzMuOTY5IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIxMi41IiByeT0iMTIuNSIvPjx0ZXh0IHg9IjIyMi43MjciIHk9IjI2MS4wMTQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjQ5LjMxOSI+5paZ6YeRID0gMjwvdGV4dD48cG9seWdvbiBwb2ludHM9IjE3NS44NzUsMjc5Ljg0NCwxODcuODc1LDI5MS44NDQsMTc1Ljg3NSwzMDMuODQ0LDE2My44NzUsMjkxLjg0NCwxNzUuODc1LDI3OS44NDQiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48cmVjdCB4PSIyOTIuMDQ1IiB5PSIyMDUuODc1IiB3aWR0aD0iMTExLjAwMiIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iMzAyLjA0NSIgeT0iMjI3LjAxNCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iOTEuMDAyIj7mlpnph5EgPSDml6XmlbAgw5cgMzwvdGV4dD48cG9seWdvbiBwb2ludHM9IjU4NC43OCwyMDUuODc1LDYzNS44MjYsMjA1Ljg3NSw2NDcuODI2LDIxNy44NzUsNjM1LjgyNiwyMjkuODc1LDU4NC43OCwyMjkuODc1LDU3Mi43OCwyMTcuODc1LDU4NC43OCwyMDUuODc1IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iNTg0Ljc4IiB5PSIyMjEuNjgzIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjExIiB0ZXh0TGVuZ3RoPSI1MS4wNDciPuaXpeaVsCA+IDM/PC90ZXh0Pjx0ZXh0IHg9IjU1My43NzEiIHk9IjIxNS4yODEiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTEiIHRleHRMZW5ndGg9IjE5LjAwOCI+eWVzPC90ZXh0Pjx0ZXh0IHg9IjY0Ny44MjYiIHk9IjIxNS4yODEiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTEiIHRleHRMZW5ndGg9IjEzLjcwMiI+bm88L3RleHQ+PHJlY3QgeD0iNDM4Ljk3OSIgeT0iMjM5Ljg3NSIgd2lkdGg9IjE4OC4xNzYiIGhlaWdodD0iMzMuOTY5IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIxMi41IiByeT0iMTIuNSIvPjx0ZXh0IHg9IjQ0OC45NzkiIHk9IjI2MS4wMTQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjE2OC4xNzYiPuaWmemHkSA9IDEuNSArICjml6XmlbAgLSAzKSDDlyAxLjU8L3RleHQ+PHJlY3QgeD0iNjQ3LjE1NSIgeT0iMjM5Ljg3NSIgd2lkdGg9IjgwLjc2OCIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iNjU3LjE1NSIgeT0iMjYxLjAxNCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iNjAuNzY4Ij7mlpnph5EgPSAxLjU8L3RleHQ+PHBvbHlnb24gcG9pbnRzPSI2MTAuMzAzLDI3OS44NDQsNjIyLjMwMywyOTEuODQ0LDYxMC4zMDMsMzAzLjg0NCw1OTguMzAzLDI5MS44NDQsNjEwLjMwMywyNzkuODQ0IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHBvbHlnb24gcG9pbnRzPSIzNjQuOTc4LDMyMy44NDQsMzY0Ljk3OCwzMjMuODQ0LDM3Ni45NzgsMzM1Ljg0NCwzNjQuOTc4LDM0Ny44NDQsMzY0Ljk3OCwzNDcuODQ0LDM1Mi45NzgsMzM1Ljg0NCwzNjQuOTc4LDMyMy44NDQiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48cmVjdCB4PSIzMjQuOTc4IiB5PSIzNjcuODQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMzMuOTY5IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIxMi41IiByeT0iMTIuNSIvPjx0ZXh0IHg9IjMzNC45NzgiIHk9IjM4OC45ODIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjYwIj7mlpnph5HjgpLov5TjgZk8L3RleHQ+PGVsbGlwc2UgY3g9IjM2NC45NzgiIGN5PSI0MzIuODEzIiByeD0iMTEiIHJ5PSIxMSIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMjIyO3N0cm9rZS13aWR0aDoxOyIvPjxlbGxpcHNlIGN4PSIzNjQuOTc4IiBjeT0iNDMyLjgxMyIgcng9IjYiIHJ5PSI2IiBmaWxsPSIjMjIyIiBzdHlsZT0ic3Ryb2tlOiMyMjI7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjM2NC45NzgiIHkxPSI3Mi4yOTciIHgyPSIzNjQuOTc4IiB5Mj0iOTIuMjk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIzNjAuOTc4LDgyLjI5NywzNjQuOTc4LDkyLjI5NywzNjguOTc4LDgyLjI5NywzNjQuOTc4LDg2LjI5NyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTM4LjM1MSIgeTE9IjIxNy44NzUiIHgyPSIxMDQuMzYzIiB5Mj0iMjE3Ljg3NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSIxMDQuMzYzIiB5MT0iMjE3Ljg3NSIgeDI9IjEwNC4zNjMiIHkyPSIyMzkuODc1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxMDAuMzYzLDIyOS44NzUsMTA0LjM2MywyMzkuODc1LDEwOC4zNjMsMjI5Ljg3NSwxMDQuMzYzLDIzMy44NzUiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjIxMy4zOTgiIHkxPSIyMTcuODc1IiB4Mj0iMjQ3LjM4NiIgeTI9IjIxNy44NzUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48bGluZSB4MT0iMjQ3LjM4NiIgeTE9IjIxNy44NzUiIHgyPSIyNDcuMzg2IiB5Mj0iMjM5Ljg3NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMjQzLjM4NiwyMjkuODc1LDI0Ny4zODYsMjM5Ljg3NSwyNTEuMzg2LDIyOS44NzUsMjQ3LjM4NiwyMzMuODc1IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxMDQuMzYzIiB5MT0iMjczLjg0NCIgeDI9IjEwNC4zNjMiIHkyPSIyOTEuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjEwNC4zNjMiIHkxPSIyOTEuODQ0IiB4Mj0iMTYzLjg3NSIgeTI9IjI5MS44NDQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE1My44NzUsMjg3Ljg0NCwxNjMuODc1LDI5MS44NDQsMTUzLjg3NSwyOTUuODQ0LDE1Ny44NzUsMjkxLjg0NCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMjQ3LjM4NiIgeTE9IjI3My44NDQiIHgyPSIyNDcuMzg2IiB5Mj0iMjkxLjg0NCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSIyNDcuMzg2IiB5MT0iMjkxLjg0NCIgeDI9IjE4Ny44NzUiIHkyPSIyOTEuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxOTcuODc1LDI4Ny44NDQsMTg3Ljg3NSwyOTEuODQ0LDE5Ny44NzUsMjk1Ljg0NCwxOTMuODc1LDI5MS44NDQiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjU3Mi43OCIgeTE9IjIxNy44NzUiIHgyPSI1MzMuMDY3IiB5Mj0iMjE3Ljg3NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSI1MzMuMDY3IiB5MT0iMjE3Ljg3NSIgeDI9IjUzMy4wNjciIHkyPSIyMzkuODc1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSI1MjkuMDY3LDIyOS44NzUsNTMzLjA2NywyMzkuODc1LDUzNy4wNjcsMjI5Ljg3NSw1MzMuMDY3LDIzMy44NzUiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjY0Ny44MjYiIHkxPSIyMTcuODc1IiB4Mj0iNjg3LjUzOSIgeTI9IjIxNy44NzUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48bGluZSB4MT0iNjg3LjUzOSIgeTE9IjIxNy44NzUiIHgyPSI2ODcuNTM5IiB5Mj0iMjM5Ljg3NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iNjgzLjUzOSwyMjkuODc1LDY4Ny41MzksMjM5Ljg3NSw2OTEuNTM5LDIyOS44NzUsNjg3LjUzOSwyMzMuODc1IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSI1MzMuMDY3IiB5MT0iMjczLjg0NCIgeDI9IjUzMy4wNjciIHkyPSIyOTEuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjUzMy4wNjciIHkxPSIyOTEuODQ0IiB4Mj0iNTk4LjMwMyIgeTI9IjI5MS44NDQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjU4OC4zMDMsMjg3Ljg0NCw1OTguMzAzLDI5MS44NDQsNTg4LjMwMywyOTUuODQ0LDU5Mi4zMDMsMjkxLjg0NCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iNjg3LjUzOSIgeTE9IjI3My44NDQiIHgyPSI2ODcuNTM5IiB5Mj0iMjkxLjg0NCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSI2ODcuNTM5IiB5MT0iMjkxLjg0NCIgeDI9IjYyMi4zMDMiIHkyPSIyOTEuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSI2MzIuMzAzLDI4Ny44NDQsNjIyLjMwMywyOTEuODQ0LDYzMi4zMDMsMjk1Ljg0NCw2MjguMzAzLDI5MS44NDQiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjMzNi40NzkiIHkxPSIxNTguMjY2IiB4Mj0iMTc1Ljg3NSIgeTI9IjE1OC4yNjYiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48bGluZSB4MT0iMTc1Ljg3NSIgeTE9IjE1OC4yNjYiIHgyPSIxNzUuODc1IiB5Mj0iMjA1Ljg3NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMTcxLjg3NSwxOTUuODc1LDE3NS44NzUsMjA1Ljg3NSwxNzkuODc1LDE5NS44NzUsMTc1Ljg3NSwxOTkuODc1IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjx0ZXh0IHg9IjE3NS44NzUiIHk9IjE4NS44NzgiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTEiIHRleHRMZW5ndGg9IjQyLjY4NCI+UmVndWxhcjwvdGV4dD48bGluZSB4MT0iMzkzLjQ3OCIgeTE9IjE1OC4yNjYiIHgyPSI2MTAuMzAzIiB5Mj0iMTU4LjI2NiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSI2MTAuMzAzIiB5MT0iMTU4LjI2NiIgeDI9IjYxMC4zMDMiIHkyPSIyMDUuODc1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSI2MDYuMzAzLDE5NS44NzUsNjEwLjMwMywyMDUuODc1LDYxNC4zMDMsMTk1Ljg3NSw2MTAuMzAzLDE5OS44NzUiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iNjEwLjMwMyIgeT0iMTg1Ljg3OCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMSIgdGV4dExlbmd0aD0iNTEuNzQiPkNoaWxkcmVuczwvdGV4dD48bGluZSB4MT0iMzY0Ljk3OCIgeTE9IjE3MC4yNjYiIHgyPSIzNjQuOTc4IiB5Mj0iMTgyLjEzNSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSIzNjQuOTc4IiB5MT0iMTgyLjEzNSIgeDI9IjM0Ny41NDciIHkyPSIxODIuMTM1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjM0Ny41NDciIHkxPSIxODIuMTM1IiB4Mj0iMzQ3LjU0NyIgeTI9IjIwNS44NzUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjM0My41NDcsMTk1Ljg3NSwzNDcuNTQ3LDIwNS44NzUsMzUxLjU0NywxOTUuODc1LDM0Ny41NDcsMTk5Ljg3NSIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48dGV4dCB4PSIzNDcuNTQ3IiB5PSIxODYuODc4IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjExIiB0ZXh0TGVuZ3RoPSI2Ny40NjYiPk5ld1JlbGVhc2U8L3RleHQ+PGxpbmUgeDE9IjE3NS44NzUiIHkxPSIzMDMuODQ0IiB4Mj0iMTc1Ljg3NSIgeTI9IjMzNS44NDQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48bGluZSB4MT0iMTc1Ljg3NSIgeTE9IjMzNS44NDQiIHgyPSIzNTIuOTc4IiB5Mj0iMzM1Ljg0NCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMzQyLjk3OCwzMzEuODQ0LDM1Mi45NzgsMzM1Ljg0NCwzNDIuOTc4LDMzOS44NDQsMzQ2Ljk3OCwzMzUuODQ0IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSI2MTAuMzAzIiB5MT0iMzAzLjg0NCIgeDI9IjYxMC4zMDMiIHkyPSIzMzUuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjYxMC4zMDMiIHkxPSIzMzUuODQ0IiB4Mj0iMzc2Ljk3OCIgeTI9IjMzNS44NDQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjM4Ni45NzgsMzMxLjg0NCwzNzYuOTc4LDMzNS44NDQsMzg2Ljk3OCwzMzkuODQ0LDM4Mi45NzgsMzM1Ljg0NCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMzQ3LjU0NyIgeTE9IjIzOS44NDQiIHgyPSIzNDcuNTQ3IiB5Mj0iMzA4Ljg0NCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxsaW5lIHgxPSIzNDcuNTQ3IiB5MT0iMzA4Ljg0NCIgeDI9IjM2NC45NzgiIHkyPSIzMDguODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjM2NC45NzgiIHkxPSIzMDguODQ0IiB4Mj0iMzY0Ljk3OCIgeTI9IjMyMy44NDQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjM2MC45NzgsMzEzLjg0NCwzNjQuOTc4LDMyMy44NDQsMzY4Ljk3OCwzMTMuODQ0LDM2NC45NzgsMzE3Ljg0NCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMzY0Ljk3OCIgeTE9IjEyNi4yNjYiIHgyPSIzNjQuOTc4IiB5Mj0iMTQ2LjI2NiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMzYwLjk3OCwxMzYuMjY2LDM2NC45NzgsMTQ2LjI2NiwzNjguOTc4LDEzNi4yNjYsMzY0Ljk3OCwxNDAuMjY2IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIzNjQuOTc4IiB5MT0iMzQ3Ljg0NCIgeDI9IjM2NC45NzgiIHkyPSIzNjcuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIzNjAuOTc4LDM1Ny44NDQsMzY0Ljk3OCwzNjcuODQ0LDM2OC45NzgsMzU3Ljg0NCwzNjQuOTc4LDM2MS44NDQiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjM2NC45NzgiIHkxPSI0MDEuODEzIiB4Mj0iMzY0Ljk3OCIgeTI9IjQyMS44MTMiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjM2MC45NzgsNDExLjgxMywzNjQuOTc4LDQyMS44MTMsMzY4Ljk3OCw0MTEuODEzLDM2NC45NzgsNDE1LjgxMyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48P3BsYW50dW1sLXNyYyBBeWFpb0tiTFUzUGp2aWxzWUl6TVQzblZEX3JueS1oN3BOazA5MVROU0tiWUtHY05yVUZjb08tUnNueXRoTmhTakZ6bnF2QjdwVENWRHFyd2xjWk5Zck16cmExNXZQYWJvSGFBNmQxOUpReGFuRTlLMU9zV3JGSklkQ0dZSlF4Q0QwTURQekVORmZrd0dTNUVtU1hVS3c0YThwTEZHUUNvakxZSm9tZllqT0FqV2Y2MkRib1BoZUFIZmlCWHdHZzZVZ1JNTkFhdjhERm95YjRLMHVOcEtaQkplNVJ2ZlBPN2ZVUWEwamQ4WWcyNjBTcW5qZU9nVEN4OHA0YWZJaXFoSGRFTENJdk4wTHMwdVl2Wl9FdzJJODFUMVlHWEdTQzVhbVU2c2VsektudXRwaEc2WGNuLTBHMDA/PjwvZz48L3N2Zz4=" class="uml" alt="uml diagram" title="" /></p>
+<h2 id="4">4. ポイント計算<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nn">Points</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="sd">/// レンタルポイントを計算</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">calculateRentalPoints</span><span class="w"> </span><span class="o">(</span><span class="n">rental</span><span class="o">:</span><span class="w"> </span><span class="n">Rental</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Movie</span><span class="o">.</span><span class="n">Type</span><span class="w"> </span><span class="k">with</span>
+<span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">NewRelease</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Days</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="o">_</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">1</span>
+</code></pre></div>
+<p>ポイントルール：</p>
+<ul>
+<li>通常のレンタル: 1ポイント</li>
+<li>新作2日以上: 2ポイント（ボーナス）</li>
+</ul>
+<h2 id="5">5. 明細書生成<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">明細書の定義<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">/// 明細行</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">StatementLine</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">{</span><span class="w"> </span><span class="n">MovieTitle</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">      </span><span class="n">Amount</span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span><span class="w"> </span><span class="o">}</span>
+
+<span class="sd">/// 明細書</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">Statement</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">{</span><span class="w"> </span><span class="n">CustomerName</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">      </span><span class="n">Lines</span><span class="o">:</span><span class="w"> </span><span class="n">StatementLine</span><span class="w"> </span><span class="kt">list</span>
+<span class="w">      </span><span class="n">TotalAmount</span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span>
+<span class="w">      </span><span class="n">FrequentRenterPoints</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">}</span>
+</code></pre></div>
+<h3 id="_7">明細書の生成<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nn">Statement</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="sd">/// 明細行を生成</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">createLine</span><span class="w"> </span><span class="o">(</span><span class="n">rental</span><span class="o">:</span><span class="w"> </span><span class="n">Rental</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">StatementLine</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="o">{</span><span class="w"> </span><span class="n">MovieTitle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rental</span><span class="o">.</span><span class="n">Movie</span><span class="o">.</span><span class="n">Title</span>
+<span class="w">          </span><span class="n">Amount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Pricing</span><span class="p">.</span><span class="n">calculateRentalPrice</span><span class="w"> </span><span class="n">rental</span><span class="w"> </span><span class="o">}</span>
+
+<span class="w">    </span><span class="sd">/// 明細書を生成</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">generate</span><span class="w"> </span><span class="o">(</span><span class="n">customer</span><span class="o">:</span><span class="w"> </span><span class="n">Customer</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Statement</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">lines</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">customer</span><span class="o">.</span><span class="n">Rentals</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="n">createLine</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">sumBy</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">l</span><span class="o">.</span><span class="n">Amount</span><span class="o">)</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">customer</span><span class="o">.</span><span class="n">Rentals</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">sumBy</span><span class="w"> </span><span class="nn">Points</span><span class="p">.</span><span class="n">calculateRentalPoints</span>
+<span class="w">        </span><span class="o">{</span><span class="w"> </span><span class="n">CustomerName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">customer</span><span class="o">.</span><span class="n">Name</span>
+<span class="w">          </span><span class="n">Lines</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lines</span>
+<span class="w">          </span><span class="n">TotalAmount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total</span>
+<span class="w">          </span><span class="n">FrequentRenterPoints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">points</span><span class="w"> </span><span class="o">}</span>
+</code></pre></div>
+<h3 id="_8">明細書のフォーマット<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="sd">/// 明細書をテキスト形式でフォーマット</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">formatText</span><span class="w"> </span><span class="o">(</span><span class="n">statement</span><span class="o">:</span><span class="w"> </span><span class="n">Statement</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sprintf</span><span class="w"> </span><span class="s">"Rental Record for %s</span><span class="se">\n</span><span class="s">"</span><span class="w"> </span><span class="n">statement</span><span class="o">.</span><span class="n">CustomerName</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">lines</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">statement</span><span class="o">.</span><span class="n">Lines</span>
+<span class="w">            </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">sprintf</span><span class="w"> </span><span class="s">"</span><span class="se">\t</span><span class="s">%s</span><span class="se">\t</span><span class="s">%.2f</span><span class="se">\n</span><span class="s">"</span><span class="w"> </span><span class="n">l</span><span class="o">.</span><span class="n">MovieTitle</span><span class="w"> </span><span class="n">l</span><span class="o">.</span><span class="n">Amount</span><span class="o">)</span>
+<span class="w">            </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span><span class="w"> </span><span class="s">""</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">footer</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">sprintf</span><span class="w"> </span><span class="s">"Amount owed is %.2f</span><span class="se">\n</span><span class="s">You earned %d frequent renter points"</span>
+<span class="w">                </span><span class="n">statement</span><span class="o">.</span><span class="n">TotalAmount</span>
+<span class="w">                </span><span class="n">statement</span><span class="o">.</span><span class="n">FrequentRenterPoints</span>
+<span class="w">        </span><span class="n">header</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">footer</span>
+
+<span class="w">    </span><span class="sd">/// 明細書をHTML形式でフォーマット</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">formatHtml</span><span class="w"> </span><span class="o">(</span><span class="n">statement</span><span class="o">:</span><span class="w"> </span><span class="n">Statement</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sprintf</span><span class="w"> </span><span class="s">"&lt;h1&gt;Rental Record for %s&lt;/h1&gt;</span><span class="se">\n</span><span class="s">&lt;table&gt;</span><span class="se">\n</span><span class="s">"</span><span class="w"> </span><span class="n">statement</span><span class="o">.</span><span class="n">CustomerName</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">lines</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">statement</span><span class="o">.</span><span class="n">Lines</span>
+<span class="w">            </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">sprintf</span><span class="w"> </span><span class="s">"&lt;tr&gt;&lt;td&gt;%s&lt;/td&gt;&lt;td&gt;%.2f&lt;/td&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">"</span><span class="w"> </span><span class="n">l</span><span class="o">.</span><span class="n">MovieTitle</span><span class="w"> </span><span class="n">l</span><span class="o">.</span><span class="n">Amount</span><span class="o">)</span>
+<span class="w">            </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span><span class="w"> </span><span class="s">""</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">footer</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">sprintf</span><span class="w"> </span><span class="s">"&lt;/table&gt;</span><span class="se">\n</span><span class="s">&lt;p&gt;Amount owed is %.2f&lt;/p&gt;</span><span class="se">\n</span><span class="s">&lt;p&gt;You earned %d frequent renter points&lt;/p&gt;"</span>
+<span class="w">                </span><span class="n">statement</span><span class="o">.</span><span class="n">TotalAmount</span>
+<span class="w">                </span><span class="n">statement</span><span class="o">.</span><span class="n">FrequentRenterPoints</span>
+<span class="w">        </span><span class="n">header</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">footer</span>
+</code></pre></div>
+<h2 id="6">6. ユーティリティモジュール<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nn">Movie</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">createRegular</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">Title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">title</span><span class="o">;</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">Regular</span><span class="w"> </span><span class="o">}</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">createNewRelease</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">Title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">title</span><span class="o">;</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">NewRelease</span><span class="w"> </span><span class="o">}</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">createChildrens</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">Title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">title</span><span class="o">;</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">MovieType</span><span class="p">.</span><span class="n">Childrens</span><span class="w"> </span><span class="o">}</span>
+
+<span class="k">module</span><span class="w"> </span><span class="nn">Customer</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">create</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="o">;</span><span class="w"> </span><span class="n">Rentals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">[]</span><span class="w"> </span><span class="o">}</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">addRental</span><span class="w"> </span><span class="n">rental</span><span class="w"> </span><span class="n">customer</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="o">{</span><span class="w"> </span><span class="n">customer</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">Rentals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rental</span><span class="w"> </span><span class="o">::</span><span class="w"> </span><span class="n">customer</span><span class="o">.</span><span class="n">Rentals</span><span class="w"> </span><span class="o">}</span>
+
+<span class="k">module</span><span class="w"> </span><span class="nn">Rental</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">create</span><span class="w"> </span><span class="n">movie</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">Movie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">movie</span><span class="o">;</span><span class="w"> </span><span class="n">Days</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="o">}</span>
+</code></pre></div>
+<h2 id="7">7. シーケンス図<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJTRVFVRU5DRSIgc3R5bGU9IndpZHRoOjU3MnB4O2hlaWdodDo0NzVweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNTcycHgiIGhlaWdodD0iNDc1cHgiIHZpZXdCb3g9IjAgMCA1NzIgNDc1IiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMjI5LjA4NSIgeT0iMjcuOTk1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxMTIiIGZvbnQtd2VpZ2h0PSI3MDAiPuaYjue0sOabuOeUn+aIkOODleODreODvDwvdGV4dD48L2c+PHJlY3QgeD0iMjM2LjEwMyIgeT0iMTc3Ljk5MiIgd2lkdGg9IjMxNi4wNjciIGhlaWdodD0iMTQzLjY2NCIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMDAwO3N0cm9rZS13aWR0aDoxLjU7Ii8+PGc+PHRpdGxlPkNsaWVudDwvdGl0bGU+PHJlY3QgeD0iMzMuNzY1IiB5PSI3OC41OTQiIHdpZHRoPSI4IiBoZWlnaHQ9IjM1NC40NjEiIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMCIvPjxsaW5lIHgxPSIzNy4yNjUiIHkxPSI3OC41OTQiIHgyPSIzNy4yNjUiIHkyPSI0MzMuMDU1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTtzdHJva2UtZGFzaGFycmF5OjUsNTsiLz48L2c+PGc+PHRpdGxlPkN1c3RvbWVyPC90aXRsZT48cmVjdCB4PSIxNTMuNzY1IiB5PSI3OC41OTQiIHdpZHRoPSI4IiBoZWlnaHQ9IjM1NC40NjEiIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMCIvPjxsaW5lIHgxPSIxNTcuMjY1IiB5MT0iNzguNTk0IiB4Mj0iMTU3LjI2NSIgeTI9IjQzMy4wNTUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41O3N0cm9rZS1kYXNoYXJyYXk6NSw1OyIvPjwvZz48Zz48dGl0bGU+PC90aXRsZT48cmVjdCB4PSIxNTIuMjY1IiB5PSIxMDcuNzI3IiB3aWR0aD0iMTAiIGhlaWdodD0iMjkuMTMzIiBmaWxsPSIjRkZGIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjxnPjx0aXRsZT5TdGF0ZW1lbnQ8L3RpdGxlPjxyZWN0IHg9IjI0OC42MDMiIHk9Ijc4LjU5NCIgd2lkdGg9IjgiIGhlaWdodD0iMzU0LjQ2MSIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwIi8+PGxpbmUgeDE9IjI1Mi4xMDMiIHkxPSI3OC41OTQiIHgyPSIyNTIuMTAzIiB5Mj0iNDMzLjA1NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7c3Ryb2tlLWRhc2hhcnJheTo1LDU7Ii8+PC9nPjxnPjx0aXRsZT48L3RpdGxlPjxyZWN0IHg9IjI0Ny4xMDMiIHk9IjE2NS45OTIiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxOTAuNzk3IiBmaWxsPSIjRkZGIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjxnPjx0aXRsZT48L3RpdGxlPjxyZWN0IHg9IjI0Ny4xMDMiIHk9IjM4NS45MjIiIHdpZHRoPSIxMCIgaGVpZ2h0PSIyOS4xMzMiIGZpbGw9IiNGRkYiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48L2c+PGc+PHRpdGxlPlByaWNpbmc8L3RpdGxlPjxyZWN0IHg9IjQ1OC42NzYiIHk9Ijc4LjU5NCIgd2lkdGg9IjgiIGhlaWdodD0iMzU0LjQ2MSIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwIi8+PGxpbmUgeDE9IjQ2Mi4xNzYiIHkxPSI3OC41OTQiIHgyPSI0NjIuMTc2IiB5Mj0iNDMzLjA1NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7c3Ryb2tlLWRhc2hhcnJheTo1LDU7Ii8+PC9nPjxnPjx0aXRsZT48L3RpdGxlPjxyZWN0IHg9IjQ1Ny4xNzYiIHk9IjIyNi4yNTgiIHdpZHRoPSIxMCIgaGVpZ2h0PSIyOS4xMzMiIGZpbGw9IiNGRkYiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48L2c+PGc+PHRpdGxlPlBvaW50czwvdGl0bGU+PHJlY3QgeD0iNTI3LjY3IiB5PSI3OC41OTQiIHdpZHRoPSI4IiBoZWlnaHQ9IjM1NC40NjEiIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMCIvPjxsaW5lIHgxPSI1MzEuMTciIHkxPSI3OC41OTQiIHgyPSI1MzEuMTciIHkyPSI0MzMuMDU1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTtzdHJva2UtZGFzaGFycmF5OjUsNTsiLz48L2c+PGc+PHRpdGxlPjwvdGl0bGU+PHJlY3QgeD0iNTI2LjE3IiB5PSIyODQuNTIzIiB3aWR0aD0iMTAiIGhlaWdodD0iMjkuMTMzIiBmaWxsPSIjRkZGIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PC9nPjxyZWN0IHg9IjEwIiB5PSI0Ny4yOTciIHdpZHRoPSI1NC41MyIgaGVpZ2h0PSIzMC4yOTciIGZpbGw9IiNFMkUyRjAiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjE3IiB5PSI2Ny4yOTIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjQwLjUzIj5DbGllbnQ8L3RleHQ+PHJlY3QgeD0iMTE2LjI2MyIgeT0iNDcuMjk3IiB3aWR0aD0iODIuMDA0IiBoZWlnaHQ9IjMwLjI5NyIgZmlsbD0iI0UyRTJGMCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iMTIzLjI2MyIgeT0iNjcuMjkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI2OC4wMDQiPkN1c3RvbWVyPC90ZXh0PjxyZWN0IHg9IjIwOC4yNjciIHk9IjQ3LjI5NyIgd2lkdGg9Ijg3LjY3MSIgaGVpZ2h0PSIzMC4yOTciIGZpbGw9IiNFMkUyRjAiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjIxNS4yNjciIHk9IjY3LjI5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNzMuNjcxIj5TdGF0ZW1lbnQ8L3RleHQ+PHJlY3QgeD0iNDMxLjQ1OSIgeT0iNDcuMjk3IiB3aWR0aD0iNjEuNDM1IiBoZWlnaHQ9IjMwLjI5NyIgZmlsbD0iI0UyRTJGMCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iNDM4LjQ1OSIgeT0iNjcuMjkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI0Ny40MzUiPlByaWNpbmc8L3RleHQ+PHJlY3QgeD0iNTAyLjg5MyIgeT0iNDcuMjk3IiB3aWR0aD0iNTYuNTU0IiBoZWlnaHQ9IjMwLjI5NyIgZmlsbD0iI0UyRTJGMCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iNTA5Ljg5MyIgeT0iNjcuMjkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI0Mi41NTQiPlBvaW50czwvdGV4dD48cmVjdCB4PSIxMCIgeT0iNDMzLjA1NSIgd2lkdGg9IjU0LjUzIiBoZWlnaHQ9IjMwLjI5NyIgZmlsbD0iI0UyRTJGMCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iMTciIHk9IjQ1My4wNSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNDAuNTMiPkNsaWVudDwvdGV4dD48cmVjdCB4PSIxMTYuMjYzIiB5PSI0MzMuMDU1IiB3aWR0aD0iODIuMDA0IiBoZWlnaHQ9IjMwLjI5NyIgZmlsbD0iI0UyRTJGMCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iMTIzLjI2MyIgeT0iNDUzLjA1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI2OC4wMDQiPkN1c3RvbWVyPC90ZXh0PjxyZWN0IHg9IjIwOC4yNjciIHk9IjQzMy4wNTUiIHdpZHRoPSI4Ny42NzEiIGhlaWdodD0iMzAuMjk3IiBmaWxsPSIjRTJFMkYwIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSIyMTUuMjY3IiB5PSI0NTMuMDUiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjczLjY3MSI+U3RhdGVtZW50PC90ZXh0PjxyZWN0IHg9IjQzMS40NTkiIHk9IjQzMy4wNTUiIHdpZHRoPSI2MS40MzUiIGhlaWdodD0iMzAuMjk3IiBmaWxsPSIjRTJFMkYwIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSI0MzguNDU5IiB5PSI0NTMuMDUiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjQ3LjQzNSI+UHJpY2luZzwvdGV4dD48cmVjdCB4PSI1MDIuODkzIiB5PSI0MzMuMDU1IiB3aWR0aD0iNTYuNTU0IiBoZWlnaHQ9IjMwLjI5NyIgZmlsbD0iI0UyRTJGMCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iNTA5Ljg5MyIgeT0iNDUzLjA1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI0Mi41NTQiPlBvaW50czwvdGV4dD48cG9seWdvbiBwb2ludHM9IjE0MC4yNjUsMTAzLjcyNywxNTAuMjY1LDEwNy43MjcsMTQwLjI2NSwxMTEuNzI3LDE0NC4yNjUsMTA3LjcyNyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMzcuMjY1IiB5MT0iMTA3LjcyNyIgeDI9IjE0Ni4yNjUiIHkyPSIxMDcuNzI3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHRleHQgeD0iNDQuMjY1IiB5PSIxMDIuNjYxIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSI3OCI+44Os44Oz44K/44Or6L+95YqgPC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iNDguMjY1LDEzMi44NTksMzguMjY1LDEzNi44NTksNDguMjY1LDE0MC44NTksNDQuMjY1LDEzNi44NTkiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjQyLjI2NSIgeTE9IjEzNi44NTkiIHgyPSIxNTEuMjY1IiB5Mj0iMTM2Ljg1OSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1kYXNoYXJyYXk6MiwyOyIvPjx0ZXh0IHg9IjU0LjI2NSIgeT0iMTMxLjc5MyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iOTEiPuabtOaWsOOBleOCjOOBn+mhp+WuojwvdGV4dD48cG9seWdvbiBwb2ludHM9IjIzNS4xMDMsMTYxLjk5MiwyNDUuMTAzLDE2NS45OTIsMjM1LjEwMywxNjkuOTkyLDIzOS4xMDMsMTY1Ljk5MiIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMzcuMjY1IiB5MT0iMTY1Ljk5MiIgeDI9IjI0MS4xMDMiIHkyPSIxNjUuOTkyIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHRleHQgeD0iNDQuMjY1IiB5PSIxNjAuOTI2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxMzAuMjU0Ij5nZW5lcmF0ZShjdXN0b21lcik8L3RleHQ+PHBhdGggZD0iTTIzNi4xMDMsMTc3Ljk5MiBMMzEyLjcyNywxNzcuOTkyIEwzMTIuNzI3LDE4NS4xMjUgTDMwMi43MjcsMTk1LjEyNSBMMjM2LjEwMywxOTUuMTI1IEwyMzYuMTAzLDE3Ny45OTIiIHN0eWxlPSJzdHJva2U6IzAwMDtzdHJva2Utd2lkdGg6MS41OyIgZmlsbD0iI0VFRSIvPjxyZWN0IHg9IjIzNi4xMDMiIHk9IjE3Ny45OTIiIHdpZHRoPSIzMTYuMDY3IiBoZWlnaHQ9IjE0My42NjQiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzAwMDtzdHJva2Utd2lkdGg6MS41OyIvPjx0ZXh0IHg9IjI1MS4xMDMiIHk9IjE5MS4wNTkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjMxLjYyNCIgZm9udC13ZWlnaHQ9IjcwMCI+bG9vcDwvdGV4dD48dGV4dCB4PSIzMjcuNzI3IiB5PSIxOTAuMjAzIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjExIiB0ZXh0TGVuZ3RoPSI2NS4wNTQiIGZvbnQtd2VpZ2h0PSI3MDAiPlvlkITjg6zjg7Pjgr/jg6tdPC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iNDQ1LjE3NiwyMjIuMjU4LDQ1NS4xNzYsMjI2LjI1OCw0NDUuMTc2LDIzMC4yNTgsNDQ5LjE3NiwyMjYuMjU4IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIyNTcuMTAzIiB5MT0iMjI2LjI1OCIgeDI9IjQ1MS4xNzYiIHkyPSIyMjYuMjU4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHRleHQgeD0iMjY0LjEwMyIgeT0iMjIxLjE5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTgxLjA3MyI+Y2FsY3VsYXRlUmVudGFsUHJpY2UocmVudGFsKTwvdGV4dD48cG9seWdvbiBwb2ludHM9IjI2OC4xMDMsMjUxLjM5MSwyNTguMTAzLDI1NS4zOTEsMjY4LjEwMywyNTkuMzkxLDI2NC4xMDMsMjU1LjM5MSIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMjYyLjEwMyIgeTE9IjI1NS4zOTEiIHgyPSI0NTYuMTc2IiB5Mj0iMjU1LjM5MSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1kYXNoYXJyYXk6MiwyOyIvPjx0ZXh0IHg9IjI3NC4xMDMiIHk9IjI1MC4zMjUiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjUwLjE1OSI+YW1vdW50PC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iNTE0LjE3LDI4MC41MjMsNTI0LjE3LDI4NC41MjMsNTE0LjE3LDI4OC41MjMsNTE4LjE3LDI4NC41MjMiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjI1Ny4xMDMiIHkxPSIyODQuNTIzIiB4Mj0iNTIwLjE3IiB5Mj0iMjg0LjUyMyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjx0ZXh0IHg9IjI2NC4xMDMiIHk9IjI3OS40NTgiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjE4OC42NDYiPmNhbGN1bGF0ZVJlbnRhbFBvaW50cyhyZW50YWwpPC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iMjY4LjEwMywzMDkuNjU2LDI1OC4xMDMsMzEzLjY1NiwyNjguMTAzLDMxNy42NTYsMjY0LjEwMywzMTMuNjU2IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIyNjIuMTAzIiB5MT0iMzEzLjY1NiIgeDI9IjUyNS4xNyIgeTI9IjMxMy42NTYiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtZGFzaGFycmF5OjIsMjsiLz48dGV4dCB4PSIyNzQuMTAzIiB5PSIzMDguNTkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjM5LjkyNyI+cG9pbnRzPC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iNDguMjY1LDM1Mi43ODksMzguMjY1LDM1Ni43ODksNDguMjY1LDM2MC43ODksNDQuMjY1LDM1Ni43ODkiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjQyLjI2NSIgeTE9IjM1Ni43ODkiIHgyPSIyNDYuMTAzIiB5Mj0iMzU2Ljc4OSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1kYXNoYXJyYXk6MiwyOyIvPjx0ZXh0IHg9IjU0LjI2NSIgeT0iMzUxLjcyMyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iNjguNDA5Ij5TdGF0ZW1lbnQ8L3RleHQ+PHBvbHlnb24gcG9pbnRzPSIyMzUuMTAzLDM4MS45MjIsMjQ1LjEwMywzODUuOTIyLDIzNS4xMDMsMzg5LjkyMiwyMzkuMTAzLDM4NS45MjIiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjM3LjI2NSIgeTE9IjM4NS45MjIiIHgyPSIyNDEuMTAzIiB5Mj0iMzg1LjkyMiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjx0ZXh0IHg9IjQ0LjI2NSIgeT0iMzgwLjg1NiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTQ5LjQwNSI+Zm9ybWF0VGV4dChzdGF0ZW1lbnQpPC90ZXh0Pjxwb2x5Z29uIHBvaW50cz0iNDguMjY1LDQxMS4wNTUsMzguMjY1LDQxNS4wNTUsNDguMjY1LDQxOS4wNTUsNDQuMjY1LDQxNS4wNTUiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjQyLjI2NSIgeTE9IjQxNS4wNTUiIHgyPSIyNDYuMTAzIiB5Mj0iNDE1LjA1NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1kYXNoYXJyYXk6MiwyOyIvPjx0ZXh0IHg9IjU0LjI2NSIgeT0iNDA5Ljk4OSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTMwIj7jg4bjgq3jgrnjg4jlvaLlvI/jga7mmI7ntLDmm7g8L3RleHQ+PD9wbGFudHVtbC1zcmMgVExDeEppRDA0RXR0NUFqS2ZsMDVLajFtMEdIU09FS2lhSU5fUDZ5R2hScThIR1gxMmVBR0tXSklLNDJZSUFHMEFMNEVDeDgzanMzWmpUVGhPeGh2bDdibHZndERSRVBHZDN0VHhMUkJSRkF2VXZYY21uN21DVjB2eTNMMjBHY1BSVGExeUhaazczYXN6TFc3YW1YUlVUWGUzb0Jja3BJS1cyQWZHcXVQT1RHaklROG9ndUVFR241d19IbUlvQlcxeTZzRkhSQVZYbVo5VlIxdmc4SG41bURfMV91MW9IUnVzX1RzYXp1eThzOG4tcUFlTGxpZmxCYVZiWkhUZDRyTXNVQ0l1WjRham4xRlZydlVxeUtDelVaVlVLclF0SUM4LWpJWmVLWUQ0ZFhHUUxUdDh5VnQwdm9FaGxITEtTS1pJMGk3MUFMNTc2bFdZRFE5UTE1ZFJuQ3JtWnBNbzlMWm5QcFBNOG91X2EwZVF3VUs0bXRUdERhTXNScFVlWWpWZVhYaGdYUFROTExNZ0RVaDJVa0ZlQnVNVkt1cGh6dHZTcHpxMkprWmJ5bkd2TFJwX3I0NVZXdDk3OThsdUNEcUNxbE56bjBscjFfSWtpZWw/PjwvZz48L3N2Zz4=" class="uml" alt="uml diagram" title="" /></p>
+<h2 id="8">8. 使用例<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">open</span><span class="w"> </span><span class="nn">FunctionalDesign.Part5.VideoRentalSystem</span>
+
+<span class="c1">// ビデオを作成</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">jaws</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Movie</span><span class="p">.</span><span class="n">createRegular</span><span class="w"> </span><span class="s">"Jaws"</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">dune</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Movie</span><span class="p">.</span><span class="n">createNewRelease</span><span class="w"> </span><span class="s">"Dune"</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">frozen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Movie</span><span class="p">.</span><span class="n">createChildrens</span><span class="w"> </span><span class="s">"Frozen"</span>
+
+<span class="c1">// 顧客を作成してレンタルを追加</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">customer</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">Customer</span><span class="p">.</span><span class="n">create</span><span class="w"> </span><span class="s">"John"</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Customer</span><span class="p">.</span><span class="n">addRental</span><span class="w"> </span><span class="o">(</span><span class="nn">Rental</span><span class="p">.</span><span class="n">create</span><span class="w"> </span><span class="n">jaws</span><span class="w"> </span><span class="mi">3</span><span class="o">)</span><span class="w">     </span><span class="c1">// 通常: $3.5</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Customer</span><span class="p">.</span><span class="n">addRental</span><span class="w"> </span><span class="o">(</span><span class="nn">Rental</span><span class="p">.</span><span class="n">create</span><span class="w"> </span><span class="n">dune</span><span class="w"> </span><span class="mi">2</span><span class="o">)</span><span class="w">     </span><span class="c1">// 新作: $6</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Customer</span><span class="p">.</span><span class="n">addRental</span><span class="w"> </span><span class="o">(</span><span class="nn">Rental</span><span class="p">.</span><span class="n">create</span><span class="w"> </span><span class="n">frozen</span><span class="w"> </span><span class="mi">4</span><span class="o">)</span><span class="w">   </span><span class="c1">// 子供: $3</span>
+
+<span class="c1">// 明細書を生成</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">statement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Statement</span><span class="p">.</span><span class="n">generate</span><span class="w"> </span><span class="n">customer</span>
+
+<span class="c1">// テキスト形式で出力</span>
+<span class="n">printfn</span><span class="w"> </span><span class="s">"%s"</span><span class="w"> </span><span class="o">(</span><span class="nn">Statement</span><span class="p">.</span><span class="n">formatText</span><span class="w"> </span><span class="n">statement</span><span class="o">)</span>
+<span class="c1">// Rental Record for John</span>
+<span class="c1">//     Jaws    3.50</span>
+<span class="c1">//     Dune    6.00</span>
+<span class="c1">//     Frozen  3.00</span>
+<span class="c1">// Amount owed is 12.50</span>
+<span class="c1">// You earned 4 frequent renter points</span>
+
+<span class="c1">// HTML形式で出力</span>
+<span class="n">printfn</span><span class="w"> </span><span class="s">"%s"</span><span class="w"> </span><span class="o">(</span><span class="nn">Statement</span><span class="p">.</span><span class="n">formatHtml</span><span class="w"> </span><span class="n">statement</span><span class="o">)</span>
+</code></pre></div>
+<h2 id="9">9. 関数型アプローチの特徴<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<h3 id="_9">データと振る舞いの分離<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// データ定義</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">Movie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">Title</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">;</span><span class="w"> </span><span class="n">Type</span><span class="o">:</span><span class="w"> </span><span class="n">MovieType</span><span class="w"> </span><span class="o">}</span>
+
+<span class="c1">// 振る舞い（関数）</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">calculateRentalPrice</span><span class="w"> </span><span class="o">(</span><span class="n">rental</span><span class="o">:</span><span class="w"> </span><span class="n">Rental</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">decimal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">...</span>
+</code></pre></div>
+<p>オブジェクト指向では <code>Movie</code> クラスに <code>calculatePrice</code> メソッドを持たせますが、関数型では純粋関数として分離します。</p>
+<h3 id="_10">パイプラインによる処理<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">let</span><span class="w"> </span><span class="nv">lines</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">customer</span><span class="o">.</span><span class="n">Rentals</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="n">createLine</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">sumBy</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">l</span><span class="o">.</span><span class="n">Amount</span><span class="o">)</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">customer</span><span class="o">.</span><span class="n">Rentals</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">sumBy</span><span class="w"> </span><span class="nn">Points</span><span class="p">.</span><span class="n">calculateRentalPoints</span>
+</code></pre></div>
+<h3 id="_11">拡張の容易さ<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>新しいビデオタイプを追加する場合：</p>
+<ol>
+<li><code>MovieType</code> に新しいケースを追加</li>
+<li><code>Pricing</code> モジュールに新しい料金計算を追加</li>
+<li>コンパイラが未処理のケースを警告</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1">// 新しいタイプを追加</span>
+<span class="k">type</span><span class="w"> </span><span class="nc">MovieType</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Regular</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">NewRelease</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Childrens</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Premium</span><span class="w">  </span><span class="c1">// 新規追加</span>
+
+<span class="c1">// コンパイラが calculateRentalPrice の更新を促す</span>
+</code></pre></div>
+<h2 id="10-strategy">10. Strategy パターンとの関係<a class="headerlink" href="#10-strategy" title="Permanent link">&para;</a></h2>
+<p>この実装は第10章の Strategy パターンと類似しています。料金計算のロジックを交換可能にする場合：</p>
+<div class="highlight"><pre><span></span><code><span class="k">type</span><span class="w"> </span><span class="nc">PricingStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">decimal</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">regularPricing</span><span class="o">:</span><span class="w"> </span><span class="n">PricingStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Pricing</span><span class="p">.</span><span class="n">regularPrice</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">newReleasePricing</span><span class="o">:</span><span class="w"> </span><span class="n">PricingStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Pricing</span><span class="p">.</span><span class="n">newReleasePrice</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">childrensPricing</span><span class="o">:</span><span class="w"> </span><span class="n">PricingStrategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Pricing</span><span class="p">.</span><span class="n">childrensPrice</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">calculateWithStrategy</span><span class="w"> </span><span class="o">(</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">PricingStrategy</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="n">days</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="o">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">strategy</span><span class="w"> </span><span class="n">days</span>
+</code></pre></div>
+<h2 id="_12">まとめ<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<p>本章では、ビデオレンタルシステムを通じて以下を学びました：</p>
+<ol>
+<li><strong>判別共用体</strong>: ビデオタイプの表現</li>
+<li><strong>パターンマッチング</strong>: タイプに基づく料金計算</li>
+<li><strong>データ変換</strong>: レンタル情報から明細書への変換</li>
+<li><strong>フォーマット戦略</strong>: 同じデータの異なる表現形式</li>
+</ol>
+<h2 id="5_1">第5部のまとめ<a class="headerlink" href="#5_1" title="Permanent link">&para;</a></h2>
+<p>第5部では、実践的なアプリケーションを通じて関数型プログラミングを学びました：</p>
+<ul>
+<li><strong>ゴシップ好きなバスの運転手</strong>: シミュレーションと状態伝播</li>
+<li><strong>給与計算システム</strong>: 業務ドメインのモデリング</li>
+<li><strong>ビデオレンタルシステム</strong>: データ変換とフォーマット</li>
+</ul>
+<p>これらの例を通じて、関数型プログラミングが実際のビジネス問題にどのように適用できるかを学びました。</p>
+<h2 id="_13">参考コード<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<p>本章のコード例は以下のファイルで確認できます：</p>
+<ul>
+<li>ソースコード: <code>apps/fsharp/part5/src/Library.fs</code></li>
+<li>テストコード: <code>apps/fsharp/part5/tests/Tests.fs</code></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>

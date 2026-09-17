@@ -1,0 +1,3654 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="本編では、コンテナの基礎から複数コンテナ構成、Kubernetes、継続的デリバリーまでを段階的に学んできました。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>付録 C コンテナ開発・運用の Tips - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#c-tips" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              付録 C コンテナ開発・運用の Tips
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../reference/" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../functional-desgin-ppp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../practical-database-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/SonarQube%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="c-tips">付録 C コンテナ開発・運用の Tips<a class="headerlink" href="#c-tips" title="Permanent link">&para;</a></h1>
+<h2 id="_1">はじめに<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>本編では、コンテナの基礎から複数コンテナ構成、Kubernetes、継続的デリバリーまでを段階的に学んできました。実際の開発・運用の現場では、本編で扱いきれなかった細かな知識やコツが、生産性とトラブル対応力を大きく左右します。</p>
+<p>この付録では、日々のコンテナ開発・運用を支える実践的な Tips を 5 つの観点から整理します。</p>
+<ol>
+<li><strong>コンテナランタイム</strong> — Docker / containerd / CRI-O や OCI、Kubernetes の CRI といった「コンテナを実際に動かす仕組み」の全体像</li>
+<li><strong>Kubernetes の Tips</strong> — <code>kubectl</code> の便利な使い方とトラブルシュート</li>
+<li><strong>コンテナ開発・デプロイの Tips</strong> — <code>.dockerignore</code>、レイヤキャッシュ、タグ運用などの実践テクニック</li>
+<li><strong>生成 AI 活用</strong> — Claude などの生成 AI をコンテナ開発に組み込む方法と注意点</li>
+<li><strong>apk</strong> — Alpine Linux のパッケージマネージャによる軽量イメージ作成</li>
+</ol>
+<p>いずれも、本シリーズのサンプルリポジトリ（<code>container-kit</code>、<code>image-bootstrap</code>、<code>gihyo-docker-kuberbetes</code>）の実コードを引用しながら、実際に手を動かして確認できる形で解説します。</p>
+<h3 id="_2">目次<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<ol>
+<li><a href="#c1-コンテナランタイム">C.1 コンテナランタイム</a></li>
+<li><a href="#c2-kubernetes-の-tips">C.2 Kubernetes の Tips</a></li>
+<li><a href="#c3-コンテナ開発デプロイの-tips">C.3 コンテナ開発・デプロイの Tips</a></li>
+<li><a href="#c4-生成-ai-技術を活用したコンテナ開発の効率化">C.4 生成 AI 技術を活用したコンテナ開発の効率化</a></li>
+<li><a href="#c5-alpine-linux-のパッケージマネージャ-apk">C.5 Alpine Linux のパッケージマネージャ apk</a></li>
+</ol>
+<hr />
+<h2 id="c1">C.1 コンテナランタイム<a class="headerlink" href="#c1" title="Permanent link">&para;</a></h2>
+<p>「<code>docker run</code> でコンテナが起動する」とき、その裏側では複数のソフトウェアが層をなして連携しています。普段は意識しなくても動きますが、Kubernetes の運用やトラブルシュートでは、この層構造を理解しているかどうかが大きな差になります。</p>
+<h3 id="_3">ランタイムの階層構造<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>コンテナランタイムは、大きく「高レベルランタイム」と「低レベルランタイム」に分かれます。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJERVNDUklQVElPTiIgc3R5bGU9IndpZHRoOjQxMHB4O2hlaWdodDo2NzFweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNDEwcHgiIGhlaWdodD0iNjcxcHgiIHZpZXdCb3g9IjAgMCA0MTAgNjcxIiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMTE3LjUiIHk9IjIyLjk5NSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTY3Ljk5OSIgZm9udC13ZWlnaHQ9IjcwMCI+44Kz44Oz44OG44OK44Op44Oz44K/44Kk44Og44Gu6ZqO5bGkPC90ZXh0PjwvZz48IS0tY2x1c3RlciB1c2VyLS0+PGcgY2xhc3M9ImNsdXN0ZXIiIGRhdGEtcXVhbGlmaWVkLW5hbWU9InVzZXIiIGlkPSJlbnQwMDAxIiBkYXRhLXNvdXJjZS1saW5lPSIzIj48cmVjdCB4PSI3IiB5PSI0NC4yOTciIHdpZHRoPSIzNjkiIGhlaWdodD0iOTcuMyIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9Ijg2LjA3IiB5PSI1OS4yOTIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjIxMC44NiIgZm9udC13ZWlnaHQ9IjcwMCI+44Om44O844K244O85pON5L2cIC8g44Kq44O844Kx44K544OI44Os44O844K/PC90ZXh0PjwvZz48IS0tY2x1c3RlciBoaWdoLS0+PGcgY2xhc3M9ImNsdXN0ZXIiIGRhdGEtcXVhbGlmaWVkLW5hbWU9ImhpZ2giIGlkPSJlbnQwMDA0IiBkYXRhLXNvdXJjZS1saW5lPSI4Ij48cmVjdCB4PSIxNiIgeT0iMTkwLjU5NyIgd2lkdGg9IjI0MyIgaGVpZ2h0PSIyMDQuNTkiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSI3NC41IiB5PSIyMDUuNTkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxMjUuOTk5IiBmb250LXdlaWdodD0iNzAwIj7pq5jjg6zjg5njg6vjg6njg7Pjgr/jgqTjg6A8L3RleHQ+PC9nPjwhLS1jbHVzdGVyIGxvdy0tPjxnIGNsYXNzPSJjbHVzdGVyIiBkYXRhLXF1YWxpZmllZC1uYW1lPSJsb3ciIGlkPSJlbnQwMDA4IiBkYXRhLXNvdXJjZS1saW5lPSIxNCI+PHJlY3QgeD0iODMiIHk9IjQ0NC4xODciIHdpZHRoPSIzMTMiIGhlaWdodD0iMTEzLjMiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSIxNzYuNSIgeT0iNDU5LjE4MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTI1Ljk5OSIgZm9udC13ZWlnaHQ9IjcwMCI+5L2O44Os44OZ44Or44Op44Oz44K/44Kk44OgPC90ZXh0Pjx0ZXh0IHg9IjE4My44MjgiIHk9IjQ3NS40NzkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjExMS4zNDQiIGZvbnQtd2VpZ2h0PSI3MDAiPihPQ0kgUnVudGltZSk8L3RleHQ+PC9nPjwhLS1lbnRpdHkgZG9ja2VyLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0idXNlci5kb2NrZXIiIGlkPSJlbnQwMDAyIiBkYXRhLXNvdXJjZS1saW5lPSI0Ij48cmVjdCB4PSIyMy4xMSIgeT0iNzkuMjk3IiB3aWR0aD0iMTEzLjc4IiBoZWlnaHQ9IjQ2LjI5NyIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHJlY3QgeD0iMTE2Ljg5IiB5PSI4NC4yOTciIHdpZHRoPSIxNSIgaGVpZ2h0PSIxMCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHJlY3QgeD0iMTE0Ljg5IiB5PSI4Ni4yOTciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjExNC44OSIgeT0iOTAuMjk3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48dGV4dCB4PSIzOC4xMSIgeT0iMTEyLjI5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNzMuNzgiPmRvY2tlciBDTEk8L3RleHQ+PC9nPjwhLS1lbnRpdHkga3ViZWxldC0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9InVzZXIua3ViZWxldCIgaWQ9ImVudDAwMDMiIGRhdGEtc291cmNlLWxpbmU9IjUiPjxyZWN0IHg9IjE3MS45OCIgeT0iNzkuMjk3IiB3aWR0aD0iMTg4LjAzOSIgaGVpZ2h0PSI0Ni4yOTciIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjxyZWN0IHg9IjM0MC4wMTkiIHk9Ijg0LjI5NyIgd2lkdGg9IjE1IiBoZWlnaHQ9IjEwIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIzMzguMDE5IiB5PSI4Ni4yOTciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjMzOC4wMTkiIHk9IjkwLjI5NyIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHRleHQgeD0iMTg2Ljk4IiB5PSIxMTIuMjkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNDguMDM5Ij5rdWJlbGV0IChLdWJlcm5ldGVzKTwvdGV4dD48L2c+PCEtLWVudGl0eSBkb2NrZXJkLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iaGlnaC5kb2NrZXJkIiBpZD0iZW50MDAwNSIgZGF0YS1zb3VyY2UtbGluZT0iOSI+PHJlY3QgeD0iMzEuNzQiIHk9IjIyNS41OTciIHdpZHRoPSI5Ni41MTMiIGhlaWdodD0iNDYuMjk3IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48cmVjdCB4PSIxMDguMjUzIiB5PSIyMzAuNTk3IiB3aWR0aD0iMTUiIGhlaWdodD0iMTAiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjEwNi4yNTMiIHk9IjIzMi41OTciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjEwNi4yNTMiIHk9IjIzNi41OTciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjx0ZXh0IHg9IjQ2Ljc0IiB5PSIyNTguNTkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1Ni41MTMiPmRvY2tlcmQ8L3RleHQ+PC9nPjwhLS1lbnRpdHkgY29udGFpbmVyZC0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9ImhpZ2guY29udGFpbmVyZCIgaWQ9ImVudDAwMDYiIGRhdGEtc291cmNlLWxpbmU9IjEwIj48cmVjdCB4PSIxMjcuMzkiIHk9IjMzMi44ODciIHdpZHRoPSIxMTUuMjIzIiBoZWlnaHQ9IjQ2LjI5NyIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHJlY3QgeD0iMjIyLjYxMyIgeT0iMzM3Ljg4NyIgd2lkdGg9IjE1IiBoZWlnaHQ9IjEwIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIyMjAuNjEzIiB5PSIzMzkuODg3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIyMjAuNjEzIiB5PSIzNDMuODg3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48dGV4dCB4PSIxNDIuMzkiIHk9IjM2NS44ODIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijc1LjIyMyI+Y29udGFpbmVyZDwvdGV4dD48L2c+PCEtLWVudGl0eSBjcmlvLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iaGlnaC5jcmlvIiBpZD0iZW50MDAwNyIgZGF0YS1zb3VyY2UtbGluZT0iMTEiPjxyZWN0IHg9IjE2My4xNSIgeT0iMjI1LjU5NyIgd2lkdGg9Ijc5LjcwMyIgaGVpZ2h0PSI0Ni4yOTciIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjxyZWN0IHg9IjIyMi44NTMiIHk9IjIzMC41OTciIHdpZHRoPSIxNSIgaGVpZ2h0PSIxMCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHJlY3QgeD0iMjIwLjg1MyIgeT0iMjMyLjU5NyIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHJlY3QgeD0iMjIwLjg1MyIgeT0iMjM2LjU5NyIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHRleHQgeD0iMTc4LjE1IiB5PSIyNTguNTkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIzOS43MDMiPkNSSS1PPC90ZXh0PjwvZz48IS0tZW50aXR5IHJ1bmMtLT48ZyBjbGFzcz0iZW50aXR5IiBkYXRhLXF1YWxpZmllZC1uYW1lPSJsb3cucnVuYyIgaWQ9ImVudDAwMDkiIGRhdGEtc291cmNlLWxpbmU9IjE1Ij48cmVjdCB4PSI5OS40IiB5PSI0OTUuMTg3IiB3aWR0aD0iNzEuMTk5IiBoZWlnaHQ9IjQ2LjI5NyIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHJlY3QgeD0iMTUwLjU5OSIgeT0iNTAwLjE4NyIgd2lkdGg9IjE1IiBoZWlnaHQ9IjEwIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIxNDguNTk5IiB5PSI1MDIuMTg3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIxNDguNTk5IiB5PSI1MDYuMTg3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48dGV4dCB4PSIxMTQuNCIgeT0iNTI4LjE4MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMzEuMTk5Ij5ydW5jPC90ZXh0PjwvZz48IS0tZW50aXR5IG90aGVycy0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9Imxvdy5vdGhlcnMiIGlkPSJlbnQwMDEwIiBkYXRhLXNvdXJjZS1saW5lPSIxNiI+PHJlY3QgeD0iMjA1Ljg4IiB5PSI0OTUuMTg3IiB3aWR0aD0iMTc0LjIzIiBoZWlnaHQ9IjQ2LjI5NyIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHJlY3QgeD0iMzYwLjExIiB5PSI1MDAuMTg3IiB3aWR0aD0iMTUiIGhlaWdodD0iMTAiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjM1OC4xMSIgeT0iNTAyLjE4NyIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHJlY3QgeD0iMzU4LjExIiB5PSI1MDYuMTg3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48dGV4dCB4PSIyMjAuODgiIHk9IjUyOC4xODIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjEzNC4yMyI+Y3J1biAvIGdWaXNvciAvIEthdGE8L3RleHQ+PC9nPjwhLS1lbnRpdHkga2VybmVsLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0ia2VybmVsIiBpZD0iZW50MDAxMSIgZGF0YS1zb3VyY2UtbGluZT0iMTkiPjxyZWN0IHg9IjEyMi4zNiIgeT0iNjA0LjQ4NyIgd2lkdGg9IjE4MS4yNzMiIGhlaWdodD0iNTIuNTk0IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSIxMzIuMzYiIHk9IjYyNy40ODIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijk4LjE3MSI+TGludXgg44Kr44O844ON44OrPC90ZXh0Pjx0ZXh0IHg9IjEzMi4zNiIgeT0iNjQzLjc3OSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTYxLjI3MyI+KG5hbWVzcGFjZSAvIGNncm91cHMpPC90ZXh0PjwvZz48IS0tbGluayBkb2NrZXIgdG8gZG9ja2VyZC0tPjxnIGNsYXNzPSJsaW5rIiBkYXRhLWVudGl0eS0xPSJlbnQwMDAyIiBkYXRhLWVudGl0eS0yPSJlbnQwMDA1IiBpZD0ibG5rMTIiIGRhdGEtc291cmNlLWxpbmU9IjIxIiBkYXRhLWxpbmstdHlwZT0iZGVwZW5kZW5jeSI+PHBhdGggZD0iTTgwLDEyNS45ODcgQzgwLDE1My4wOTcgODAsMTkzLjMxNyA4MCwyMjAuMzU3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSJub25lIiBpZD0iZG9ja2VyLXRvLWRvY2tlcmQiLz48cG9seWdvbiBwb2ludHM9IjgwLDIyNS4zNTcsODQsMjE2LjM1Nyw4MCwyMjAuMzU3LDc2LDIxNi4zNTcsODAsMjI1LjM1NyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48L2c+PCEtLWxpbmsgZG9ja2VyZCB0byBjb250YWluZXJkLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDUiIGRhdGEtZW50aXR5LTI9ImVudDAwMDYiIGlkPSJsbmsxMyIgZGF0YS1zb3VyY2UtbGluZT0iMjIiIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNMTAyLjUzLDI3Mi4zMjcgQzEyMC4yNCwyOTAuMDk3IDE0MS4yOCwzMTEuMTg1IDE1OC45OCwzMjguOTQ1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSJub25lIiBpZD0iZG9ja2VyZC10by1jb250YWluZXJkIi8+PHBvbHlnb24gcG9pbnRzPSIxNjIuNTEsMzMyLjQ4NywxNTguOTksMzIzLjI4OSwxNTguOTgsMzI4Ljk0NSwxNTMuMzI0LDMyOC45MzYsMTYyLjUxLDMzMi40ODciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PC9nPjwhLS1saW5rIGt1YmVsZXQgdG8gY29udGFpbmVyZC0tPjxnIGNsYXNzPSJsaW5rIiBkYXRhLWVudGl0eS0xPSJlbnQwMDAzIiBkYXRhLWVudGl0eS0yPSJlbnQwMDA2IiBpZD0ibG5rMTQiIGRhdGEtc291cmNlLWxpbmU9IjIzIiBkYXRhLWxpbmstdHlwZT0iZGVwZW5kZW5jeSI+PHBhdGggZD0iTTI3MC40OCwxMjUuOTY3IEMyNzYuMDMsMTU5LjUxNyAyODIuMjQsMjIzLjgxNyAyNjAsMjcxLjg4NyBDMjQ5LjA2LDI5NS41MjcgMjMyLjY5OSwzMTMuODIxIDIxNi4wODksMzI5LjExMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9Imt1YmVsZXQtdG8tY29udGFpbmVyZCIvPjxwb2x5Z29uIHBvaW50cz0iMjEyLjQxLDMzMi40OTcsMjIxLjc0MSwzMjkuMzQ0LDIxNi4wODksMzI5LjExMSwyMTYuMzIzLDMyMy40NTksMjEyLjQxLDMzMi40OTciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMjc2LjczIiB5PSIyNTMuMzA0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIyMS45NDQiPkNSSTwvdGV4dD48L2c+PCEtLWxpbmsga3ViZWxldCB0byBjcmlvLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDMiIGRhdGEtZW50aXR5LTI9ImVudDAwMDciIGlkPSJsbmsxNSIgZGF0YS1zb3VyY2UtbGluZT0iMjQiIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNMjU2LjE2LDEyNS45ODcgQzI0NC4zMiwxNTMuMDk3IDIyNi41ODEsMTkzLjczNSAyMTQuNzcxLDIyMC43NzUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIGZpbGw9Im5vbmUiIGlkPSJrdWJlbGV0LXRvLWNyaW8iLz48cG9seWdvbiBwb2ludHM9IjIxMi43NywyMjUuMzU3LDIyMC4wMzgsMjE4LjcxLDIxNC43NzEsMjIwLjc3NSwyMTIuNzA3LDIxNS41MDgsMjEyLjc3LDIyNS4zNTciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMjQzIiB5PSIxNzAuNjY0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIyMS45NDQiPkNSSTwvdGV4dD48L2c+PCEtLWxpbmsgY29udGFpbmVyZCB0byBydW5jLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDYiIGRhdGEtZW50aXR5LTI9ImVudDAwMDkiIGlkPSJsbmsxNiIgZGF0YS1zb3VyY2UtbGluZT0iMjUiIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNMTc3Ljk0LDM3OS42NjcgQzE2OC40MSw0MTAuMjE3IDE1My4wMTksNDU5LjU2NCAxNDMuNTA5LDQ5MC4wNTQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIGZpbGw9Im5vbmUiIGlkPSJjb250YWluZXJkLXRvLXJ1bmMiLz48cG9seWdvbiBwb2ludHM9IjE0Mi4wMiw0OTQuODI3LDE0OC41MTgsNDg3LjQyNiwxNDMuNTA5LDQ5MC4wNTQsMTQwLjg4MSw0ODUuMDQ0LDE0Mi4wMiw0OTQuODI3IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjx0ZXh0IHg9IjE2OC40IiB5PSI0MjQuMjU0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIyMy4xNDQiPk9DSTwvdGV4dD48L2c+PCEtLWxpbmsgY3JpbyB0byBydW5jLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDciIGRhdGEtZW50aXR5LTI9ImVudDAwMDkiIGlkPSJsbmsxNyIgZGF0YS1zb3VyY2UtbGluZT0iMjYiIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNMTYyLjgxLDI2Ni4wMTcgQzEzNS40MSwyNzkuNDg3IDEwMS4yNywzMDEuNTE3IDg1LDMzMi44ODcgQzU2LjgyLDM4Ny4yMjcgOTIuNDc4LDQ1NC44NzIgMTE2LjEyOCw0OTAuNzUyIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSJub25lIiBpZD0iY3Jpby10by1ydW5jIi8+PHBvbHlnb24gcG9pbnRzPSIxMTguODgsNDk0LjkyNywxMTcuMjY3LDQ4NS4yMTEsMTE2LjEyOCw0OTAuNzUyLDExMC41ODcsNDg5LjYxNCwxMTguODgsNDk0LjkyNyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48dGV4dCB4PSI4NiIgeT0iMzYwLjYwNCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMjMuMTQ0Ij5PQ0k8L3RleHQ+PC9nPjwhLS1saW5rIHJ1bmMgdG8ga2VybmVsLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDkiIGRhdGEtZW50aXR5LTI9ImVudDAwMTEiIGlkPSJsbmsxOCIgZGF0YS1zb3VyY2UtbGluZT0iMjciIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNMTUwLjk3LDU0MS45NDcgQzE2My43Miw1NTkuOTk3IDE3OC42OTYsNTgxLjIwMiAxOTEuOTc2LDYwMC4wMTIiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIGZpbGw9Im5vbmUiIGlkPSJydW5jLXRvLWtlcm5lbCIvPjxwb2x5Z29uIHBvaW50cz0iMTk0Ljg2LDYwNC4wOTcsMTkyLjkzNyw1OTQuNDM4LDE5MS45NzYsNjAwLjAxMiwxODYuNDAyLDU5OS4wNTIsMTk0Ljg2LDYwNC4wOTciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PC9nPjwhLS1saW5rIG90aGVycyB0byBrZXJuZWwtLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAxMCIgZGF0YS1lbnRpdHktMj0iZW50MDAxMSIgaWQ9ImxuazE5IiBkYXRhLXNvdXJjZS1saW5lPSIyOCIgZGF0YS1saW5rLXR5cGU9ImRlcGVuZGVuY3kiPjxwYXRoIGQ9Ik0yNzYuNjIsNTQxLjk0NyBDMjYzLjU0LDU1OS45OTcgMjQ4LjE2NCw1ODEuMjM4IDIzNC41MzQsNjAwLjA0OCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9Im90aGVycy10by1rZXJuZWwiLz48cG9seWdvbiBwb2ludHM9IjIzMS42LDYwNC4wOTcsMjQwLjEyLDU5OS4xNTYsMjM0LjUzNCw2MDAuMDQ4LDIzMy42NDIsNTk0LjQ2MiwyMzEuNiw2MDQuMDk3IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjwvZz48P3BsYW50dW1sLXNyYyBUTDRuSW1DbjZEdHBBcUFkRVhIdDF2VEVmT00yV3ZEQkpDQ3J6OWdLTjB1NVNWMDI4YUF4a0FXdUUxSDFBcThIMUM3STd2Q2d6NV91OU5WTHRBNW10N3RWVW8tTnp4ckZTbnFwUkJETlEtMHZqLVJJY2FUTlBxa1JKUXN2anNTbHd6bDl2dG9BYTY5SzRuNjFsY1JEV3BLVkRkazN6elZMVUJNdW16bG1ib1NGcGN0c1JpczVEUy0tTlRPbUlOMlFDOExGNDlOM2FISENRNXBoSUplMGhEYmZVSzdVWGU5MVVpWFlmZDZ6M09LSUpCRGFvcWlCMGZzTUZBcmRyX3hBNnNqY2JJN3lnSndGLWR5dncwTk56cUFRSWc0OTVubDVSbmtBY2RrakhaVmQ1UFNMSXdsNXYzekIxd0JVUlJSbU5ZZXE3eDl5aGJXVWJHc2dMNTNGa0E5YTNHMThGRGhkWUxIR2o4YWNOWVhyZHdjYU9nRjNITmVDd3ZjdlZQV25jODdSMUhjb1A0R2VXLUNxS1o4VFJUOXJNU1M4NVZqZkQ3UF9tWWMtN1dsWXMyb2czRUNUM0U2S0lPWWVXMEVUT3pvMG00MGFvOGlnYzJ5VExmWkJubW9HUm0wMD8+PC9nPjwvc3ZnPg==" class="uml" alt="uml diagram" title="" /></p>
+<ul>
+<li><strong>低レベルランタイム（OCI ランタイム）</strong>：実際に Linux カーネルの namespace や cgroups を操作してコンテナプロセスを生成・起動する最下層の実装です。デファクトスタンダードは <strong>runc</strong> です。OCI（Open Container Initiative）が定めた「ランタイム仕様（runtime-spec）」に準拠していれば、runc 以外にも <code>crun</code>、サンドボックス型の <code>gVisor</code>、軽量 VM 型の <code>Kata Containers</code> などを差し替えられます。</li>
+<li><strong>高レベルランタイム</strong>：イメージの取得（pull）、展開、コンテナのライフサイクル管理、ネットワーク設定などを担います。<strong>containerd</strong> と <strong>CRI-O</strong> が代表的です。Docker のデーモン（dockerd）も内部で containerd を利用しています。</li>
+</ul>
+<h3 id="ociopen-container-initiative">OCI（Open Container Initiative）<a class="headerlink" href="#ociopen-container-initiative" title="Permanent link">&para;</a></h3>
+<p>OCI は、コンテナの相互運用性を保つための業界標準を策定する団体です。主に次の 2 つの仕様を定めています。</p>
+<ul>
+<li><strong>イメージ仕様（image-spec）</strong>：コンテナイメージのフォーマット</li>
+<li><strong>ランタイム仕様（runtime-spec）</strong>：コンテナの実行方法</li>
+</ul>
+<p><code>image-bootstrap</code> リポジトリの Dockerfile（<code>apps/image-bootstrap/Dockerfile</code>）にある <code>LABEL org.opencontainers.image.source</code> は、まさにこの OCI イメージ仕様で定義された標準ラベルです。</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">gcr.io/distroless/base-debian11:nonroot</span>
+<span class="k">LABEL</span><span class="w"> </span>org.opencontainers.image.source<span class="o">=</span>https://github.com/gihyodocker/image-bootstrap
+</code></pre></div>
+<p><code>org.opencontainers.image.source</code> を付与しておくと、GitHub Container Registry などのレジストリ側でイメージとソースリポジトリが自動的に関連づけられます。OCI 標準に従うことで、ツールやレジストリをまたいだ相互運用が可能になります。</p>
+<h3 id="kubernetes-cricontainer-runtime-interface">Kubernetes と CRI（Container Runtime Interface）<a class="headerlink" href="#kubernetes-cricontainer-runtime-interface" title="Permanent link">&para;</a></h3>
+<p>Kubernetes 自身はコンテナを直接動かしません。各ノードで動く <strong>kubelet</strong> が、<strong>CRI（Container Runtime Interface）</strong> という gRPC のインターフェースを通じて高レベルランタイムに指示を出します。</p>
+<ul>
+<li><strong>CRI</strong> は「kubelet とコンテナランタイムの間の共通プロトコル」です。CRI を実装したランタイムであれば、Kubernetes はどれでも利用できます。</li>
+<li>代表的な CRI 実装が <strong>containerd</strong> と <strong>CRI-O</strong> です。</li>
+</ul>
+<p>かつて Kubernetes は Docker を直接サポートしていましたが、Docker は CRI を直接実装していなかったため、<code>dockershim</code> という変換層を介していました。この <code>dockershim</code> は Kubernetes v1.24 で削除されました。ただし、これは「Docker で作ったイメージが動かなくなる」という意味ではありません。Docker が作るイメージは OCI イメージ仕様に準拠しているため、containerd や CRI-O でそのまま動作します。変わったのは「ノード上でコンテナを動かす高レベルランタイム」だけです。</p>
+<h3 id="_4">使っているランタイムを確認する<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>クラスタの各ノードがどのランタイムを使っているかは、次のコマンドで確認できます（出力は例です）。</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>-o<span class="w"> </span>wide
+<span class="c1"># CONTAINER-RUNTIME 列に containerd://1.7.x や cri-o://1.28.x のように表示される</span>
+</code></pre></div>
+<p>この情報は、ノードレベルのトラブルシュートやセキュリティ評価の出発点になります。</p>
+<hr />
+<h2 id="c2-kubernetes-tips">C.2 Kubernetes の Tips<a class="headerlink" href="#c2-kubernetes-tips" title="Permanent link">&para;</a></h2>
+<p>Kubernetes の運用は、<code>kubectl</code> をいかに使いこなすかにかかっています。ここでは、現場で頻繁に使う <code>kubectl</code> のテクニックと、トラブルシュートの定石を整理します。</p>
+<h3 id="_5">出力フォーマットを使いこなす<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p><code>kubectl get</code> の <code>-o</code> オプションで、目的に応じた形式の出力が得られます。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># マニフェストを YAML で丸ごと取得（既存リソースを雛形にするときに便利）</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>deployment<span class="w"> </span>web<span class="w"> </span>-o<span class="w"> </span>yaml
+
+<span class="c1"># JSONPath で特定のフィールドだけ抜き出す（例: Pod の IP 一覧）</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.items[*].status.podIP}'</span>
+
+<span class="c1"># カスタムカラムで一覧表示</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>custom-columns<span class="o">=</span>NAME:.metadata.name,STATUS:.status.phase
+</code></pre></div>
+<p><code>-o yaml</code> は、稼働中のリソース定義をそのままファイルに保存し、Git 管理されたマニフェストへ反映する出発点として重宝します。<code>-o jsonpath</code> は、スクリプトに組み込んで特定の値だけをプログラム的に取り出すときに役立ちます。</p>
+<h3 id="_6">コンテナに入る・通信する・ファイルをやり取りする<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 稼働中の Pod でコマンドを実行（シェルに入る）</span>
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>web-xxxxx<span class="w"> </span>--<span class="w"> </span>/bin/sh
+
+<span class="c1"># Pod のポートをローカルに転送（Service を経由せずに直接アクセス）</span>
+kubectl<span class="w"> </span>port-forward<span class="w"> </span>pod/web-xxxxx<span class="w"> </span><span class="m">8080</span>:80
+
+<span class="c1"># Pod とローカルの間でファイルをコピー</span>
+kubectl<span class="w"> </span>cp<span class="w"> </span>web-xxxxx:/var/log/app.log<span class="w"> </span>./app.log
+</code></pre></div>
+<p><code>port-forward</code> は、Ingress や LoadBalancer を設定しなくても、開発中のサービスへ手元のブラウザや <code>curl</code> からアクセスできるため、動作確認に欠かせません。</p>
+<h3 id="_7">コンテキストと名前空間の切り替え<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>複数のクラスタや名前空間を扱うようになると、操作対象を間違える事故が起こりがちです。<code>kubectx</code> と <code>kubens</code> を導入すると切り替えが安全かつ高速になります。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># クラスタ（コンテキスト）の切り替え</span>
+kubectx<span class="w">                 </span><span class="c1"># 一覧表示・対話選択</span>
+kubectx<span class="w"> </span>my-prod-cluster<span class="w"> </span><span class="c1"># 指定して切り替え</span>
+
+<span class="c1"># 名前空間の切り替え</span>
+kubens<span class="w">                  </span><span class="c1"># 一覧表示・対話選択</span>
+kubens<span class="w"> </span>task-app<span class="w">         </span><span class="c1"># 以降の kubectl のデフォルト名前空間を変更</span>
+</code></pre></div>
+<p>標準の <code>kubectl config use-context</code> や <code>kubectl config set-context --current --namespace=...</code> でも同じことができますが、<code>kubectx</code> / <code>kubens</code> の方が短く、現在の対象を視覚的に確認しやすいのが利点です。</p>
+<h3 id="pod">デバッグ用 Pod を使う<a class="headerlink" href="#pod" title="Permanent link">&para;</a></h3>
+<p>本番イメージは軽量化のため <code>curl</code> や <code>dig</code> などのツールを含まないことがほとんどです（C.3、C.5 参照）。そこで、クラスタ内のネットワークや DNS を調査するために、ツール一式を詰めた「デバッグ用コンテナ」を一時的に起動するテクニックが有効です。</p>
+<p>本シリーズの <code>container-kit</code> リポジトリには、まさにこの用途のためのデバッグ用イメージが用意されています。<code>apps/container-kit/containers/debug/Dockerfile</code> は次の内容です。</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:23.10</span>
+
+<span class="k">LABEL</span><span class="w"> </span>org.opencontainers.image.source<span class="o">=</span>https://github.com/gihyodocker/container-kit
+
+<span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span>-y
+<span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>wget<span class="w"> </span>git<span class="w"> </span>zip<span class="w"> </span>telnet<span class="w"> </span>vim<span class="w"> </span>default-mysql-client<span class="w"> </span>iputils-ping<span class="w"> </span>net-tools<span class="w"> </span>dnsutils
+</code></pre></div>
+<p><code>curl</code>、<code>telnet</code>、<code>ping</code>（iputils-ping）、<code>net-tools</code>、<code>dnsutils</code>、MySQL クライアントなど、調査に必要なツールがまとめて入っています。このイメージ（<code>ghcr.io/gihyodocker/debug</code>）をクラスタ内で起動すれば、対話的にネットワーク調査ができます。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># デバッグ用 Pod を起動してシェルに入る（終了時に自動削除）</span>
+kubectl<span class="w"> </span>run<span class="w"> </span>debug<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span>--image<span class="o">=</span>ghcr.io/gihyodocker/debug<span class="w"> </span>--<span class="w"> </span>/bin/bash
+
+<span class="c1"># Pod 内から、Service の名前解決や疎通を確認する（例）</span>
+<span class="c1"># nslookup mysql</span>
+<span class="c1"># curl -v http://web/healthz</span>
+<span class="c1"># mysql -h mysql -u root -p</span>
+</code></pre></div>
+<p><code>container-kit</code> には、このほかにもリバースプロキシ用の <code>simple-nginx-proxy</code> や、検証用ジョブの <code>time-limit-job</code> といった補助コンテナが含まれています（出典: <code>apps/container-kit/README-ja.md</code>）。</p>
+<h3 id="_8">トラブルシュートの定石<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>Pod が起動しない、すぐ落ちる、といったときの調査手順を順番に示します。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. リソースの状態と直近のイベントを確認する（最初に見るべき情報）</span>
+kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>web-xxxxx
+
+<span class="c1"># 2. クラスタ全体のイベントを時系列で確認する</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>--sort-by<span class="o">=</span>.lastTimestamp
+
+<span class="c1"># 3. コンテナのログを確認する</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>web-xxxxx
+
+<span class="c1"># 4. クラッシュして再起動した場合、直前のコンテナのログを見る</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>web-xxxxx<span class="w"> </span>--previous
+</code></pre></div>
+<p>ポイントは次の通りです。</p>
+<ul>
+<li><code>kubectl describe</code> の末尾に表示される <strong>Events</strong> は、イメージ取得失敗（<code>ErrImagePull</code>）、スケジューリング不可、ヘルスチェック失敗など、原因の手がかりが集約されています。まずここを見るのが鉄則です。</li>
+<li>コンテナが起動直後にクラッシュを繰り返す（<code>CrashLoopBackOff</code>）場合、現在のコンテナのログは空のことが多いため、<code>--previous</code> で「落ちた直前のコンテナ」のログを確認します。これがクラッシュ原因を突き止める最重要コマンドです。</li>
+</ul>
+<hr />
+<h2 id="c3-tips">C.3 コンテナ開発・デプロイの Tips<a class="headerlink" href="#c3-tips" title="Permanent link">&para;</a></h2>
+<p>ここでは、イメージのビルドからデプロイまでの間で効いてくる、実践的な小技を整理します。これらはいずれも「変更を楽に安全にできる」状態を保つための工夫です。</p>
+<h3 id="dockerignore">.dockerignore でビルドコンテキストを絞る<a class="headerlink" href="#dockerignore" title="Permanent link">&para;</a></h3>
+<p><code>docker build</code> は、まずカレントディレクトリ一式（ビルドコンテキスト）を Docker デーモンへ送ります。<code>.git</code> ディレクトリや <code>node_modules</code>、ログファイルなどが含まれていると、ビルドが遅くなるだけでなく、不要なファイルがイメージに混入する原因にもなります。</p>
+<p><code>.dockerignore</code> で除外対象を指定しておきましょう（例）。</p>
+<div class="highlight"><pre><span></span><code>.git
+node_modules
+*.log
+tmp/
+.env
+</code></pre></div>
+<p>特に <code>.env</code> のような機密情報を含むファイルは、誤ってイメージに取り込まないよう必ず除外します。</p>
+<h3 id="_9">レイヤキャッシュを意識した命令順序<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>Dockerfile の各命令は「レイヤ」を生成し、Docker は変更がなければキャッシュを再利用します。キャッシュを最大限活かすコツは、<strong>変更頻度の低い命令を先に、高い命令を後に書く</strong>ことです。</p>
+<div class="highlight"><pre><span></span><code><span class="c"># 良い例: 依存定義を先にコピーして依存解決し、ソースは後でコピーする</span>
+<span class="k">COPY</span><span class="w"> </span>package.json<span class="w"> </span>package-lock.json<span class="w"> </span>./
+<span class="k">RUN</span><span class="w"> </span>npm<span class="w"> </span>ci
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
+</code></pre></div>
+<p>このように書くと、ソースコードを変更しても <code>package.json</code> が変わらない限り <code>npm ci</code> のレイヤがキャッシュされ、ビルドが大幅に高速化します。逆に最初に <code>COPY . .</code> してしまうと、ソースを 1 行直すだけで依存解決からやり直しになります。</p>
+<h3 id="latest">latest を避けて不変タグを使う<a class="headerlink" href="#latest" title="Permanent link">&para;</a></h3>
+<p>イメージのタグに <code>latest</code> を使うのは、運用上の事故のもとです。<code>latest</code> は「最新を指す可変な別名」であり、いつの間にか中身が変わってしまうため、次の問題を招きます。</p>
+<ul>
+<li>どのバージョンが本番で動いているか特定できない</li>
+<li>環境ごとに異なるイメージが動いてしまい、再現性が失われる</li>
+<li>ロールバック先が分からなくなる</li>
+</ul>
+<p>代わりに、Git のコミットハッシュやセマンティックバージョンなど、<strong>一度割り当てたら中身が変わらない不変タグ</strong>を使います。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 推奨: 内容と一対一に対応する不変なタグ</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>myapp:1.4.2<span class="w"> </span>.
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>myapp:<span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>--short<span class="w"> </span>HEAD<span class="k">)</span><span class="w"> </span>.
+
+<span class="c1"># 非推奨: 中身が変わりうる可変タグ</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>myapp:latest<span class="w"> </span>.
+</code></pre></div>
+<h3 id="_10">ヘルスチェックを設定する<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>コンテナが「プロセスは生きているが、アプリとしては正常に応答できない」状態を検知するために、ヘルスチェックを設定します。</p>
+<p>Dockerfile では <code>HEALTHCHECK</code>、Kubernetes では <code>livenessProbe</code>（生存確認）と <code>readinessProbe</code>（リクエスト受付可否）を使います。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Kubernetes の Probe（例）</span>
+<span class="nt">readinessProbe</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">httpGet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/healthz</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">  </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="nt">livenessProbe</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">httpGet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/healthz</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">  </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
+</code></pre></div>
+<p><code>readinessProbe</code> が失敗している Pod には Service からトラフィックが流れなくなり、<code>livenessProbe</code> が失敗し続ける Pod は再起動されます。両者を使い分けることで、無停止デプロイや自動復旧が機能します。</p>
+<h3 id="requests-limits">リソース制限（requests / limits）を設定する<a class="headerlink" href="#requests-limits" title="Permanent link">&para;</a></h3>
+<p>Pod ごとに CPU・メモリの <code>requests</code>（最低保証量）と <code>limits</code>（上限）を設定しておくと、特定の Pod がノードのリソースを食い潰して他に影響を与える事態を防げます。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"100m"</span>
+<span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"128Mi"</span>
+<span class="w">  </span><span class="nt">limits</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"500m"</span>
+<span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"256Mi"</span>
+</code></pre></div>
+<p><code>requests</code> はスケジューリングの判断材料となり、<code>limits</code> を超えるとメモリの場合は OOMKill、CPU の場合はスロットリングされます。適切な値は実測に基づいて調整します。</p>
+<h3 id="root">非 root ユーザーで実行する<a class="headerlink" href="#root" title="Permanent link">&para;</a></h3>
+<p>コンテナ内のプロセスを root のまま動かすと、万一の侵害時の被害が大きくなります。本シリーズの <code>image-bootstrap</code> では、distroless の非 root イメージを使い、<code>USER</code> を明示しています（<code>apps/image-bootstrap/Dockerfile</code>）。</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">gcr.io/distroless/base-debian11:nonroot</span>
+
+<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>build<span class="w"> </span>--chown<span class="o">=</span>nonroot:nonroot<span class="w"> </span>/go/src/github.com/gihyodocker/image-bootstrap/bin/server<span class="w"> </span>/usr/local/bin/
+
+<span class="k">USER</span><span class="w"> </span><span class="s">nonroot</span>
+
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"server"</span><span class="p">]</span>
+</code></pre></div>
+<p>ビルド成果物のみを含む distroless イメージに、非 root ユーザーで実行する構成を組み合わせることで、攻撃対象領域を最小化しています。</p>
+<h3 id="_11">イメージの脆弱性スキャン<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>ビルドしたイメージに既知の脆弱性が含まれていないかは、CI に脆弱性スキャンを組み込んで継続的にチェックします。<code>image-bootstrap</code> では Trivy を使っており、<code>apps/image-bootstrap/trivy.yaml</code> で複数のスキャナを有効化しています。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scan</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">scanners</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vuln</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret</span>
+</code></pre></div>
+<ul>
+<li><code>vuln</code>：OS パッケージやライブラリの既知脆弱性</li>
+<li><code>config</code>：Dockerfile や IaC の設定ミス</li>
+<li><code>secret</code>：イメージ内に埋め込まれた機密情報（API キーなど）</li>
+</ul>
+<p>ビルドのたびにこのスキャンを走らせることで、危険なイメージのデプロイを未然に防げます。</p>
+<hr />
+<h2 id="c4-ai">C.4 生成 AI 技術を活用したコンテナ開発の効率化<a class="headerlink" href="#c4-ai" title="Permanent link">&para;</a></h2>
+<p>近年、Claude をはじめとする生成 AI は、コンテナ開発・運用のさまざまな場面で強力なアシスタントになります。ここでは、具体的な活用シーンと、安全に使うための注意点を整理します。</p>
+<h3 id="_12">活用シーン<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<h4 id="dockerfileci">Dockerfile・マニフェスト・CI 設定の生成とレビュー<a class="headerlink" href="#dockerfileci" title="Permanent link">&para;</a></h4>
+<p>「Go アプリ用の Multi-stage build な Dockerfile を、distroless ベースで非 root 実行にして」といった要件を伝えると、雛形を素早く生成できます。既存の Dockerfile を貼り付けて「レイヤキャッシュとイメージサイズの観点で改善点を指摘して」と頼めば、レビュアーとしても機能します。</p>
+<p>Kubernetes マニフェストや GitHub Actions のワークフロー、Helm チャートのように、定型的だが記述量が多くミスしやすいファイルは、生成 AI が特に得意とする領域です。</p>
+<h4 id="_13">エラーログの解析<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<p><code>CrashLoopBackOff</code> の原因が分からないとき、<code>kubectl describe</code> や <code>kubectl logs --previous</code>（C.2 参照）の出力を貼り付けて「このログから考えられる原因と切り分け手順を教えて」と尋ねると、調査の方向性を素早く絞り込めます。長く読みづらいスタックトレースの要約にも有効です。</p>
+<h4 id="_14">コマンド補完・ワンライナー作成<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
+<p>「特定の名前空間で、Running でない Pod だけを <code>jsonpath</code> で抽出する <code>kubectl</code> コマンドを書いて」のように、うろ覚えのオプションや複雑な <code>jsonpath</code> 式の組み立てを任せられます。</p>
+<h3 id="_15">注意点<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<p>生成 AI は強力ですが、出力をそのまま信じてはいけません。本シリーズの「クリティカルシンキング」の考え方、すなわち「信じるにたる根拠がないかぎり信じるな」という姿勢が、ここでも重要になります。</p>
+<ul>
+<li><strong>生成物は必ず検証する</strong>：生成された Dockerfile やマニフェストは、存在しないオプションや古い書き方（例: 削除済みの API バージョン、<code>dockershim</code> 前提の記述）を含むことがあります。手元で <code>docker build</code> や <code>kubectl apply --dry-run=server</code> を実行し、実際に動くこと・意図通りであることを確認してから採用します。</li>
+<li><strong>機密情報を渡さない</strong>：API キー、パスワード、<code>.env</code> の中身、本番の接続情報、社外秘のソースコードなどを、そのままプロンプトに貼り付けてはいけません。ログを共有する際は、トークンや IP アドレスなどをマスクしてから渡します。利用するサービスのデータ取り扱いポリシーも事前に確認します。</li>
+<li><strong>設計判断は人間が行う</strong>：「どのアーキテクチャを採用するか」「どこまでセキュリティを担保するか」といった責任を伴う判断は、生成 AI に丸投げせず、提案を一案として参考にしつつ最終決定は人間が下します。</li>
+<li><strong>再現性のある形に落とす</strong>：生成 AI とのやり取りで得た成果物は、必ず Git 管理されたファイルや ADR（アーキテクチャ決定記録）に残し、「なぜそうしたか」を含めてチームで共有します。</li>
+</ul>
+<p>生成 AI は「考える代わり」ではなく「考えを加速する道具」です。最終的な品質と安全に責任を持つのは、あくまで開発者自身です。</p>
+<hr />
+<h2 id="c5-alpine-linux-apk">C.5 Alpine Linux のパッケージマネージャ apk<a class="headerlink" href="#c5-alpine-linux-apk" title="Permanent link">&para;</a></h2>
+<p>軽量なコンテナイメージを作るうえで、ベースイメージに <strong>Alpine Linux</strong> を選ぶ場面は多くあります。ここでは、Alpine が軽量な理由と、そのパッケージマネージャ <strong>apk</strong> の使い方を、実際の Dockerfile を引用しながら解説します。</p>
+<h3 id="alpine-linux">Alpine Linux が軽量な理由<a class="headerlink" href="#alpine-linux" title="Permanent link">&para;</a></h3>
+<p>一般的な Linux ディストリビューション（Ubuntu や Debian）のベースイメージが数百 MB あるのに対し、Alpine のベースイメージはわずか数 MB です。この差は主に次の 2 つの選択によります。</p>
+<ul>
+<li><strong>musl libc</strong>：標準 C ライブラリに、一般的な glibc ではなく軽量な <strong>musl libc</strong> を採用しています。</li>
+<li><strong>BusyBox</strong>：<code>ls</code> や <code>cat</code> などの基本コマンド群を、個別のバイナリではなく <strong>BusyBox</strong> という単一の多機能バイナリで提供しています。</li>
+</ul>
+<p>この徹底した軽量化により、イメージサイズの削減、pull の高速化、攻撃対象領域の縮小といったメリットが得られます。</p>
+<h3 id="apk">apk の基本コマンド<a class="headerlink" href="#apk" title="Permanent link">&para;</a></h3>
+<p>apk（Alpine Package Keeper）は Alpine の公式パッケージマネージャです。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># パッケージインデックスを更新する</span>
+apk<span class="w"> </span>update
+
+<span class="c1"># パッケージをインストールする</span>
+apk<span class="w"> </span>add<span class="w"> </span>curl
+
+<span class="c1"># パッケージを削除する</span>
+apk<span class="w"> </span>del<span class="w"> </span>curl
+</code></pre></div>
+<h3 id="apk-add-no-cache">apk add --no-cache でキャッシュを残さない<a class="headerlink" href="#apk-add-no-cache" title="Permanent link">&para;</a></h3>
+<p>コンテナイメージでは、<code>apk add</code> の際に <code>--no-cache</code> を付けるのが定石です。これは「パッケージインデックスのキャッシュをローカルに残さない」オプションで、<code>apk update</code> を別途実行する必要もなくなり、イメージサイズを抑えられます。</p>
+<p><code>gihyo-docker-kuberbetes</code> の <code>ch09/ch09_3_2/Dockerfile</code> は、このシンプルな使い方の例です。</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">alpine:3.7</span>
+
+<span class="k">RUN</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>--no-cache<span class="w"> </span>wget
+</code></pre></div>
+<p><code>--no-cache</code> を使わずに <code>apk update &amp;&amp; apk add</code> とすると、<code>/var/cache/apk</code> にインデックスが残り、その分イメージが肥大化します。</p>
+<h3 id="-virtual">--virtual でビルド依存をまとめて削除する<a class="headerlink" href="#-virtual" title="Permanent link">&para;</a></h3>
+<p>「ビルド時にだけ必要だが、実行時には不要」なツール（コンパイラやダウンロード用の <code>wget</code> など）をイメージに残すと、無駄に大きく、かつ攻撃対象も増えます。これを解決するのが <code>--virtual</code> を使った<strong>仮想パッケージ</strong>のテクニックです。</p>
+<p><code>--virtual=&lt;名前&gt;</code> でインストールしたパッケージ群に仮想的な名前を付けておき、ビルドが終わったら <code>apk del &lt;名前&gt;</code> でまとめて削除します。</p>
+<p><code>gihyo-docker-kuberbetes</code> の <code>ch10/ch10_2_1/Dockerfile</code> が、この典型的なパターンです。<code>jq</code> のバイナリをダウンロードして配置したあと、ダウンロードに使った <code>wget</code> を削除しています。</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">alpine:3.7</span>
+
+<span class="k">RUN</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>--no-cache<span class="w"> </span>--virtual<span class="o">=</span>build-deps<span class="w"> </span>wget<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wget<span class="w"> </span>https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>mv<span class="w"> </span>jq-linux64<span class="w"> </span>/usr/local/bin/jq<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/jq<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>apk<span class="w"> </span>del<span class="w"> </span>build-deps
+
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">"/usr/local/bin/jq"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-C"</span><span class="p">]</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">""</span><span class="p">]</span>
+</code></pre></div>
+<p>ここでのポイントは 2 つあります。</p>
+<ol>
+<li><code>wget</code> を <code>build-deps</code> という仮想パッケージ名でインストールしている</li>
+<li>一連の処理を <strong>1 つの <code>RUN</code> 命令</strong>（<code>&amp;&amp;</code> で連結）にまとめ、最後に <code>apk del build-deps</code> している</li>
+</ol>
+<p>なぜ 1 つの <code>RUN</code> にまとめるかというと、Dockerfile では <code>RUN</code> ごとにレイヤが作られるためです。インストールと削除を別の <code>RUN</code> に分けると、削除前の状態（<code>wget</code> が入った状態）が下のレイヤとして残ってしまい、イメージサイズが減りません。同じ <code>RUN</code> の中でインストールと削除を完結させることで、<code>wget</code> を含まない最終レイヤだけが残ります。</p>
+<h3 id="_16">ビルド依存と実行時依存を区別する<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>実行時にも必要なパッケージは削除してはいけません。<code>--virtual</code> でまとめるのは「ビルド時だけ必要なもの」に限ります。</p>
+<p><code>gihyo-docker-kuberbetes</code> の <code>ch09/ch09_3_1/Dockerfile</code> は、この区別を明確にコメントで示した良い例です。</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">alpine:3.7</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/</span>
+<span class="k">ENV</span><span class="w"> </span>GOPATH<span class="w"> </span>/go
+
+<span class="c"># ① ビルド時だけ必要なライブラリ・ツールのインストール</span>
+<span class="k">RUN</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>--no-cache<span class="w"> </span>--virtual<span class="o">=</span>build-deps<span class="w"> </span>go<span class="w"> </span>git<span class="w"> </span>gcc<span class="w"> </span>g++
+
+<span class="c"># ② 実行時にも必要なライブラリ・ツールのインストール</span>
+<span class="k">RUN</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>--no-cache<span class="w"> </span>ca-certificates
+
+<span class="c"># ③ todoapiをビルドし、実行ファイルをつくる</span>
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>/go/src/github.com/gihyodocker/todoapi
+<span class="k">RUN</span><span class="w"> </span>go<span class="w"> </span>get<span class="w"> </span>github.com/go-sql-driver/mysql
+<span class="k">RUN</span><span class="w"> </span>go<span class="w"> </span>get<span class="w"> </span>gopkg.in/gorp.v1
+<span class="k">RUN</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/go/src/github.com/gihyodocker/todoapi<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>bin/todoapi<span class="w"> </span>cmd/main.go
+<span class="k">RUN</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/go/src/github.com/gihyodocker/todoapi<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>bin/todoapi<span class="w"> </span>/usr/local/bin/
+
+<span class="c"># ④ ビルド時だけ必要なライブラリ・ツールのアンインストール</span>
+<span class="k">RUN</span><span class="w"> </span>apk<span class="w"> </span>del<span class="w"> </span>--no-cache<span class="w"> </span>build-deps
+
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"todoapi"</span><span class="p">]</span>
+</code></pre></div>
+<p>ここでは、コンパイラ群（<code>go git gcc g++</code>）を <code>build-deps</code> としてまとめて最後に削除する一方、実行時に TLS 通信で必要な <code>ca-certificates</code> は別途インストールして残しています。</p>
+<p>なお、この例ではビルドとアンインストールが複数の <code>RUN</code> に分かれているため、<code>build-deps</code> を含む中間レイヤは残ります。イメージを最小化するなら、前述のように一連の処理を 1 つの <code>RUN</code> にまとめるか、第 10 章で扱った <strong>Multi-stage builds</strong> を使い、ビルド専用ステージと実行専用ステージを完全に分離するアプローチがより効果的です。<code>--virtual</code> パターンは「シングルステージのまま手軽にビルド依存を削りたい」場合に有効な手法と位置づけられます。</p>
+<h3 id="apk-tips">apk の Tips まとめ<a class="headerlink" href="#apk-tips" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>やりたいこと</th>
+<th>コマンド</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>キャッシュを残さずインストール</td>
+<td><code>apk add --no-cache &lt;pkg&gt;</code></td>
+</tr>
+<tr>
+<td>ビルド依存をまとめてインストール</td>
+<td><code>apk add --no-cache --virtual=build-deps &lt;pkg...&gt;</code></td>
+</tr>
+<tr>
+<td>ビルド依存をまとめて削除</td>
+<td><code>apk del build-deps</code></td>
+</tr>
+<tr>
+<td>効果を出すコツ</td>
+<td>インストール〜削除を 1 つの <code>RUN</code> にまとめる</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_17">まとめ<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h2>
+<p>この付録では、コンテナ開発・運用を支える実践的な Tips を 5 つの観点から解説しました。</p>
+<ul>
+<li><strong>C.1 コンテナランタイム</strong>：Docker / containerd / CRI-O、OCI ランタイム（runc）、Kubernetes の CRI という層構造を理解することで、ランタイムの差し替えやノードレベルのトラブルシュートに対応できます。<code>dockershim</code> 削除後も、OCI 準拠のイメージはそのまま動きます。</li>
+<li><strong>C.2 Kubernetes の Tips</strong>：<code>-o yaml</code>／<code>jsonpath</code>、<code>exec</code>／<code>port-forward</code>／<code>cp</code>、<code>kubectx</code>／<code>kubens</code> を使いこなし、<code>container-kit</code> のデバッグ用 Pod と <code>describe</code>／<code>events</code>／<code>logs --previous</code> を組み合わせれば、調査の速度と精度が上がります。</li>
+<li><strong>C.3 コンテナ開発・デプロイの Tips</strong>：<code>.dockerignore</code>、レイヤキャッシュ、不変タグ、ヘルスチェック、リソース制限、非 root 実行、脆弱性スキャンといった工夫が、再現性と安全性を支えます。</li>
+<li><strong>C.4 生成 AI 活用</strong>：Dockerfile やマニフェスト生成、ログ解析、コマンド補完で開発を加速できます。ただし生成物は必ず検証し、機密情報を渡さず、設計判断は人間が担うことが原則です。</li>
+<li><strong>C.5 apk</strong>：Alpine は musl libc と BusyBox により軽量です。<code>apk add --no-cache</code> と <code>--virtual</code> パターンを 1 つの <code>RUN</code> にまとめることで、ビルド依存を残さない小さなイメージを作れます。</li>
+</ul>
+<p>いずれの Tips も、本シリーズが一貫して目指す「変更を楽に安全にできて役に立つソフトウェア」を、コンテナという実行基盤の上で実現するための具体的な手段です。日々の開発・運用の中で少しずつ取り入れていきましょう。</p>
+<hr />
+<h2 id="_18">関連リンク<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../appendix-b-orchestration-environments/">付録 B さまざまなコンテナオーケストレーション環境</a></li>
+<li><a href="../10-optimal-container-image/">第 10 章 最適なコンテナイメージ作成と運用</a></li>
+<li><a href="../">目次</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>

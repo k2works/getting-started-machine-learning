@@ -1,0 +1,3787 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="本編では、ローカル環境（Docker Desktop の Kubernetes や kind など）を使ってコンテナアプリケーションをデプロイする方法を学びました。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>付録 B さまざまなコンテナオーケストレーション環境 - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#b" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              付録 B さまざまなコンテナオーケストレーション環境
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../reference/" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../functional-desgin-ppp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../practical-database-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/SonarQube%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="b">付録 B さまざまなコンテナオーケストレーション環境<a class="headerlink" href="#b" title="Permanent link">&para;</a></h1>
+<h2 id="_1">はじめに<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>本編では、ローカル環境（Docker Desktop の Kubernetes や kind など）を使ってコンテナアプリケーションをデプロイする方法を学びました。ローカル環境は学習や開発には最適ですが、本番運用ではノードの冗長化、可用性、スケーラビリティ、ネットワークやストレージの管理など、自前で面倒を見るには負担の大きい要素がいくつもあります。</p>
+<p>そこで実際の本番運用では、クラウドベンダーが提供する「マネージドなオーケストレーション環境」を利用するのが一般的です。マネージド環境では、コントロールプレーン（Kubernetes の API サーバーや etcd など）の運用をベンダーに任せられるため、利用者はワーカーノードとアプリケーションの管理に集中できます。</p>
+<p>この付録では、ローカルから本番のマネージド環境へ移行するという観点で、次の 5 つの環境を概観します。</p>
+<ul>
+<li>B.1 Google Kubernetes Engine(GKE)</li>
+<li>B.2 Amazon Elastic Kubernetes Service(EKS)</li>
+<li>B.3 Azure Kubernetes Service(AKS)</li>
+<li>B.4 オンプレミス環境での Kubernetes クラスタの構築</li>
+<li>B.5 Amazon Elastic Container Service(ECS)</li>
+</ul>
+<p>このうち GKE・EKS・AKS は 3 大クラウドが提供するマネージド Kubernetes であり、本編で書いた Kubernetes マニフェストをほぼそのまま流用できます。一方で ECS は Kubernetes ではない AWS 独自のオーケストレーション環境であり、概念や定義ファイルが異なります。Kubernetes の知識をそのまま活かせるかどうかが、両者を選ぶ際の大きな分かれ目になります。</p>
+<h3 id="_2">マネージド環境の比較<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>ローカル環境と 3 大クラウドのマネージド Kubernetes、そして非 Kubernetes の ECS を比較すると次のようになります。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">項目</th>
+<th style="text-align: left;">ローカル(Docker Desktop / kind)</th>
+<th style="text-align: left;">GKE</th>
+<th style="text-align: left;">EKS</th>
+<th style="text-align: left;">AKS</th>
+<th style="text-align: left;">ECS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">提供元</td>
+<td style="text-align: left;">自分の PC</td>
+<td style="text-align: left;">Google Cloud</td>
+<td style="text-align: left;">AWS</td>
+<td style="text-align: left;">Microsoft Azure</td>
+<td style="text-align: left;">AWS</td>
+</tr>
+<tr>
+<td style="text-align: left;">オーケストレーター</td>
+<td style="text-align: left;">Kubernetes</td>
+<td style="text-align: left;">Kubernetes</td>
+<td style="text-align: left;">Kubernetes</td>
+<td style="text-align: left;">Kubernetes</td>
+<td style="text-align: left;">ECS（独自）</td>
+</tr>
+<tr>
+<td style="text-align: left;">コントロールプレーン</td>
+<td style="text-align: left;">自前</td>
+<td style="text-align: left;">マネージド</td>
+<td style="text-align: left;">マネージド</td>
+<td style="text-align: left;">マネージド</td>
+<td style="text-align: left;">マネージド</td>
+</tr>
+<tr>
+<td style="text-align: left;">主な構築ツール</td>
+<td style="text-align: left;">docker / kind</td>
+<td style="text-align: left;">gcloud / Terraform</td>
+<td style="text-align: left;">eksctl / Terraform</td>
+<td style="text-align: left;">az / Terraform</td>
+<td style="text-align: left;">CDK / Terraform</td>
+</tr>
+<tr>
+<td style="text-align: left;">マニフェストの再利用</td>
+<td style="text-align: left;">―</td>
+<td style="text-align: left;">高い</td>
+<td style="text-align: left;">高い</td>
+<td style="text-align: left;">高い</td>
+<td style="text-align: left;">不可（独自定義）</td>
+</tr>
+<tr>
+<td style="text-align: left;">ロードバランサ</td>
+<td style="text-align: left;">―</td>
+<td style="text-align: left;">Cloud Load Balancing</td>
+<td style="text-align: left;">ELB(ALB/NLB)</td>
+<td style="text-align: left;">Azure Load Balancer / Application Gateway</td>
+<td style="text-align: left;">ELB(ALB/NLB)</td>
+</tr>
+<tr>
+<td style="text-align: left;">主な用途</td>
+<td style="text-align: left;">学習・開発</td>
+<td style="text-align: left;">本番運用</td>
+<td style="text-align: left;">本番運用</td>
+<td style="text-align: left;">本番運用</td>
+<td style="text-align: left;">本番運用</td>
+</tr>
+</tbody>
+</table>
+<p>各クラウドの Kubernetes は API レベルで互換性があるため、Service や Ingress のような環境依存しやすい部分を除けば、本編のマニフェストはどのクラウドへ持っていってもほぼ動作します。以降の各節では、それぞれの環境の特徴と構築手順を見ていきます。</p>
+<p>なお本文中では、本リポジトリ（getting-started-docker-kubernetes）に実在するスクリプトやマニフェストを引用した箇所と、実コードのない一般論・例とを明確に区別します。実コードのない手順には「例」と明記します。</p>
+<hr />
+<h2 id="b1-google-kubernetes-enginegke">B.1 Google Kubernetes Engine(GKE)<a class="headerlink" href="#b1-google-kubernetes-enginegke" title="Permanent link">&para;</a></h2>
+<p>GKE は Google Cloud が提供するマネージド Kubernetes です。Kubernetes は元々 Google 社内のコンテナ基盤 Borg の知見を基に開発された経緯があり、GKE はその本家とも言える環境です。Autopilot モード（ノードの管理まで Google に任せるモード）と Standard モード（ノードを自分で管理するモード）の 2 種類があります。</p>
+<p>本リポジトリには GKE 用の構築スクリプトは含まれていないため、ここで示すコマンドは一般的な手順の「例」です。実際のオプションやリージョン名などは、利用する Google Cloud プロジェクトの状況に合わせて読み替えてください。</p>
+<h3 id="gcloud">gcloud によるクラスタ作成（例）<a class="headerlink" href="#gcloud" title="Permanent link">&para;</a></h3>
+<p>GKE のクラスタは <code>gcloud</code> CLI で作成します。次は Standard モードでクラスタを作成する例です。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># プロジェクトとデフォルトのリージョン/ゾーンを設定する（例）</span>
+gcloud<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>project<span class="w"> </span>YOUR_PROJECT_ID
+gcloud<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>compute/zone<span class="w"> </span>asia-northeast1-a
+
+<span class="c1"># GKE クラスタを作成する（例）</span>
+gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>create<span class="w"> </span>taskapp-cluster<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--num-nodes<span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--machine-type<span class="o">=</span>e2-medium<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--release-channel<span class="o">=</span>regular
+</code></pre></div>
+<p>Autopilot モードを使う場合は、ノード数やマシンタイプを指定せずに次のように作成します。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Autopilot モードでクラスタを作成する（例）</span>
+gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>create-auto<span class="w"> </span>taskapp-cluster<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--region<span class="o">=</span>asia-northeast1
+</code></pre></div>
+<h3 id="kubeconfig">kubeconfig の取得とデプロイ（例）<a class="headerlink" href="#kubeconfig" title="Permanent link">&para;</a></h3>
+<p>クラスタを作成したら、<code>kubectl</code> から接続するための認証情報（kubeconfig）を取得します。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># kubectl がクラスタへ接続できるよう認証情報を取得する（例）</span>
+gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>get-credentials<span class="w"> </span>taskapp-cluster
+
+<span class="c1"># 接続確認（例）</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+
+<span class="c1"># 本編で作成したマニフェストを適用する（例）</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>k8s/
+</code></pre></div>
+<p>GKE では、<code>type: LoadBalancer</code> の Service を作成すると Google Cloud のロードバランサが自動的にプロビジョニングされ、外部 IP アドレスが払い出されます。本編で学んだ Service や Deployment のマニフェストは基本的にそのまま利用できる点が、マネージド Kubernetes の大きな利点です。</p>
+<hr />
+<h2 id="b2-amazon-elastic-kubernetes-serviceeks">B.2 Amazon Elastic Kubernetes Service(EKS)<a class="headerlink" href="#b2-amazon-elastic-kubernetes-serviceeks" title="Permanent link">&para;</a></h2>
+<p>EKS は AWS が提供するマネージド Kubernetes です。EKS のクラスタ構築には、AWS 公式が推奨する CLI ツール <code>eksctl</code> を使うと宣言的かつ簡潔に記述できます。</p>
+<p>本リポジトリには、AWS CloudShell 上で EKS を構築するための実スクリプトが含まれています。ここでは出典として <code>cloudshell/aws/eks/create-eks.sh</code> と <code>cloudshell/aws/eks/setup-tools.sh</code> を引用しながら解説します。</p>
+<h3 id="eksctl">eksctl のインストール<a class="headerlink" href="#eksctl" title="Permanent link">&para;</a></h3>
+<p><code>cloudshell/aws/eks/setup-tools.sh</code> は、eksctl の最新版をダウンロードして配置するスクリプトです。</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env bash</span>
+
+<span class="nb">set</span><span class="w"> </span>-o<span class="w"> </span>errexit
+<span class="nb">set</span><span class="w"> </span>-o<span class="w"> </span>nounset
+<span class="nb">set</span><span class="w"> </span>-o<span class="w"> </span>pipefail
+
+curl<span class="w"> </span>-s<span class="w"> </span>--location<span class="w"> </span><span class="s2">"https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_</span><span class="k">$(</span>uname<span class="w"> </span>-s<span class="k">)</span><span class="s2">_amd64.tar.gz"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tar<span class="w"> </span>xz<span class="w"> </span>-C<span class="w"> </span>/tmp
+sudo<span class="w"> </span>mv<span class="w"> </span>/tmp/eksctl<span class="w"> </span>/usr/local/bin
+</code></pre></div>
+<p>GitHub のリリースから tarball を取得して <code>/usr/local/bin</code> へ展開するだけのシンプルなスクリプトです。<code>set -o errexit / nounset / pipefail</code> を冒頭で指定し、途中でエラーが起きたらすぐに止まるようにしている点が堅牢なスクリプトの作法です。</p>
+<h3 id="clusterconfig">ClusterConfig によるクラスタ定義<a class="headerlink" href="#clusterconfig" title="Permanent link">&para;</a></h3>
+<p><code>cloudshell/aws/eks/create-eks.sh</code> は、eksctl の <code>ClusterConfig</code> を動的に生成して EKS クラスタを構築するスクリプトです。スクリプトは <code>-n</code>（クラスタ名）と <code>-r</code>（リージョン）を引数で受け取り、ヒアドキュメントで <code>cluster.yaml</code> を組み立てます。生成される <code>ClusterConfig</code> の中核部分は次のとおりです。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eksctl.io/v1alpha5</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterConfig</span>
+
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${CLUSTER_NAME}</span>
+<span class="w">  </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${DEFAULT_REGION}</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span>
+
+<span class="nt">addons</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vpc-cni</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">coredns</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-proxy</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span>
+
+<span class="nt">managedNodeGroups</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workers</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> role</span><span class="p">:</span><span class="w"> </span><span class="nv">workers</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="nt">instanceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t3.medium</span>
+<span class="w">    </span><span class="nt">desiredCapacity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">privateNetworking</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>このマニフェストには、EKS クラスタを構成するうえで重要な要素が詰まっています。</p>
+<ul>
+<li><code>addons</code>: クラスタにインストールするアドオンを指定します。ここでは Kubernetes の動作に欠かせない 3 つを宣言しています。<ul>
+<li><code>vpc-cni</code>: Pod に AWS VPC のネットワークを割り当てる CNI（Container Network Interface）プラグインです。</li>
+<li><code>coredns</code>: クラスタ内の DNS（サービスディスカバリ）を担うコンポーネントです。</li>
+<li><code>kube-proxy</code>: 各ノードで Service への通信を適切な Pod へ転送するコンポーネントです。</li>
+</ul>
+</li>
+<li><code>managedNodeGroups</code>: ワーカーノードのグループを定義します。<code>instanceType: t3.medium</code> のインスタンスを <code>desiredCapacity: 1</code> 台起動し、<code>privateNetworking: true</code> によってノードをプライベートサブネットに配置します。マネージドノードグループは、ノードのライフサイクル（作成・更新・削除）を AWS が管理してくれる仕組みです。</li>
+</ul>
+<h3 id="iam">クラスタの作成と IAM 権限の付与<a class="headerlink" href="#iam" title="Permanent link">&para;</a></h3>
+<p>クラスタ定義を生成したあと、<code>create-eks.sh</code> は実際にクラスタを作成し、IAM ユーザーへ操作権限を付与します。スクリプトの後半部分は次のようになっています。</p>
+<div class="highlight"><pre><span></span><code><span class="nv">AWS_ACCOUNT_ID</span><span class="o">=</span><span class="sb">`</span>aws<span class="w"> </span>sts<span class="w"> </span>get-caller-identity<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s2">".Account"</span><span class="sb">`</span>
+
+<span class="c1"># (中略：cluster.yaml と eks-update-kubeconfig.json を生成)</span>
+
+<span class="nv">IAM_USER_NAME</span><span class="o">=</span>gihyo-<span class="sb">`</span>head<span class="w"> </span>/dev/urandom<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-dc<span class="w"> </span>a-z0-9<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-c<span class="w"> </span><span class="m">6</span><span class="sb">`</span>
+aws<span class="w"> </span>iam<span class="w"> </span>create-user<span class="w"> </span>--user-name<span class="w"> </span><span class="nv">$IAM_USER_NAME</span>
+aws<span class="w"> </span>iam<span class="w"> </span>put-user-policy<span class="w"> </span>--user-name<span class="w"> </span><span class="nv">$IAM_USER_NAME</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--policy-name<span class="w"> </span>eksUpdateConfigPolicy<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--policy-document<span class="w"> </span>file://eks-update-kubeconfig.json
+
+eksctl<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--config-file<span class="w"> </span>./cluster.yaml
+eksctl<span class="w"> </span>create<span class="w"> </span>iamidentitymapping<span class="w"> </span>--cluster<span class="w"> </span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--arn<span class="w"> </span>arn:aws:iam::<span class="si">${</span><span class="nv">AWS_ACCOUNT_ID</span><span class="si">}</span>:user/<span class="si">${</span><span class="nv">IAM_USER_NAME</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--username<span class="w"> </span><span class="si">${</span><span class="nv">IAM_USER_NAME</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--group<span class="w"> </span>system:masters
+</code></pre></div>
+<p>この処理の流れは次のとおりです。</p>
+<ol>
+<li><code>aws sts get-caller-identity</code> で現在の AWS アカウント ID を取得します。</li>
+<li>ランダムなサフィックスを付けた IAM ユーザー（<code>gihyo-xxxxxx</code>）を作成し、<code>eks-update-kubeconfig.json</code> で定義したポリシー（<code>eks:DescribeCluster</code> と <code>eks:ListClusters</code> を許可するもの）をインラインポリシーとして付与します。これにより、このユーザーは kubeconfig の更新に必要な情報を取得できるようになります。</li>
+<li><code>eksctl create cluster --config-file ./cluster.yaml</code> で、先ほどの <code>ClusterConfig</code> に基づいてクラスタを作成します。VPC やサブネット、ノードグループなどが一括で構築されます。</li>
+<li><code>eksctl create iamidentitymapping</code> で IAM identity mapping を作成します。これは「AWS の IAM ユーザー」と「Kubernetes 内の権限（グループ）」を結びつける EKS 独自の仕組みです。ここでは作成した IAM ユーザーを <code>system:masters</code> グループにマッピングし、クラスタ管理者権限を与えています。</li>
+</ol>
+<p>EKS では、AWS の認証（IAM）と Kubernetes の認可（RBAC）が分離しているため、この IAM identity mapping が「誰がクラスタを操作できるか」を決める要となります。EKS を扱ううえで特に押さえておきたいポイントです。</p>
+<h3 id="kubeconfig_1">kubeconfig の更新（例）<a class="headerlink" href="#kubeconfig_1" title="Permanent link">&para;</a></h3>
+<p>クラスタ作成後は、次のコマンドで <code>kubectl</code> の接続情報を更新します（一般的な手順の例）。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># kubectl がクラスタへ接続できるよう kubeconfig を更新する（例）</span>
+aws<span class="w"> </span>eks<span class="w"> </span>update-kubeconfig<span class="w"> </span>--name<span class="w"> </span>CLUSTER_NAME<span class="w"> </span>--region<span class="w"> </span>REGION
+kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+</code></pre></div>
+<hr />
+<h2 id="b3-azure-kubernetes-serviceaks">B.3 Azure Kubernetes Service(AKS)<a class="headerlink" href="#b3-azure-kubernetes-serviceaks" title="Permanent link">&para;</a></h2>
+<p>AKS は Microsoft Azure が提供するマネージド Kubernetes です。本リポジトリには、本編のタスク管理アプリ（taskapp）を AKS へデプロイするためのマニフェストが <code>apps/taskapp/k8s/plain/aks/</code> に含まれています。ここではそれらを引用しながら、ローカル版（<code>apps/taskapp/k8s/plain/local/</code>）との差分を見ていきます。</p>
+<h3 id="_3">ローカル版との差分<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>AKS 版とローカル版は、ほとんどのマニフェストが共通です。実際にファイルを比較すると、<code>api.yaml</code>・<code>mysql.yaml</code>・<code>migrator.yaml</code> はローカル版と AKS 版で内容が一致しており、Deployment や StatefulSet、Job の定義をそのまま流用できることがわかります。これはマネージド Kubernetes の互換性の高さを示す好例です。</p>
+<p>差分が現れるのは <code>web.yaml</code> の Ingress 定義です。外部からの入口（Ingress）は環境のロードバランサに依存するため、ここだけ環境ごとに書き換える必要があります。</p>
+<p>ローカル版（<code>apps/taskapp/k8s/plain/local/web.yaml</code>）の Ingress は、NGINX Ingress Controller を前提としています。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">            </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<p>一方、AKS 版（<code>apps/taskapp/k8s/plain/aks/web.yaml</code>）の Ingress は、Azure の Application Gateway Ingress Controller を前提としています。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure-application-gateway</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">            </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<p>実ファイルで確認できる差分は次の 2 点です。</p>
+<ul>
+<li><code>ingressClassName</code> が <code>nginx</code>（ローカル）から <code>azure-application-gateway</code>（AKS）へ変わっています。AKS では Azure の Application Gateway をクラスタの Ingress として利用するためです。</li>
+<li>ローカル版にあった <code>host: localhost</code> の指定が、AKS 版では削除されています。ローカルでは <code>localhost</code> というホスト名でアクセスしますが、AKS では Application Gateway に払い出されるパブリックアドレスでアクセスするためです。</li>
+</ul>
+<p>Deployment 本体（コンテナイメージや環境変数など）は両者で完全に共通であり、<code>ghcr.io/gihyodocker/taskapp-web:v0.1.0</code> などのイメージ参照もそのままです。つまり「アプリケーションの定義は共通、入口（Ingress）だけ環境に合わせる」という構成になっています。これはマニフェストの保守性を高める良い設計です。</p>
+<h3 id="az">az によるクラスタ作成（例）<a class="headerlink" href="#az" title="Permanent link">&para;</a></h3>
+<p>AKS のクラスタは <code>az</code> CLI で作成します。次は一般的な手順の「例」です。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># リソースグループを作成する（例）</span>
+az<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>taskapp-rg<span class="w"> </span>--location<span class="w"> </span>japaneast
+
+<span class="c1"># AKS クラスタを作成する（例）</span>
+az<span class="w"> </span>aks<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--resource-group<span class="w"> </span>taskapp-rg<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>taskapp-cluster<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--node-count<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--node-vm-size<span class="w"> </span>Standard_B2s<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--generate-ssh-keys
+
+<span class="c1"># kubectl の接続情報を取得する（例）</span>
+az<span class="w"> </span>aks<span class="w"> </span>get-credentials<span class="w"> </span>--resource-group<span class="w"> </span>taskapp-rg<span class="w"> </span>--name<span class="w"> </span>taskapp-cluster
+
+<span class="c1"># AKS 用マニフェストを適用する（例）</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>apps/taskapp/k8s/plain/aks/
+</code></pre></div>
+<p>Application Gateway Ingress Controller を利用する場合は、クラスタ作成時にアドオンとして有効化するか、後から有効化する必要があります。その有効化が済んでいることが、上記 AKS 版 <code>web.yaml</code> の Ingress が機能する前提となります。</p>
+<hr />
+<h2 id="b4-kubernetes">B.4 オンプレミス環境での Kubernetes クラスタの構築<a class="headerlink" href="#b4-kubernetes" title="Permanent link">&para;</a></h2>
+<p>クラウドのマネージドサービスを使わず、自社のデータセンターや自前のサーバー上に Kubernetes クラスタを構築することもできます。オンプレミスでは、セキュリティ要件や既存資産の活用、ランニングコストの観点から自前構築が選ばれることがあります。その代わり、コントロールプレーンの運用やバージョンアップ、ネットワーク・ストレージ・ロードバランサの整備をすべて自分たちで担う必要があります。</p>
+<p>本リポジトリにはオンプレミス構築用のスクリプトは含まれていないため、ここで示すのは一般的な構成の「例」です。</p>
+<h3 id="kubeadm">kubeadm によるクラスタ構築（例）<a class="headerlink" href="#kubeadm" title="Permanent link">&para;</a></h3>
+<p>オンプレミスで Kubernetes を構築する標準的なツールが <code>kubeadm</code> です。大まかな流れは次のとおりです。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 各ノードに kubeadm / kubelet / kubectl をインストール後、</span>
+<span class="c1"># コントロールプレーンノードでクラスタを初期化する（例）</span>
+sudo<span class="w"> </span>kubeadm<span class="w"> </span>init<span class="w"> </span>--pod-network-cidr<span class="o">=</span><span class="m">10</span>.244.0.0/16
+
+<span class="c1"># 一般ユーザーから kubectl を使えるよう kubeconfig を配置する（例）</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$HOME</span>/.kube
+sudo<span class="w"> </span>cp<span class="w"> </span>-i<span class="w"> </span>/etc/kubernetes/admin.conf<span class="w"> </span><span class="nv">$HOME</span>/.kube/config
+sudo<span class="w"> </span>chown<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span><span class="nv">$HOME</span>/.kube/config
+
+<span class="c1"># ワーカーノードをクラスタに参加させる（例）</span>
+<span class="c1"># （kubeadm init が出力する join コマンドを各ワーカーで実行する）</span>
+sudo<span class="w"> </span>kubeadm<span class="w"> </span>join<span class="w"> </span>CONTROL_PLANE_IP:6443<span class="w"> </span>--token<span class="w"> </span>TOKEN<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--discovery-token-ca-cert-hash<span class="w"> </span>sha256:HASH
+</code></pre></div>
+<h3 id="cni">CNI とロードバランサの整備（例）<a class="headerlink" href="#cni" title="Permanent link">&para;</a></h3>
+<p><code>kubeadm init</code> 直後のクラスタは、Pod 間ネットワークがまだ構成されておらず、ノードは <code>NotReady</code> のままです。Pod 同士が通信できるように、CNI プラグインを別途インストールする必要があります。代表的な CNI には次のようなものがあります（例）。</p>
+<ul>
+<li>Flannel: シンプルで導入が容易なオーバーレイネットワーク。</li>
+<li>Calico: ネットワークポリシーによる細かいアクセス制御に対応。</li>
+<li>Cilium: eBPF を活用した高性能なネットワーキングと可観測性。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># CNI プラグイン（Calico）を適用する（例）</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/projectcalico/calico/CALICO_VERSION/manifests/calico.yaml
+</code></pre></div>
+<p>また、クラウドと違ってオンプレミスには <code>type: LoadBalancer</code> の Service に対して外部 IP を払い出す仕組みが標準では存在しません。そこで MetalLB のようなソフトウェアロードバランサを導入し、空き IP アドレスのプールを割り当てることで、<code>type: LoadBalancer</code> を機能させます（例）。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># MetalLB に払い出させる IP アドレスプールの定義（例）</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metallb.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IPAddressPool</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default-pool</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metallb-system</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">addresses</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.10.240-192.168.10.250</span>
+</code></pre></div>
+<p>このように、オンプレミスではマネージド環境が裏側で面倒を見ていた「ネットワーク（CNI）」「ロードバランサ（MetalLB 等）」「ストレージ」を自分で組み立てる必要があります。逆に言えば、これらを理解しておくと、マネージド環境が何をしてくれているのかがより深く理解できます。</p>
+<hr />
+<h2 id="b5-amazon-elastic-container-serviceecs">B.5 Amazon Elastic Container Service(ECS)<a class="headerlink" href="#b5-amazon-elastic-container-serviceecs" title="Permanent link">&para;</a></h2>
+<p>ECS は AWS 独自のコンテナオーケストレーション環境であり、Kubernetes ではありません。そのため Kubernetes のマニフェストはそのまま使えませんが、AWS のサービスと密に統合されており、Fargate（サーバーレスでコンテナを実行する仕組み）と組み合わせれば、ノード（EC2 インスタンス）の管理すら不要になります。</p>
+<p>本リポジトリには、ECS 環境を AWS CDK（TypeScript）で構築する実コードが <code>cloudshell/aws/ecs/gihyo-ecs/</code> に含まれています。ここではそのスタック定義 <code>lib/gihyo-ecs-stack.ts</code> を引用しながら、ECS の中心概念である Cluster / Task Definition / Service を解説します。</p>
+<h3 id="cdk">CDK アプリのエントリポイント<a class="headerlink" href="#cdk" title="Permanent link">&para;</a></h3>
+<p><code>bin/gihyo-ecs.ts</code> がアプリのエントリポイントで、<code>GihyoEcsStack</code> というスタックをインスタンス化しています。</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env node</span>
+<span class="k">import</span><span class="w"> </span><span class="s1">'source-map-support/register'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">cdk</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'aws-cdk-lib'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">GihyoEcsStack</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'../lib/gihyo-ecs-stack'</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">cdk</span><span class="p">.</span><span class="nx">App</span><span class="p">();</span>
+<span class="ow">new</span><span class="w"> </span><span class="nx">GihyoEcsStack</span><span class="p">(</span><span class="nx">app</span><span class="p">,</span><span class="w"> </span><span class="s1">'GihyoEcsStack'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="p">});</span>
+</code></pre></div>
+<h3 id="cluster">Cluster の定義<a class="headerlink" href="#cluster" title="Permanent link">&para;</a></h3>
+<p><code>lib/gihyo-ecs-stack.ts</code> では、まず VPC を作成したうえで、その VPC 上に ECS クラスタを定義しています。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ECS</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cluster</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ecs</span><span class="p">.</span><span class="nx">Cluster</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'Cluster'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">vpc</span><span class="o">:</span><span class="w"> </span><span class="kt">vpc</span><span class="p">,</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>ECS の Cluster は、タスク（コンテナ）を実行する論理的なグループです。Kubernetes のクラスタに相当しますが、ECS ではコントロールプレーンを意識する必要はなく、Fargate を使えばノードの存在すら隠蔽されます。</p>
+<h3 id="task-definition">Task Definition の定義<a class="headerlink" href="#task-definition" title="Permanent link">&para;</a></h3>
+<p>ECS で「どのコンテナをどう動かすか」を定義するのが Task Definition です。次のコードでは、Fargate 用の Task Definition を作成し、<code>nginx</code> と <code>echo</code> の 2 つのコンテナを 1 つのタスクにまとめています。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ECS TaskDefinition</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">echoTaskDefinition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ecs</span><span class="p">.</span><span class="nx">FargateTaskDefinition</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'TaskDefinitionEcho'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">cpu</span><span class="o">:</span><span class="w"> </span><span class="kt">256</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">memoryLimitMiB</span><span class="o">:</span><span class="w"> </span><span class="kt">512</span><span class="p">,</span>
+<span class="p">});</span>
+<span class="c1">// "nginx" container</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">nginxContainer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">echoTaskDefinition</span><span class="p">.</span><span class="nx">addContainer</span><span class="p">(</span><span class="s2">"EchoConNginx"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">containerName</span><span class="o">:</span><span class="w"> </span><span class="s2">"nginx"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">image</span><span class="o">:</span><span class="w"> </span><span class="kt">ecs.ContainerImage.fromRegistry</span><span class="p">(</span><span class="s1">'ghcr.io/gihyodocker/simple-nginx-proxy:v0.0.1'</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">logging</span><span class="o">:</span><span class="w"> </span><span class="kt">ecs.LogDrivers.awsLogs</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">streamPrefix</span><span class="o">:</span><span class="w"> </span><span class="s1">'echo-nginx'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">logRetention</span><span class="o">:</span><span class="w"> </span><span class="kt">log.RetentionDays.ONE_MONTH</span><span class="p">,</span>
+<span class="w">  </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">environment</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">NGINX_PORT</span><span class="o">:</span><span class="w"> </span><span class="s2">"80"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">SERVER_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">"localhost"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">BACKEND_HOST</span><span class="o">:</span><span class="w"> </span><span class="s2">"localhost:8080"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">BACKEND_MAX_FAILS</span><span class="o">:</span><span class="w"> </span><span class="s2">"3"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">BACKEND_FAIL_TIMEOUT</span><span class="o">:</span><span class="w"> </span><span class="s2">"10s"</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">});</span>
+<span class="nx">nginxContainer</span><span class="p">.</span><span class="nx">addPortMappings</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">containerPort</span><span class="o">:</span><span class="w"> </span><span class="kt">80</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">hostPort</span><span class="o">:</span><span class="w"> </span><span class="kt">80</span>
+<span class="p">})</span>
+<span class="c1">// "echo" container</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">echoContainer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">echoTaskDefinition</span><span class="p">.</span><span class="nx">addContainer</span><span class="p">(</span><span class="s2">"EchoConEcho"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">containerName</span><span class="o">:</span><span class="w"> </span><span class="s2">"echo"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">image</span><span class="o">:</span><span class="w"> </span><span class="kt">ecs.ContainerImage.fromRegistry</span><span class="p">(</span><span class="s1">'ghcr.io/gihyodocker/echo:v0.0.1-9-gfe27471-slim'</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">logging</span><span class="o">:</span><span class="w"> </span><span class="kt">ecs.LogDrivers.awsLogs</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">streamPrefix</span><span class="o">:</span><span class="w"> </span><span class="s1">'echo-nginx'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">logRetention</span><span class="o">:</span><span class="w"> </span><span class="kt">log.RetentionDays.ONE_MONTH</span><span class="p">,</span>
+<span class="w">  </span><span class="p">}),</span>
+<span class="p">});</span>
+<span class="nx">echoContainer</span><span class="p">.</span><span class="nx">addPortMappings</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">containerPort</span><span class="o">:</span><span class="w"> </span><span class="kt">8080</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">hostPort</span><span class="o">:</span><span class="w"> </span><span class="kt">8080</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>ここでのポイントは次のとおりです。</p>
+<ul>
+<li><code>FargateTaskDefinition</code> で CPU・メモリを指定しています。タスク単位でリソースを割り当てる点が ECS の特徴です。</li>
+<li><code>addContainer</code> で 1 つのタスクに複数のコンテナ（<code>nginx</code> と <code>echo</code>）を同居させています。<code>nginx</code> がリバースプロキシとなり、<code>localhost:8080</code> の <code>echo</code> コンテナへ転送する構成です。同じタスク内のコンテナは <code>localhost</code> で通信できます。</li>
+<li><code>LogDrivers.awsLogs</code> により、各コンテナのログを CloudWatch Logs へ転送しています。</li>
+</ul>
+<h3 id="service">Service の定義<a class="headerlink" href="#service" title="Permanent link">&para;</a></h3>
+<p>Task Definition は「設計図」にすぎません。それを実際に「何個、どう動かし続けるか」を定義するのが Service です。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ECS Service</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ecs</span><span class="p">.</span><span class="nx">FargateService</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'ServiceEcho'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">cluster</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">taskDefinition</span><span class="o">:</span><span class="w"> </span><span class="kt">echoTaskDefinition</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">desiredCount</span><span class="o">:</span><span class="w"> </span><span class="kt">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">assignPublicIp</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">securityGroups</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nx">securityGroupApp</span><span class="p">,</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">});</span>
+<span class="nx">service</span><span class="p">.</span><span class="nx">attachToApplicationTargetGroup</span><span class="p">(</span><span class="nx">targetGroup</span><span class="p">);</span>
+</code></pre></div>
+<p><code>FargateService</code> は、指定した Cluster 上で <code>echoTaskDefinition</code> のタスクを <code>desiredCount: 1</code>（1 つ）だけ常時起動し続けます。タスクが落ちれば自動で再起動され、台数を増やせばスケールアウトします。さらに <code>attachToApplicationTargetGroup</code> により、このスタックで作成した ALB（Application Load Balancer）のターゲットグループへ紐づけ、外部からの HTTP リクエストをタスクへ振り分けています。</p>
+<h3 id="kubernetes">Kubernetes との対応関係<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h3>
+<p>ECS の概念は、Kubernetes の概念と次のように対応づけて理解するとわかりやすいでしょう。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ECS の概念</th>
+<th style="text-align: left;">おおよそ対応する Kubernetes の概念</th>
+<th style="text-align: left;">役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Cluster</td>
+<td style="text-align: left;">Cluster</td>
+<td style="text-align: left;">コンテナを実行する論理的なグループ</td>
+</tr>
+<tr>
+<td style="text-align: left;">Task Definition</td>
+<td style="text-align: left;">Pod のテンプレート（Deployment の <code>template</code>）</td>
+<td style="text-align: left;">コンテナ群・リソース・環境変数などの設計図</td>
+</tr>
+<tr>
+<td style="text-align: left;">Task</td>
+<td style="text-align: left;">Pod</td>
+<td style="text-align: left;">実際に起動するコンテナ群の実行単位</td>
+</tr>
+<tr>
+<td style="text-align: left;">Service</td>
+<td style="text-align: left;">Deployment + Service</td>
+<td style="text-align: left;">タスクを指定数だけ維持し、LB へ振り分ける</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fargate</td>
+<td style="text-align: left;">（ノードレス実行）</td>
+<td style="text-align: left;">サーバー管理不要でタスクを実行する基盤</td>
+</tr>
+</tbody>
+</table>
+<p>厳密には ECS の Service は Kubernetes の Deployment（レプリカ維持）と Service（負荷分散）の両方の役割を兼ねている点に注意してください。これらの対応関係を押さえておくと、Kubernetes の知識を ECS へ応用しやすくなります。</p>
+<h3 id="pipecd-ecs">PipeCD による ECS デプロイ定義（補足）<a class="headerlink" href="#pipecd-ecs" title="Permanent link">&para;</a></h3>
+<p>本リポジトリの <code>pipecd-examples/ecs/simple/</code> には、CDK とは別の形式で ECS を定義するファイルもあります。これは継続的デリバリーツール PipeCD 向けの定義で、Task Definition と Service を YAML で記述します。出典として <code>pipecd-examples/ecs/simple/taskdef.yaml</code> の主要部を引用します。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">family</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-service-fam</span>
+<span class="nt">executionRoleArn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:iam::XXXX:role/ecsTaskExecutionRole</span>
+<span class="nt">containerDefinitions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">XXXX.dkr.ecr.ap-northeast-1.amazonaws.com/nginx:1</span>
+<span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">mountPoints</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">    </span><span class="nt">portMappings</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="nt">compatibilities</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FARGATE</span>
+<span class="nt">requiresCompatibilities</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FARGATE</span>
+<span class="nt">networkMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">awsvpc</span>
+<span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span>
+<span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
+</code></pre></div>
+<p>Service 側の定義（<code>pipecd-examples/ecs/simple/servicedef.yaml</code>）では、起動するタスク数や起動タイプ、ネットワーク設定を記述します。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-service</span>
+<span class="nt">desiredCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">launchType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FARGATE</span>
+<span class="nt">networkConfiguration</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">awsvpcConfiguration</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assignPublicIp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ENABLED</span>
+<span class="w">    </span><span class="nt">securityGroups</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sg-YYYY</span>
+<span class="w">    </span><span class="nt">subnets</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subnet-YYYY</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subnet-YYYY</span>
+</code></pre></div>
+<p>このように、ECS の構築方法は AWS CDK で記述する方法（<code>gihyo-ecs</code>）と、CD ツール向けに宣言的な YAML で記述する方法（PipeCD）など複数あります。いずれの場合も、Task Definition と Service という ECS の基本概念は共通している点を押さえておきましょう。なお <code>XXXX</code> や <code>sg-YYYY</code> などはプレースホルダであり、実際の値に置き換える必要があります。</p>
+<hr />
+<h2 id="_4">まとめ<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>この付録では、ローカル環境から本番のマネージド環境へ移行するという観点で、5 つのコンテナオーケストレーション環境を概観しました。</p>
+<ul>
+<li>GKE・EKS・AKS は 3 大クラウドが提供するマネージド Kubernetes であり、本編で学んだマニフェストをほぼそのまま再利用できます。差分が出やすいのは Service や Ingress のような環境依存部分で、AKS の例では Ingress の <code>ingressClassName</code> だけを <code>azure-application-gateway</code> に変えるだけで済みました。</li>
+<li>EKS では <code>eksctl</code> の <code>ClusterConfig</code> でクラスタを宣言的に定義し、IAM identity mapping で AWS の認証と Kubernetes の認可を結びつける点が特徴です。</li>
+<li>オンプレミスでは <code>kubeadm</code> でクラスタを構築し、CNI（Calico など）やソフトウェアロードバランサ（MetalLB）を自分で整備する必要があります。これはマネージド環境が裏で何をしているかを理解する良い機会にもなります。</li>
+<li>ECS は Kubernetes ではない AWS 独自の環境ですが、Cluster / Task Definition / Service という概念を Kubernetes の Cluster / Pod / Deployment+Service に対応づけて理解すれば、既存の知識を活かせます。</li>
+</ul>
+<p>どの環境を選ぶにせよ、本編で身につけたコンテナとオーケストレーションの基礎は共通の土台になります。「変更を楽に安全にできる」状態を保つために、アプリケーションの定義（共通部分）と環境固有の設定（差分部分）を切り分けて管理することが、複数環境を扱ううえでの実践的な指針となります。</p>
+<hr />
+<h3 id="_5">関連リンク<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../appendix-a-dev-tools-setup/">付録 A 開発ツールのセットアップ</a></li>
+<li><a href="../appendix-c-tips/">付録 C Docker/Kubernetes の Tips</a></li>
+<li><a href="../06-kubernetes-deploy-cluster/">第 6 章 Kubernetes クラスタへのデプロイ</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>

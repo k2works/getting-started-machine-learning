@@ -1,0 +1,4265 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="会計システムにおけるデータ訂正方式（赤黒処理）とログ管理の設計を行います。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>第19章：赤黒とログの設計（ORM版） - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#19orm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第19章：赤黒とログの設計（ORM版）
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../reference/" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../functional-desgin-ppp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-docker-kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/SonarQube%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="19orm">第19章：赤黒とログの設計（ORM版）<a class="headerlink" href="#19orm" title="Permanent link">&para;</a></h1>
+<p>会計システムにおけるデータ訂正方式（赤黒処理）とログ管理の設計を行います。</p>
+<p>JPA 版では、@EntityListeners と AuditingEntityListener を使用した監査証跡の実装を行います。</p>
+<hr />
+<h2 id="191">19.1 赤黒処理の概念<a class="headerlink" href="#191" title="Permanent link">&para;</a></h2>
+<p>会計システムでは、一度登録したデータの「削除」や「更新」を安易に行うことはできません。監査証跡を確保しつつ、データ訂正を行う方式が必要です。</p>
+<h3 id="_1">赤黒処理とは<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>赤黒処理とは、誤った仕訳を訂正する際に、元の仕訳を「赤伝（取消伝票）」で打ち消し、正しい仕訳を「黒伝（訂正伝票）」として新規登録する方式です。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJERVNDUklQVElPTiIgc3R5bGU9IndpZHRoOjQ2NXB4O2hlaWdodDo2ODJweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNDY1cHgiIGhlaWdodD0iNjgycHgiIHZpZXdCb3g9IjAgMCA0NjUgNjgyIiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMTgwLjI1IiB5PSIyMi45OTUiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijk4IiBmb250LXdlaWdodD0iNzAwIj7otaTpu5Llh6bnkIbjga7mtYHjgow8L3RleHQ+PC9nPjwhLS1jbHVzdGVyIG9yaWdpbmFsLS0+PGcgY2xhc3M9ImNsdXN0ZXIiIGRhdGEtcXVhbGlmaWVkLW5hbWU9Im9yaWdpbmFsIiBpZD0iZW50MDAwMSIgZGF0YS1zb3VyY2UtbGluZT0iMyI+PHJlY3QgeD0iMjguNSIgeT0iNDQuMjk3IiB3aWR0aD0iMjM0IiBoZWlnaHQ9IjEyMS44OSIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9Ijk2LjUiIHk9IjU5LjI5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iOTgiIGZvbnQtd2VpZ2h0PSI3MDAiPuWFg+S8neelqO+8iOiqpOOCiu+8iTwvdGV4dD48L2c+PCEtLWNsdXN0ZXIgcmVkLS0+PGcgY2xhc3M9ImNsdXN0ZXIiIGRhdGEtcXVhbGlmaWVkLW5hbWU9InJlZCIgaWQ9ImVudDAwMDMiIGRhdGEtc291cmNlLWxpbmU9IjciPjxyZWN0IHg9IjI4LjUiIHk9IjIzMS4xODciIHdpZHRoPSIyMzQiIGhlaWdodD0iMTM4LjE5IiBmaWxsPSJub25lIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiByeD0iMi41IiByeT0iMi41Ii8+PHRleHQgeD0iMTAzLjUiIHk9IjI0Ni4xODIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijg0IiBmb250LXdlaWdodD0iNzAwIj7otaTkvJ3vvIjlj5bmtojvvIk8L3RleHQ+PC9nPjwhLS1jbHVzdGVyIGJsYWNrLS0+PGcgY2xhc3M9ImNsdXN0ZXIiIGRhdGEtcXVhbGlmaWVkLW5hbWU9ImJsYWNrIiBpZD0iZW50MDAwNSIgZGF0YS1zb3VyY2UtbGluZT0iMTEiPjxyZWN0IHg9IjE1NS41IiB5PSI0MzQuMzc3IiB3aWR0aD0iMjM0IiBoZWlnaHQ9IjEzOC4xOCIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjIzMC41IiB5PSI0NDkuMzcyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI4NCIgZm9udC13ZWlnaHQ9IjcwMCI+6buS5Lyd77yI6KiC5q2j77yJPC90ZXh0PjwvZz48IS0tZW50aXR5IGoxLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0ib3JpZ2luYWwuajEiIGlkPSJlbnQwMDAyIiBkYXRhLXNvdXJjZS1saW5lPSI0Ij48cmVjdCB4PSI1Mi4zMyIgeT0iODcuMjk3IiB3aWR0aD0iMTY2LjM0MyIgaGVpZ2h0PSI1NC44OTEiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjYyLjMzIiB5PSIxMDMuMjkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxMDQuOTI1Ij7ku5XoqLPnlarlj7c6IEowMDAxPC90ZXh0Pjx0ZXh0IHg9IjYyLjMzIiB5PSIxMTkuNTg5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNDYuMzQzIj7jgJDlgJ/mlrnjgJHnj77ph5EgMTAwLDAwMDwvdGV4dD48dGV4dCB4PSI2Mi4zMyIgeT0iMTM1Ljg4NiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTQ2LjM0MyI+44CQ6LK45pa544CR5aOy5LiKIDEwMCwwMDA8L3RleHQ+PC9nPjwhLS1lbnRpdHkgajItLT48ZyBjbGFzcz0iZW50aXR5IiBkYXRhLXF1YWxpZmllZC1uYW1lPSJyZWQuajIiIGlkPSJlbnQwMDA0IiBkYXRhLXNvdXJjZS1saW5lPSI4Ij48cmVjdCB4PSI1Mi4zMyIgeT0iMjc0LjE4NyIgd2lkdGg9IjE2Ni4zNDMiIGhlaWdodD0iNzEuMTg4IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSI2Mi4zMyIgeT0iMjkwLjE4MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTE0LjY1MiI+5LuV6Kiz55Wq5Y+3OiBKMDAwMVI8L3RleHQ+PHRleHQgeD0iNjIuMzMiIHk9IjMwNi40NzkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjE0Ni4zNDMiPuOAkOWAn+aWueOAkeWjsuS4iiAxMDAsMDAwPC90ZXh0Pjx0ZXh0IHg9IjYyLjMzIiB5PSIzMjIuNzc2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNDYuMzQzIj7jgJDosrjmlrnjgJHnj77ph5EgMTAwLDAwMDwvdGV4dD48dGV4dCB4PSI2Mi4zMyIgeT0iMzM5LjA3MyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iODEuNzMiPuKAu+iyuOWAn+OCkuWPjei7ojwvdGV4dD48L2c+PCEtLWVudGl0eSBqMy0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9ImJsYWNrLmozIiBpZD0iZW50MDAwNiIgZGF0YS1zb3VyY2UtbGluZT0iMTIiPjxyZWN0IHg9IjE3OS4zMyIgeT0iNDc3LjM3NyIgd2lkdGg9IjE2Ni4zNDMiIGhlaWdodD0iNzEuMTg4IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSIxODkuMzMiIHk9IjQ5My4zNzIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjEwNC45MjUiPuS7leios+eVquWPtzogSjAwMDI8L3RleHQ+PHRleHQgeD0iMTg5LjMzIiB5PSI1MDkuNjY5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNDYuMzQzIj7jgJDlgJ/mlrnjgJHnj77ph5EgMTIwLDAwMDwvdGV4dD48dGV4dCB4PSIxODkuMzMiIHk9IjUyNS45NjYiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjE0Ni4zNDMiPuOAkOiyuOaWueOAkeWjsuS4iiAxMjAsMDAwPC90ZXh0Pjx0ZXh0IHg9IjE4OS4zMyIgeT0iNTQyLjI2MyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iODEuNzMiPuKAu+ato+OBl+OBhOmHkemhjTwvdGV4dD48L2c+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iR01OOSIgaWQ9ImVudDAwMTAiIGRhdGEtc291cmNlLWxpbmU9IjE5Ij48cGF0aCBkPSJNNiw0NzcuNjk3IEw2LDU0OC4yMjggTDEzMSw1NDguMjI4IEwxMzEsNDg3LjY5NyBMMTIxLDQ3Ny42OTcgTDYsNDc3LjY5NyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiBmaWxsPSIjRkVGRkREIi8+PHBhdGggZD0iTTEyMSw0NzcuNjk3IEwxMjEsNDg3LjY5NyBMMTMxLDQ4Ny42OTcgTDEyMSw0NzcuNjk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSIjRkVGRkREIi8+PHRleHQgeD0iMTIiIHk9IjQ5NC43NjQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjkxIj7otaTkvJ3jga/lhYPkvJ3npajjga48L3RleHQ+PHRleHQgeD0iMTIiIHk9IjUwOS44OTciIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjEwNCI+6LK45YCf44KS5a6M5YWo44Gr5Y+N6LuiPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSI1MjUuMDI5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxMDQiPuS7leios+mHkemhjeOBruWQiOioiOOBjDwvdGV4dD48dGV4dCB4PSIxMiIgeT0iNTQwLjE2MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iNjUiPuOCvOODreOBq+OBquOCizwvdGV4dD48L2c+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iR01OMTIiIGlkPSJlbnQwMDEzIiBkYXRhLXNvdXJjZS1saW5lPSIyNiI+PHBhdGggZD0iTTMxMi41LDYyNy41NTcgTDMxMi41LDY2Ny44MjMgTDQ1MC41LDY2Ny44MjMgTDQ1MC41LDYzNy41NTcgTDQ0MC41LDYyNy41NTcgTDMxMi41LDYyNy41NTciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgZmlsbD0iI0ZFRkZERCIvPjxwYXRoIGQ9Ik00NDAuNSw2MjcuNTU3IEw0NDAuNSw2MzcuNTU3IEw0NTAuNSw2MzcuNTU3IEw0NDAuNSw2MjcuNTU3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSIjRkVGRkREIi8+PHRleHQgeD0iMzE4LjUiIHk9IjY0NC42MjQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjExNyI+6buS5Lyd44Gv5q2j44GX44GE5YaF5a6544GnPC90ZXh0Pjx0ZXh0IHg9IjMxOC41IiB5PSI2NTkuNzU3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxMDQiPuaWsOimj+OBq+S7leios+OCkui1t+elqDwvdGV4dD48L2c+PCEtLWxpbmsgb3JpZ2luYWwgdG8gcmVkLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDEiIGRhdGEtZW50aXR5LTI9ImVudDAwMDMiIGlkPSJsbms3IiBkYXRhLXNvdXJjZS1saW5lPSIxNSIgZGF0YS1saW5rLXR5cGU9ImRlcGVuZGVuY3kiPjxwYXRoIGQ9Ik0yNTQuNSwxNjYuODI3IEMyNTQuNSwxNjcuMTU0IDI1NC41LDE2Ny40ODIgMjU0LjUsMTY3LjgxIEMyNTQuNSwxNjguNDY3IDI1NC41LDE2OS4xMjcgMjU0LjUsMTY5Ljc5MSBDMjU0LjUsMTcyLjQ0NiAyNTQuNSwxNzUuMTU1IDI1NC41LDE3Ny45MDcgQzI1NC41LDE4OC45MTMgMjU0LjUsMjAwLjYwNSAyNTQuNSwyMTIuMjk2IEMyNTQuNSwyMTguMTQxIDI1NC41LDIyMy45ODYgMjU0LjUsMjI5Ljc0NiBDMjU0LjUsMjMwLjEwNiAyNTQuNSwyMjUuNDY1IDI1NC41LDIyNS44MjUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIGZpbGw9Im5vbmUiIGlkPSJvcmlnaW5hbC10by1yZWQiLz48cG9seWdvbiBwb2ludHM9IjI1NC41LDIzMC44MjUsMjU4LjUsMjIxLjgyNSwyNTQuNSwyMjUuODI1LDI1MC41LDIyMS44MjUsMjU0LjUsMjMwLjgyNSIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48dGV4dCB4PSIyNTUuNSIgeT0iMjAzLjI1NCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iNTIiPui1pOS8neeZuuihjDwvdGV4dD48L2c+PCEtLWxpbmsgcmVkIHRvIGJsYWNrLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDMiIGRhdGEtZW50aXR5LTI9ImVudDAwMDUiIGlkPSJsbms4IiBkYXRhLXNvdXJjZS1saW5lPSIxNiIgZGF0YS1saW5rLXR5cGU9ImRlcGVuZGVuY3kiPjxwYXRoIGQ9Ik0yNjIuNTU2LDMxNi4yOTEgQzI2NC4xMTEsMzE3LjM4OSAyNjUuODU5LDMxOC42NDEgMjY3Ljc3NSwzMjAuMDM5IEMyNzUuNDM3LDMyNS42MzIgMjg1Ljc2OSwzMzMuNTU5IDI5Ny4wMTksMzQzLjI2MyBDMzE5LjUxOCwzNjIuNjcyIDM0NS42ODUsMzg5LjE5MiAzNjEuNSw0MTguMzc3IEMzNjMuOTU0LDQyMi45MDYgMzY2LjEwNyw0MjcuNzEgMzY3Ljk5NSw0MzIuNjU3IEMzNjguMTEzLDQzMi45NjYgMzY4LjIzLDQzMy4yNzYgMzY4LjM0Niw0MzMuNTg2IEMzNjguNDA0LDQzMy43NDEgMzY2LjcyNyw0MjkuMjA3IDM2Ni43ODUsNDI5LjM2MiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9InJlZC10by1ibGFjayIvPjxwb2x5Z29uIHBvaW50cz0iMzY4LjUyLDQzNC4wNTIsMzY5LjE0OCw0MjQuMjIzLDM2Ni43ODUsNDI5LjM2MiwzNjEuNjQ1LDQyNi45OTksMzY4LjUyLDQzNC4wNTIiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMzU2LjI4IiB5PSI0MDYuNDQ0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSI1MiI+6buS5Lyd55m66KGMPC90ZXh0PjwvZz48IS0tbGluayByZWQgdG8gR01OOS0tPjxnIGNsYXNzPSJsaW5rIiBkYXRhLWVudGl0eS0xPSJlbnQwMDAzIiBkYXRhLWVudGl0eS0yPSJlbnQwMDEwIiBpZD0ibG5rMTEiIGRhdGEtc291cmNlLWxpbmU9IjE5IiBkYXRhLWxpbmstdHlwZT0iYXNzb2NpYXRpb24iPjxwYXRoIGQ9Ik0yNDQuMTM2LDM2OS42NTkgQzI0NC4wODIsMzY5Ljc3OSAyNDQuMDI4LDM2OS45IDI0My45NzMsMzcwLjAyIEMyNDMuODY0LDM3MC4yNjEgMjQzLjc1MywzNzAuNTAxIDI0My42NDEsMzcwLjc0MSBDMjQzLjQxOCwzNzEuMjIgMjQzLjE5LDM3MS42OTcgMjQyLjk1NywzNzIuMTcyIEMyNDIuNDkyLDM3My4xMjEgMjQyLjAwOCwzNzQuMDU5IDI0MS41MDUsMzc0Ljk4NSBDMjM5LjQ5MywzNzguNjg5IDIzNy4xNzQsMzgyLjE5NCAyMzQuNSwzODUuMzc3IEMyMTIuMTEsNDEyLjAxNyAxOTIuMDksMzk4LjUzNyAxNjMuNSw0MTguMzc3IEMxMzkuMzQsNDM1LjEzNyAxMTUuNzcsNDU4LjI5NyA5OC4xNSw0NzcuMzg3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWRhc2hhcnJheTo3LDc7IiBmaWxsPSJub25lIiBpZD0icmVkLUdNTjkiLz48L2c+PCEtLWxpbmsgYmxhY2sgdG8gR01OMTItLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAwNSIgZGF0YS1lbnRpdHktMj0iZW50MDAxMyIgaWQ9ImxuazE0IiBkYXRhLXNvdXJjZS1saW5lPSIyNiIgZGF0YS1saW5rLXR5cGU9ImFzc29jaWF0aW9uIj48cGF0aCBkPSJNMzgxLjUsNTcyLjc5MSBDMzgxLjUsNTczLjE3NCAzODEuNSw1NzMuNTU3IDM4MS41LDU3My45NCBDMzgxLjUsNTc0LjcwNiAzODEuNSw1NzUuNDc0IDM4MS41LDU3Ni4yNDIgQzM4MS41LDU4Mi4zODcgMzgxLjUsNTg4LjU4IDM4MS41LDU5NC42MDcgQzM4MS41LDYwNi42NjIgMzgxLjUsNjE4LjA1NyAzODEuNSw2MjcuMDk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWRhc2hhcnJheTo3LDc7IiBmaWxsPSJub25lIiBpZD0iYmxhY2stR01OMTIiLz48L2c+PD9wbGFudHVtbC1zcmMgVlRCRkp5OG01MFZtVV8tQVhoQ2FPenV1LTBUdXpFbmJtMkdlUldka1Bhb3M4Sno0bzgwNFowVFo0NUkyMEdxNjBSVnVucll3YkhGX1djeks4QTNYc2pWTnotY3RySDlRS2lQaXE5aFFMUGZ4eWlmUE9sSlNXSzdDOGE4ZkVRZjlJWG1zMTZXY0ZON2tsQ1ZzcENjcEpla09YUGJwNVMzSTZMUEpZTlgyYVBCdTc0TWJMMG03OWRRRGpULXpNZVRRbXAzVTVtR1hUQVdHbEtwclV4Uy05ZGg1aXh3Y2tHZUUyUzhFNUVTcnJYX242Y3RzOXdGMmVaT1ZTMW4yNXNpTXE4ODU4RElna25fdjFJR2JueE9QM2pPSHd1Rk00UGwwUnpzNjZoR0lpcWdqNGhDVkU0cFNXNDY2N0NSUWZqampCYzJIZjFHenNLOEpfdXo3dDFBRms5QjE4NkJTNEVDSWNnUUQ0ZlZqLWhCYm9tSTNVX0RxbWZYN3Z6ci1pYU9ILUtqLVlWbDJjRkRfWXFYSERIYjdMNHJKSng1d3ZGU1p0YXNDci1MbFdDLTJMajdxWVpHM0lveXk4eUhsb2JjbWFQT1hicG1uWWVZTzNhYnRPSUNuRWlJeUhoOEltX3d1RnFGZENpSFRDN1B2TFBoRHFEd082Q184aFItbjlta0V1aUQwbUdQM1cydEZfMDQwPz48L2c+PC9zdmc+" class="uml" alt="uml diagram" title="" /></p>
+<h3 id="_2">赤黒処理のメリット<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>メリット</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>監査証跡の確保</td>
+<td>元の仕訳が残り、訂正履歴が追跡可能</td>
+</tr>
+<tr>
+<td>データ整合性</td>
+<td>物理削除を行わないため、参照整合性が維持される</td>
+</tr>
+<tr>
+<td>会計基準準拠</td>
+<td>会計原則に則った正当な訂正方法</td>
+</tr>
+<tr>
+<td>残高の自動調整</td>
+<td>赤伝により残高が自動的に訂正される</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="192">19.2 赤黒処理のテーブル設計<a class="headerlink" href="#192" title="Permanent link">&para;</a></h2>
+<p>仕訳テーブルには、赤黒処理に必要な項目が含まれています。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJDTEFTUyIgc3R5bGU9IndpZHRoOjUyOHB4O2hlaWdodDoyMTZweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNTI4cHgiIGhlaWdodD0iMjE2cHgiIHZpZXdCb3g9IjAgMCA1MjggMjE2IiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjwhLS1jbGFzcyBKb3VybmFsLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iSm91cm5hbCIgaWQ9ImVudDAwMDEiIGRhdGEtc291cmNlLWxpbmU9IjEiPjxyZWN0IHg9IjciIHk9IjciIHdpZHRoPSIyNTUuNTk4IiBoZWlnaHQ9IjE5NC42NzIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjxlbGxpcHNlIGN4PSIxMTYuNTQ5IiBjeT0iMjMiIHJ4PSIxMSIgcnk9IjExIiBmaWxsPSIjQUREMUIyIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBhdGggZD0iTTEyMC42NTksMjkgTDExMi45NCwyOSBMMTEyLjk0LDE2LjYwOSBMMTIwLjY1OSwxNi42MDkgTDEyMC42NTksMTguNzY2IEwxMTUuMzkzLDE4Ljc2NiBMMTE1LjM5MywyMS40MzggTDEyMC4xNTksMjEuNDM4IEwxMjAuMTU5LDIzLjU5NCBMMTE1LjM5MywyMy41OTQgTDExNS4zOTMsMjYuODQ0IEwxMjAuNjU5LDI2Ljg0NCBMMTIwLjY1OSwyOSBaICIgZmlsbD0iIzAwMCIvPjx0ZXh0IHg9IjEzNy4wNDkiIHk9IjI3Ljg0NyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMjgiPuS7leioszwvdGV4dD48bGluZSB4MT0iOCIgeTE9IjM5IiB4Mj0iMjYxLjU5OCIgeTI9IjM5IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48ZyBkYXRhLXZpc2liaWxpdHktbW9kaWZpZXI9IklFX01BTkRBVE9SWSI+PGVsbGlwc2UgY3g9IjE4IiBjeT0iNTIuNjQ4IiByeD0iMyIgcnk9IjMiIGZpbGw9IiMwMDAiIHN0eWxlPSJzdHJva2U6IzAwMDtzdHJva2Utd2lkdGg6MTsiLz48L2c+PHRleHQgeD0iMjciIHk9IjU1Ljk5NSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iODQiIGZvbnQtd2VpZ2h0PSI3MDAiPuS7leios+S8neelqOeVquWPtzwvdGV4dD48dGV4dCB4PSIxMTEiIHk9IjU1Ljk5NSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTQ1LjU5OSI+OiBWQVJDSEFSKDEwKSDCq1BLwrs8L3RleHQ+PGxpbmUgeDE9IjgiIHkxPSI2My4yOTciIHgyPSIyNjEuNTk4IiB5Mj0iNjMuMjk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHRleHQgeD0iMTMiIHk9IjgwLjI5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNDIiPui1t+elqOaXpTwvdGV4dD48dGV4dCB4PSIxMyIgeT0iOTYuNTg5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI0MiI+5YWl5Yqb5pelPC90ZXh0Pjx0ZXh0IHg9IjEzIiB5PSIxMTIuODg2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI4NCI+5LuV6Kiz5Lyd56Wo5Yy65YiGPC90ZXh0Pjx0ZXh0IHg9IjEzIiB5PSIxMjkuMTgzIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxMy4zNTEiPi4uLjwvdGV4dD48dGV4dCB4PSIxMyIgeT0iMTQ1LjQ3OSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNzAiIGZvbnQtd2VpZ2h0PSI3MDAiPui1pOS8neODleODqeOCsDwvdGV4dD48dGV4dCB4PSI4MyIgeT0iMTQ1LjQ3OSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNzguNDYzIj46IFNNQUxMSU5UPC90ZXh0Pjx0ZXh0IHg9IjEzIiB5PSIxNjEuNzc2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI4NCIgZm9udC13ZWlnaHQ9IjcwMCI+6LWk6buS5Lyd56Wo55Wq5Y+3PC90ZXh0Pjx0ZXh0IHg9Ijk3IiB5PSIxNjEuNzc2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI3MC41ODgiPjogSU5URUdFUjwvdGV4dD48dGV4dCB4PSIxMyIgeT0iMTc4LjA3MyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNTYiPuS9nOaIkOaXpeaZgjwvdGV4dD48dGV4dCB4PSIxMyIgeT0iMTk0LjM3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1NiI+5pu05paw5pel5pmCPC90ZXh0PjwvZz48ZyBjbGFzcz0iZW50aXR5IiBkYXRhLXF1YWxpZmllZC1uYW1lPSJHTU4yIiBpZD0iZW50MDAwMyIgZGF0YS1zb3VyY2UtbGluZT0iMTUiPjxwYXRoIGQ9Ik0yOTcuOCw0Ni4zNyBMMjk3LjgsMTAwLjMzIEwyNjIuODksMTA0LjMzIEwyOTcuOCwxMDguMzMgTDI5Ny44LDE2Mi4zIEEwLDAgMCAwIDAgMjk3LjgsMTYyLjMgTDUxMy44LDE2Mi4zIEEwLDAgMCAwIDAgNTEzLjgsMTYyLjMgTDUxMy44LDU2LjM3IEw1MDMuOCw0Ni4zNyBMMjk3LjgsNDYuMzcgQTAsMCAwIDAgMCAyOTcuOCw0Ni4zNyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiBmaWxsPSIjRkVGRkREIi8+PHBhdGggZD0iTTUwMy44LDQ2LjM3IEw1MDMuOCw1Ni4zNyBMNTEzLjgsNTYuMzcgTDUwMy44LDQ2LjM3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIGZpbGw9IiNGRUZGREQiLz48dGV4dCB4PSIzMDMuOCIgeT0iNjMuNDM3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSI2OS4zOCI+6LWk5Lyd44OV44Op44KwOjwvdGV4dD48dGV4dCB4PSIzMDMuOCIgeT0iNzguNTciIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjEwNS40MjgiPjAgPSDpgJrluLjvvIjpu5LkvJ3vvIk8L3RleHQ+PHRleHQgeD0iMzAzLjgiIHk9IjkzLjcwMyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTA1LjQyOCI+MSA9IOi1pOS8ne+8iOWPlua2iO+8iTwvdGV4dD48dGV4dCB4PSIzMDMuOCIgeT0iMTA4LjgzNSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyI+wqA8L3RleHQ+PHRleHQgeD0iMzAzLjgiIHk9IjEyMy45NjgiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjgyLjM4Ij7otaTpu5LkvJ3npajnlarlj7c6PC90ZXh0Pjx0ZXh0IHg9IjMwMy44IiB5PSIxMzkuMTAxIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxOTUiPui1pOS8neOBruWgtOWQiOOAgeWFg+S8neelqOOBrueVquWPt+OCkuagvOe0jTwvdGV4dD48dGV4dCB4PSIzMDMuOCIgeT0iMTU0LjIzNCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTQzIj7ntJDku5jjgZHjgavjgojjgorlsaXmrbTjgpLov73ot6E8L3RleHQ+PC9nPjw/cGxhbnR1bWwtc3JjIFBPelZJeTlHNkNSbHRxem55QWVFRUZITUo5MkdfYmM0SFZUMmd1Sk9tRFA1SEUwc1oyTTU5Y1hfQjMxZU80TFhENUZRZjB6cFRpeGNiTC1YQ3ZPR1RsVVV0X0V5cF9DVUtMOEFvWDZBazdSM3h0bjRLRnUwQlNrN0hJY19adXUxOHVuM21OTmtGUkZaRFB2ZmpPem4wY3NiU19FQndUbkNGM1FCYWlkcmJMR0FlYjdtVXR0a09iU2NxQjk5QXdyVy1oakZweC1lU0dnMjgwMzZWay1IS3c4dFlGdjRqNndHa2g2UXBjUU5yWlAzVE1KTmZza3ZiYmQ4dkMwVHRaNlpua0ZQWkdRaVBSNWN6X1RuMFkzOVllWUFYVHF6MVNheGF6XzBMNXEyT2NXRVpLZ3RUMzBPRXFST0ROUkU4Q3Zud0VNT0xmbGlxbVdtXzN5ZUNTYkt0c1pSZVpNM2I1SFFyYUNCWHc2QlE3Tk1UWnBoMFpvaHZqaE5IQnFhd1dsSDNBOUx3Qmw5Tll0a3lCLTdWbHkxSDZhUjFUVl8wMDAwPz48L2c+PC9zdmc+" class="uml" alt="uml diagram" title="" /></p>
+<hr />
+<h2 id="193-mybatis">19.3 MyBatis 版との実装比較<a class="headerlink" href="#193-mybatis" title="Permanent link">&para;</a></h2>
+<h3 id="_3">データアクセス層の比較<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>機能</th>
+<th>MyBatis 版</th>
+<th>JPA 版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>監査カラム設定</td>
+<td>手動 / Interceptor</td>
+<td>@EnableJpaAuditing</td>
+</tr>
+<tr>
+<td>マスタ変更ログ</td>
+<td>DB トリガー</td>
+<td>@EntityListeners</td>
+</tr>
+<tr>
+<td>ENUM 変換</td>
+<td>TypeHandler</td>
+<td>AttributeConverter</td>
+</tr>
+<tr>
+<td>動的クエリ</td>
+<td>XML <code>&lt;if&gt;</code> タグ</td>
+<td>Specification パターン</td>
+</tr>
+<tr>
+<td>一括保存（Cascade）</td>
+<td>明示的に各テーブル INSERT</td>
+<td>CascadeType.ALL</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="194">19.4 赤黒処理サービスの実装<a class="headerlink" href="#194" title="Permanent link">&para;</a></h2>
+<details>
+<summary>JournalCorrectionService.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.application.service</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.application.port.out.JournalRepository</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.journal.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.RequiredArgsConstructor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Service</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDate</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.ArrayList</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 赤黒処理サービス</span>
+<span class="cm"> *</span>
+<span class="cm"> * JPA 版でもビジネスロジックは MyBatis 版と同じ</span>
+<span class="cm"> * Entity の操作方法が異なる（JPA では Cascade を活用）</span>
+<span class="cm"> */</span>
+<span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">JournalCorrectionService</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">JournalRepository</span><span class="w"> </span><span class="n">journalRepository</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">BalanceUpdateService</span><span class="w"> </span><span class="n">balanceUpdateService</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 仕訳を赤黒訂正する</span>
+<span class="cm">     * @param originalVoucherNumber 元伝票番号</span>
+<span class="cm">     * @param correctedJournal 訂正後の仕訳（黒伝）</span>
+<span class="cm">     * @return 赤伝と黒伝の仕訳伝票番号</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Transactional</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CorrectionResult</span><span class="w"> </span><span class="nf">correctJournal</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">originalVoucherNumber</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Journal</span><span class="w"> </span><span class="n">correctedJournal</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 元伝票を取得</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">original</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">journalRepository</span><span class="p">.</span><span class="na">findByVoucherNumber</span><span class="p">(</span><span class="n">originalVoucherNumber</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span>
+<span class="w">                </span><span class="s">"元伝票が見つかりません: "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">originalVoucherNumber</span><span class="p">));</span>
+
+<span class="w">        </span><span class="c1">// 赤伝を作成</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">redSlip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createRedSlip</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">journalRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">redSlip</span><span class="p">);</span>
+<span class="w">        </span><span class="n">balanceUpdateService</span><span class="p">.</span><span class="na">updateBalancesForJournal</span><span class="p">(</span><span class="n">redSlip</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// 黒伝（訂正伝票）を登録</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">correctedJournal</span><span class="p">.</span><span class="na">isBalanced</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">"訂正仕訳の貸借が一致しません"</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">journalRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">correctedJournal</span><span class="p">);</span>
+<span class="w">        </span><span class="n">balanceUpdateService</span><span class="p">.</span><span class="na">updateBalancesForJournal</span><span class="p">(</span><span class="n">correctedJournal</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"赤黒訂正完了: 元伝票={}, 赤伝={}, 黒伝={}"</span><span class="p">,</span>
+<span class="w">            </span><span class="n">originalVoucherNumber</span><span class="p">,</span>
+<span class="w">            </span><span class="n">redSlip</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">correctedJournal</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">());</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CorrectionResult</span><span class="p">(</span>
+<span class="w">            </span><span class="n">redSlip</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">correctedJournal</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">()</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 仕訳を取消する（赤伝のみ発行）</span>
+<span class="cm">     * @param voucherNumber 取消対象の仕訳伝票番号</span>
+<span class="cm">     * @return 赤伝の仕訳伝票番号</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Transactional</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">cancelJournal</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">voucherNumber</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">original</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">journalRepository</span><span class="p">.</span><span class="na">findByVoucherNumber</span><span class="p">(</span><span class="n">voucherNumber</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span>
+<span class="w">                </span><span class="s">"仕訳が見つかりません: "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">voucherNumber</span><span class="p">));</span>
+
+<span class="w">        </span><span class="c1">// 既に赤伝が発行されているか確認</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">original</span><span class="p">.</span><span class="na">getRedSlipFlag</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">.</span><span class="na">getRedSlipFlag</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalStateException</span><span class="p">(</span><span class="s">"この仕訳は既に取消済みです"</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// 赤伝を作成</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">redSlip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createRedSlip</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">journalRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">redSlip</span><span class="p">);</span>
+<span class="w">        </span><span class="n">balanceUpdateService</span><span class="p">.</span><span class="na">updateBalancesForJournal</span><span class="p">(</span><span class="n">redSlip</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"仕訳取消完了: 元伝票={}, 赤伝={}"</span><span class="p">,</span>
+<span class="w">            </span><span class="n">voucherNumber</span><span class="p">,</span><span class="w"> </span><span class="n">redSlip</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">());</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">redSlip</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 赤伝を作成する</span>
+<span class="cm">     *</span>
+<span class="cm">     * JPA 版では CascadeType.ALL により、</span>
+<span class="cm">     * Journal を保存すると details も自動的に保存される</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Journal</span><span class="w"> </span><span class="nf">createRedSlip</span><span class="p">(</span><span class="n">Journal</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 赤伝の仕訳伝票番号を生成（元伝票番号 + R）</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">redVoucherNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">original</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"R"</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// 貸借を反転した明細を作成</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">redDetails</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">JournalDetail</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">var</span><span class="w"> </span><span class="n">detail</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">original</span><span class="p">.</span><span class="na">getDetails</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">reversedDCDetails</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">JournalDebitCreditDetail</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">var</span><span class="w"> </span><span class="n">dcDetail</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">detail</span><span class="p">.</span><span class="na">getDebitCreditDetails</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kd">var</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JournalDebitCreditDetail</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">journalVoucherNumber</span><span class="p">(</span><span class="n">redVoucherNumber</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">lineNumber</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getLineNumber</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">debitCreditLineNumber</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getDebitCreditLineNumber</span><span class="p">())</span>
+<span class="w">                    </span><span class="c1">// 借方→貸方、貸方→借方に反転</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">debitCreditType</span><span class="p">(</span>
+<span class="w">                        </span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getDebitCreditType</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DebitCreditType</span><span class="p">.</span><span class="na">DEBIT</span>
+<span class="w">                            </span><span class="o">?</span><span class="w"> </span><span class="n">DebitCreditType</span><span class="p">.</span><span class="na">CREDIT</span>
+<span class="w">                            </span><span class="p">:</span><span class="w"> </span><span class="n">DebitCreditType</span><span class="p">.</span><span class="na">DEBIT</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">accountCode</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getAccountCode</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">subAccountCode</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getSubAccountCode</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">departmentCode</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getDepartmentCode</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">amount</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getAmount</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">taxType</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getTaxType</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">taxRate</span><span class="p">(</span><span class="n">dcDetail</span><span class="p">.</span><span class="na">getTaxRate</span><span class="p">())</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">                </span><span class="n">reversedDCDetails</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">reversed</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">redDetail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JournalDetail</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">journalVoucherNumber</span><span class="p">(</span><span class="n">redVoucherNumber</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">lineNumber</span><span class="p">(</span><span class="n">detail</span><span class="p">.</span><span class="na">getLineNumber</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">lineSummary</span><span class="p">(</span><span class="n">detail</span><span class="p">.</span><span class="na">getLineSummary</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"（取消）"</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">debitCreditDetails</span><span class="p">(</span><span class="n">reversedDCDetails</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">            </span><span class="n">redDetails</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">redDetail</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Journal</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="na">journalVoucherNumber</span><span class="p">(</span><span class="n">redVoucherNumber</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">postingDate</span><span class="p">(</span><span class="n">LocalDate</span><span class="p">.</span><span class="na">now</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">entryDate</span><span class="p">(</span><span class="n">LocalDate</span><span class="p">.</span><span class="na">now</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">closingEntryFlag</span><span class="p">(</span><span class="n">original</span><span class="p">.</span><span class="na">getClosingEntryFlag</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">voucherType</span><span class="p">(</span><span class="n">original</span><span class="p">.</span><span class="na">getVoucherType</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">departmentCode</span><span class="p">(</span><span class="n">original</span><span class="p">.</span><span class="na">getDepartmentCode</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">redSlipFlag</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">redBlackVoucherNumber</span><span class="p">(</span><span class="n">extractNumericPart</span><span class="p">(</span><span class="n">original</span><span class="p">.</span><span class="na">getJournalVoucherNumber</span><span class="p">()))</span>
+<span class="w">            </span><span class="p">.</span><span class="na">details</span><span class="p">(</span><span class="n">redDetails</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="nf">extractNumericPart</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">voucherNumber</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">voucherNumber</span><span class="p">.</span><span class="na">replaceAll</span><span class="p">(</span><span class="s">"[^0-9]"</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 訂正結果</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">CorrectionResult</span><span class="p">(</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">redSlipNumber</span><span class="p">,</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">blackSlipNumber</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<hr />
+<h2 id="195">19.5 ログ管理方式の選択<a class="headerlink" href="#195" title="Permanent link">&para;</a></h2>
+<p>会計システムのログ管理には、3つの方式があります。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJERVNDUklQVElPTiIgc3R5bGU9IndpZHRoOjc2NXB4O2hlaWdodDozNTZweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNzY1cHgiIGhlaWdodD0iMzU2cHgiIHZpZXdCb3g9IjAgMCA3NjUgMzU2IiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMzE2LjI1IiB5PSIyMi45OTUiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjEyNS45OTkiIGZvbnQtd2VpZ2h0PSI3MDAiPuODreOCsOeuoeeQhuaWueW8j+OBruavlOi8gzwvdGV4dD48L2c+PCEtLWNsdXN0ZXIgYS0tPjxnIGNsYXNzPSJjbHVzdGVyIiBkYXRhLXF1YWxpZmllZC1uYW1lPSJhIiBpZD0iZW50MDAwMSIgZGF0YS1zb3VyY2UtbGluZT0iMyI+PHJlY3QgeD0iNyIgeT0iMTE5Ljc5NyIgd2lkdGg9IjI0NyIgaGVpZ2h0PSIxMjEuODkiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSIxNC44NDciIHk9IjEzNC43OTIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjIzMS4zMDciIGZvbnQtd2VpZ2h0PSI3MDAiPuaWueW8j0E6IOODh+ODvOOCv+iHquS9k+OBq+ODreOCsOaDheWgseOCkuaMgeOBpDwvdGV4dD48L2c+PCEtLWNsdXN0ZXIgYi0tPjxnIGNsYXNzPSJjbHVzdGVyIiBkYXRhLXF1YWxpZmllZC1uYW1lPSJiIiBpZD0iZW50MDAwMyIgZGF0YS1zb3VyY2UtbGluZT0iNyI+PHJlY3QgeD0iMjk0IiB5PSIxMTkuNzk3IiB3aWR0aD0iMTkxIiBoZWlnaHQ9IjEyMS44OSIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjMwMS45MjkiIHk9IjEzNC43OTIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjE3NS4xNDMiIGZvbnQtd2VpZ2h0PSI3MDAiPuaWueW8j0I6IOi1pOm7kuWHpueQhuODu+irlueQhuWJiumZpDwvdGV4dD48L2c+PCEtLWNsdXN0ZXIgYy0tPjxnIGNsYXNzPSJjbHVzdGVyIiBkYXRhLXF1YWxpZmllZC1uYW1lPSJjIiBpZD0iZW50MDAwNSIgZGF0YS1zb3VyY2UtbGluZT0iMTEiPjxyZWN0IHg9IjUyNSIgeT0iMTExLjY0NyIgd2lkdGg9IjE5MCIgaGVpZ2h0PSIxMzguMTkiIGZpbGw9Im5vbmUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSI1MzIuNjI3IiB5PSIxMjYuNjQyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNzQuNzQ2IiBmb250LXdlaWdodD0iNzAwIj7mlrnlvI9DOiDjg63jgrDjg4bjg7zjg5bjg6vjgavkv53lrZg8L3RleHQ+PC9nPjwhLS1lbnRpdHkgYTEtLT48ZyBjbGFzcz0iZW50aXR5IiBkYXRhLXF1YWxpZmllZC1uYW1lPSJhLmExIiBpZD0iZW50MDAwMiIgZGF0YS1zb3VyY2UtbGluZT0iNCI+PHJlY3QgeD0iODMiIHk9IjE2Mi43OTciIHdpZHRoPSI3NiIgaGVpZ2h0PSI1NC44OTEiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjkzIiB5PSIxNzguNzkyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1NiI+5L2c5oiQ5pel5pmCPC90ZXh0Pjx0ZXh0IHg9IjkzIiB5PSIxOTUuMDg5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1NiI+5pu05paw5pel5pmCPC90ZXh0Pjx0ZXh0IHg9IjkzIiB5PSIyMTEuMzg2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1NiI+5pu05paw6ICF5ZCNPC90ZXh0PjwvZz48IS0tZW50aXR5IGIxLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iYi5iMSIgaWQ9ImVudDAwMDQiIGRhdGEtc291cmNlLWxpbmU9IjgiPjxyZWN0IHg9IjMyMyIgeT0iMTYyLjc5NyIgd2lkdGg9IjEwNCIgaGVpZ2h0PSI1NC44OTEiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjx0ZXh0IHg9IjMzMyIgeT0iMTc4Ljc5MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNzAiPui1pOS8neODleODqeOCsDwvdGV4dD48dGV4dCB4PSIzMzMiIHk9IjE5NS4wODkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9Ijg0Ij7otaTpu5LkvJ3npajnlarlj7c8L3RleHQ+PHRleHQgeD0iMzMzIiB5PSIyMTEuMzg2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI3MCI+5YmK6Zmk44OV44Op44KwPC90ZXh0PjwvZz48IS0tZW50aXR5IGMxLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iYy5jMSIgaWQ9ImVudDAwMDYiIGRhdGEtc291cmNlLWxpbmU9IjEyIj48cmVjdCB4PSI1NDkiIHk9IjE1NC42NDciIHdpZHRoPSIxMDQiIGhlaWdodD0iNzEuMTg4IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48dGV4dCB4PSI1NTkiIHk9IjE3MC42NDIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjU2Ij7mk43kvZznqK7liKU8L3RleHQ+PHRleHQgeD0iNTU5IiB5PSIxODYuOTM5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI4NCI+5pON5L2c5YmN44OH44O844K/PC90ZXh0Pjx0ZXh0IHg9IjU1OSIgeT0iMjAzLjIzNiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iODQiPuaTjeS9nOW+jOODh+ODvOOCvzwvdGV4dD48dGV4dCB4PSI1NTkiIHk9IjIxOS41MzMiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjQyIj7mk43kvZzogIU8L3RleHQ+PC9nPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9IkdNTjkiIGlkPSJlbnQwMDEwIiBkYXRhLXNvdXJjZS1saW5lPSIxOSI+PHBhdGggZD0iTTE0Mi4zMiwyODUuODM3IEwxNDIuMzIsMzQxLjIzNSBMMzQ5LjY4MSwzNDEuMjM1IEwzNDkuNjgxLDI5NS44MzcgTDMzOS42ODEsMjg1LjgzNyBMMTQyLjMyLDI4NS44MzciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgZmlsbD0iI0ZFRkZERCIvPjxwYXRoIGQ9Ik0zMzkuNjgxLDI4NS44MzcgTDMzOS42ODEsMjk1LjgzNyBMMzQ5LjY4MSwyOTUuODM3IEwzMzkuNjgxLDI4NS44MzciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIGZpbGw9IiNGRUZGREQiLz48dGV4dCB4PSIxNDguMzIiIHk9IjMwMi45MDQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9Ijc4Ij7mnIDjgoLjgrfjg7Pjg5fjg6s8L3RleHQ+PHRleHQgeD0iMTQ4LjMyIiB5PSIzMTguMDM3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxMzAiPuabtOaWsOWxpeattOOBr+S/neaMgeOBl+OBquOBhDwvdGV4dD48dGV4dCB4PSIxNDguMzIiIHk9IjMzMy4xNjkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjE4Ni4zNjEiPkpQQSDjgafjga8gQEVuYWJsZUpwYUF1ZGl0aW5nPC90ZXh0PjwvZz48ZyBjbGFzcz0iZW50aXR5IiBkYXRhLXF1YWxpZmllZC1uYW1lPSJHTU4xMiIgaWQ9ImVudDAwMTMiIGRhdGEtc291cmNlLWxpbmU9IjI1Ij48cGF0aCBkPSJNNDA0LjUsMjkzLjQwNyBMNDA0LjUsMzMzLjY3MyBMNTI5LjUsMzMzLjY3MyBMNTI5LjUsMzAzLjQwNyBMNTE5LjUsMjkzLjQwNyBMNDA0LjUsMjkzLjQwNyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiBmaWxsPSIjRkVGRkREIi8+PHBhdGggZD0iTTUxOS41LDI5My40MDcgTDUxOS41LDMwMy40MDcgTDUyOS41LDMwMy40MDcgTDUxOS41LDI5My40MDciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiIGZpbGw9IiNGRUZGREQiLz48dGV4dCB4PSI0MTAuNSIgeT0iMzEwLjQ3NCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTA0Ij7kvJroqIjjg4fjg7zjgr/jgavmnIDpgak8L3RleHQ+PHRleHQgeD0iNDEwLjUiIHk9IjMyNS42MDciIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9IjkxIj7nm6Pmn7voqLzot6HjgpLnorrkv508L3RleHQ+PC9nPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9IkdNTjE1IiBpZD0iZW50MDAxNiIgZGF0YS1zb3VyY2UtbGluZT0iMzAiPjxwYXRoIGQ9Ik02MjUuNSwyOTMuNDA3IEw2MjUuNSwzMzMuNjczIEw3NTAuNSwzMzMuNjczIEw3NTAuNSwzMDMuNDA3IEw3NDAuNSwyOTMuNDA3IEw2MjUuNSwyOTMuNDA3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIGZpbGw9IiNGRUZGREQiLz48cGF0aCBkPSJNNzQwLjUsMjkzLjQwNyBMNzQwLjUsMzAzLjQwNyBMNzUwLjUsMzAzLjQwNyBMNzQwLjUsMjkzLjQwNyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0iI0ZFRkZERCIvPjx0ZXh0IHg9IjYzMS41IiB5PSIzMTAuNDc0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSI5MSI+5a6M5YWo44Gq5bGl5q20566h55CGPC90ZXh0Pjx0ZXh0IHg9IjYzMS41IiB5PSIzMjUuNjA3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxMDQiPuODnuOCueOCv+abtOaWsOOBq+acgOmBqTwvdGV4dD48L2c+PCEtLWxpbmsgYSB0byBiLS0+PCEtLWxpbmsgYiB0byBjLS0+PCEtLWxpbmsgYSB0byBHTU45LS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDEiIGRhdGEtZW50aXR5LTI9ImVudDAwMTAiIGlkPSJsbmsxMSIgZGF0YS1zb3VyY2UtbGluZT0iMTkiIGRhdGEtbGluay10eXBlPSJhc3NvY2lhdGlvbiI+PHBhdGggZD0iTTI0NiwyNDEuOTQ0IEMyNDYsMjQyLjI2MSAyNDYsMjQyLjU3OSAyNDYsMjQyLjg5OCBDMjQ2LDI0My41MzUgMjQ2LDI0NC4xNzMgMjQ2LDI0NC44MTIgQzI0NiwyNDYuMDkgMjQ2LDI0Ny4zNzMgMjQ2LDI0OC42NTggQzI0NiwyNTEuMjI3IDI0NiwyNTMuODA0IDI0NiwyNTYuMzcgQzI0NiwyNjYuNjM2IDI0NiwyNzYuNzI5IDI0NiwyODUuNDY3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWRhc2hhcnJheTo3LDc7IiBmaWxsPSJub25lIiBpZD0iYS1HTU45Ii8+PC9nPjwhLS1saW5rIGIgdG8gR01OMTItLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAwMyIgZGF0YS1lbnRpdHktMj0iZW50MDAxMyIgaWQ9ImxuazE0IiBkYXRhLXNvdXJjZS1saW5lPSIyNSIgZGF0YS1saW5rLXR5cGU9ImFzc29jaWF0aW9uIj48cGF0aCBkPSJNNDY3LDI0MS42OTQgQzQ2NywyNDIuMDM2IDQ2NywyNDIuMzc4IDQ2NywyNDIuNzIgQzQ2NywyNDQuMDkxIDQ2NywyNDUuNDY4IDQ2NywyNDYuODQ4IEM0NjcsMjUyLjM2OSA0NjcsMjU3Ljk0NyA0NjcsMjYzLjM5NiBDNDY3LDI3NC4yOTQgNDY3LDI4NC42NzcgNDY3LDI5My4wNjciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtZGFzaGFycmF5OjcsNzsiIGZpbGw9Im5vbmUiIGlkPSJiLUdNTjEyIi8+PC9nPjwhLS1saW5rIGMgdG8gR01OMTUtLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAwNSIgZGF0YS1lbnRpdHktMj0iZW50MDAxNiIgaWQ9ImxuazE3IiBkYXRhLXNvdXJjZS1saW5lPSIzMCIgZGF0YS1saW5rLXR5cGU9ImFzc29jaWF0aW9uIj48cGF0aCBkPSJNNjg4LDI0OS45NTkgQzY4OCwyNTAuMzA1IDY4OCwyNTAuNjUxIDY4OCwyNTAuOTk3IEM2ODgsMjUyLjM4MSA2ODgsMjUzLjc2NiA2ODgsMjU1LjE0OSBDNjg4LDI1Ny45MTUgNjg4LDI2MC42NzEgNjg4LDI2My4zOTYgQzY4OCwyNzQuMjk0IDY4OCwyODQuNjc3IDY4OCwyOTMuMDY3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWRhc2hhcnJheTo3LDc7IiBmaWxsPSJub25lIiBpZD0iYy1HTU4xNSIvPjwvZz48P3BsYW50dW1sLXNyYyBUTDlESm5mMTZCeEZodlhtei0yTEt3ZG51aWN4ekIxVm5LcnFRNzF4UWZldUVxTW1XS1lxV2pfTUxqZUwwY2dnOFBRcl9mWHRQdFJ2NXh1b2tnUDFScGxsbENfZFprVHdJbXU1cUdGXzhrd1ZuOHFyclJvSHVHUm1sWmhfYmVJMmE5OVpVR09odTVmNnQtTW8yQVkwMkM2X0lvZ1R3N09CVTVUSkE1Nk10b18xdHJHcjNsbXFHdXFMUWoxRm4zOUFEaXI0am1VZ3NiMmpqamhyeXFwak53ZGNuVi1kUEJLaTZ0S0Rjb1FWTm4xX2N3Tjl6VWJlazJhaGx6MGpZNjdJUlVBN05GeXdzak0yUFlnOGNyNXUyNjhSbjFjd29wQ0RuTGRTM2tCalpqbU92OWI2ZmFrUXVjTm5jVW5aTEkzTTdsQUI5ZVdrWGVfazNjTGxQdW9xS2Q2ckxTVjBTVDJOckpSYzZ2X2FVWnNqQmZ0emdxdENpMFZERGxQWHFBYzVIVFVzN1ZRa3YxT01sSWJnNGREWVBYNzJZZnYzcFFCZDVQVGZ5SnFyWTNmTzFUeTdWbTNZM3VXTWtZTXdRN2RQTGhxaHVFVGVWVm9sTWkweG1CLUdrVmFTMVZ1UlItWVJNTVFPSXl4UzFvRnRxTk96Ym5NOG1zcHc4MzhYUFA4ZXQ0azJRZmU0TXE3bjRKeVp5VnZGVEpuQ1daMFBkRTNCWTdfeUhTdE5jSW1ZLXBMUDNqMkZEZ2NWOUc1bjFGdURDa2kwcF9uRkpGUzA/PjwvZz48L3N2Zz4=" class="uml" alt="uml diagram" title="" /></p>
+<h3 id="_4">推奨される組み合わせ<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>データ種別</th>
+<th>方式</th>
+<th>JPA 実装</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>マスタデータ</td>
+<td>A + C</td>
+<td>@EnableJpaAuditing + @EntityListeners</td>
+</tr>
+<tr>
+<td>トランザクションデータ</td>
+<td>A + B</td>
+<td>@EnableJpaAuditing + 赤黒処理</td>
+</tr>
+<tr>
+<td>サマリデータ</td>
+<td>A</td>
+<td>@EnableJpaAuditing のみ</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="196-jpa-auditing">19.6 JPA Auditing による自動タイムスタンプ<a class="headerlink" href="#196-jpa-auditing" title="Permanent link">&para;</a></h2>
+<p>JPA 版では、Spring Data JPA の Auditing 機能を使用して、作成日時・更新日時・作成者・更新者を自動的に設定できます。</p>
+<h3 id="auditing">Auditing 設定<a class="headerlink" href="#auditing" title="Permanent link">&para;</a></h3>
+<details>
+<summary>AccountingApplication.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.boot.SpringApplication</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.repository.config.EnableJpaAuditing</span><span class="p">;</span>
+
+<span class="nd">@SpringBootApplication</span>
+<span class="nd">@EnableJpaAuditing</span><span class="w">  </span><span class="c1">// JPA Auditing を有効化</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AccountingApplication</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">AccountingApplication</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="auditoraware">AuditorAware 実装（操作者の自動設定）<a class="headerlink" href="#auditoraware" title="Permanent link">&para;</a></h3>
+<details>
+<summary>AuditorAwareImpl.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.config</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.domain.AuditorAware</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.security.core.Authentication</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.security.core.context.SecurityContextHolder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Component</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Optional</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 操作者を自動取得する AuditorAware 実装</span>
+<span class="cm"> *</span>
+<span class="cm"> * Spring Security と連携して、現在ログイン中のユーザーを取得</span>
+<span class="cm"> * @CreatedBy, @LastModifiedBy に自動設定される</span>
+<span class="cm"> */</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuditorAwareImpl</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">AuditorAware</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getCurrentAuditor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Authentication</span><span class="w"> </span><span class="n">authentication</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SecurityContextHolder</span><span class="p">.</span><span class="na">getContext</span><span class="p">().</span><span class="na">getAuthentication</span><span class="p">();</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">authentication</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">authentication</span><span class="p">.</span><span class="na">isAuthenticated</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">"system"</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">authentication</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="entity">監査情報を持つ基底 Entity<a class="headerlink" href="#entity" title="Permanent link">&para;</a></h3>
+<details>
+<summary>BaseEntity.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.common</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.Getter</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.Setter</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.annotation.CreatedBy</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.annotation.CreatedDate</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.annotation.LastModifiedBy</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.annotation.LastModifiedDate</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.domain.support.AuditingEntityListener</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDateTime</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 監査情報を持つ基底 Entity</span>
+<span class="cm"> *</span>
+<span class="cm"> * JPA 版では @EntityListeners と Auditing アノテーションで</span>
+<span class="cm"> * 作成日時・更新日時・作成者・更新者を自動管理</span>
+<span class="cm"> *</span>
+<span class="cm"> * MyBatis 版では手動で設定していたが、JPA 版では自動化</span>
+<span class="cm"> */</span>
+<span class="nd">@MappedSuperclass</span>
+<span class="nd">@EntityListeners</span><span class="p">(</span><span class="n">AuditingEntityListener</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BaseEntity</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@CreatedDate</span>
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"作成日時"</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">updatable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@LastModifiedDate</span>
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"更新日時"</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updatedAt</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@CreatedBy</span>
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"作成者"</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="n">updatable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">createdBy</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@LastModifiedBy</span>
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"更新者"</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">updatedBy</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<hr />
+<h2 id="197">19.7 マスタ変更ログテーブルの設計<a class="headerlink" href="#197" title="Permanent link">&para;</a></h2>
+<h3 id="flyway">Flyway マイグレーション<a class="headerlink" href="#flyway" title="Permanent link">&para;</a></h3>
+<details>
+<summary>V010__create_change_log_table.sql</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1">-- 操作種別</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TYPE</span><span class="w"> </span><span class="err">操作種別</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ENUM</span><span class="w"> </span><span class="p">(</span><span class="s1">'INSERT'</span><span class="p">,</span><span class="w"> </span><span class="s1">'UPDATE'</span><span class="p">,</span><span class="w"> </span><span class="s1">'DELETE'</span><span class="p">);</span>
+
+<span class="c1">-- 変更ログテーブル</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="ss">"変更ログ"</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="ss">"ログID"</span><span class="w"> </span><span class="nb">SERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"テーブル名"</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"レコードキー"</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"操作種別"</span><span class="w"> </span><span class="err">操作種別</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"操作前データ"</span><span class="w"> </span><span class="n">JSONB</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"操作後データ"</span><span class="w"> </span><span class="n">JSONB</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"操作日時"</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="ss">"操作者"</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span>
+<span class="w">    </span><span class="ss">"操作端末"</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+<span class="w">    </span><span class="ss">"備考"</span><span class="w"> </span><span class="nb">TEXT</span>
+<span class="p">);</span>
+
+<span class="c1">-- インデックス</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="ss">"idx_変更ログ_テーブル名"</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="ss">"変更ログ"</span><span class="p">(</span><span class="ss">"テーブル名"</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="ss">"idx_変更ログ_レコードキー"</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="ss">"変更ログ"</span><span class="p">(</span><span class="ss">"レコードキー"</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="ss">"idx_変更ログ_操作日時"</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="ss">"変更ログ"</span><span class="p">(</span><span class="ss">"操作日時"</span><span class="p">);</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="entity_1">変更ログ Entity<a class="headerlink" href="#entity_1" title="Permanent link">&para;</a></h3>
+<details>
+<summary>ChangeLog.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.converter.OperationTypeConverter</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.*</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDateTime</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 変更ログ Entity</span>
+<span class="cm"> *</span>
+<span class="cm"> * JPA 版では @Entity で定義</span>
+<span class="cm"> * @GeneratedValue で自動採番</span>
+<span class="cm"> */</span>
+<span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"変更ログ"</span><span class="p">)</span>
+<span class="nd">@Data</span>
+<span class="nd">@Builder</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ChangeLog</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Id</span>
+<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ログID"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">logId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"テーブル名"</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"レコードキー"</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">recordKey</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Convert</span><span class="p">(</span><span class="n">converter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OperationTypeConverter</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作種別"</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">columnDefinition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作種別"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">OperationType</span><span class="w"> </span><span class="n">operationType</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作前データ"</span><span class="p">,</span><span class="w"> </span><span class="n">columnDefinition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"JSONB"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">beforeData</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作後データ"</span><span class="p">,</span><span class="w"> </span><span class="n">columnDefinition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"JSONB"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">afterData</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作日時"</span><span class="p">,</span><span class="w"> </span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">operatedAt</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作者"</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">operatedBy</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"操作端末"</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">operatedFrom</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"備考"</span><span class="p">,</span><span class="w"> </span><span class="n">columnDefinition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"TEXT"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">remarks</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@PrePersist</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">onCreate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">operatedAt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">this</span><span class="p">.</span><span class="na">operatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="enum-converter">操作種別 Enum と Converter<a class="headerlink" href="#enum-converter" title="Permanent link">&para;</a></h3>
+<details>
+<summary>OperationType.java と OperationTypeConverter.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 操作種別 Enum</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">enum</span><span class="w"> </span><span class="n">OperationType</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">INSERT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UPDATE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DELETE</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.converter</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.OperationType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.AttributeConverter</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.Converter</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 操作種別 ↔ PostgreSQL ENUM 変換</span>
+<span class="cm"> */</span>
+<span class="nd">@Converter</span><span class="p">(</span><span class="n">autoApply</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OperationTypeConverter</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">AttributeConverter</span><span class="o">&lt;</span><span class="n">OperationType</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">convertToDatabaseColumn</span><span class="p">(</span><span class="n">OperationType</span><span class="w"> </span><span class="n">attribute</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">attribute</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">attribute</span><span class="p">.</span><span class="na">name</span><span class="p">()</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">OperationType</span><span class="w"> </span><span class="nf">convertToEntityAttribute</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">dbData</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">dbData</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">OperationType</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">dbData</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<hr />
+<h2 id="198-entitylistener">19.8 EntityListener によるマスタ変更ログの自動記録<a class="headerlink" href="#198-entitylistener" title="Permanent link">&para;</a></h2>
+<p>JPA 版では @EntityListeners を使用して、Entity のライフサイクルイベントをフックし、変更ログを自動的に記録できます。</p>
+<details>
+<summary>ChangeLogListener.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.listener</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.ChangeLog</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.OperationType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.repository.ChangeLogJpaRepository</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.core.JsonProcessingException</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.databind.ObjectMapper</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.security.core.context.SecurityContextHolder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Component</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDateTime</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * マスタ変更ログを自動記録する EntityListener</span>
+<span class="cm"> *</span>
+<span class="cm"> * JPA 版では @EntityListeners で Entity のライフサイクルをフック</span>
+<span class="cm"> * MyBatis 版では DB トリガーで実装していた機能を Java コードで実現</span>
+<span class="cm"> */</span>
+<span class="nd">@Component</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ChangeLogListener</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">ChangeLogJpaRepository</span><span class="w"> </span><span class="n">changeLogRepository</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">ObjectMapper</span><span class="w"> </span><span class="n">objectMapper</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Autowired</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setChangeLogRepository</span><span class="p">(</span><span class="n">ChangeLogJpaRepository</span><span class="w"> </span><span class="n">repository</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ChangeLogListener</span><span class="p">.</span><span class="na">changeLogRepository</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">repository</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Autowired</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setObjectMapper</span><span class="p">(</span><span class="n">ObjectMapper</span><span class="w"> </span><span class="n">mapper</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ChangeLogListener</span><span class="p">.</span><span class="na">objectMapper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mapper</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@PostPersist</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postPersist</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">entity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">saveChangeLog</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">OperationType</span><span class="p">.</span><span class="na">INSERT</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="n">entity</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@PostUpdate</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postUpdate</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">entity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">saveChangeLog</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">OperationType</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="n">entity</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@PostRemove</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postRemove</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">entity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">saveChangeLog</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">OperationType</span><span class="p">.</span><span class="na">DELETE</span><span class="p">,</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveChangeLog</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">OperationType</span><span class="w"> </span><span class="n">operationType</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">Object</span><span class="w"> </span><span class="n">beforeData</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">afterData</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getTableName</span><span class="p">(</span><span class="n">entity</span><span class="p">);</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">recordKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRecordKey</span><span class="p">(</span><span class="n">entity</span><span class="p">);</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">beforeJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">beforeData</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">objectMapper</span><span class="p">.</span><span class="na">writeValueAsString</span><span class="p">(</span><span class="n">beforeData</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">afterJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">afterData</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">objectMapper</span><span class="p">.</span><span class="na">writeValueAsString</span><span class="p">(</span><span class="n">afterData</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">changeLog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChangeLog</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">tableName</span><span class="p">(</span><span class="n">tableName</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">recordKey</span><span class="p">(</span><span class="n">recordKey</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">operationType</span><span class="p">(</span><span class="n">operationType</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">beforeData</span><span class="p">(</span><span class="n">beforeJson</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">afterData</span><span class="p">(</span><span class="n">afterJson</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">operatedAt</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">operatedBy</span><span class="p">(</span><span class="n">getCurrentUser</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+<span class="w">            </span><span class="n">changeLogRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">changeLog</span><span class="p">);</span>
+
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"変更ログ記録: table={}, key={}, operation={}"</span><span class="p">,</span>
+<span class="w">                </span><span class="n">tableName</span><span class="p">,</span><span class="w"> </span><span class="n">recordKey</span><span class="p">,</span><span class="w"> </span><span class="n">operationType</span><span class="p">);</span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">JsonProcessingException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"変更ログの JSON 変換に失敗しました"</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getTableName</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">entity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Table</span><span class="w"> </span><span class="n">tableAnnotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entity</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getAnnotation</span><span class="p">(</span><span class="n">Table</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">tableAnnotation</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">tableAnnotation</span><span class="p">.</span><span class="na">name</span><span class="p">()</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">entity</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getSimpleName</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getRecordKey</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">entity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">entity</span><span class="p">.</span><span class="na">toString</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getCurrentUser</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">authentication</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SecurityContextHolder</span><span class="p">.</span><span class="na">getContext</span><span class="p">().</span><span class="na">getAuthentication</span><span class="p">();</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">authentication</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">authentication</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s">"system"</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="entitylistener-entity">EntityListener を使用する Entity<a class="headerlink" href="#entitylistener-entity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Account Entity に @EntityListeners を追加</span>
+<span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"勘定科目マスタ"</span><span class="p">)</span>
+<span class="nd">@EntityListeners</span><span class="p">(</span><span class="n">ChangeLogListener</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">  </span><span class="c1">// 変更ログを自動記録</span>
+<span class="nd">@Data</span>
+<span class="nd">@Builder</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Account</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">BaseEntity</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ... 既存のフィールド</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="199">19.9 変更ログリポジトリの実装<a class="headerlink" href="#199" title="Permanent link">&para;</a></h2>
+<h3 id="jparepository-specification">JpaRepository と Specification<a class="headerlink" href="#jparepository-specification" title="Permanent link">&para;</a></h3>
+<details>
+<summary>ChangeLogJpaRepository.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.repository</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.ChangeLog</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.OperationType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.repository.JpaRepository</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.repository.JpaSpecificationExecutor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.repository.Query</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.repository.query.Param</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Repository</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDateTime</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 変更ログ JpaRepository</span>
+<span class="cm"> *</span>
+<span class="cm"> * JpaSpecificationExecutor を継承して動的クエリに対応</span>
+<span class="cm"> */</span>
+<span class="nd">@Repository</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">ChangeLogJpaRepository</span>
+<span class="w">        </span><span class="kd">extends</span><span class="w"> </span><span class="n">JpaRepository</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">                </span><span class="n">JpaSpecificationExecutor</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * テーブル名とレコードキーで検索</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">findByTableNameAndRecordKeyOrderByOperatedAtDesc</span><span class="p">(</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">recordKey</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * テーブル名で検索</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">findByTableNameOrderByOperatedAtDesc</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 操作種別で検索</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">findByOperationTypeOrderByOperatedAtDesc</span><span class="p">(</span><span class="n">OperationType</span><span class="w"> </span><span class="n">operationType</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 期間指定で検索</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="nd">@Query</span><span class="p">(</span><span class="s">"SELECT c FROM ChangeLog c "</span><span class="w"> </span><span class="o">+</span>
+<span class="w">           </span><span class="s">"WHERE c.operatedAt BETWEEN :from AND :to "</span><span class="w"> </span><span class="o">+</span>
+<span class="w">           </span><span class="s">"ORDER BY c.operatedAt DESC"</span><span class="p">)</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">findByDateRange</span><span class="p">(</span>
+<span class="w">            </span><span class="nd">@Param</span><span class="p">(</span><span class="s">"from"</span><span class="p">)</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">from</span><span class="p">,</span>
+<span class="w">            </span><span class="nd">@Param</span><span class="p">(</span><span class="s">"to"</span><span class="p">)</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="kd">to</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">     * 操作者で検索</span>
+<span class="cm">     */</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">findByOperatedByOrderByOperatedAtDesc</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">operatedBy</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<h3 id="specification">Specification による動的クエリ<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h3>
+<details>
+<summary>ChangeLogSpecifications.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.specification</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.ChangeLog</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.OperationType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.domain.Specification</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDateTime</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 変更ログ検索用 Specification</span>
+<span class="cm"> *</span>
+<span class="cm"> * JPA 版では Specification パターンで動的クエリを構築</span>
+<span class="cm"> * MyBatis 版では XML の &lt;if&gt; タグで動的 SQL を構築していた</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ChangeLogSpecifications</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Specification</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">tableNameEquals</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">cb</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="n">tableName</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cb</span><span class="p">.</span><span class="na">equal</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"tableName"</span><span class="p">),</span><span class="w"> </span><span class="n">tableName</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Specification</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">recordKeyEquals</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">recordKey</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">cb</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="n">recordKey</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cb</span><span class="p">.</span><span class="na">equal</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"recordKey"</span><span class="p">),</span><span class="w"> </span><span class="n">recordKey</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Specification</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">operationTypeEquals</span><span class="p">(</span><span class="n">OperationType</span><span class="w"> </span><span class="n">operationType</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">cb</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="n">operationType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cb</span><span class="p">.</span><span class="na">equal</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"operationType"</span><span class="p">),</span><span class="w"> </span><span class="n">operationType</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Specification</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">operatedAtAfter</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">from</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">cb</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="n">from</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cb</span><span class="p">.</span><span class="na">greaterThanOrEqualTo</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"operatedAt"</span><span class="p">),</span><span class="w"> </span><span class="n">from</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Specification</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">operatedAtBefore</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="w"> </span><span class="kd">to</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">cb</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="kd">to</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cb</span><span class="p">.</span><span class="na">lessThanOrEqualTo</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"operatedAt"</span><span class="p">),</span><span class="w"> </span><span class="kd">to</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Specification</span><span class="o">&lt;</span><span class="n">ChangeLog</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">operatedByEquals</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">operatedBy</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">cb</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="n">operatedBy</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cb</span><span class="p">.</span><span class="na">equal</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"operatedBy"</span><span class="p">),</span><span class="w"> </span><span class="n">operatedBy</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<hr />
+<h2 id="1910">19.10 変更ログリポジトリのテスト<a class="headerlink" href="#1910" title="Permanent link">&para;</a></h2>
+<details>
+<summary>ChangeLogRepositoryTest.java</summary>
+
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.accounting.infrastructure.persistence.repository</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.application.port.out.ChangeLogRepository</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.ChangeLog</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.example.accounting.domain.model.audit.OperationType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.context.annotation.Import</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.test.context.DynamicPropertyRegistry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.test.context.DynamicPropertySource</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.testcontainers.containers.PostgreSQLContainer</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.testcontainers.junit.jupiter.Container</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.testcontainers.junit.jupiter.Testcontainers</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.time.LocalDateTime</span><span class="p">;</span>
+
+<span class="kn">import static</span><span class="w"> </span><span class="nn">org.assertj.core.api.Assertions.*</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 変更ログリポジトリのテスト</span>
+<span class="cm"> */</span>
+<span class="nd">@DataJpaTest</span>
+<span class="nd">@AutoConfigureTestDatabase</span><span class="p">(</span><span class="n">replace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AutoConfigureTestDatabase</span><span class="p">.</span><span class="na">Replace</span><span class="p">.</span><span class="na">NONE</span><span class="p">)</span>
+<span class="nd">@Testcontainers</span>
+<span class="nd">@Import</span><span class="p">(</span><span class="n">ChangeLogRepositoryImpl</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="nd">@DisplayName</span><span class="p">(</span><span class="s">"変更ログリポジトリ"</span><span class="p">)</span>
+<span class="kd">class</span> <span class="nc">ChangeLogRepositoryTest</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Container</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">PostgreSQLContainer</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">postgres</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PostgreSQLContainer</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="s">"postgres:16"</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withDatabaseName</span><span class="p">(</span><span class="s">"testdb"</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withUsername</span><span class="p">(</span><span class="s">"test"</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withPassword</span><span class="p">(</span><span class="s">"test"</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nd">@DynamicPropertySource</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureProperties</span><span class="p">(</span><span class="n">DynamicPropertyRegistry</span><span class="w"> </span><span class="n">registry</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">registry</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"spring.datasource.url"</span><span class="p">,</span><span class="w"> </span><span class="n">postgres</span><span class="p">::</span><span class="n">getJdbcUrl</span><span class="p">);</span>
+<span class="w">        </span><span class="n">registry</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"spring.datasource.username"</span><span class="p">,</span><span class="w"> </span><span class="n">postgres</span><span class="p">::</span><span class="n">getUsername</span><span class="p">);</span>
+<span class="w">        </span><span class="n">registry</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"spring.datasource.password"</span><span class="p">,</span><span class="w"> </span><span class="n">postgres</span><span class="p">::</span><span class="n">getPassword</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Autowired</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">ChangeLogRepository</span><span class="w"> </span><span class="n">changeLogRepository</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Nested</span>
+<span class="w">    </span><span class="nd">@DisplayName</span><span class="p">(</span><span class="s">"登録"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">class</span> <span class="nc">Insert</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">        </span><span class="nd">@Test</span>
+<span class="w">        </span><span class="nd">@DisplayName</span><span class="p">(</span><span class="s">"変更ログを登録できる"</span><span class="p">)</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="nf">canInsertChangeLog</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Arrange</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">changeLog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChangeLog</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">tableName</span><span class="p">(</span><span class="s">"勘定科目マスタ"</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">recordKey</span><span class="p">(</span><span class="s">"11100"</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">operationType</span><span class="p">(</span><span class="n">OperationType</span><span class="p">.</span><span class="na">INSERT</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">afterData</span><span class="p">(</span><span class="s">"{\"勘定科目コード\":\"11100\",\"勘定科目名\":\"現金\"}"</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">operatedBy</span><span class="p">(</span><span class="s">"admin"</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+<span class="w">            </span><span class="c1">// Act</span>
+<span class="w">            </span><span class="n">changeLogRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">changeLog</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Assert</span>
+<span class="w">            </span><span class="n">assertThat</span><span class="p">(</span><span class="n">changeLog</span><span class="p">.</span><span class="na">getLogId</span><span class="p">()).</span><span class="na">isNotNull</span><span class="p">();</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">changeLogRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">changeLog</span><span class="p">.</span><span class="na">getLogId</span><span class="p">());</span>
+<span class="w">            </span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">).</span><span class="na">isPresent</span><span class="p">();</span>
+<span class="w">            </span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getTableName</span><span class="p">()).</span><span class="na">isEqualTo</span><span class="p">(</span><span class="s">"勘定科目マスタ"</span><span class="p">);</span>
+<span class="w">            </span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getOperationType</span><span class="p">()).</span><span class="na">isEqualTo</span><span class="p">(</span><span class="n">OperationType</span><span class="p">.</span><span class="na">INSERT</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Nested</span>
+<span class="w">    </span><span class="nd">@DisplayName</span><span class="p">(</span><span class="s">"検索"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">class</span> <span class="nc">Search</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">        </span><span class="nd">@Test</span>
+<span class="w">        </span><span class="nd">@DisplayName</span><span class="p">(</span><span class="s">"テーブル名とレコードキーで検索できる"</span><span class="p">)</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="nf">canFindByTableNameAndRecordKey</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Act</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">changeLogRepository</span><span class="p">.</span><span class="na">findByTableNameAndRecordKey</span><span class="p">(</span>
+<span class="w">                    </span><span class="s">"勘定科目マスタ"</span><span class="p">,</span><span class="w"> </span><span class="s">"11100"</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Assert</span>
+<span class="w">            </span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">).</span><span class="na">allMatch</span><span class="p">(</span><span class="n">log</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">                    </span><span class="n">log</span><span class="p">.</span><span class="na">getTableName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="s">"勘定科目マスタ"</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">                    </span><span class="n">log</span><span class="p">.</span><span class="na">getRecordKey</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="s">"11100"</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="nd">@Test</span>
+<span class="w">        </span><span class="nd">@DisplayName</span><span class="p">(</span><span class="s">"複合条件で検索できる"</span><span class="p">)</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="nf">canFindByConditions</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Act: Specification パターンで動的クエリ</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">changeLogRepository</span><span class="p">.</span><span class="na">findByConditions</span><span class="p">(</span>
+<span class="w">                    </span><span class="s">"勘定科目マスタ"</span><span class="p">,</span>
+<span class="w">                    </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">OperationType</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">,</span>
+<span class="w">                    </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">                    </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">                    </span><span class="kc">null</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// Assert</span>
+<span class="w">            </span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">).</span><span class="na">allMatch</span><span class="p">(</span><span class="n">log</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">                </span><span class="n">log</span><span class="p">.</span><span class="na">getOperationType</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">OperationType</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+<hr />
+<h2 id="1911">19.11 まとめ：設計のポイント<a class="headerlink" href="#1911" title="Permanent link">&para;</a></h2>
+<h3 id="_5">赤黒処理によるデータ訂正<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ol>
+<li>物理削除を行わず、赤伝で打ち消し</li>
+<li>監査証跡の確保</li>
+<li>残高の自動調整</li>
+<li>JPA 版では CascadeType.ALL で一括保存</li>
+</ol>
+<h3 id="_6">ログ管理方式の使い分け<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>データ種別</th>
+<th>方式</th>
+<th>JPA 実装</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>マスタデータ</td>
+<td>ログテーブル方式</td>
+<td>@EntityListeners</td>
+</tr>
+<tr>
+<td>トランザクションデータ</td>
+<td>赤黒処理</td>
+<td>Cascade 保存</td>
+</tr>
+<tr>
+<td>サマリデータ</td>
+<td>更新日時のみ</td>
+<td>@EnableJpaAuditing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="jpa-auditing">JPA Auditing による自動化<a class="headerlink" href="#jpa-auditing" title="Permanent link">&para;</a></h3>
+<ul>
+<li>@CreatedDate, @LastModifiedDate で日時自動設定</li>
+<li>@CreatedBy, @LastModifiedBy で操作者自動設定</li>
+<li>AuditorAware で Spring Security 連携</li>
+</ul>
+<h3 id="mybatis">MyBatis 版との比較<a class="headerlink" href="#mybatis" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>MyBatis 版</th>
+<th>JPA 版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>監査カラム設定</td>
+<td>手動 / Interceptor</td>
+<td>@EnableJpaAuditing</td>
+</tr>
+<tr>
+<td>マスタ変更ログ</td>
+<td>DB トリガー</td>
+<td>@EntityListeners</td>
+</tr>
+<tr>
+<td>ENUM 変換</td>
+<td>TypeHandler</td>
+<td>AttributeConverter</td>
+</tr>
+<tr>
+<td>動的クエリ</td>
+<td>XML <code>&lt;if&gt;</code> タグ</td>
+<td>Specification パターン</td>
+</tr>
+<tr>
+<td>自動採番</td>
+<td>useGeneratedKeys</td>
+<td>@GeneratedValue</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>@MybatisTest</td>
+<td>@DataJpaTest</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_7">次章予告<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p><a href="../chapter20-orm/">第20章</a>では、D社（化粧品製造販売）の事例に基づいて、Seedデータを作成します。JPA 版では CommandLineRunner と @Transactional を使用したデータ投入を実装します。</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,4653 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="ローカル開発 PC 上に SonarQube（Community Build）を Docker ベースで構築し、プロジェクトの静的コード解析環境を提供するための手順を説明します。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+        <link rel="prev" href="../CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/">
+      
+      
+        <link rel="next" href="../Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>SonarQube ローカル開発環境セットアップ手順書 - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sonarqube" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SonarQube ローカル開発環境セットアップ手順書
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../article/" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/functional-desgin-ppp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/practical-database-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/getting-start-docker-kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提条件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="前提条件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-desktop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Desktop のリソース設定（推奨）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        クロスプラットフォーム対応
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        セットアップ手順
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="セットアップ手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. カーネルパラメータの設定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. カーネルパラメータの設定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#macos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windowswsl2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows（WSL2）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. プロジェクト設定（任意）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. プロジェクト設定（任意）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scantype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scanType 一覧
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. ディレクトリの作成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. ディレクトリの作成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ディレクトリ構造
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Docker Compose の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Docker Compose の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jvm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JVM メモリ設定の目安
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. コンテナの起動
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 初期設定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 初期設定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 ログイン
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 トークンの生成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 日本語プラグインのインストール（任意）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プロジェクトのスキャン
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="プロジェクトのスキャン">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        事前準備: プロジェクト作成と権限付与
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキャンツール別の設定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="スキャンツール別の設定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sonar-scannertypescript-javascript" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sonar-scanner（TypeScript / JavaScript / 汎用）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbtscala" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sbt（Scala）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mavenjava-kotlin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maven（Java / Kotlin）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gradlejava-kotlin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gradle（Java / Kotlin）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        典型的な利用フロー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="典型的な利用フロー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gulp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gulp タスクを使用する場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        手動で実行する場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API による診断情報の取得
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker 管理コマンド
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        バックアップ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="バックアップ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データベースのダンプ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データの完全リセット
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        トラブルシューティング
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="トラブルシューティング">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sonarqube_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SonarQube が起動しない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elasticsearch-exit-code-78" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elasticsearch exit code 78: ヒープサイズ不一致
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elasticsearch-exit-code-78-vmmax_map_count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elasticsearch exit code 78: vm.max_map_count 不足
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        メモリ不足
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ポート競合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンテナが起動しない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows 固有の問題
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Windows 固有の問題">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wsl2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WSL2 のカーネルパラメータがリセットされる
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-desktop_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Desktop のディスク容量を解放
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ポート一覧
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        接続情報まとめ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        セキュリティチェックリスト
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="sonarqube">SonarQube ローカル開発環境セットアップ手順書<a class="headerlink" href="#sonarqube" title="Permanent link">&para;</a></h1>
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>ローカル開発 PC 上に SonarQube（Community Build）を Docker ベースで構築し、プロジェクトの静的コード解析環境を提供するための手順を説明します。</p>
+<p>SonarQube は PostgreSQL をバックエンドデータベースとして使用し、Docker Compose で管理します。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">コンポーネント</th>
+<th style="text-align: left;">コンテナ名</th>
+<th style="text-align: left;">ポート</th>
+<th style="text-align: left;">イメージ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">SonarQube</td>
+<td style="text-align: left;">sonarqube</td>
+<td style="text-align: left;">9000</td>
+<td style="text-align: left;"><code>sonarqube:community</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">PostgreSQL</td>
+<td style="text-align: left;">sonarqube-db</td>
+<td style="text-align: left;">— (内部)</td>
+<td style="text-align: left;"><code>postgres:16-alpine</code></td>
+</tr>
+</tbody>
+</table>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJERVNDUklQVElPTiIgc3R5bGU9IndpZHRoOjUzMHB4O2hlaWdodDo1NDBweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNTMwcHgiIGhlaWdodD0iNTQwcHgiIHZpZXdCb3g9IjAgMCA1MzAgNTQwIiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxnIGNsYXNzPSJ0aXRsZSIgZGF0YS1zb3VyY2UtbGluZT0iMSI+PHRleHQgeD0iMTQ2LjgwMyIgeT0iMjIuOTk1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIyMzAuMTA0IiBmb250LXdlaWdodD0iNzAwIj5Tb25hclF1YmUgb24gTG9jYWwgUEMg5qeL5oiQ5ZuzPC90ZXh0PjwvZz48IS0tY2x1c3RlciDplovnmbogUEMgKGxvY2FsaG9zdCktLT48ZyBjbGFzcz0iY2x1c3RlciIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iLi4gUEMgLmxvY2FsaG9zdC4iIGlkPSJlbnQwMDAxIiBkYXRhLXNvdXJjZS1saW5lPSIzIj48cG9seWdvbiBwb2ludHM9IjE2LDUzLjI5NywyNiw0My4yOTcsNTAxLDQzLjI5Nyw1MDEsNTA1LjA3Nyw0OTEsNTE1LjA3NywxNiw1MTUuMDc3LDE2LDUzLjI5NyIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iNDkxIiB5MT0iNTMuMjk3IiB4Mj0iNTAxIiB5Mj0iNDMuMjk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjE2IiB5MT0iNTMuMjk3IiB4Mj0iNDkxIiB5Mj0iNTMuMjk3IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjQ5MSIgeTE9IjUzLjI5NyIgeDI9IjQ5MSIgeTI9IjUxNS4wNzciIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48dGV4dCB4PSIxODMuMTc0IiB5PSI2OS4yOTIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjE0Mi42NTIiIGZvbnQtd2VpZ2h0PSI3MDAiPumWi+eZuiBQQyAobG9jYWxob3N0KTwvdGV4dD48L2c+PCEtLWNsdXN0ZXIgRG9ja2VyIERlc2t0b3AtLT48ZyBjbGFzcz0iY2x1c3RlciIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iLi4gUEMgLmxvY2FsaG9zdC4uRG9ja2VyIERlc2t0b3AiIGlkPSJlbnQwMDAzIiBkYXRhLXNvdXJjZS1saW5lPSI2Ij48cGF0aCBkPSJNMTM5LjUsMjIzLjg4NyBMMjY1LjcxNCwyMjMuODg3IEEzLjc1LDMuNzUgMCAwIDEgMjY4LjIxNCwyMjYuMzg3IEwyNzUuMjE0LDI0Ni4xODQgTDM1NC41LDI0Ni4xODQgQTIuNSwyLjUgMCAwIDEgMzU3LDI0OC42ODQgTDM1Nyw0ODguNTc3IEEyLjUsMi41IDAgMCAxIDM1NC41LDQ5MS4wNzcgTDEzOS41LDQ5MS4wNzcgQTIuNSwyLjUgMCAwIDEgMTM3LDQ4OC41NzcgTDEzNywyMjYuMzg3IEEyLjUsMi41IDAgMCAxIDEzOS41LDIyMy44ODciIHN0eWxlPSJzdHJva2U6IzAwMDtzdHJva2Utd2lkdGg6MS41OyIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxMzciIHkxPSIyNDYuMTg0IiB4Mj0iMjc1LjIxNCIgeTI9IjI0Ni4xODQiIHN0eWxlPSJzdHJva2U6IzAwMDtzdHJva2Utd2lkdGg6MS41OyIvPjx0ZXh0IHg9IjE0MSIgeT0iMjM4Ljg4MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iMTI1LjIxNCIgZm9udC13ZWlnaHQ9IjcwMCI+RG9ja2VyIERlc2t0b3A8L3RleHQ+PC9nPjwhLS1lbnRpdHkgc2Nhbm5lci0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9Ii4uIFBDIC5sb2NhbGhvc3QuLnNjYW5uZXIiIGlkPSJlbnQwMDAyIiBkYXRhLXNvdXJjZS1saW5lPSI0Ij48cmVjdCB4PSIzMS41NCIgeT0iODMuMjk3IiB3aWR0aD0iMzIyLjkyNiIgaGVpZ2h0PSI2Mi41OTQiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjIuNSIgcnk9IjIuNSIvPjxyZWN0IHg9IjMzNC40NjYiIHk9Ijg4LjI5NyIgd2lkdGg9IjE1IiBoZWlnaHQ9IjEwIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIzMzIuNDY2IiB5PSI5MC4yOTciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjMzMi40NjYiIHk9Ijk0LjI5NyIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHRleHQgeD0iNDYuNTQiIHk9IjExNi4yOTIiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjcwIj7jgrnjgq3jg6Pjg4rjg7w8L3RleHQ+PHRleHQgeD0iNDYuNTQiIHk9IjEzMi41ODkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjI4Mi45MjYiPu+8iHNvbmFyLXNjYW5uZXIgLyBzYnQgLyBtYXZlbiAvIGdyYWRsZe+8iTwvdGV4dD48L2c+PCEtLWVudGl0eSBicm93c2VyLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iLi4gUEMgLmxvY2FsaG9zdC4uYnJvd3NlciIgaWQ9ImVudDAwMDYiIGRhdGEtc291cmNlLWxpbmU9IjExIj48cmVjdCB4PSIzODkiIHk9IjkxLjQ0NyIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjQ2LjI5NyIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMi41IiByeT0iMi41Ii8+PHJlY3QgeD0iNDY1IiB5PSI5Ni40NDciIHdpZHRoPSIxNSIgaGVpZ2h0PSIxMCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHJlY3QgeD0iNDYzIiB5PSI5OC40NDciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjxyZWN0IHg9IjQ2MyIgeT0iMTAyLjQ0NyIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHRleHQgeD0iNDA0IiB5PSIxMjQuNDQyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSI1NiI+44OW44Op44Km44K2PC90ZXh0PjwvZz48IS0tZW50aXR5IHNvbmFyLS0+PGcgY2xhc3M9ImVudGl0eSIgZGF0YS1xdWFsaWZpZWQtbmFtZT0iLi4gUEMgLmxvY2FsaG9zdC4uRG9ja2VyIERlc2t0b3Auc29uYXIiIGlkPSJlbnQwMDA0IiBkYXRhLXNvdXJjZS1saW5lPSI3Ij48cmVjdCB4PSIxNTIuNjkiIHk9IjI1OC44ODciIHdpZHRoPSIxODguNjIiIGhlaWdodD0iNzguODkxIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIyLjUiIHJ5PSIyLjUiLz48cmVjdCB4PSIzMjEuMzEiIHk9IjI2My44ODciIHdpZHRoPSIxNSIgaGVpZ2h0PSIxMCIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7Ii8+PHJlY3QgeD0iMzE5LjMxIiB5PSIyNjUuODg3IiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiLz48cmVjdCB4PSIzMTkuMzEiIHk9IjI2OS44ODciIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIvPjx0ZXh0IHg9IjE2Ny42OSIgeT0iMjkxLjg4MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxNCIgdGV4dExlbmd0aD0iNzguMDUzIj5Tb25hclF1YmU8L3RleHQ+PHRleHQgeD0iMTY3LjY5IiB5PSIzMDguMTc5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxNDguNjIiPu+8iENvbW11bml0eSBCdWlsZO+8iTwvdGV4dD48dGV4dCB4PSIxNjcuNjkiIHk9IjMyNC40NzYiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTQiIHRleHRMZW5ndGg9IjczLjQ5MyI+cG9ydDogOTAwMDwvdGV4dD48L2c+PCEtLWVudGl0eSBwZy0tPjxnIGNsYXNzPSJlbnRpdHkiIGRhdGEtcXVhbGlmaWVkLW5hbWU9Ii4uIFBDIC5sb2NhbGhvc3QuLkRvY2tlciBEZXNrdG9wLnBnIiBpZD0iZW50MDAwNSIgZGF0YS1zb3VyY2UtbGluZT0iOCI+PHBhdGggZD0iTTE3My40OSw0MzkuNzc3IEMxNzMuNDksNDI5Ljc3NyAyMzQuOTk5LDQyOS43NzcgMjM0Ljk5OSw0MjkuNzc3IEMyMzQuOTk5LDQyOS43NzcgMjk2LjUwOCw0MjkuNzc3IDI5Ni41MDgsNDM5Ljc3NyBMMjk2LjUwOCw0NjUuMDc0IEMyOTYuNTA4LDQ3NS4wNzQgMjM0Ljk5OSw0NzUuMDc0IDIzNC45OTksNDc1LjA3NCBDMjM0Ljk5OSw0NzUuMDc0IDE3My40OSw0NzUuMDc0IDE3My40OSw0NjUuMDc0IEwxNzMuNDksNDM5Ljc3NyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiBmaWxsPSIjRjFGMUYxIi8+PHBhdGggZD0iTTE3My40OSw0MzkuNzc3IEMxNzMuNDksNDQ5Ljc3NyAyMzQuOTk5LDQ0OS43NzcgMjM0Ljk5OSw0NDkuNzc3IEMyMzQuOTk5LDQ0OS43NzcgMjk2LjUwOCw0NDkuNzc3IDI5Ni41MDgsNDM5Ljc3NyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiBmaWxsPSJub25lIi8+PHRleHQgeD0iMTgzLjQ5IiB5PSI0NjYuNzcyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjE0IiB0ZXh0TGVuZ3RoPSIxMDMuMDE4Ij5Qb3N0Z3JlU1FMIDE2PC90ZXh0PjwvZz48IS0tbGluayBzY2FubmVyIHRvIHNvbmFyLS0+PGcgY2xhc3M9ImxpbmsiIGRhdGEtZW50aXR5LTE9ImVudDAwMDIiIGRhdGEtZW50aXR5LTI9ImVudDAwMDQiIGlkPSJsbms3IiBkYXRhLXNvdXJjZS1saW5lPSIxNCIgZGF0YS1saW5rLXR5cGU9ImRlcGVuZGVuY3kiPjxwYXRoIGQ9Ik0xNjUuODMsMTQ2LjI4NyBDMTUzLjM1LDE2NC4yMTcgMTQzLjEsMTg3LjI4NyAxNTIsMjA3Ljg4NyBDMTYwLjQ0LDIyNy40MzcgMTcxLjc3NCwyNDEuMzUzIDE4Ny40MzQsMjU1LjM2MyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9InNjYW5uZXItdG8tc29uYXIiLz48cG9seWdvbiBwb2ludHM9IjE5MS4xNiwyNTguNjk3LDE4Ny4xMiwyNDkuNzE1LDE4Ny40MzQsMjU1LjM2MywxODEuNzg1LDI1NS42NzcsMTkxLjE2LDI1OC42OTciIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PHRleHQgeD0iMTUzIiB5PSIxODguOTU0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxNDMuNTkiPkhUVFAgKGxvY2FsaG9zdDo5MDAwKTwvdGV4dD48dGV4dCB4PSIxNzIuNzk1IiB5PSIyMDQuMDg3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxMDQiPuOCueOCreODo+ODs+e1kOaenOmAgeS/oTwvdGV4dD48L2c+PCEtLWxpbmsgYnJvd3NlciB0byBzb25hci0tPjxnIGNsYXNzPSJsaW5rIiBkYXRhLWVudGl0eS0xPSJlbnQwMDA2IiBkYXRhLWVudGl0eS0yPSJlbnQwMDA0IiBpZD0ibG5rOCIgZGF0YS1zb3VyY2UtbGluZT0iMTUiIGRhdGEtbGluay10eXBlPSJkZXBlbmRlbmN5Ij48cGF0aCBkPSJNNDEzLjcsMTM3Ljg3NyBDMzgyLjI5LDE2Ny45MjcgMzI5LjQ4MywyMTguNDMxIDI5MS4wNjMsMjU1LjE4MSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIgZmlsbD0ibm9uZSIgaWQ9ImJyb3dzZXItdG8tc29uYXIiLz48cG9seWdvbiBwb2ludHM9IjI4Ny40NSwyNTguNjM3LDI5Ni43MTksMjU1LjMwNiwyOTEuMDYzLDI1NS4xODEsMjkxLjE4OSwyNDkuNTI1LDI4Ny40NSwyNTguNjM3IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjx0ZXh0IHg9IjM3MS4xMiIgeT0iMTg4Ljk1NCIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTQzLjU5Ij5IVFRQIChsb2NhbGhvc3Q6OTAwMCk8L3RleHQ+PHRleHQgeD0iMzk3LjQxNSIgeT0iMjA0LjA4NyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iOTEiPuODgOODg+OCt+ODpeODnOODvOODiTwvdGV4dD48L2c+PCEtLWxpbmsgc29uYXIgdG8gcGctLT48ZyBjbGFzcz0ibGluayIgZGF0YS1lbnRpdHktMT0iZW50MDAwNCIgZGF0YS1lbnRpdHktMj0iZW50MDAwNSIgaWQ9ImxuazkiIGRhdGEtc291cmNlLWxpbmU9IjE2IiBkYXRhLWxpbmstdHlwZT0iZGVwZW5kZW5jeSI+PHBhdGggZD0iTTI0My45NCwzMzguMTA3IEMyNDEuNjUsMzY3LjE0NyAyMzguOTkzLDQwMC44NDIgMjM3LjExMyw0MjQuNjcyIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7IiBmaWxsPSJub25lIiBpZD0ic29uYXItdG8tcGciLz48cG9seWdvbiBwb2ludHM9IjIzNi43Miw0MjkuNjU3LDI0MS40MTUsNDIwLjk5OSwyMzcuMTEzLDQyNC42NzIsMjMzLjQ0LDQyMC4zNywyMzYuNzIsNDI5LjY1NyIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48dGV4dCB4PSIyNTQuNzYiIHk9IjM4MC44NDQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTMiIHRleHRMZW5ndGg9Ijc5LjIiPkpEQkMgKDU0MzIpPC90ZXh0Pjx0ZXh0IHg9IjI0Mi4zNiIgeT0iMzk1Ljk3NyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMyIgdGV4dExlbmd0aD0iMTA0Ij7lhoXpg6jjg43jg4Pjg4jjg6/jg7zjgq88L3RleHQ+PC9nPjw/cGxhbnR1bWwtc3JjIFpQNUZJbTkxNkNSbHlvYlV6Zkc3b1Z2MjdaZ2VYbVdGWVh3enBFdUVjeFd4aS1vQ0hLSFdFbklRMTlzNEk4QThfWHQyV3JHS0dYemNLbDdhTHNYTUJRbkpidmQzRkJfZFVUemRINWN1MTBnQ3VZMVZER2FtMmJiY09IVG9RSFpTRG1WcnlfdmI1bzdBUjBCNmdES1NOaG43Sm1qazlEZlhOQ0dDRTQwTXl0bjYySExXZ0YxRFhLekF0WVh2Z2NJbEhDVXpFZV9pdXpwMmI5ODA1ZTZSR2Z5VXRZTEt0cXcwUlBVQ1VtcTNDOFVQMlk0Vk1uTml3REdDaW9lUW9uMVU0U3BfNF9TcC1JR2VwSm9sSWlqWTdyQkxpY2pocG5Cck1JMklpOTU4OUFSLTRPMWlCQjI5a05SRndIc1NXMUpvTUxYUWRvWHkxbnNZTm9sOWJmQUZBaG5KdVNqNE9HUGlaLWlQalVueGdOWHlTc2VESVRXZzVkRHAzSU1aeDVZOXBaTko3SndWM3d4UWV6aEh2eVNyY2pkem9xRk1iOUdnVjVOb0xpY3NCYlo5MWZmMjRVdXhjanRFZkZHRmhRc2tCNmtZVnQ4eWFXekFkYU1TaDJsUFlRMm15bUswPz48L2c+PC9zdmc+" class="uml" alt="uml diagram" title="" /></p>
+<h2 id="_2">前提条件<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">項目</th>
+<th style="text-align: left;">要件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">OS</td>
+<td style="text-align: left;">macOS / Windows / Linux</td>
+</tr>
+<tr>
+<td style="text-align: left;">RAM</td>
+<td style="text-align: left;">最低 4GB（推奨 6GB 以上を Docker Desktop に割り当て）</td>
+</tr>
+<tr>
+<td style="text-align: left;">ストレージ</td>
+<td style="text-align: left;">10GB 以上の空き容量</td>
+</tr>
+<tr>
+<td style="text-align: left;">Docker Desktop</td>
+<td style="text-align: left;">インストール済み（Docker Compose 同梱）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="docker-desktop">Docker Desktop のリソース設定（推奨）<a class="headerlink" href="#docker-desktop" title="Permanent link">&para;</a></h3>
+<p>Docker Desktop &gt; <strong>Settings</strong> &gt; <strong>Resources</strong> で以下を設定します。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">項目</th>
+<th style="text-align: left;">最小</th>
+<th style="text-align: left;">推奨</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Memory</td>
+<td style="text-align: left;">4GB</td>
+<td style="text-align: left;">6GB 以上</td>
+</tr>
+<tr>
+<td style="text-align: left;">CPUs</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">Disk</td>
+<td style="text-align: left;">20GB</td>
+<td style="text-align: left;">40GB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_3">クロスプラットフォーム対応<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">機能</th>
+<th style="text-align: left;">macOS</th>
+<th style="text-align: left;">Windows</th>
+<th style="text-align: left;">Linux</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ブラウザを開く</td>
+<td style="text-align: left;"><code>open</code></td>
+<td style="text-align: left;"><code>start</code></td>
+<td style="text-align: left;"><code>xdg-open</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">null デバイス</td>
+<td style="text-align: left;"><code>/dev/null</code></td>
+<td style="text-align: left;"><code>NUL</code></td>
+<td style="text-align: left;"><code>/dev/null</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">Docker Compose</td>
+<td style="text-align: left;"><code>docker compose</code></td>
+<td style="text-align: left;"><code>docker compose</code></td>
+<td style="text-align: left;"><code>docker compose</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_4">セットアップ手順<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="1">1. カーネルパラメータの設定<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<p>SonarQube 内部の Elasticsearch が <code>vm.max_map_count</code> の引き上げを要求します。</p>
+<h4 id="macos">macOS<a class="headerlink" href="#macos" title="Permanent link">&para;</a></h4>
+<p>Docker Desktop for Mac は Linux VM 上で動作します。通常は Docker Desktop が適切な値を設定しますが、不足している場合は以下で引き上げます。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 現在値を確認</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--privileged<span class="w"> </span>alpine<span class="w"> </span>sysctl<span class="w"> </span>vm.max_map_count
+
+<span class="c1"># 524288 未満の場合は引き上げ（Docker Desktop 再起動まで有効）</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--privileged<span class="w"> </span>alpine<span class="w"> </span>sysctl<span class="w"> </span>-w<span class="w"> </span>vm.max_map_count<span class="o">=</span><span class="m">524288</span>
+</code></pre></div>
+<blockquote>
+<p><strong>注意</strong>: Docker Desktop を再起動すると値がリセットされます。SonarQube 起動前に毎回確認してください。</p>
+</blockquote>
+<h4 id="windowswsl2">Windows（WSL2）<a class="headerlink" href="#windowswsl2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c"># PowerShell（管理者）で WSL2 の設定を変更</span>
+<span class="n">wsl</span> <span class="n">-d</span> <span class="n">docker-desktop</span> <span class="n">sysctl</span> <span class="n">-w</span> <span class="n">vm</span><span class="p">.</span><span class="n">max_map_count</span><span class="p">=</span><span class="n">524288</span>
+</code></pre></div>
+<p>永続化するには <code>%USERPROFILE%\.wslconfig</code> に以下を追加します。</p>
+<div class="highlight"><pre><span></span><code><span class="k">[wsl2]</span>
+<span class="na">kernelCommandLine</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"sysctl.vm.max_map_count=524288"</span>
+</code></pre></div>
+<h4 id="linux">Linux<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># 一時的な設定（即時反映）</span>
+sudo<span class="w"> </span>sysctl<span class="w"> </span>-w<span class="w"> </span>vm.max_map_count<span class="o">=</span><span class="m">524288</span>
+
+<span class="c1"># 永続化</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"vm.max_map_count=524288"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/sysctl.d/99-sonarqube.conf
+sudo<span class="w"> </span>sysctl<span class="w"> </span>--system
+</code></pre></div>
+<hr />
+<h3 id="2">2. プロジェクト設定（任意）<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p>プロジェクトルートに <code>sonarqube.config.json</code> を作成し、スキャン対象プロジェクトを定義します。設定ファイルがない場合、環境変数 <code>SONAR_PROJECT_KEY</code> の値（デフォルト: <code>my-project</code>）で単一プロジェクトとして動作します。</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"projects"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Backend"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"projectKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-backend"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scanType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sonar-scanner"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"srcDir"</span><span class="p">:</span><span class="w"> </span><span class="s2">"apps/backend"</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"frontend"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Frontend"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"projectKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-frontend"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scanType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sonar-scanner"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"srcDir"</span><span class="p">:</span><span class="w"> </span><span class="s2">"apps/frontend"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="scantype">scanType 一覧<a class="headerlink" href="#scantype" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">scanType</th>
+<th style="text-align: left;">説明</th>
+<th style="text-align: left;">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>sonar-scanner</code></td>
+<td style="text-align: left;"><code>npx sonarqube-scanner</code> で実行</td>
+<td style="text-align: left;">TypeScript / JavaScript / 汎用</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>sbt</code></td>
+<td style="text-align: left;"><code>sbt sonarScan</code> で実行</td>
+<td style="text-align: left;">Scala（sbt-sonar プラグイン）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>maven</code></td>
+<td style="text-align: left;"><code>mvn sonar:sonar</code> で実行</td>
+<td style="text-align: left;">Java / Kotlin（Maven）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gradle</code></td>
+<td style="text-align: left;"><code>gradle sonar</code> で実行</td>
+<td style="text-align: left;">Java / Kotlin（Gradle）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="3">3. ディレクトリの作成<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p>プロジェクトルートの <code>ops/docker/sonarqube-local/</code> に Docker Compose ファイルを配置します。データは Docker の名前付きボリュームで管理します。</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>ops/docker/sonarqube-local
+</code></pre></div>
+<h4 id="_5">ディレクトリ構造<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>ops/docker/sonarqube-local/
+└── docker-compose.yml       # Docker Compose 設定
+
+Docker ボリューム（自動作成）:
+  sonarqube_data              # SonarQube データ
+  sonarqube_logs              # SonarQube ログ
+  sonarqube_extensions        # SonarQube プラグイン
+  sonarqube_postgresql        # PostgreSQL データ
+</code></pre></div>
+<hr />
+<h3 id="4-docker-compose">4. Docker Compose の配置<a class="headerlink" href="#4-docker-compose" title="Permanent link">&para;</a></h3>
+<p><code>ops/docker/sonarqube-local/docker-compose.yml</code> を以下の内容で作成します。<code>npx gulp sonar-local:setup</code> を使用する場合は自動生成されます。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sonarqube</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube:community</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">sonarqube-db</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_healthy</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"9000:9000"</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># --- DB 接続 ---</span>
+<span class="w">      </span><span class="nt">SONAR_JDBC_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jdbc:postgresql://sonarqube-db:5432/sonarqube</span>
+<span class="w">      </span><span class="nt">SONAR_JDBC_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube</span>
+<span class="w">      </span><span class="nt">SONAR_JDBC_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube_password</span><span class="w">  </span><span class="c1"># 変更推奨</span>
+<span class="w">      </span><span class="c1"># --- JVM メモリ (ローカル環境向け) ---</span>
+<span class="w">      </span><span class="nt">SONAR_CE_JAVAOPTS</span><span class="p">:</span><span class="w"> </span><span class="s">"-Xmx512m</span><span class="nv"> </span><span class="s">-Xms512m"</span>
+<span class="w">      </span><span class="nt">SONAR_WEB_JAVAOPTS</span><span class="p">:</span><span class="w"> </span><span class="s">"-Xmx256m</span><span class="nv"> </span><span class="s">-Xms256m"</span>
+<span class="w">      </span><span class="nt">SONAR_SEARCH_JAVAOPTS</span><span class="p">:</span><span class="w"> </span><span class="s">"-Xmx512m</span><span class="nv"> </span><span class="s">-Xms512m"</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube_data:/opt/sonarqube/data</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube_logs:/opt/sonarqube/logs</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube_extensions:/opt/sonarqube/extensions</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube-net</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD-SHELL"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"curl</span><span class="nv"> </span><span class="s">-f</span><span class="nv"> </span><span class="s">http://localhost:9000/api/system/status</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">exit</span><span class="nv"> </span><span class="s">1"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300s</span>
+
+<span class="w">  </span><span class="nt">sonarqube-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres:16-alpine</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube-db</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">POSTGRES_DB</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube</span>
+<span class="w">      </span><span class="nt">POSTGRES_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube</span>
+<span class="w">      </span><span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube_password</span><span class="w">  </span><span class="c1"># 上と同じに変更</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube_postgresql:/var/lib/postgresql/data</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonarqube-net</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD-SHELL"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"pg_isready</span><span class="nv"> </span><span class="s">-U</span><span class="nv"> </span><span class="s">sonarqube"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
+<span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sonarqube-net</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bridge</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sonarqube_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sonarqube_logs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sonarqube_extensions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sonarqube_postgresql</span><span class="p">:</span>
+</code></pre></div>
+<blockquote>
+<p><strong>重要</strong>: <code>SONAR_JDBC_PASSWORD</code> と <code>POSTGRES_PASSWORD</code> は同じ値に変更してください。</p>
+</blockquote>
+<h4 id="jvm">JVM メモリ設定の目安<a class="headerlink" href="#jvm" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Docker 割り当て RAM</th>
+<th style="text-align: left;">WEB</th>
+<th style="text-align: left;">CE</th>
+<th style="text-align: left;">SEARCH</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">4GB</td>
+<td style="text-align: left;"><code>-Xmx256m -Xms256m</code></td>
+<td style="text-align: left;"><code>-Xmx512m -Xms512m</code></td>
+<td style="text-align: left;"><code>-Xmx512m -Xms512m</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">6GB</td>
+<td style="text-align: left;"><code>-Xmx512m -Xms512m</code></td>
+<td style="text-align: left;"><code>-Xmx1g -Xms1g</code></td>
+<td style="text-align: left;"><code>-Xmx512m -Xms512m</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">8GB 以上</td>
+<td style="text-align: left;"><code>-Xmx512m -Xms512m</code></td>
+<td style="text-align: left;"><code>-Xmx1g -Xms1g</code></td>
+<td style="text-align: left;"><code>-Xmx1g -Xms1g</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>重要</strong>: ES 8.x は初期ヒープサイズ（<code>-Xms</code>）と最大ヒープサイズ（<code>-Xmx</code>）が一致している必要があります。不一致の場合、bootstrap check failure（exit code 78）で起動に失敗します。</p>
+</blockquote>
+<hr />
+<h3 id="5">5. コンテナの起動<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>ops/docker/sonarqube-local
+
+<span class="c1"># コンテナを起動</span>
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+
+<span class="c1"># 起動状態を確認</span>
+docker<span class="w"> </span>compose<span class="w"> </span>ps
+
+<span class="c1"># ヘルスチェック待ち（初回は数分かかる）</span>
+docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sonarqube
+</code></pre></div>
+<hr />
+<h3 id="6">6. 初期設定<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<h4 id="61">6.1 ログイン<a class="headerlink" href="#61" title="Permanent link">&para;</a></h4>
+<p>ブラウザで <code>http://localhost:9000</code> にアクセスします。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">項目</th>
+<th style="text-align: left;">初期値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ユーザー ID</td>
+<td style="text-align: left;"><code>admin</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">パスワード</td>
+<td style="text-align: left;"><code>admin</code></td>
+</tr>
+</tbody>
+</table>
+<p>初回ログイン時にパスワード変更を求められるので、新しいパスワードを設定します。</p>
+<h4 id="62">6.2 トークンの生成<a class="headerlink" href="#62" title="Permanent link">&para;</a></h4>
+<p>プロジェクトスキャンに使用する認証トークンを生成します。</p>
+<ol>
+<li>右上の <strong>A</strong>（admin アイコン）&gt; <strong>My Account</strong> をクリック</li>
+<li><strong>Security</strong> タブを選択</li>
+<li><strong>Tokens</strong> セクションの <strong>Generate</strong> 欄にトークン名（例: <code>local-dev</code>）を入力</li>
+<li><strong>Generate</strong> をクリック</li>
+<li>表示されたトークンをコピーしてプロジェクトルートの <code>.env</code> に設定</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># .env に追加</span>
+<span class="nv">SONAR_HOST_URL</span><span class="o">=</span>http://localhost:9000
+<span class="nv">SONAR_TOKEN</span><span class="o">=</span>&lt;YOUR_TOKEN&gt;
+</code></pre></div>
+<blockquote>
+<p><strong>重要</strong>: トークンは一度しか表示されません。紛失した場合は再発行が必要です。</p>
+</blockquote>
+<h4 id="63">6.3 日本語プラグインのインストール（任意）<a class="headerlink" href="#63" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Administration</strong> &gt; <strong>Marketplace</strong> を開く</li>
+<li>「Japanese」で検索</li>
+<li><strong>Install</strong> をクリック</li>
+<li>SonarQube を再起動</li>
+</ol>
+<hr />
+<h2 id="_6">プロジェクトのスキャン<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="_7">事前準備: プロジェクト作成と権限付与<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<ol>
+<li>SonarQube でプロジェクトを作成してください。Project Key が <code>sonarqube.config.json</code> の <code>projectKey</code> と一致しているか確認してください。</li>
+<li>
+<p>次のどちらかで権限を付与してください。</p>
+</li>
+<li>
+<p>付与方法 A: 管理者でログイン &gt; Administration &gt; Security &gt; Users で対象ユーザーに <code>Execute Analysis</code> を付与</p>
+</li>
+<li>付与方法 B: プロジェクト画面 &gt; Project Settings &gt; Permissions で <code>Execute Analysis</code> を付与</li>
+</ol>
+<h3 id="_8">スキャンツール別の設定<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<h4 id="sonar-scannertypescript-javascript">sonar-scanner（TypeScript / JavaScript / 汎用）<a class="headerlink" href="#sonar-scannertypescript-javascript" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>&lt;project-dir&gt;
+npm<span class="w"> </span>install<span class="w"> </span>--save-dev<span class="w"> </span>sonarqube-scanner
+</code></pre></div>
+<p><code>sonar-project.properties</code> を作成します。</p>
+<div class="highlight"><pre><span></span><code><span class="na">sonar.projectKey</span><span class="o">=</span><span class="s">&lt;YOUR_PROJECT_KEY&gt;</span>
+<span class="na">sonar.projectName</span><span class="o">=</span><span class="s">&lt;YOUR_PROJECT_NAME&gt;</span>
+<span class="na">sonar.sources</span><span class="o">=</span><span class="s">src</span>
+<span class="na">sonar.tests</span><span class="o">=</span><span class="s">src</span>
+<span class="na">sonar.test.inclusions</span><span class="o">=</span><span class="s">**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx</span>
+<span class="na">sonar.exclusions</span><span class="o">=</span><span class="s">**/node_modules/**,**/generated/**,**/dist/**</span>
+<span class="na">sonar.typescript.lcov.reportPaths</span><span class="o">=</span><span class="s">coverage/lcov.info</span>
+<span class="na">sonar.sourceEncoding</span><span class="o">=</span><span class="s">UTF-8</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># テスト実行（カバレッジデータ生成）</span>
+npm<span class="w"> </span>run<span class="w"> </span>test:coverage
+
+<span class="c1"># SonarQube スキャン</span>
+npx<span class="w"> </span>sonarqube-scanner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.host.url<span class="o">=</span>http://localhost:9000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.token<span class="o">=</span>&lt;YOUR_TOKEN&gt;
+</code></pre></div>
+<h4 id="sbtscala">sbt（Scala）<a class="headerlink" href="#sbtscala" title="Permanent link">&para;</a></h4>
+<p><code>project/plugins.sbt</code> に SonarScanner プラグインを追加します。</p>
+<div class="highlight"><pre><span></span><code><span class="n">addSbtPlugin</span><span class="p">(</span><span class="s">"com.sonar-scala"</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">"sbt-sonar"</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">"2.3.0"</span><span class="p">)</span>
+</code></pre></div>
+<p><code>build.sbt</code> に SonarQube 設定を追加します。</p>
+<div class="highlight"><pre><span></span><code><span class="n">sonarProperties</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nc">Map</span><span class="p">(</span>
+<span class="w">  </span><span class="s">"sonar.projectKey"</span><span class="w">    </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"&lt;YOUR_PROJECT_KEY&gt;"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"sonar.projectName"</span><span class="w">   </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"&lt;YOUR_PROJECT_NAME&gt;"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"sonar.sources"</span><span class="w">       </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"src/main/scala"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"sonar.tests"</span><span class="w">         </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"src/test/scala"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"sonar.sourceEncoding"</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"UTF-8"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"sonar.scala.coverage.reportPaths"</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">    </span><span class="s">"target/scala-3.6.2/scoverage-report/scoverage.xml"</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># テスト実行（カバレッジデータ生成）</span>
+sbt<span class="w"> </span>coverage<span class="w"> </span><span class="nb">test</span><span class="w"> </span>coverageReport
+
+<span class="c1"># SonarQube スキャン</span>
+sbt<span class="w"> </span>sonarScan<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.host.url<span class="o">=</span>http://localhost:9000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.token<span class="o">=</span>&lt;YOUR_TOKEN&gt;
+</code></pre></div>
+<h4 id="mavenjava-kotlin">Maven（Java / Kotlin）<a class="headerlink" href="#mavenjava-kotlin" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>mvn<span class="w"> </span>sonar:sonar<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.projectKey<span class="o">=</span>&lt;YOUR_PROJECT_KEY&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.host.url<span class="o">=</span>http://localhost:9000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.token<span class="o">=</span>&lt;YOUR_TOKEN&gt;
+</code></pre></div>
+<h4 id="gradlejava-kotlin">Gradle（Java / Kotlin）<a class="headerlink" href="#gradlejava-kotlin" title="Permanent link">&para;</a></h4>
+<p><code>build.gradle</code> にプラグインを追加します。</p>
+<div class="highlight"><pre><span></span><code><span class="n">plugins</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="s2">"org.sonarqube"</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="s2">"5.1.0.4882"</span>
+<span class="o">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>gradle<span class="w"> </span>sonar<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.projectKey<span class="o">=</span>&lt;YOUR_PROJECT_KEY&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.host.url<span class="o">=</span>http://localhost:9000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-Dsonar.token<span class="o">=</span>&lt;YOUR_TOKEN&gt;
+</code></pre></div>
+<hr />
+<h2 id="_9">典型的な利用フロー<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="gulp">Gulp タスクを使用する場合<a class="headerlink" href="#gulp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. プロジェクト設定（任意）</span>
+<span class="c1"># sonarqube.config.json を作成</span>
+
+<span class="c1"># 2. SonarQube セットアップ</span>
+npx<span class="w"> </span>gulp<span class="w"> </span>sonar-local:setup
+
+<span class="c1"># 3. ブラウザで初期設定・トークン生成（初回のみ）</span>
+<span class="c1"># http://localhost:9000</span>
+
+<span class="c1"># 4. .env に SONAR_TOKEN を追加</span>
+
+<span class="c1"># 5. スキャン実行</span>
+npx<span class="w"> </span>gulp<span class="w"> </span>sonar-local:scan
+
+<span class="c1"># 6. 結果確認</span>
+npx<span class="w"> </span>gulp<span class="w"> </span>sonar-local:issues
+</code></pre></div>
+<h3 id="_10">手動で実行する場合<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. SonarQube コンテナ起動</span>
+<span class="nb">cd</span><span class="w"> </span>ops/docker/sonarqube-local
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+
+<span class="c1"># 2. ブラウザで初期設定・トークン生成（初回のみ）</span>
+<span class="c1"># http://localhost:9000</span>
+
+<span class="c1"># 3. スキャン実行（プロジェクトのスキャンツールに応じて実行）</span>
+
+<span class="c1"># 4. 結果を確認</span>
+<span class="c1"># http://localhost:9000</span>
+</code></pre></div>
+<hr />
+<h2 id="api">API による診断情報の取得<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># サーバー状態</span>
+curl<span class="w"> </span>-u<span class="w"> </span>&lt;TOKEN&gt;:<span class="w"> </span>http://localhost:9000/api/system/status
+
+<span class="c1"># プロジェクト一覧</span>
+curl<span class="w"> </span>-u<span class="w"> </span>&lt;TOKEN&gt;:<span class="w"> </span><span class="s2">"http://localhost:9000/api/projects/search"</span>
+
+<span class="c1"># 課題一覧（重大度フィルタ付き）</span>
+curl<span class="w"> </span>-u<span class="w"> </span>&lt;TOKEN&gt;:<span class="w"> </span><span class="s2">"http://localhost:9000/api/issues/search?\</span>
+<span class="s2">componentKeys=&lt;PROJECT_KEY&gt;&amp;\</span>
+<span class="s2">types=BUG,VULNERABILITY,CODE_SMELL&amp;\</span>
+<span class="s2">severities=BLOCKER,CRITICAL,MAJOR"</span>
+
+<span class="c1"># メトリクス</span>
+curl<span class="w"> </span>-u<span class="w"> </span>&lt;TOKEN&gt;:<span class="w"> </span><span class="s2">"http://localhost:9000/api/measures/component?\</span>
+<span class="s2">component=&lt;PROJECT_KEY&gt;&amp;\</span>
+<span class="s2">metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density,ncloc"</span>
+
+<span class="c1"># 品質ゲート</span>
+curl<span class="w"> </span>-u<span class="w"> </span>&lt;TOKEN&gt;:<span class="w"> </span><span class="s2">"http://localhost:9000/api/qualitygates/project_status?\</span>
+<span class="s2">projectKey=&lt;PROJECT_KEY&gt;"</span>
+</code></pre></div>
+<hr />
+<h2 id="docker">Docker 管理コマンド<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># プロジェクトディレクトリに移動</span>
+<span class="nb">cd</span><span class="w"> </span>ops/docker/sonarqube-local
+
+<span class="c1"># コンテナの状態確認</span>
+docker<span class="w"> </span>compose<span class="w"> </span>ps
+
+<span class="c1"># コンテナの起動</span>
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+
+<span class="c1"># コンテナの停止</span>
+docker<span class="w"> </span>compose<span class="w"> </span>down
+
+<span class="c1"># コンテナの再起動</span>
+docker<span class="w"> </span>compose<span class="w"> </span>restart
+
+<span class="c1"># ログの確認（リアルタイム）</span>
+docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>sonarqube
+
+<span class="c1"># ログの確認（直近 100 行）</span>
+docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>sonarqube
+
+<span class="c1"># コンテナに接続</span>
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>sonarqube<span class="w"> </span>bash
+</code></pre></div>
+<hr />
+<h2 id="_11">バックアップ<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<h3 id="_12">データベースのダンプ<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>sonarqube-db<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>sonarqube<span class="w"> </span>sonarqube<span class="w"> </span>&gt;<span class="w"> </span>backup.sql
+</code></pre></div>
+<h3 id="_13">データの完全リセット<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>ローカル環境では再構築が容易なため、データを完全にリセットすることもできます。</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>ops/docker/sonarqube-local
+
+<span class="c1"># コンテナとボリュームを削除</span>
+docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v
+
+<span class="c1"># 再起動（初期状態から）</span>
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+<hr />
+<h2 id="_14">トラブルシューティング<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<h3 id="sonarqube_1">SonarQube が起動しない<a class="headerlink" href="#sonarqube_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ログを確認</span>
+docker<span class="w"> </span>logs<span class="w"> </span>sonarqube
+
+<span class="c1"># vm.max_map_count を確認（Docker Desktop 内部）</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--privileged<span class="w"> </span>alpine<span class="w"> </span>sysctl<span class="w"> </span>vm.max_map_count
+</code></pre></div>
+<h3 id="elasticsearch-exit-code-78">Elasticsearch exit code 78: ヒープサイズ不一致<a class="headerlink" href="#elasticsearch-exit-code-78" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>bootstrap check failure [1] of [1]: initial heap size [268435456] not equal to maximum heap size [536870912]
+</code></pre></div>
+<p>ES 8.x は <code>-Xms</code> と <code>-Xmx</code> が一致していることを要求します。<code>docker-compose.yml</code> の <code>SONAR_SEARCH_JAVAOPTS</code> で <code>-Xms</code> と <code>-Xmx</code> を同じ値に設定してください。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># NG: Xms != Xmx</span>
+<span class="nt">SONAR_SEARCH_JAVAOPTS</span><span class="p">:</span><span class="w"> </span><span class="s">"-Xmx512m</span><span class="nv"> </span><span class="s">-Xms256m"</span>
+
+<span class="c1"># OK: Xms == Xmx</span>
+<span class="nt">SONAR_SEARCH_JAVAOPTS</span><span class="p">:</span><span class="w"> </span><span class="s">"-Xmx512m</span><span class="nv"> </span><span class="s">-Xms512m"</span>
+</code></pre></div>
+<blockquote>
+<p><strong>注意</strong>: <code>SONAR_CE_JAVAOPTS</code> と <code>SONAR_WEB_JAVAOPTS</code> も同様に <code>-Xms</code> と <code>-Xmx</code> を一致させてください。</p>
+</blockquote>
+<h3 id="elasticsearch-exit-code-78-vmmax_map_count">Elasticsearch exit code 78: vm.max_map_count 不足<a class="headerlink" href="#elasticsearch-exit-code-78-vmmax_map_count" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Docker Desktop 内部の値を確認</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--privileged<span class="w"> </span>alpine<span class="w"> </span>sysctl<span class="w"> </span>vm.max_map_count
+
+<span class="c1"># 524288 未満の場合は引き上げ</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--privileged<span class="w"> </span>alpine<span class="w"> </span>sysctl<span class="w"> </span>-w<span class="w"> </span>vm.max_map_count<span class="o">=</span><span class="m">524288</span>
+</code></pre></div>
+<h3 id="_15">メモリ不足<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<p>Docker Desktop のリソース割り当てを増やすか、<code>docker-compose.yml</code> の JVM 設定を調整してください（セクション 4 の JVM メモリ設定の目安を参照）。</p>
+<h3 id="_16">ポート競合<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>9000 番ポートが他サービスで使用中の場合、<code>docker-compose.yml</code> のポートマッピングを変更します:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">ports</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"9100:9000"</span><span class="w">  </span><span class="c1"># 外部ポートを変更</span>
+</code></pre></div>
+<blockquote>
+<p><strong>ヒント</strong>: ポートを変更した場合は <code>.env</code> の <code>SONAR_HOST_URL</code> も合わせて変更してください。</p>
+</blockquote>
+<h3 id="_17">コンテナが起動しない<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">症状</th>
+<th style="text-align: left;">原因</th>
+<th style="text-align: left;">対処</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ES exit code 78（ヒープ不一致）</td>
+<td style="text-align: left;"><code>-Xms</code> と <code>-Xmx</code> が不一致</td>
+<td style="text-align: left;">JVM オプションで <code>-Xms</code> と <code>-Xmx</code> を同じ値に設定</td>
+</tr>
+<tr>
+<td style="text-align: left;">ES exit code 78（vm.max_map_count）</td>
+<td style="text-align: left;"><code>vm.max_map_count</code> 不足</td>
+<td style="text-align: left;"><code>docker run --rm --privileged alpine sysctl -w vm.max_map_count=524288</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">DB 接続エラー</td>
+<td style="text-align: left;">パスワード不一致</td>
+<td style="text-align: left;"><code>SONAR_JDBC_PASSWORD</code> と <code>POSTGRES_PASSWORD</code> が一致しているか確認</td>
+</tr>
+<tr>
+<td style="text-align: left;">OOM / メモリ不足</td>
+<td style="text-align: left;">Docker のメモリ割り当て不足</td>
+<td style="text-align: left;">Docker Desktop のリソース設定でメモリを増やす</td>
+</tr>
+<tr>
+<td style="text-align: left;">ヘルスチェック失敗</td>
+<td style="text-align: left;">起動に時間がかかる</td>
+<td style="text-align: left;"><code>start_period</code> を延長（デフォルト 300s）</td>
+</tr>
+<tr>
+<td style="text-align: left;">ディスク容量不足</td>
+<td style="text-align: left;">Docker のディスク容量不足</td>
+<td style="text-align: left;">Docker Desktop のディスク割り当てを増やす、または <code>docker system prune</code> で不要イメージを削除</td>
+</tr>
+</tbody>
+</table>
+<h3 id="windows">Windows 固有の問題<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
+<h4 id="wsl2">WSL2 のカーネルパラメータがリセットされる<a class="headerlink" href="#wsl2" title="Permanent link">&para;</a></h4>
+<p><code>%USERPROFILE%\.wslconfig</code> に永続設定を記述してください（セクション 1 参照）。</p>
+<h3 id="docker-desktop_1">Docker Desktop のディスク容量を解放<a class="headerlink" href="#docker-desktop_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 未使用のイメージ・ボリューム・ネットワークを削除</span>
+docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-a
+
+<span class="c1"># 未使用ボリュームのみ削除（SonarQube が停止中の場合は注意）</span>
+docker<span class="w"> </span>volume<span class="w"> </span>prune
+</code></pre></div>
+<hr />
+<h2 id="_18">ポート一覧<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">サービス</th>
+<th style="text-align: left;">ポート</th>
+<th style="text-align: left;">備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">SonarQube</td>
+<td style="text-align: left;">9000</td>
+<td style="text-align: left;">Web UI・API</td>
+</tr>
+<tr>
+<td style="text-align: left;">PostgreSQL</td>
+<td style="text-align: left;">5432（内部）</td>
+<td style="text-align: left;">SonarQube 専用・外部非公開</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_19">接続情報まとめ<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">用途</th>
+<th style="text-align: left;">接続先</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">SonarQube ダッシュボード</td>
+<td style="text-align: left;"><code>http://localhost:9000</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">SonarQube API</td>
+<td style="text-align: left;"><code>http://localhost:9000/api</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_20">セキュリティチェックリスト<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>admin</code> の初期パスワードを変更した</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> PostgreSQL のパスワードをデフォルトから変更した</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 分析トークンを <code>.env</code> に記載し <code>.gitignore</code> で除外されている</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> トークンの有効期限を把握している</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>
