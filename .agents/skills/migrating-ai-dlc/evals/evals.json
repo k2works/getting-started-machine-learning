@@ -1,0 +1,60 @@
+{
+  "skill_name": "migrating-ai-dlc",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "booster を更新したら docs/reference に AI-DLC 版のガイドが入ってた。うちの受注管理プロジェクト（docs/requirements/order/ にストーリー 12 本、docs/development/order/ に release_plan.md と進行中の iteration_plan-3.md、apps/order/ に Spring Boot のコードあり）を AI-DLC に移行したい。まず何をどう変えるか計画を出して。",
+      "expected_output": "--plan として、まず aidlc_check.py で移行前の状態（ERROR/WARN の件数）を測り、現状を棚卸しする。docs/development/order/aidlc_migration_plan.md に、検査結果・現状・チェックボックス付きの 10 ステップ（CLAUDE.md、リスク台帳、用語集、静的・動的モデル、受入条件、Unit 分解、release_plan 追記、iteration_plan-3 → bolt_plan-3、ガードレール、OKF 適用）・AI の仮定・要確認を書く。Unit 案・依存 DAG・ストーリーマップ・リスク台帳の表・静的モデル・Bolt 計画案などの後続ステップの成果物は計画に書かず、候補は要確認に 1 行で残す。既存のストーリーと計画は変更しない",
+      "files": [],
+      "assertions": [
+        "移行計画がチェックボックス付き Markdown で作られている",
+        "移行計画が既定のパス docs/development/order/aidlc_migration_plan.md にある",
+        "計画に Unit 分解と iteration_plan → bolt_plan の読み替えが含まれる",
+        "ブラウンフィールドとして既存コードの静的・動的モデル昇格が含まれる",
+        "リスク台帳と AI に渡せる範囲（In/Out）の作成が含まれる",
+        "Unit 境界などの判断を要確認として人に戻している",
+        "--plan では既存のストーリー・計画ファイルを変更していない",
+        "CLAUDE.md への AI-DLC 採用の明記が含まれる",
+        "移行前の状態を aidlc_check.py で測り、ERROR/WARN の件数を計画に記録している",
+        "後続ステップの成果物（Unit 案・依存 DAG・ストーリーマップ・リスク台帳・静的／動的モデル・Bolt 計画案など）を計画の節として先取りしていない"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "移行計画は承認した。ステップ 6 の Unit 分解をやって。docs/requirements/order/ のストーリーを Unit にまとめて、依存関係とストーリーマップも作って。決済まわりは外部サービスだから本番キーは絶対 AI に渡さない前提で。",
+      "expected_output": "docs/requirements/order/units.md に、各 Unit の目的・含まれるストーリー・NFR・リスク（リスク台帳の ID で参照、未作成なら暫定 ID）・測定基準・推奨 Bolt・エントロピー評価・AI の仮定、依存 DAG、ユースケース × Unit × ストーリーの対応表、未配置ストーリーを書く。決済は独立 Unit にし、本番キーを渡さない前提をリスク ID で対応づける。ガードレールの本文は units.md に書き写さない。Unit の境界は案として示し承認を求める。apply-okf（git 管理外なら手書き）でフロントマターと index/log を更新し、aidlc_check.py で units.md の項目を検証して報告する",
+      "files": [],
+      "assertions": [
+        "docs/requirements/order/units.md が作られている",
+        "各 Unit に目的・ストーリー・NFR・リスク・測定基準・推奨 Bolt がある",
+        "依存 DAG とストーリーマップがある",
+        "決済が独立 Unit で、本番キーを AI に渡さない前提と対応づいている",
+        "12 ストーリーすべてが配置または未配置として言及されている",
+        "units.md に OKF フロントマターがある",
+        "docs/log.md に記録がある",
+        "Unit 境界を案として示し承認を求めている",
+        "すべての Unit に「AI の仮定」がある",
+        "Unit のリスクをリスク台帳（risk_register.md）の ID で参照している",
+        "aidlc_check.py で units.md を検証し、結果を報告している"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "AI-DLC への移行は一通り終わったつもりなんだけど、ちゃんと揃ってるか確認して。プロジェクトは order。",
+      "expected_output": "--check として aidlc_check.py --project order を実行し、ERROR/WARN の件数と各項目を報告する（受入条件はストーリー単位、フロントエンドの無いプロジェクトでは developing-frontend を対象外、verified・index 登録・未配置ストーリーの計画混入も含む）。続けてスクリプトが見ない点（成果物同士の矛盾、リスク台帳・用語集の中身、コードと受入条件の整合）を読んで確かめ、不足ごとに移行ステップ番号と直し方を示す。ファイルは変更しない",
+      "files": [],
+      "assertions": [
+        "U-03 決済連携の推奨 Bolt 欠けを指摘している",
+        "release_plan.md のテスト戦略欠けを指摘している",
+        "bolt_plan-3.md のゲート密度欠けを指摘している",
+        "受入条件の不足をストーリー単位（12 本中 3 本）で数えている",
+        "受入条件の Given/When/Then 不足を指摘している",
+        "存在する成果物（units/risk_register/glossary）を誤って欠けとしていない",
+        "不足を移行ステップに対応づけている",
+        "aidlc_check.py を実行し、ERROR/WARN の件数を報告している",
+        "AI 生成の移行成果物に人の承認記録（verified）が無いことを指摘している",
+        "未配置の US-11・US-12 がリリース計画に割り当てられている矛盾を指摘している"
+      ]
+    }
+  ]
+}
