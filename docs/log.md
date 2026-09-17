@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Python 第 7 章](/article/getting-start-ml/python/07-linear-regression.md) を新規作成。
 * **Creation**: [Python 第 6 章](/article/getting-start-ml/python/06-task-runner-and-ci-cd.md) を新規作成。
 * **Creation**: [Python 第 5 章](/article/getting-start-ml/python/05-package-management-and-static-analysis.md) を新規作成。
 * **Creation**: [Python 第 4 章](/article/getting-start-ml/python/04-version-control-and-data-management.md) を新規作成。
