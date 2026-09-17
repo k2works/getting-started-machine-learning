@@ -8,12 +8,12 @@
 
 ## 言語別解説
 
-言語は 3 つの波に分けて順に追加します。第 1 波の Python 版は全章を執筆済みです。
+言語は 3 つの波に分けて順に追加します。第 1 波の Python 版は全章を執筆済みで、現在は Kotlin 版を執筆しています。
 
 | 波 | 言語 | 環境 | 特徴 | 状況 |
 |----|------|------|------|------|
 | 1 | [Python](python/index.md) | CPython | 機械学習ライブラリが成熟、型ヒント、Jupyter Lab による探索と可視化 | 完了 |
-| 1 | Kotlin | JVM | 静的型付け、OOP と FP の融合、Kotlin Notebook による探索と可視化 | 未着手 |
+| 1 | [Kotlin](kotlin/index.md) | JVM | 静的型付け、OOP と FP の融合、Kotlin Notebook による探索と可視化 | 執筆中 |
 | 1 | TypeScript | Node.js | 静的型付け、機械学習ライブラリが限られる環境での自作 | 未着手 |
 | 2 | Java / C# / F# / Scala / Rust / Go | — | — | 未着手 |
 | 3 | Ruby / PHP / Elixir / Clojure / Haskell | — | — | 未着手 |
@@ -24,7 +24,7 @@
 
 | 章 | テーマ | Python | Kotlin | TypeScript |
 |----|--------|--------|--------|------------|
-| 1 | 機械学習とはじめてのテスト | [Python](python/01-machine-learning-and-first-test.md) | — | — |
+| 1 | 機械学習とはじめてのテスト | [Python](python/01-machine-learning-and-first-test.md) | [Kotlin](kotlin/01-machine-learning-and-first-test.md) | — |
 | 2 | データの前処理と三角測量 | [Python](python/02-data-preprocessing-and-triangulation.md) | — | — |
 | 3 | 決定木による分類と明白な実装 | [Python](python/03-decision-tree-and-obvious-implementation.md) | — | — |
 

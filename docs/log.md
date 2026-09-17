@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: Kotlin 版 B7 の進行に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
+* **Update**: Kotlin 版 B7 の進行に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [機械学習から始めるプログラミング入門 Kotlin 第 1 章](/article/getting-start-ml/kotlin/01-machine-learning-and-first-test.md) を新規作成。
 * **Creation**: [002-kotlin-ml-libraries](/adr/002-kotlin-ml-libraries.md) を作成（claude-code/claude-opus-5）
 * **Verification**: [outline](/article/getting-start-ml/outline.md) を human:kakimomokuri が検証

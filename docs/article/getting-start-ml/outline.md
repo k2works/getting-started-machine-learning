@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:07:15Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:24:28Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -452,12 +452,12 @@ PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribu
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| Nix 環境 | `ops/nix/environments/kotlin/shell.nix`（JDK 21 + kotlin + gradle）を参照実装から追加し、`flake.nix` の `devShells` に登録する | 未着手 |
-| JDK とビルド | ローカルは JDK 25、Nix は JDK 21 なので、Gradle Wrapper でバージョンを固定し、`jvmToolchain(21)` で JDK を自動取得させる。ローカルの Gradle 8.11.1 で JDK 25 から Wrapper を動かせるかを最初に確認する | 未着手 |
-| アプリ雛形 | `apps/kotlin/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・`src/main/kotlin`・`src/test/kotlin`）にテストが 1 本通る最小構成 | 未着手 |
-| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 未着手 |
+| Nix 環境 | `ops/nix/environments/kotlin/shell.nix`（JDK 21 + kotlin + gradle）を参照実装から追加し、`flake.nix` の `devShells` に登録する | 完了（CI での動作確認は B7 のステップ 7） |
+| JDK とビルド | ローカルは JDK 25、Nix は JDK 21 なので、Gradle Wrapper でバージョンを固定し、`jvmToolchain(21)` で JDK を自動取得させる。ローカルの Gradle 8.11.1 で JDK 25 から Wrapper を動かせるかを最初に確認する | 完了（Gradle 8.11.1 は JDK 25 で Kotlin DSL を扱えないため、Wrapper の生成だけ JDK 21 で行った。Gradle 9.7.1 は JDK 25 で動作） |
+| アプリ雛形 | `apps/kotlin/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・`src/main/kotlin`・`src/test/kotlin`）にテストが 1 本通る最小構成 | 完了 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 完了 |
 | Notebook 環境 | `apps/kotlin/notebooks/` に Kotlin Notebook を置く。出力セルは `nbstripout` で消し、検査は Python 版の `tools/notebooks.py` と同じく Gradle タスクから呼ぶ（呼び出し方は B7 で決める） | 未着手 |
-| ライブラリ選定 | ADR 002（Kotlin 版のライブラリ）を作成する | 未着手 |
+| ライブラリ選定 | ADR 002（Kotlin 版のライブラリ）を作成する | 完了（ADR 002） |
 | CI | `.github/workflows/kotlin-ci.yml`（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする | 未着手 |
 
 ### 章別執筆計画（Kotlin）
