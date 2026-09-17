@@ -1,6 +1,9 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Python 第 6 章](/article/getting-start-ml/python/06-task-runner-and-ci-cd.md) を新規作成。
+* **Creation**: [Python 第 5 章](/article/getting-start-ml/python/05-package-management-and-static-analysis.md) を新規作成。
+* **Creation**: [Python 第 4 章](/article/getting-start-ml/python/04-version-control-and-data-management.md) を新規作成。
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 3 章](/article/getting-start-ml/python/03-decision-tree-and-obvious-implementation.md) を新規作成。
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 2 章](/article/getting-start-ml/python/02-data-preprocessing-and-triangulation.md) を新規作成。
 * **Creation**: [001-python-ml-libraries](/adr/001-python-ml-libraries.md) を作成（claude-code/claude-opus-5）
