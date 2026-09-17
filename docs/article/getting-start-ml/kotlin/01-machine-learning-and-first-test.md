@@ -4,7 +4,7 @@ title: "第 1 章: 機械学習とはじめてのテスト"
 description: "機械学習とルールベースの違いを確認し、きのこ派・たけのこ派の判定を Kotlin の TDD で実装して正解率を測る。"
 tags: [article,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:55:25Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:50:50Z }
 ---
 
 # 第 1 章: 機械学習とはじめてのテスト
@@ -531,6 +531,8 @@ Kotlin の `if` は値を返す **式** なので、そのまま関数の戻り�
 fun predictByRule(features: Features): String = if (features.ageGroup == 20) "きのこ" else "たけのこ"
 ```
 
+第 5 章では、静的解析ツール detekt の指摘（MagicNumber）を受けて、`20` を名前付きの定数 `KINOKO_AGE_GROUP` に置き換えます。
+
 ## 1.9 正解率を計算する
 
 すべて正解のテストと仮実装から始めます。
@@ -807,6 +809,8 @@ BUILD SUCCESSFUL in 3s
 <details>
 <summary>この章の完成コード（src/main/kotlin/chapter01/KinokoTakenoko.kt）</summary>
 
+第 5 章で `20` を定数にした後のコードです。
+
 ```kotlin
 package chapter01
 
@@ -848,7 +852,10 @@ fun splitFeaturesAndLabels(people: List<Person>): Pair<List<Features>, List<Stri
     return features to labels
 }
 
-fun predictByRule(features: Features): String = if (features.ageGroup == 20) "きのこ" else "たけのこ"
+/** 「20 代ならきのこ派」というルールの年代 */
+private const val KINOKO_AGE_GROUP = 20
+
+fun predictByRule(features: Features): String = if (features.ageGroup == KINOKO_AGE_GROUP) "きのこ" else "たけのこ"
 
 fun accuracy(
     predictions: List<String>,

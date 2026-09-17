@@ -62,7 +62,7 @@ Windows の PowerShell では `./gradlew` の代わりに `.\gradlew.bat` を使
 | 章 | テーマ |
 |----|--------|
 | [第 4 章](04-version-control-and-data-management.md) | バージョン管理とデータ管理 |
-| 第 5 章（未執筆） | パッケージ管理と静的解析 |
+| [第 5 章](05-package-management-and-static-analysis.md) | パッケージ管理と静的解析 |
 | 第 6 章（未執筆） | タスクランナーと CI/CD |
 
 ### 第 3 部: 回帰と実践的な前処理

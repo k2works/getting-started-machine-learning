@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Kotlin 第 5 章](/article/getting-start-ml/kotlin/05-package-management-and-static-analysis.md) を新規作成。[第 1 章](/article/getting-start-ml/kotlin/01-machine-learning-and-first-test.md) の完成コードを定数化に合わせて更新。
 * **Creation**: [Kotlin 第 4 章](/article/getting-start-ml/kotlin/04-version-control-and-data-management.md) を新規作成。
 * **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) に B9 で確かめた detekt 1.23.8・Kover 0.9.9 の動作と、Gradle デーモンの JDK を 21 に固定する決定を追記。
 * **Update**: Kotlin 版 B8 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）・Bolt の状態と、[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を更新。
