@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [機械学習から始めるプログラミング入門 執筆ワークフロー](/article/getting-start-ml/workflow.md) を新規作成。
+* **Creation**: [機械学習から始めるプログラミング入門 Python 第 1 章](/article/getting-start-ml/python/01-machine-learning-and-first-test.md) を新規作成。
 * **Verification**: [outline](/article/getting-start-ml/outline.md) を human:kakimomokuri が検証
 * **Creation**: [機械学習から始めるプログラミング入門 執筆計画](/article/getting-start-ml/outline.md) を新規作成。5 部 15 章＋付録の章構成、学習データ（スッキリわかる機械学習入門の配布データ）をコミットしない方針と配置方法、3 波に分けた対象言語（第 1 波は Python・Kotlin・TypeScript）、Python と Kotlin に限定した Notebook による可視化の方針、第 1 波の Bolt 計画を定義。
 
