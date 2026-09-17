@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T02:22:31Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:02:09Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
 ---
@@ -135,7 +135,7 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 | 7 | cinema | 相関のヒートマップ、散布図と外れ値、実測値と予測値、残差プロット |
 | 8 | Survived | クラス分布、性別・客室クラス別の生存率、混同行列 |
 | 9 | Boston | 標準化前後の分布、特徴量と価格の散布図 |
-| 10 | Survived | モデル別の特徴量重要度 |
+| 10 | iris | モデル別の特徴量重要度 |
 | 11 | Survived | 混同行列、ROC 曲線 |
 | 12 | Boston | 正則化の強さと係数の変化 |
 | 13 | Boston | 第 1・第 2 主成分の散布図、寄与率 |
@@ -222,7 +222,7 @@ Wiki 記事 2 章（uv・Ruff・mypy・Jupyter Lab）の内容を、各言語の
 
 | 章 | テーマ | データ | 内容 |
 |----|--------|--------|------|
-| 10 | ロジスティック回帰とアンサンブル学習 | iris、Survived | 勾配降下法によるロジスティック回帰の自作、第 3 章の決定木を再利用したランダムフォレスト（バギング）、特徴量重要度、モデル共通インターフェース |
+| 10 | ロジスティック回帰とアンサンブル学習 | iris | 勾配降下法によるロジスティック回帰の自作、第 3 章の決定木を再利用したランダムフォレスト（バギング）、特徴量重要度、モデル共通インターフェース |
 | 11 | 評価指標と交差検証 | Survived、cinema | 混同行列、適合率・再現率・F 値、MSE・RMSE・MAE、K 分割交差検証、評価関数を高階関数として渡す設計 |
 | 12 | 正則化とモデル選択 | Boston | 過学習と正則化、リッジ回帰（自作）、ラッソ回帰（ライブラリ）、ハイパーパラメータ探索、不変データによる実験結果の記録 |
 
@@ -375,6 +375,8 @@ apps/
 | B7〜B12 | Kotlin・TypeScript を B1〜B6 と同じ区切りで進める。Kotlin の B7 で `kotlin` の Nix 環境と Kotlin Notebook の動作を確認する | 各言語の全章完了。Kotlin は可視化の節が Python 版と揃っている |
 | B13 | 多言語統合解説（第 1 波の 3 言語） | 統合解説の各表で 3 言語の行・列が揃っている |
 
+B1〜B6（Python 版の全章）は 2026-09-17 に完了した。第 2 章以降は、依存関係の無い章をサブエージェントで並行して実装・執筆し、親が検査（テスト・カバレッジ・lint・型・Notebook の出力・学習データ行の混入）してから章ごとにコミットした。
+
 各 Bolt の着手前にステップ計画を作り、承認を得てから進める。第 2 波・第 3 波の Bolt 計画は、第 1 波の実績（1 章あたりの所要時間、ライブラリ選定で詰まった点）を踏まえて第 1 波の完了時に作る。
 
 ### 前提整備
@@ -384,9 +386,9 @@ apps/
 | 学習データ | `apps/data/sukkiri-ml/` への配置手順、`.gitignore` への `apps/data/` 追加、`data:setup`・`data:check` タスク | 完了 |
 | シリーズ骨子 | `index.md`・`workflow.md`、`docs/article/index.md` のシリーズ一覧、`mkdocs.yml` の nav | 完了 |
 | Nix 環境 | `python`・`node` は既存。`kotlin`（JDK 21 + kotlin + gradle）は `tmp/getting-started-tdd/ops/nix/environments/kotlin/` を雛形に追加し flake に登録する。ML ライブラリの導入に必要なネイティブ依存（BLAS 等）の有無を確認 | 進行中（`python` は CI で動作確認済み。`kotlin` は未着手） |
-| Notebook 環境 | Python は Jupyter Lab を開発依存に追加。Kotlin は IntelliJ IDEA の Kotlin Notebook で Kotlin DataFrame・Kandy が読み込めることを確認。両言語とも出力セルを消す仕組み（pre-commit フックやタスク）を用意 | 未着手 |
+| Notebook 環境 | Python は Jupyter Lab を開発依存に追加。Kotlin は IntelliJ IDEA の Kotlin Notebook で Kotlin DataFrame・Kandy が読み込めることを確認。両言語とも出力セルを消す仕組み（pre-commit フックやタスク）を用意 | 進行中（Python は `tools/notebooks.py` と tox で完了。Kotlin は未着手） |
 | アプリ雛形 | `apps/python/`・`apps/kotlin/`・`apps/node/` にテストが 1 本通る最小構成 | 進行中（`apps/python/` 完了） |
-| ライブラリ選定 | 第 1 波 3 言語の ML ライブラリと、Python・Kotlin の可視化ライブラリを ADR で確定 | 未着手 |
+| ライブラリ選定 | 第 1 波 3 言語の ML ライブラリと、Python・Kotlin の可視化ライブラリを ADR で確定 | 進行中（Python は ADR 001 で確定。Kotlin・TypeScript は未着手） |
 
 ### 章別執筆計画（Python）
 

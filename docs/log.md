@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: Python 版の全章完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備・Bolt 計画の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
+* **Update**: Python 版の全章完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備・Bolt 計画の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [Python 第 10 章](/article/getting-start-ml/python/10-logistic-regression-and-ensemble.md) を新規作成。
 * **Creation**: [Python 第 15 章](/article/getting-start-ml/python/15-machine-learning-api-and-module-design.md) を新規作成。
 * **Creation**: [Python 第 13 章](/article/getting-start-ml/python/13-principal-component-analysis.md) を新規作成。
