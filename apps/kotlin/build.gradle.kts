@@ -9,6 +9,8 @@ repositories {
 val ktlint: Configuration = configurations.create("ktlint")
 
 dependencies {
+    implementation(libs.dataframe)
+    implementation(libs.tribuo.classification.tree)
     testImplementation(kotlin("test"))
     ktlint(libs.ktlint.cli) {
         attributes {
