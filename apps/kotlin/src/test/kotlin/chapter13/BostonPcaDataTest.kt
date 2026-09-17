@@ -1,5 +1,6 @@
 package chapter13
 
+import chapter07.Matrix
 import chapter07.toMatrix
 import dataset.dataDir
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -33,7 +34,7 @@ class BostonPcaDataTest {
 
         val covariance = covarianceMatrix(x)
         model.components.rows.zip(model.explainedVariance).forEach { (component, variance) ->
-            val projected = covariance * chapter07.Matrix(component.map { listOf(it) })
+            val projected = covariance * Matrix(component.map { listOf(it) })
             component.zip(projected.columns.first()).forEach { (v, av) -> assertEquals(v * variance, av, absoluteTolerance = 1e-9) }
         }
         assertEquals(1.0, model.explainedVarianceRatio.sum(), absoluteTolerance = 1e-9)
