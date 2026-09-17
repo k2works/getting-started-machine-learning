@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Kotlin 第 7 章](/article/getting-start-ml/kotlin/07-linear-regression.md) を新規作成。
 * **Update**: Kotlin [第 2 章](/article/getting-start-ml/kotlin/02-data-preprocessing-and-triangulation.md)・[第 3 章](/article/getting-start-ml/kotlin/03-decision-tree-and-obvious-implementation.md) のコードを、分割に型引数を持たせた実装に合わせて更新。
 * **Update**: Kotlin 版 B9 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新。
 * **Update**: [Python 第 6 章](/article/getting-start-ml/python/06-task-runner-and-ci-cd.md) のワークフローから、効いていなかった Nix ストアのキャッシュのステップを削除。

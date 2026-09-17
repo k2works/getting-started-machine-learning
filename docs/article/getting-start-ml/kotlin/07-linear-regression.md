@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 7 章: 線形回帰による数値予測"
+description: "行列型と演算子オーバーロードで正規方程式による線形回帰を TDD で自作し、外れ値の除去・回帰の評価指標を実装して、Tribuo の SLMTrainer と係数・決定係数を突き合わせる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T05:57:18Z }
+---
+
 # 第 7 章: 線形回帰による数値予測
 
 ## 7.1 はじめに
