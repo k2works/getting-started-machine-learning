@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 15 章: 機械学習 API とモジュール設計"
+description: "第 7・8 章のモデルを使う予測 API を、interface の約束とスタブでインサイドアウトに TDD し、Ktor・kotlinx.serialization・StatusPages でエンドポイントと入力検証を作って testApplication で統合テストする。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:02:33Z }
+---
+
 # 第 15 章: 機械学習 API とモジュール設計
 
 ## 15.1 はじめに
