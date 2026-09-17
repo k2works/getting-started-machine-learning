@@ -1,0 +1,39 @@
+name: Deploy MkDocs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js latest
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build documentation
+        run: npm run docs:build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
