@@ -4,7 +4,7 @@ title: "002 Kotlin 版の機械学習・データ・可視化・API ライブラ
 description: "Kotlin 版のライブラリに Kotlin DataFrame・Tribuo・Kandy・Ktor を採用し、Tribuo で確認した機能に基づいて章ごとの置き換え範囲を決める。"
 tags: [adr,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:40:47Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:08:27Z }
 ---
 
 # 002 Kotlin 版の機械学習・データ・可視化・API ライブラリの選定
@@ -74,6 +74,23 @@ detekt は alpha 版の 2.0 系ではなく安定版の 1.23.8 を使い、`grad
 | 12 | Tribuo の `ElasticNetCDTrainer` | 自作のリッジ回帰は閉形式で書く。ラッソ回帰は `LARSLassoTrainer` が alpha を取らないので、`ElasticNetCDTrainer` で表せるかを第 12 章で確認し、表せなければ置き換えの節を省略する |
 | 13 | なし | PCA のモジュールが無いので、Tribuo の固有値分解を使った自作を最終実装とし、置き換えの節を省略する |
 | 14 | Tribuo の `KMeansTrainer` | 初期中心を渡せないので、同じ初期中心での一致は確かめない。同じクラスタ数での SSE の大きさを比べるにとどめる |
+
+### B10〜B12 で確かめた結果
+
+各章の実装で Tribuo などの振る舞いを確かめ、テストに残した結果。
+
+| 章 | 確かめたこと |
+|----|------------|
+| 3 | Tribuo の CART と予測が一致するのは深さ 2 まで。深さ 3 以上で 1 件違うのは、多数決が同数の葉のラベルの選び方と、同じ不純度の分割候補の選び方（自作は列の順、Tribuo は特徴量名の順）が違うため |
+| 7 | 最小二乗解と一致するのは `SLMTrainer(true)` と `LARSTrainer()`（予測が小数第 13 位まで一致）。`SLMTrainer(false)`・`LinearSGDTrainer` は一致しない。`SparseLinearModel` の重みは正規化した空間の値で、元の単位に戻すと自作の係数と一致する。`RegressionEvaluator` の MAE・RMSE・R² は自作と一致する |
+| 8 | 前処理後のデータで、Tribuo の CART と深さ 1〜6 は予測が全件一致し、深さ 7〜10 では 1〜7 件違う（原因は未調査）。クラスの重み付けは自作の木で示した。モデルは Java のシリアライズで保存し、`ObjectInputFilter` で読み込めるクラスを許可リストに絞った |
+| 9 | `MeanStdDevTransformation` は不偏標準偏差（件数 − 1 で割る）を使うので、自作の標準化の値に √((n−1)/n) を掛けると一致する。Kandy 0.8.0 の `histogram` は DataFrame 0.15.0 と組み合わせると `NoSuchMethodError` になる |
+| 10 | `LogisticRegressionTrainer` の既定（AdaGrad・5 エポック）は学習が足りず、500 エポックで自作と同じ正解率になる。`RandomForestTrainer` は分割ごとに特徴量を選び、`minChildWeight` の既定値 5 では訓練データを分け切らない |
+| 11 | `LabelEvaluator` の正解率・適合率・再現率・F 値・混同行列と、`KFoldSplitter` の分割ごとの件数は自作と一致する。`RegressionEvaluator` に MSE は無い。`CrossValidation` は分割を自分で作るので、同じ分割での比較には使えない |
+| 12 | `ElasticNetCDTrainer` の罰則は `alpha × l1Ratio × 件数` の定義で、`l1Ratio=1` でラッソ回帰になる。`l1Ratio=0` は拒否され（下限 `1e-12`）、`l1Ratio=1e-12` と `alpha / 件数` で自作のリッジ回帰と 1e-6 以内で一致する。このため置き換えの節は省略しなかった |
+| 13 | `DenseMatrix.eigenDecomposition()` は対称でない行列では空の `Optional` を返す。固有値は大きい順に並び、固有ベクトルの符号に規則は無い |
+| 14 | `KMeansTrainer` のコンストラクターは初期中心を受け取らず、初期化の方法は `RANDOM` と `PLUSPLUS` だけ。シードを 10 通り変えた最小の SSE で自作と比べた |
+| 15 | Ktor 3.6.0 は kotlinx.serialization 1.11.0 に依存する。Kotlin DataFrame の依存（Apache POI 経由の `log4j-api`）が、サーバーの起動時に Log4j2 のメッセージを出す（動作には影響しない） |
 
 ### 検討した代替案
 

@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:55:49Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:08:27Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -471,13 +471,13 @@ PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribu
 | 5 | パッケージ管理と静的解析 | Gradle Kotlin DSL、バージョンカタログ（`libs.versions.toml`）、Gradle Wrapper、detekt・ktlint、Kover | — |
 | 6 | タスクランナーと CI/CD | Gradle タスク、GitHub Actions と Nix、JDK ツールチェーン、Kotlin Notebook の導入と出力セルの削除 | — |
 | 7 | 線形回帰による数値予測 | 自作の行列型と演算子オーバーロード（`times`・`plus`）、正規方程式、拡張関数による評価指標 | Tribuo の線形回帰 |
-| 8 | 実践的な分類と前処理パイプライン | DataFrame の `groupBy` による補完、ダミー変数化、前処理を `interface Transformer` で合成、モデルの保存と読み込み | Tribuo の決定木とクラスの重み付け（可否は ADR 002 で確認） |
-| 9 | 特徴量エンジニアリング | 標準化・多項式特徴量の自作、DataFrame の `join`、Shift_JIS の読み込み（`Charsets`） | 自作と Tribuo の標準化の突き合わせ（可否は ADR 002 で確認） |
+| 8 | 実践的な分類と前処理パイプライン | DataFrame の `groupBy` による補完、ダミー変数化、前処理を `interface Transformer` で合成、モデルの保存と読み込み | Tribuo の CART（重み付けなしで突き合わせ。Tribuo に無いクラスの重み付けは自作の木で示した） |
+| 9 | 特徴量エンジニアリング | 標準化・多項式特徴量の自作、DataFrame の `join`、Shift_JIS の読み込み（`Charsets`） | Tribuo の `MeanStdDevTransformation`（不偏標準偏差を使うことを確かめて突き合わせ） |
 | 10 | ロジスティック回帰とアンサンブル学習 | ソフトマックスと勾配降下、第 3 章の決定木を再利用したランダムフォレスト、`interface Classifier` による共通化 | Tribuo のロジスティック回帰・`RandomForestTrainer` |
 | 11 | 評価指標と交差検証 | 関数型（`(List<T>, List<T>) -> Double`）で評価関数を渡す、K 分割、`Sequence` | Tribuo の評価器 |
-| 12 | 正則化とモデル選択 | リッジ回帰の閉形式、data class の `copy` による実験結果の記録 | Tribuo の正則化付き線形モデル（ラッソの有無は ADR 002 で確認） |
+| 12 | 正則化とモデル選択 | リッジ回帰の閉形式、data class の `copy` による実験結果の記録 | Tribuo の `ElasticNetCDTrainer`（`l1Ratio` でラッソ回帰とリッジ回帰の両方を表せた） |
 | 13 | 主成分分析による次元削減 | 分散共分散行列と Tribuo の固有値分解、固有ベクトルの符号の扱い | ライブラリ未対応（理由を記事に書く） |
-| 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、エルボー法、`generateSequence` による反復 | Tribuo の K-means（同じ初期中心を渡せるかは ADR 002 で確認） |
+| 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、エルボー法、`generateSequence` による反復 | Tribuo の `KMeansTrainer`（初期中心を渡せないため SSE を比較） |
 | 15 | 機械学習 API とモジュール設計 | Ktor・kotlinx.serialization、レイヤードアーキテクチャ、`testApplication` による統合テスト、`Result`・sealed class によるエラー表現 | — |
 
 可視化の節は、Python 版と同じ第 2・3・7〜14 章に設ける（Kandy で書き起こす）。
@@ -498,9 +498,9 @@ PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribu
 | B7 ウォーキングスケルトン | Kotlin の前提整備（Nix 環境・Gradle Wrapper・雛形・データ参照）、ADR 002、第 1 章の実装と記事、Kotlin 版トップ、nav、Kotlin CI | `apps/kotlin/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
 | B8 | 第 2〜3 章（Kotlin DataFrame・Tribuo の導入、最初の Kotlin Notebook と出力削除の仕組み） | 自作決定木と Tribuo の結果を並べて載せられる。Notebook の出力が CI の検査で残っていない |
 | B9 | 第 4〜6 章 | Gradle タスク・detekt・Kover・CI が記事どおりに動く |
-| B10 | 第 7〜9 章 | |
-| B11 | 第 10〜12 章 | |
-| B12 | 第 13〜15 章 | Kotlin 版の全章完了。Python 版と節構成がそろっている |
+| B10 | 第 7〜9 章 | 完了 |
+| B11 | 第 10〜12 章 | 完了 |
+| B12 | 第 13〜15 章 | Kotlin 版の全章完了。Python 版と節構成がそろっている（完了） |
 
 Python 版と同じく、B7・B8 で型（プロジェクト構成・テストの書き方・Notebook の運用・記事の体裁）を固めてから、B9 以降は依存関係の無い章をサブエージェントで並行して進める。第 10 章は第 3 章、第 15 章は第 7・8 章の実装に依存するので、依存先の完了後に着手する。
 
@@ -516,6 +516,8 @@ Python 版と同じく、B7・B8 で型（プロジェクト構成・テスト�
 - [x] B7（ウォーキングスケルトン）の範囲
 
 B7〜B8（Kotlin 版の第 1 部）と B9（第 2 部）は 2026-09-17 に完了した。B9 では、detekt 1.23.8 が JDK 25 で動かないため Gradle デーモンの JDK を 21 に固定し（ADR 002）、MagicNumber の指摘のうち `MAX_DEPTHS` の値は設定（`ignorePropertyDeclaration`）で対象外にした。あわせて、Python CI の効いていなかった Nix ストアのキャッシュのステップを削除した。
+
+B10〜B12（第 3〜5 部）も 2026-09-17 に完了し、Kotlin 版の全 15 章がそろった。着手前に、第 2 章の分割に正解ラベルの型引数を持たせ、各章で使う Tribuo のモジュールと Ktor を依存に追加した。そのうえで、第 1〜3 章にしか依存しない第 7〜14 章は章ごとに隔離した worktree のサブエージェントで並行して実装・執筆し、第 7・8 章に依存する第 15 章は両章の取り込み後に着手した。親は章ごとにコミットを取り込み、`./gradlew check`（データあり）・データなしのテスト・学習データの行の混入・BOM・絶対パス・画像・Notebook の出力を検査してから記事に OKF を適用した。各章で Tribuo について確かめた結果は ADR 002 に記録した。
 
 TypeScript 版の章別執筆計画は、Kotlin 版の B8 の完了後に本ファイルへ追加する。
 
