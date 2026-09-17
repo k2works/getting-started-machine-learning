@@ -16,11 +16,11 @@ private val labelFactory = LabelFactory()
 private fun toExample(
     x: AnyFrame,
     row: Int,
-    label: String,
+    label: Label,
 ): Example<Label> {
     val names = x.columnNames().toTypedArray()
     val values = DoubleArray(names.size) { (x[names[it]][row] as Number).toDouble() }
-    return ArrayExample(Label(label), names, values)
+    return ArrayExample(label, names, values)
 }
 
 fun toTribuoDataset(
@@ -28,7 +28,7 @@ fun toTribuoDataset(
     t: List<String>,
 ): MutableDataset<Label> {
     val dataset = MutableDataset(SimpleDataSourceProvenance("dataframe", labelFactory), labelFactory)
-    t.forEachIndexed { row, label -> dataset.add(toExample(x, row, label)) }
+    t.forEachIndexed { row, label -> dataset.add(toExample(x, row, Label(label))) }
     return dataset
 }
 
@@ -45,4 +45,4 @@ fun trainTribuoTree(
 fun predictWithTribuo(
     model: Model<Label>,
     x: AnyFrame,
-): List<String> = (0 until x.rowsCount()).map { row -> model.predict(toExample(x, row, "?")).output.label }
+): List<String> = (0 until x.rowsCount()).map { row -> model.predict(toExample(x, row, LabelFactory.UNKNOWN_LABEL)).output.label }
