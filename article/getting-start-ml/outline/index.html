@@ -2678,6 +2678,76 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kotlin/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kotlin/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4967,7 +5037,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 </tbody>
 </table>
 <ul>
-<li>可視化ライブラリ候補は未検証。Python・Kotlin の第 3 章に着手する前に、ML ライブラリと同じ ADR で確定する。</li>
+<li>可視化ライブラリは、Python 版を <a href="../../../adr/001-python-ml-libraries/">ADR 001</a>（matplotlib・seaborn）、Kotlin 版を <a href="../../../adr/002-kotlin-ml-libraries/">ADR 002</a>（Kandy 0.8.0）で確定した。</li>
 <li>Notebook は「探索して分かったことをテストと本番コードに移す」ための場所として位置づける。Notebook で見つけた知見（例: 最適な <code>max_depth</code>）は必ずテストに反映し、Notebook だけに残さない。</li>
 <li>Notebook をコミットする前に出力セルを消す。出力に学習データの行が含まれると、データをコミットしないという方針に反するため。</li>
 <li>CI では Notebook を実行しない。Notebook から移したテストと本番コードを CI で検証する。</li>
@@ -5843,8 +5913,8 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 </tr>
 <tr>
 <td>Kandy（lets-plot）</td>
-<td>安定版の最新 0.8.5、Apache License 2.0</td>
-<td>Maven Central</td>
+<td>安定版の最新は 0.8.5 だが DataFrame 1.0.0-rc01 に依存する。DataFrame 0.15.0 と組み合わせられるのは 0.8.0（B8 で確認し ADR 002 を訂正）。Apache License 2.0</td>
+<td>Maven Central の POM</td>
 </tr>
 <tr>
 <td>そのほか</td>
@@ -5885,7 +5955,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 </tr>
 <tr>
 <td>可視化</td>
-<td>Kandy 0.8.5</td>
+<td>Kandy 0.8.0</td>
 <td>Kotlin Notebook で表示でき、Apache License 2.0</td>
 <td>lets-plot を直接使う</td>
 </tr>
@@ -5936,8 +6006,8 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 </tr>
 <tr>
 <td>Notebook 環境</td>
-<td><code>apps/kotlin/notebooks/</code> に Kotlin Notebook を置く。出力セルは <code>nbstripout</code> で消し、検査は Python 版の <code>tools/notebooks.py</code> と同じく Gradle タスクから呼ぶ（呼び出し方は B7 で決める）</td>
-<td>未着手</td>
+<td><code>apps/kotlin/notebooks/</code> に Kotlin Notebook を置く。出力セルの削除（<code>notebookStrip</code>）・検査（<code>notebookVerify</code>）・IDE なしの実行（<code>notebookExecute</code>）を Gradle タスクにする</td>
+<td>完了（B8。<code>notebookVerify</code> は <code>check</code> に組み込み CI で実行。<code>notebookExecute</code> は uv で kotlin-jupyter-kernel を一時取得する）</td>
 </tr>
 <tr>
 <td>ライブラリ選定</td>
@@ -5947,7 +6017,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <tr>
 <td>CI</td>
 <td><code>.github/workflows/kotlin-ci.yml</code>（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする</td>
-<td>未着手</td>
+<td>一部完了（B7。<code>./gradlew check</code> でテスト・ktlint・Notebook の出力検査を行う。detekt・Kover は B9 で追加する）</td>
 </tr>
 </tbody>
 </table>
@@ -5978,7 +6048,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <td>3</td>
 <td>決定木による分類と明白な実装</td>
 <td>sealed interface による <code>Leaf</code>／<code>Node</code>、<code>when</code> の網羅性、再帰、浮動小数点数の比較（<code>assertEquals</code> の許容誤差）</td>
-<td>Tribuo の CART</td>
+<td>Tribuo の CART（同数の多数決と同じ不純度の分割候補の選び方が違い、深さ 3 以上で 1 件の予測が違う。原因をテストで記録）</td>
 </tr>
 <tr>
 <td>4</td>
@@ -6116,6 +6186,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 付録 A の Kotlin 版を作らないこと</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B7（ウォーキングスケルトン）の範囲</li>
 </ul>
+<p>B7〜B8（Kotlin 版の第 1 部）は 2026-09-17 に完了した。</p>
 <p>TypeScript 版の章別執筆計画は、Kotlin 版の B8 の完了後に本ファイルへ追加する。</p>
 <h2 id="_18">リスクと対応<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
 <table>
