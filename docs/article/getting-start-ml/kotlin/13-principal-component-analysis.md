@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 13 章: 主成分分析による次元削減"
+description: "標準化・分散共分散行列・Tribuo の DenseMatrix の固有値分解で主成分分析を TDD で実装し、寄与率と固有ベクトルの符号の扱いを確かめる。Tribuo に PCA が無いため置き換えの節は理由を書いて省略する。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T06:25:46Z }
+---
+
 # 第 13 章: 主成分分析による次元削減
 
 ## 13.1 はじめに

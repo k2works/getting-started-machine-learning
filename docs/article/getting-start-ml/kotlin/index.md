@@ -85,7 +85,7 @@ Windows の PowerShell では `./gradlew` の代わりに `.\gradlew.bat` を使
 
 | 章 | テーマ |
 |----|--------|
-| 第 13 章（未執筆） | 主成分分析による次元削減 |
+| [第 13 章](13-principal-component-analysis.md) | 主成分分析による次元削減 |
 | 第 14 章（未執筆） | K-means によるクラスタリング |
 | 第 15 章（未執筆） | 機械学習 API とモジュール設計 |
 
