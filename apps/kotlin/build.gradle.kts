@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
 }
 
 repositories {
@@ -23,6 +25,12 @@ dependencies {
 
 kotlin {
     jvmToolchain(21)
+}
+
+// detekt の既定の設定に、detekt.yml に書いた項目だけを重ねる。check タスクから実行される
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(file("detekt.yml"))
 }
 
 tasks.test {
