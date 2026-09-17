@@ -78,7 +78,7 @@ Windows の PowerShell では `./gradlew` の代わりに `.\gradlew.bat` を使
 | 章 | テーマ |
 |----|--------|
 | [第 10 章](10-logistic-regression-and-ensemble.md) | ロジスティック回帰とアンサンブル学習 |
-| 第 11 章（未執筆） | 評価指標と交差検証 |
+| [第 11 章](11-evaluation-metrics-and-cross-validation.md) | 評価指標と交差検証 |
 | [第 12 章](12-regularization-and-model-selection.md) | 正則化とモデル選択 |
 
 ### 第 5 部: 教師なし学習と実運用

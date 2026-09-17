@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 11 章: 評価指標と交差検証"
+description: "混同行列・適合率・再現率・F 値などの評価指標と K 分割交差検証を、評価関数を関数型で渡す設計と Sequence で TDD で自作し、Tribuo の LabelEvaluator・RegressionEvaluator・KFoldSplitter と突き合わせる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:05:30Z }
+---
+
 # 第 11 章: 評価指標と交差検証
 
 ## 11.1 はじめに
