@@ -1,7 +1,6 @@
 package chapter03
 
 import org.jetbrains.kotlinx.dataframe.AnyFrame
-import org.jetbrains.kotlinx.dataframe.api.rows
 import org.tribuo.Example
 import org.tribuo.Model
 import org.tribuo.MutableDataset

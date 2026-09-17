@@ -177,6 +177,15 @@ class IrisDataTest {
 
     private fun irisSplit(): TrainTestSplit = prepareIris(csvFile, testSize = 0.3, seed = 0)
 
+    private fun countDifferences(
+        split: TrainTestSplit,
+        maxDepth: Int?,
+    ): Int {
+        val mine = DecisionTree(maxDepth).fit(split.xTrain, split.tTrain).predict(split.xTest)
+        val tribuo = predictWithTribuo(trainTribuoTree(split.xTrain, split.tTrain, maxDepth, 1.0f), split.xTest)
+        return mine.zip(tribuo).count { (a, b) -> a != b }
+    }
+
     @Test
     fun `深さ2の決定木はテストデータの45件中42件を正しく分類する`() {
         val split = irisSplit()
@@ -191,22 +200,21 @@ class IrisDataTest {
         val split = irisSplit()
 
         for (maxDepth in listOf(1, 2)) {
-            val mine = DecisionTree(maxDepth).fit(split.xTrain, split.tTrain).predict(split.xTest)
-            val tribuo = predictWithTribuo(trainTribuoTree(split.xTrain, split.tTrain, maxDepth, 1.0f), split.xTest)
-
-            assertEquals(mine, tribuo, "深さ $maxDepth")
+            assertEquals(0, countDifferences(split, maxDepth), "深さ $maxDepth")
         }
     }
 
     @Test
-    fun `深さ3以上では多数決が同数の葉に落ちる1件だけTribuoと予測が違う`() {
+    fun `深さ3では多数決が同数の葉に落ちる1件だけTribuoと予測が違う`() {
+        assertEquals(1, countDifferences(irisSplit(), maxDepth = 3))
+    }
+
+    @Test
+    fun `深さ4以上でも1件だけTribuoと予測が違う`() {
         val split = irisSplit()
 
-        for (maxDepth in listOf(3, null)) {
-            val mine = DecisionTree(maxDepth).fit(split.xTrain, split.tTrain).predict(split.xTest)
-            val tribuo = predictWithTribuo(trainTribuoTree(split.xTrain, split.tTrain, maxDepth, 1.0f), split.xTest)
-
-            assertEquals(1, mine.zip(tribuo).count { (a, b) -> a != b }, "深さ $maxDepth")
+        for (maxDepth in listOf(4, 5, null)) {
+            assertEquals(1, countDifferences(split, maxDepth), "深さ $maxDepth")
         }
     }
 

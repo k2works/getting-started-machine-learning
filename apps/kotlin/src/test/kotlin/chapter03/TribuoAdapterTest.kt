@@ -28,7 +28,7 @@ class ToTribuoDatasetTest {
 
 class TribuoTreeTest {
     @Test
-    fun `同数の葉が無ければTribuoのCARTと自作の決定木は同じ予測をする`() {
+    fun `分割候補や多数決が同じにならなければTribuoのCARTと自作の決定木は同じ予測をする`() {
         val (x, t) = threeSpecies()
         val newX = dataFrameOf("花弁幅" to listOf(0.2, 0.4, 0.55, 0.75, 0.95))
 
@@ -46,5 +46,23 @@ class TribuoTreeTest {
 
         assertEquals(listOf("b", "a"), mine)
         assertEquals(1, tribuo.toSet().size)
+    }
+
+    @Test
+    fun `同じ不純度の分割候補が複数あるとき自作は列の順で選ぶがTribuoは特徴量名の順で選ぶ`() {
+        val x =
+            dataFrameOf(
+                "b" to listOf(0.1, 0.9),
+                "a" to listOf(0.1, 0.9),
+            )
+        val t = listOf("left", "right")
+        val newX =
+            dataFrameOf(
+                "b" to listOf(0.2),
+                "a" to listOf(0.8),
+            )
+
+        assertEquals(listOf("left"), DecisionTree().fit(x, t).predict(newX))
+        assertEquals(listOf("right"), predictWithTribuo(trainTribuoTree(x, t, null, 1.0f), newX))
     }
 }
