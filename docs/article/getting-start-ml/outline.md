@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:46:23Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:49:16Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -564,11 +564,11 @@ ml.js の各パッケージの細部（ml-cart の分割基準とクラスの重
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| Nix 環境 | `ops/nix/environments/node/shell.nix` の Node.js を 22 に上げ、`nix develop .#node` で Node.js・npm が使えることを CI で確かめる | 完了（`nodejs_22` に更新。CI での動作確認は B13 のステップ 7） |
+| Nix 環境 | `ops/nix/environments/node/shell.nix` の Node.js を 22 に上げ、`nix develop .#node` で Node.js・npm が使えることを CI で確かめる | 完了（`nodejs_22` に更新し、CI で Node.js 22.21.1・npm 10.9.4 を確認） |
 | アプリ雛形 | `apps/node/`（`package.json`・`package-lock.json`・`tsconfig.json`・`vitest.config.ts`・`eslint.config.mjs`・`src/`・`test/`）にテストが 1 本通る最小構成。`.nvmrc` か `engines` で Node.js の版を明示する | 完了（`.nvmrc` と `engines` の両方。`.npmrc` の `save-exact` で正確な版を記録） |
 | 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは Vitest の `it.skipIf`（`describe.skipIf`）でデータが無ければスキップする | 完了（`describe.skipIf`） |
 | ライブラリ選定 | ADR 003（TypeScript 版のライブラリ）を作成する | 完了（ADR 003） |
-| CI | `.github/workflows/node-ci.yml`（Nix → `npm ci` → `npm run check`、カバレッジの表示）。キャッシュは npm のキャッシュの実在するパスにする | 未着手 |
+| CI | `.github/workflows/node-ci.yml`（Nix → `npm ci` → `npm run check`、カバレッジの表示）。キャッシュは npm のキャッシュの実在するパスにする | 完了（B13。Nix の Node.js 22.21.1 で `npm run check` とカバレッジの表示が成功。キャッシュは `~/.npm`） |
 
 ### 章別執筆計画（TypeScript）
 
@@ -604,7 +604,7 @@ Kotlin 版で、第 1〜3 章の型を固めた後は依存関係の無い章を
 
 | Bolt | 内容 | 完了条件 |
 |------|------|---------|
-| B13 ウォーキングスケルトン | Nix の `node` 環境の更新、`apps/node/` の雛形、ADR 003、第 1 章の実装と記事、TypeScript 版トップ、nav、Node CI | `apps/node/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
+| B13 ウォーキングスケルトン（完了） | Nix の `node` 環境の更新、`apps/node/` の雛形、ADR 003、第 1 章の実装と記事、TypeScript 版トップ、nav、Node CI | `apps/node/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
 | B14 | 第 2〜3 章（型付きレコード、シード付き乱数、ml.js の導入） | 自作の決定木と ml-cart の結果を並べて載せられる |
 | B15 | 第 4〜6 章 | npm scripts・ESLint・Prettier・カバレッジ・CI が記事どおりに動く |
 | B16 | 第 7〜14 章（依存関係の無い章を並行して進める） | 各章のテストが通り、記事がそろっている |
