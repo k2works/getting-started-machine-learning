@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:08:27Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:22:35Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -519,7 +519,110 @@ B7〜B8（Kotlin 版の第 1 部）と B9（第 2 部）は 2026-09-17 に完了
 
 B10〜B12（第 3〜5 部）も 2026-09-17 に完了し、Kotlin 版の全 15 章がそろった。着手前に、第 2 章の分割に正解ラベルの型引数を持たせ、各章で使う Tribuo のモジュールと Ktor を依存に追加した。そのうえで、第 1〜3 章にしか依存しない第 7〜14 章は章ごとに隔離した worktree のサブエージェントで並行して実装・執筆し、第 7・8 章に依存する第 15 章は両章の取り込み後に着手した。親は章ごとにコミットを取り込み、`./gradlew check`（データあり）・データなしのテスト・学習データの行の混入・BOM・絶対パス・画像・Notebook の出力を検査してから記事に OKF を適用した。各章で Tribuo について確かめた結果は ADR 002 に記録した。
 
-TypeScript 版の章別執筆計画は、Kotlin 版の B8 の完了後に本ファイルへ追加する。
+## TypeScript 版執筆計画
+
+第 1 波の最後の言語として、TypeScript 版を Python 版・Kotlin 版と同じ 5 部 15 章の節構成で書き起こす。TypeScript は、機械学習のライブラリが Python・JVM ほど成熟していない環境の代表として扱う。Python 版・Kotlin 版との対比の軸は次の 3 つとする。
+
+- **型**: 構造的型付けと判別可能なユニオン（`type Tree = Leaf | Node`）、`number | null` による欠損値、`strict` モードの型チェック。型は実行時には消えるので、外部から来るデータ（CSV・API の入力）は実行時に検証する
+- **データの表現**: データフレームのライブラリを使わず、1 行を `interface` で型付けしたレコードの配列と、列を取り出す小さな関数で表す。行列は自作の型と ml-matrix で扱う
+- **自作の価値**: ライブラリが無い・古い領域（乱数のシード、正則化など）を自作で埋め、ライブラリがある領域は ml.js 系のパッケージと突き合わせる
+
+Notebook による探索と可視化は、執筆計画の方針どおり TypeScript 版では扱わない。可視化の節がある章（第 2・3・7〜14 章）では、章の冒頭で Python 版・Kotlin 版の該当する節へ案内する。付録 A（総合演習）は Kotlin 版と同じく作らず、TypeScript 版トップから Python 版の付録 A へ案内する。
+
+### 確認した事実（2026-09-17 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| ローカル環境 | Node.js 22.18.0、npm 10.9.3 | コマンドの `--version` |
+| Nix 環境 | `ops/nix/environments/node/shell.nix` は `nodejs_20`・npm・TypeScript。本リポジトリの CI で `node` 環境を使うワークフローは無い | ファイルと `.github/workflows/` を読んだ |
+| 参照実装 | `tmp/getting-started-tdd/apps/node/` は ESM（`"type": "module"`）、Vitest・ESLint（typescript-eslint）・Prettier・`tsc --noEmit`、npm scripts の `check` で品質チェックをまとめている | `package.json` を読んだ |
+| TypeScript | 最新は 7.0.2、6 系の最新は 6.0.3、Apache-2.0。typescript-eslint 8.70.0 の peerDependencies は `typescript >=4.8.4 <6.1.0` で、7 系に対応していない | npm レジストリ |
+| テスト・静的解析 | Vitest 5.0.1（MIT、`engines.node` は `^22.12.0 \|\| ^24.0.0 \|\| >=26.0.0`）、@vitest/coverage-v8 5.0.1、ESLint 10.10.0（`^20.19.0 \|\| ^22.13.0 \|\| >=24`）、Prettier 3.9.7 | npm レジストリ |
+| データフレーム | danfojs-node 1.2.0（MIT）は 2025-04 以降更新が無く、`@tensorflow/tfjs-node` 3 系（ネイティブのバイナリ）と非推奨の `request` に依存する | npm レジストリ |
+| 機械学習（ml.js 系、すべて MIT） | ml-matrix 6.15.0（2026-08 更新）、ml-regression-multivariate-linear 2.0.4、ml-cart 2.1.1、ml-random-forest 2.1.0、ml-logistic-regression 2.0.0、ml-kmeans 7.0.1（2026-06 更新）、ml-pca 4.1.1、ml-confusion-matrix 2.0.0、ml-cross-validation 1.3.0。多くは 2022 年から更新が無い。型定義を同梱しないパッケージがある（ml-cart・ml-logistic-regression は `types` の指定が無い） | npm レジストリ |
+| K-means の初期中心 | ml-kmeans の `initialization` に初期中心（`number[][]`）を渡せる | パッケージの README |
+| CSV・文字コード | csv-parse 7.0.2（MIT）。Node.js 22 の `TextDecoder('shift_jis')` で Shift_JIS を読める | npm レジストリ、実行して確認 |
+| API | Hono 4.13.8、@hono/node-server 2.1.1、Fastify 5.12.5、zod 4.6.5（いずれも MIT） | npm レジストリ |
+
+ml.js の各パッケージの細部（ml-cart の分割基準とクラスの重み、ml-logistic-regression の最適化手法、正則化付き回帰の有無、ESM からの読み込み方）は未検証。B13 の ADR 003 で、章ごとに置き換え可能かを確かめてから確定する。
+
+### ライブラリ方針（ADR 003 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| 言語・型チェック | TypeScript 6.0.3（`strict`） | typescript-eslint が 7 系に対応していないため 6 系に固定する | TypeScript 7 系（typescript-eslint の対応を待つ） |
+| 実行環境 | Node.js 22（Nix の `node` 環境を `nodejs_22` に上げる） | Vitest 5・ESLint 10 の要件を満たし、手元の 22.18.0 と一致する。Node.js 20 はサポートが終了している | Node.js 24 |
+| テスト・カバレッジ | Vitest 5 + @vitest/coverage-v8 | TypeScript を変換なしで扱え、参照実装と同じ | Node.js の `node:test` |
+| 静的解析・整形 | ESLint 10 + typescript-eslint、Prettier | 参照実装と同じ | Biome |
+| データの表現 | 型付きレコードの配列と自作の列関数、csv-parse | データフレームのライブラリが古くネイティブ依存を持つため。型で列スキーマを表す題材になる | danfojs-node |
+| 乱数 | シード付きの疑似乱数生成器を自作する | `Math.random` はシードを指定できないため。第 2 章の TDD の題材にする | seedrandom |
+| 機械学習 | ml.js 系（ml-matrix・ml-cart・ml-random-forest・ml-logistic-regression・ml-kmeans・ml-pca など） | MIT で、決定木・ランダムフォレスト・K-means・PCA がそろう | 自作のみ（置き換えの節を省略） |
+| API | Hono + @hono/node-server + zod | `app.request` でサーバーを起動せずに統合テストを書け、依存が小さい | Fastify |
+| 可視化 | なし | 執筆計画の方針（可視化は Python・Kotlin のみ） | — |
+
+### 前提整備（TypeScript）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `ops/nix/environments/node/shell.nix` の Node.js を 22 に上げ、`nix develop .#node` で Node.js・npm が使えることを CI で確かめる | 未着手 |
+| アプリ雛形 | `apps/node/`（`package.json`・`package-lock.json`・`tsconfig.json`・`vitest.config.ts`・`eslint.config.mjs`・`src/`・`test/`）にテストが 1 本通る最小構成。`.nvmrc` か `engines` で Node.js の版を明示する | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは Vitest の `it.skipIf`（`describe.skipIf`）でデータが無ければスキップする | 未着手 |
+| ライブラリ選定 | ADR 003（TypeScript 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/node-ci.yml`（Nix → `npm ci` → `npm run check`、カバレッジの表示）。キャッシュは npm のキャッシュの実在するパスにする | 未着手 |
+
+### 章別執筆計画（TypeScript）
+
+| 章 | テーマ | TypeScript での焦点 | ライブラリへの置き換え |
+|----|--------|--------------------|--------------------|
+| 1 | 機械学習とはじめてのテスト | Vitest、`interface` による行の型、`readFileSync` と BOM の除去、`describe.skipIf` による実データテストのスキップ | — |
+| 2 | データの前処理と三角測量 | CSV を型付きレコードに変換、欠損値を `number \| null` で表す、シード付き疑似乱数生成器の自作、ジェネリクスの `splitTrainTest<T>` | — |
+| 3 | 決定木による分類と明白な実装 | 判別可能なユニオン（`kind`）による `Leaf`／`Node`、`never` による網羅性の検査、再帰、浮動小数点数の比較（`toBeCloseTo`） | ml-cart |
+| 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`node_modules/`・`coverage/`・`dist/` の除外、`package-lock.json` のコミット、乱数シード | — |
+| 5 | パッケージ管理と静的解析 | npm と `package-lock.json`、`tsconfig.json` の `strict`、ESLint（typescript-eslint）・Prettier、Vitest のカバレッジ、型定義の無いパッケージの扱い | — |
+| 6 | タスクランナーと CI/CD | npm scripts による `check` の集約、GitHub Actions と Nix、Node.js の版の固定 | — |
+| 7 | 線形回帰による数値予測 | 自作の行列クラス（演算子オーバーロードが無いのでメソッドで表す）、正規方程式、評価指標 | ml-matrix の解法・ml-regression-multivariate-linear |
+| 8 | 実践的な分類と前処理パイプライン | グループ別の補完、ダミー変数化、`interface Transformer` によるパイプライン、JSON によるモデルの保存と読み込み | ml-cart（クラスの重み付けの可否は ADR 003 で確認） |
+| 9 | 特徴量エンジニアリング | 標準化・多項式特徴量の自作、`Map` による表の結合、`TextDecoder('shift_jis')` による読み込み | 自作の標準化との突き合わせ（ライブラリの有無は ADR 003 で確認） |
+| 10 | ロジスティック回帰とアンサンブル学習 | ソフトマックスと勾配降下、第 3 章の決定木を再利用したランダムフォレスト、`interface Classifier` による共通化 | ml-logistic-regression・ml-random-forest |
+| 11 | 評価指標と交差検証 | 関数型（`(actual: T[], predicted: T[]) => number`）で評価関数を渡す、K 分割、ジェネレーター（`function*`） | ml-confusion-matrix・ml-cross-validation |
+| 12 | 正則化とモデル選択 | リッジ回帰の閉形式、`Readonly` とスプレッド構文による実験結果の記録 | 正則化付き回帰のパッケージの有無は ADR 003 で確認（無ければ置き換えの節を省略） |
+| 13 | 主成分分析による次元削減 | 分散共分散行列と ml-matrix の固有値分解、固有ベクトルの符号の扱い | ml-pca |
+| 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、エルボー法、ジェネレーターによる反復 | ml-kmeans（同じ初期中心を渡して結果を突き合わせる） |
+| 15 | 機械学習 API とモジュール設計 | Hono と zod による入力の検証、レイヤードアーキテクチャ、`app.request` による統合テスト、判別可能なユニオンの `Result` 型によるエラー表現 | — |
+
+### Python 版・Kotlin 版との数値の違い
+
+分割は Python 版・Kotlin 版と同じ手順（シード付きでシャッフルし、テスト件数を切り上げる）で行うが、TypeScript 版では疑似乱数生成器を自作するので、**どの行が訓練データ・テストデータに入るかは Python 版・Kotlin 版と一致しない**。数値の扱いは Kotlin 版と同じとする。
+
+- 件数（例: iris の 105 件と 45 件）は一致させる
+- 記事の数値は TypeScript 版の実装で実測したものだけを載せる
+- 自作とライブラリの突き合わせは TypeScript 版の中で完結させる
+
+### Bolt 計画（TypeScript）
+
+Kotlin 版で、第 1〜3 章の型を固めた後は依存関係の無い章を worktree のサブエージェントで並行して進められることを確かめた。TypeScript 版もこの進め方を使い、Bolt を 5 つにまとめる。
+
+| Bolt | 内容 | 完了条件 |
+|------|------|---------|
+| B13 ウォーキングスケルトン | Nix の `node` 環境の更新、`apps/node/` の雛形、ADR 003、第 1 章の実装と記事、TypeScript 版トップ、nav、Node CI | `apps/node/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
+| B14 | 第 2〜3 章（型付きレコード、シード付き乱数、ml.js の導入） | 自作の決定木と ml-cart の結果を並べて載せられる |
+| B15 | 第 4〜6 章 | npm scripts・ESLint・Prettier・カバレッジ・CI が記事どおりに動く |
+| B16 | 第 7〜14 章（依存関係の無い章を並行して進める） | 各章のテストが通り、記事がそろっている |
+| B17 | 第 15 章 | TypeScript 版の全章完了。Python 版と節構成がそろっている |
+
+B16 の前に、共有するファイル（`package.json` の依存、第 2 章の分割の型など）を親が整えてから並行作業に入る。第 15 章は第 7・8 章の実装に依存するので、B16 の取り込み後に着手する。
+
+### 承認が必要な事項（TypeScript）
+
+次の点を確認した（2026-09-17 承認）。
+
+- [x] データフレームのライブラリを使わず、型付きレコードの配列で表すこと
+- [x] TypeScript を 6.0 系に、Node.js を 22 に固定し、Nix の `node` 環境を `nodejs_22` に上げること
+- [x] 機械学習のライブラリを ml.js 系とし、置き換えの範囲を ADR 003 で章ごとに確かめること
+- [x] API を Hono + zod で作ること
+- [x] 可視化の節と付録 A を TypeScript 版では作らず、Python 版・Kotlin 版へ案内すること
+- [x] Bolt を B13〜B17 の 5 つにまとめ、B16 で第 7〜14 章を並行して進めること
+- [x] B13（ウォーキングスケルトン）の範囲
 
 ## リスクと対応
 
