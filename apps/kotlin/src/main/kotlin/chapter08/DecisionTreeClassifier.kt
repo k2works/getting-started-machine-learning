@@ -74,17 +74,11 @@ private fun bestSplit(
         val weights = order.map { w[it.index] }
         for (i in 1 until order.size) {
             if (values[i] == values[i - 1]) continue
+            val leftLabels = labels.subList(0, i)
+            val rightLabels = labels.subList(i, labels.size)
             val left = weights.subList(0, i)
             val right = weights.subList(i, weights.size)
-            val impurity =
-                (
-                    left.sum() *
-                        weightedGini(
-                            labels.subList(0, i),
-                            left,
-                        ) + right.sum() * weightedGini(labels.subList(i, labels.size), right)
-                ) /
-                    weights.sum()
+            val impurity = (left.sum() * weightedGini(leftLabels, left) + right.sum() * weightedGini(rightLabels, right)) / weights.sum()
             if (best == null || impurity < best.impurity) {
                 best = Candidate(feature = feature, threshold = (values[i - 1] + values[i]) / 2, impurity = impurity)
             }
