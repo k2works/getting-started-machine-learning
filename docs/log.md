@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [機械学習から始めるプログラミング入門 Kotlin 第 1 章](/article/getting-start-ml/kotlin/01-machine-learning-and-first-test.md) を新規作成。
 * **Creation**: [002-kotlin-ml-libraries](/adr/002-kotlin-ml-libraries.md) を作成（claude-code/claude-opus-5）
 * **Verification**: [outline](/article/getting-start-ml/outline.md) を human:kakimomokuri が検証
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に Kotlin 版執筆計画（確認した事実、ライブラリ方針、前提整備、章別計画、Python 版との数値の違い、Bolt 計画、承認事項）を追加。
