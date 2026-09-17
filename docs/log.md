@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [機械学習から始めるプログラミング入門 Python 第 3 章](/article/getting-start-ml/python/03-decision-tree-and-obvious-implementation.md) を新規作成。
 * **Creation**: [機械学習から始めるプログラミング入門 Python 第 2 章](/article/getting-start-ml/python/02-data-preprocessing-and-triangulation.md) を新規作成。
 * **Creation**: [001-python-ml-libraries](/adr/001-python-ml-libraries.md) を作成（claude-code/claude-opus-5）
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) の前提整備の状態と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を B1 完了に合わせて更新。
