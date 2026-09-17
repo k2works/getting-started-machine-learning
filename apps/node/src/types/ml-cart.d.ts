@@ -8,6 +8,8 @@ declare module "ml-cart" {
     /** 件数がこの値以下になったら分割せずに葉にする（既定値 3） */
     minNumSamples?: number;
     maxDepth?: number;
+    /** 利得がこの値以下なら分割しない（既定値 0.01） */
+    gainThreshold?: number;
   }
 
   export class DecisionTreeClassifier {
