@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 9 章: 特徴量エンジニアリング"
+description: "ダミー変数・標準化・多項式特徴量・外れ値検出・Shift_JIS の表の結合を TDD で自作し、特徴量の組み合わせごとの決定係数を測って、Tribuo の標準化との違い（不偏標準偏差）を確かめる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T06:01:20Z }
+---
+
 # 第 9 章: 特徴量エンジニアリング
 
 ## 9.1 はじめに
