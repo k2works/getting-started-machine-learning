@@ -4,7 +4,7 @@ title: "第 1 章: 機械学習とはじめてのテスト"
 description: "機械学習とルールベースの違いを確認し、きのこ派・たけのこ派の判定を Kotlin の TDD で実装して正解率を測る。"
 tags: [article,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:24:06Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:55:25Z }
 ---
 
 # 第 1 章: 機械学習とはじめてのテスト
@@ -699,6 +699,8 @@ private fun captureStdout(block: () -> Unit): String {
     return buffer.toString(Charsets.UTF_8).replace("\r\n", "\n")
 }
 ```
+
+第 2 章では、このヘルパーを `src/test/kotlin/support/CaptureStdout.kt` に移し、どの章のテストからも使えるようにします。
 
 `main` と表示のテストは、実データで出力を確かめながら書いたので、Red を経ずに通っています。出力を固定し、変更で表示が変わったことに気づけるようにするためのテストです。
 
