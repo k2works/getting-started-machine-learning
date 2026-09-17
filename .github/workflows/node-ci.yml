@@ -1,0 +1,55 @@
+name: Node CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/node/**"
+      - ".github/workflows/node-ci.yml"
+      - "ops/nix/environments/node/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/node/**"
+      - ".github/workflows/node-ci.yml"
+      - "ops/nix/environments/node/**"
+      - "flake.nix"
+      - "flake.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      # npm ci が再利用するダウンロード済みのパッケージ（~/.npm）を保存する
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('apps/node/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        run: nix develop .#node --command bash -c "cd apps/node && npm ci"
+
+      # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
+      - name: Run format check, lint, type check and tests
+        run: nix develop .#node --command bash -c "cd apps/node && npm run check"
+
+      # 実データのテストがスキップされるので、手元より低い値になる。下限は設けず表示だけする
+      - name: Show coverage
+        run: nix develop .#node --command bash -c "cd apps/node && npm run test:coverage"
