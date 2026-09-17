@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:24:28Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -430,7 +430,7 @@ Kotlin は JVM 上で動く静的型付けの言語で、data class・sealed int
 | Smile | 最新 6.3.0 のライセンスは GPL-3.0、2.6.0 は LGPL-3.0 | Maven Central の POM |
 | Tribuo | 最新 4.3.2、Apache License 2.0。決定木・ランダムフォレスト（`RandomForestTrainer`）・K-means・線形モデルのモジュールがあり、行列の固有値分解（`DenseMatrix.EigenDecomposition`）を持つ。PCA のモジュールは見当たらない | Maven Central のモジュール一覧・JAR の中身 |
 | Kotlin DataFrame | 安定版の最新 0.15.0（1.0.0 は開発版のみ）、Apache License 2.0 | Maven Central |
-| Kandy（lets-plot） | 安定版の最新 0.8.5、Apache License 2.0 | Maven Central |
+| Kandy（lets-plot） | 安定版の最新は 0.8.5 だが DataFrame 1.0.0-rc01 に依存する。DataFrame 0.15.0 と組み合わせられるのは 0.8.0（B8 で確認し ADR 002 を訂正）。Apache License 2.0 | Maven Central の POM |
 | そのほか | Kotlin 2.4.20、Ktor 3.6.0、kotlinx.serialization 1.11.0、Kover 0.9.9、detekt 1.23.8、ktlint 1.8.0、multik 0.3.1（Apache License 2.0） | Maven Central |
 
 Tribuo の各アルゴリズムの細部（決定木の分割基準をジニ不純度にできるか、クラスの重み付け、ラッソ回帰の有無など）は未検証。B7 の ADR 002 で、章ごとに置き換え可能かを確かめてから確定する。
@@ -442,7 +442,7 @@ Tribuo の各アルゴリズムの細部（決定木の分割基準をジニ不�
 | データフレーム | Kotlin DataFrame 0.15.0 | JetBrains 製で Kotlin Notebook と統合されている | 標準ライブラリのコレクションと data class のみ |
 | 行列演算 | 自作の小さな行列型（`DoubleArray`）と Tribuo の `DenseMatrix` | 正規方程式・固有値分解の仕組みを見せるため。依存を増やさない | multik 0.3.1 |
 | 機械学習 | Tribuo 4.3.2 | Apache License 2.0 で、決定木・ランダムフォレスト・線形モデル・K-means がそろう | Smile 2.6.0（LGPL-3.0）。Smile 6.x は GPL-3.0 のため、採用するならリポジトリのライセンスとの整合を先に判断する |
-| 可視化 | Kandy 0.8.5 | Kotlin Notebook で表示でき、Apache License 2.0 | lets-plot を直接使う |
+| 可視化 | Kandy 0.8.0 | Kotlin Notebook で表示でき、Apache License 2.0 | lets-plot を直接使う |
 | API | Ktor 3.6.0 + kotlinx.serialization | Kotlin 製で、`testApplication` による統合テストがある | Spring Boot |
 | 静的解析・カバレッジ | detekt、ktlint、Kover | Kotlin の標準的な組み合わせ | — |
 

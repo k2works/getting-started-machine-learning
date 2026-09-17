@@ -4,7 +4,7 @@ title: "002 Kotlin 版の機械学習・データ・可視化・API ライブラ
 description: "Kotlin 版のライブラリに Kotlin DataFrame・Tribuo・Kandy・Ktor を採用し、Tribuo で確認した機能に基づいて章ごとの置き換え範囲を決める。"
 tags: [adr,getting-start-ml,kotlin]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:16:42Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
 ---
 
 # 002 Kotlin 版の機械学習・データ・可視化・API ライブラリの選定
@@ -34,8 +34,9 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:16:42Z }
 | PCA | モジュールが無い。行列の固有値分解（`DenseMatrix.EigenDecomposition`）はある | JAR のクラス一覧 |
 | 標準化 | `MeanStdDevTransformation` がある | JAR のクラス一覧 |
 | モデルの保存 | `Model.serializeToFile` がある | メソッドの一覧 |
-| Kotlin DataFrame 0.15.0 | Kotlin 2.4.20 でコンパイルできる。`DataFrame.readCsv` は BOM を取り除いて列名を読み、欠損を含む数値列を `Double?` として読む（iris.csv で 150 行・4 列が `Double?`、1 列が `String`） | 実行して列名の先頭の文字コードと列の型を出力 |
-| Kandy 0.8.5 | Kotlin 2.4.20 のプロジェクトで依存を解決してコンパイルできる | ビルド |
+| Kotlin DataFrame 0.15.0 | Kotlin 2.4.20 でコンパイルできる。読み込み関数は `DataFrame.readCSV`（`readCsv` は 1.0 系の名前で、0.15.0 には無い）。BOM を取り除いて列名を読み、欠損を含む数値列を `Double?` として読む（iris.csv で 150 行・4 列が `Double?`、1 列が `String`） | DataFrame だけを依存に持つプロジェクトで実行し、読み込んだ JAR が `dataframe-core-0.15.0.jar` であることと、列名の先頭の文字コード・列の型を出力 |
+| Kandy の版と DataFrame の版の対応 | `kandy-api` の POM によると、0.8.0 は DataFrame 0.15.0、0.8.1 は 1.0.0-Beta3、0.8.3 は 1.0.0-Beta4、0.8.4 は 1.0.0-Beta5、0.8.5 は 1.0.0-rc01 に依存する | Maven Central の POM |
+| Kotlin Notebook の実行 | kotlin-jupyter-kernel 0.19.0.944（PyPI、Apache License 2.0）で、IDE なしで `jupyter nbconvert --execute` により Notebook を実行できる。`%use dataframe(0.15.0), kandy(0.8.0)` と `%use dataframe(1.0.0-rc01), kandy(0.8.5)` はどちらも iris.csv の読み込みと散布図のセルが成功した。`@file:DependsOn` でプロジェクトの JAR を読み込み、テスト済みの関数を呼べる | uvx で一時的に導入したカーネルで実行 |
 
 ## 決定
 
@@ -45,7 +46,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:16:42Z }
 | テスト | kotlin.test + JUnit Platform | Kotlin と同じ | Apache License 2.0 | 第 1 章 |
 | データフレーム | Kotlin DataFrame | 0.15.0 | Apache License 2.0 | 第 2 章 |
 | 機械学習 | Tribuo | 4.3.2 | Apache License 2.0 | 第 3 章 |
-| 可視化 | Kandy（lets-plot） | 0.8.5 | Apache License 2.0 | 第 2 章 |
+| 可視化 | Kandy（lets-plot） | 0.8.0 | Apache License 2.0 | 第 2 章 |
 | API | Ktor、kotlinx.serialization | 3.6.0、1.11.0 | Apache License 2.0 | 第 15 章 |
 | 静的解析・カバレッジ | detekt、ktlint、Kover | 1.23.8、1.8.0、0.9.9 | Apache License 2.0（detekt・Kover）、MIT（ktlint） | 第 5 章 |
 
@@ -89,6 +90,10 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:16:42Z }
 - `apps/kotlin/gradle/libs.versions.toml` に上記のライブラリと版だけが記載されている
 - Kotlin CI（`.github/workflows/kotlin-ci.yml`）がグリーンである
 - 置き換えを省略した章の記事に、省略した理由が書かれている
+
+## 訂正の記録
+
+2026-09-17（B8）: 当初の版では、DataFrame と Kandy 0.8.5 を同じ使い捨てのプロジェクトの依存に入れて確かめていた。Kandy 0.8.5 が DataFrame 1.0.0-rc01 に依存しているため、Gradle は DataFrame を 1.0.0-rc01 に解決しており、「DataFrame 0.15.0 の `readCsv` が BOM を取り除く」という記述は、実際には 1.0.0-rc01 を確かめた結果だった。DataFrame だけを依存に持つプロジェクトで確かめ直し、DataFrame 0.15.0 と組み合わせられる Kandy 0.8.0 に決定を改めた（人の判断による）。DataFrame 1.0 の正式版が出たら、Kandy とあわせて移行を検討する。
 
 ## 備考
 

@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) を訂正。Kandy 0.8.5 が DataFrame 1.0.0-rc01 に依存していたため当初の検証が 1.0.0-rc01 のものだったと判明し、DataFrame 0.15.0 と組み合わせられる Kandy 0.8.0 に改め、Kotlin Notebook を IDE なしで実行できることを追記。[執筆計画](/article/getting-start-ml/outline.md) の該当箇所も修正。
+* **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) を訂正。Kandy 0.8.5 が DataFrame 1.0.0-rc01 に依存していたため当初の検証が 1.0.0-rc01 のものだったと判明し、DataFrame 0.15.0 と組み合わせられる Kandy 0.8.0 に改め、Kotlin Notebook を IDE なしで実行できることを追記。[執筆計画](/article/getting-start-ml/outline.md) の該当箇所も修正。
 * **Update**: Kotlin 版 B7 の進行に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Update**: Kotlin 版 B7 の進行に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [機械学習から始めるプログラミング入門 Kotlin 第 1 章](/article/getting-start-ml/kotlin/01-machine-learning-and-first-test.md) を新規作成。
