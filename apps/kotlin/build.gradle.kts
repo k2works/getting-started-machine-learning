@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kover)
 }
@@ -18,9 +19,16 @@ dependencies {
     implementation(libs.tribuo.regression.sgd)
     implementation(libs.tribuo.clustering.kmeans)
     implementation(libs.tribuo.math)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.status.pages)
+    implementation(libs.ktor.serialization.kotlinx.json)
     // DataFrame・Tribuo が使う SLF4J の警告を出さないための、何もしないログ実装
     runtimeOnly(libs.slf4j.nop)
     testImplementation(kotlin("test"))
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.ktor.client.content.negotiation)
     ktlint(libs.ktlint.cli) {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
