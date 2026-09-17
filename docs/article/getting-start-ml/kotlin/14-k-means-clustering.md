@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 14 章: K-means によるクラスタリング"
+description: "初期中心を引数で渡せる K-means を generateSequence の反復で TDD で自作し、エルボー法でクラスタ数を選んで、初期中心を渡せない Tribuo の KMeansTrainer と SSE を比べる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T06:26:52Z }
+---
+
 # 第 14 章: K-means によるクラスタリング
 
 ## 14.1 はじめに
