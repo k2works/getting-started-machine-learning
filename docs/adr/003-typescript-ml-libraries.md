@@ -4,7 +4,7 @@ title: "003 TypeScript 版の機械学習・データ・API ライブラリの�
 description: "TypeScript 版のライブラリに TypeScript 6.0・Node.js 22・Vitest・ml.js 系・Hono + zod を採用し、ml.js で確認した機能と癖に基づいて章ごとの置き換え範囲を決める。"
 tags: [adr,getting-start-ml,typescript]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:36:58Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 ---
 
 # 003 TypeScript 版の機械学習・データ・API ライブラリの選定
@@ -65,7 +65,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:36:58Z }
 
 | 章 | 置き換え | 方針 |
 |----|---------|------|
-| 3 | ml-cart | 正解ラベルを整数に変換し、`minNumSamples: 1` で自作の決定木と予測を突き合わせる。境界は平均値で自作と同じ |
+| 3 | ml-cart | 正解ラベルを整数に変換し、`minNumSamples: 1`・`gainThreshold: 0` で自作の決定木と予測を突き合わせる（B14 で確認。既定の設定には README に無い `gainThreshold: 0.01` が含まれる。境界ちょうどの値は `<` で右に進み、多数決が同数のときは訓練データ全体で先に現れたラベルを選ぶ。iris では深さ 3 だけ 1 件の予測が違う） |
 | 7 | ml-regression-multivariate-linear、ml-matrix の `solve` | 係数（切片が最後に並ぶ点に注意）と決定係数を突き合わせる |
 | 8 | ml-cart | クラスの重み付けが無いので、重み付けの効果は自作で示し、突き合わせは重み付けなしで行う。モデルは JSON で保存する |
 | 9 | なし | 標準化のライブラリを採用しないので、自作の標準化を最終実装とする（置き換えの節は理由を書いて省略する） |

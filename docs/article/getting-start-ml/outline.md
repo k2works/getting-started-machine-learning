@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:49:16Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -576,7 +576,7 @@ ml.js の各パッケージの細部（ml-cart の分割基準とクラスの重
 |----|--------|--------------------|--------------------|
 | 1 | 機械学習とはじめてのテスト | Vitest、`interface` による行の型、`readFileSync` と BOM の除去、`describe.skipIf` による実データテストのスキップ | — |
 | 2 | データの前処理と三角測量 | CSV を型付きレコードに変換、欠損値を `number \| null` で表す、シード付き疑似乱数生成器の自作、ジェネリクスの `splitTrainTest<T>` | — |
-| 3 | 決定木による分類と明白な実装 | 判別可能なユニオン（`kind`）による `Leaf`／`Node`、`never` による網羅性の検査、再帰、浮動小数点数の比較（`toBeCloseTo`） | ml-cart |
+| 3 | 決定木による分類と明白な実装 | 判別可能なユニオン（`kind`）による `Leaf`／`Node`、`never` による網羅性の検査、再帰、浮動小数点数の比較（`toBeCloseTo`） | ml-cart（境界ちょうどの値の左右・同数の多数決の選び方・既定の利得の下限が違い、実データでは深さ 3 で 1 件の予測が違う。原因をテストで記録） |
 | 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`node_modules/`・`coverage/`・`dist/` の除外、`package-lock.json` のコミット、乱数シード | — |
 | 5 | パッケージ管理と静的解析 | npm と `package-lock.json`、`tsconfig.json` の `strict`、ESLint（typescript-eslint）・Prettier、Vitest のカバレッジ、型定義の無いパッケージの扱い | — |
 | 6 | タスクランナーと CI/CD | npm scripts による `check` の集約、GitHub Actions と Nix、Node.js の版の固定 | — |
@@ -605,7 +605,7 @@ Kotlin 版で、第 1〜3 章の型を固めた後は依存関係の無い章を
 | Bolt | 内容 | 完了条件 |
 |------|------|---------|
 | B13 ウォーキングスケルトン（完了） | Nix の `node` 環境の更新、`apps/node/` の雛形、ADR 003、第 1 章の実装と記事、TypeScript 版トップ、nav、Node CI | `apps/node/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
-| B14 | 第 2〜3 章（型付きレコード、シード付き乱数、ml.js の導入） | 自作の決定木と ml-cart の結果を並べて載せられる |
+| B14（完了） | 第 2〜3 章（型付きレコード、シード付き乱数、ml.js の導入） | 自作の決定木と ml-cart の結果を並べて載せられる |
 | B15 | 第 4〜6 章 | npm scripts・ESLint・Prettier・カバレッジ・CI が記事どおりに動く |
 | B16 | 第 7〜14 章（依存関係の無い章を並行して進める） | 各章のテストが通り、記事がそろっている |
 | B17 | 第 15 章 | TypeScript 版の全章完了。Python 版と節構成がそろっている |

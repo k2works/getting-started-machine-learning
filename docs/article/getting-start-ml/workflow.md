@@ -4,7 +4,7 @@ title: "執筆ワークフロー"
 description: "「機械学習から始めるプログラミング入門」の章ごとの実装・執筆サイクル、学習データの扱い、同期チェックリスト、進捗管理。"
 tags: [article,getting-start-ml]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T09:49:16Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 ---
 
 # 執筆ワークフロー
@@ -156,5 +156,5 @@ stop
 |------|--------|--------|--------|--------|--------|------|------|
 | Python | 完了 | 完了 | 完了 | 完了 | 完了 | 完了 | B1〜B6 完了 |
 | Kotlin | 完了 | 完了 | 完了 | 完了 | 完了 | —（Python 版の付録 A を案内） | B7〜B12 完了 |
-| TypeScript | 第 1 章完了 | 未着手 | 未着手 | 未着手 | 未着手 | — | B13 完了 |
+| TypeScript | 完了 | 未着手 | 未着手 | 未着手 | 未着手 | — | B13〜B14 完了 |
 | 多言語統合解説 | — | — | — | — | — | — | 未着手 |
