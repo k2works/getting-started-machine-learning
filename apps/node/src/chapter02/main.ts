@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { dataDir } from "../dataset.ts";
 import {
   FEATURES,
+  type Feature,
   TARGET,
   countMissing,
   loadIris,
@@ -11,8 +12,11 @@ import {
 const TEST_SIZE = 0.3;
 const SEED = 0;
 
-function sum(counts: Record<string, number>): number {
-  return Object.values(counts).reduce((total, count) => total + count, 0);
+function totalMissing(rows: readonly Record<Feature, number>[]): number {
+  return Object.values(countMissing(rows, FEATURES)).reduce(
+    (total, count) => total + count,
+    0,
+  );
 }
 
 export function main(print: (line: string) => void = console.log): void {
@@ -30,7 +34,7 @@ export function main(print: (line: string) => void = console.log): void {
     `訓練データ: ${split.xTrain.length} 件, テストデータ: ${split.xTest.length} 件`,
   );
   print(
-    `補完後の欠損値の数: 訓練データ ${sum(countMissing(split.xTrain, FEATURES))}, テストデータ ${sum(countMissing(split.xTest, FEATURES))}`,
+    `補完後の欠損値の数: 訓練データ ${totalMissing(split.xTrain)}, テストデータ ${totalMissing(split.xTest)}`,
   );
 }
 

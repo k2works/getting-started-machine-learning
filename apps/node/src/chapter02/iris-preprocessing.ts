@@ -26,33 +26,35 @@ export function loadIris(csvFile: string): IrisRow[] {
   });
 }
 
+function byColumn<K extends string>(
+  columns: readonly K[],
+  valueOf: (column: K) => number,
+): Record<K, number> {
+  return Object.fromEntries(
+    columns.map((column) => [column, valueOf(column)]),
+  ) as Record<K, number>;
+}
+
 export function countMissing<K extends string>(
   rows: readonly Record<K, unknown>[],
   columns: readonly K[],
 ): Record<K, number> {
-  return Object.fromEntries(
-    columns.map((column) => [
-      column,
-      rows.filter((row) => row[column] === null).length,
-    ]),
-  ) as Record<K, number>;
+  return byColumn(
+    columns,
+    (column) => rows.filter((row) => row[column] === null).length,
+  );
 }
 
 export function columnMeans<K extends string>(
   rows: readonly Record<K, number | null>[],
   columns: readonly K[],
 ): Record<K, number> {
-  return Object.fromEntries(
-    columns.map((column) => {
-      const values = rows
-        .map((row) => row[column])
-        .filter((value) => value !== null);
-      return [
-        column,
-        values.reduce((sum, value) => sum + value, 0) / values.length,
-      ];
-    }),
-  ) as Record<K, number>;
+  return byColumn(columns, (column) => {
+    const values = rows
+      .map((row) => row[column])
+      .filter((value) => value !== null);
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  });
 }
 
 export function fillMissing<K extends string>(
