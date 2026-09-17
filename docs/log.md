@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [TypeScript 第 3 章](/article/getting-start-ml/typescript/03-decision-tree-and-obvious-implementation.md) を新規作成。
 * **Creation**: [TypeScript 第 2 章](/article/getting-start-ml/typescript/02-data-preprocessing-and-triangulation.md) を新規作成。
 * **Update**: TypeScript 版 B13 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（TypeScript）と [執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表を更新。
 * **Creation**: [機械学習から始めるプログラミング入門 TypeScript 版トップ](/article/getting-start-ml/typescript/index.md) を新規作成。
