@@ -351,7 +351,7 @@ class FitLinearRegressionTest {
         val model = fitLinearRegression(rows, t)
 
         assertEquals(2.0, model.intercept, absoluteTolerance = 1e-9)
-        assertValues(listOf(3.0, -1.0), model.weights.map { it })
+        assertValues(listOf(3.0, -1.0), model.weights)
     }
 }
 
