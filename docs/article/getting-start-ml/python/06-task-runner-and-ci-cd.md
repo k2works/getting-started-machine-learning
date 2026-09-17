@@ -4,7 +4,7 @@ title: "第 6 章: タスクランナーと CI/CD"
 description: "tox で品質チェックをまとめ、Notebook の出力セルを nbstripout で消し、GitHub Actions で自動実行する。CI で起きた Nix の PYTHONPATH の問題の調べ方も扱う。"
 tags: [article,getting-start-ml,python]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T02:47:20Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:55:26Z }
 ---
 
 # 第 6 章: タスクランナーと CI/CD
@@ -358,14 +358,6 @@ jobs:
         uses: cachix/install-nix-action@v30
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-
-      - name: Cache Nix store
-        uses: actions/cache@v4
-        with:
-          path: /tmp/nix-cache
-          key: ${{ runner.os }}-nix-python-${{ hashFiles('flake.lock', 'ops/nix/environments/python/shell.nix') }}
-          restore-keys: |
-            ${{ runner.os }}-nix-python-
 
       # nix develop は PYTHONPATH に Nix の Python パッケージを追加し、uv の仮想環境の依存関係より優先されるため外す
       # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
