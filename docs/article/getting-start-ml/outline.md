@@ -4,7 +4,7 @@ title: "執筆計画アウトライン"
 description: "「機械学習から始めるプログラミング入門」シリーズの章構成・学習データの扱い・対象言語・Bolt 計画をまとめた執筆計画。"
 tags: [article,getting-start-ml]
 status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T03:46:58Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T04:18:26Z }
 verified:
   - { by: human:kakimomokuri, at: 2026-09-17T01:52:09Z }
   - { by: human:kakimomokuri, at: 2026-09-17T03:09:16Z }
@@ -121,7 +121,7 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 | Python | Jupyter Lab | pandas | matplotlib, seaborn | `apps/python/notebooks/` |
 | Kotlin | Kotlin Notebook（IntelliJ IDEA） | Kotlin DataFrame | Kandy | `apps/kotlin/notebooks/` |
 
-- 可視化ライブラリ候補は未検証。Python・Kotlin の第 3 章に着手する前に、ML ライブラリと同じ ADR で確定する。
+- 可視化ライブラリは、Python 版を [ADR 001](../../adr/001-python-ml-libraries.md)（matplotlib・seaborn）、Kotlin 版を [ADR 002](../../adr/002-kotlin-ml-libraries.md)（Kandy 0.8.0）で確定した。
 - Notebook は「探索して分かったことをテストと本番コードに移す」ための場所として位置づける。Notebook で見つけた知見（例: 最適な `max_depth`）は必ずテストに反映し、Notebook だけに残さない。
 - Notebook をコミットする前に出力セルを消す。出力に学習データの行が含まれると、データをコミットしないという方針に反するため。
 - CI では Notebook を実行しない。Notebook から移したテストと本番コードを CI で検証する。
@@ -456,9 +456,9 @@ PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribu
 | JDK とビルド | ローカルは JDK 25、Nix は JDK 21 なので、Gradle Wrapper でバージョンを固定し、`jvmToolchain(21)` で JDK を自動取得させる。ローカルの Gradle 8.11.1 で JDK 25 から Wrapper を動かせるかを最初に確認する | 完了（Gradle 8.11.1 は JDK 25 で Kotlin DSL を扱えないため、Wrapper の生成だけ JDK 21 で行った。Gradle 9.7.1 は JDK 25 で動作） |
 | アプリ雛形 | `apps/kotlin/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・`src/main/kotlin`・`src/test/kotlin`）にテストが 1 本通る最小構成 | 完了 |
 | 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 完了 |
-| Notebook 環境 | `apps/kotlin/notebooks/` に Kotlin Notebook を置く。出力セルは `nbstripout` で消し、検査は Python 版の `tools/notebooks.py` と同じく Gradle タスクから呼ぶ（呼び出し方は B7 で決める） | 未着手 |
+| Notebook 環境 | `apps/kotlin/notebooks/` に Kotlin Notebook を置く。出力セルの削除（`notebookStrip`）・検査（`notebookVerify`）・IDE なしの実行（`notebookExecute`）を Gradle タスクにする | 完了（B8。`notebookVerify` は `check` に組み込み CI で実行。`notebookExecute` は uv で kotlin-jupyter-kernel を一時取得する） |
 | ライブラリ選定 | ADR 002（Kotlin 版のライブラリ）を作成する | 完了（ADR 002） |
-| CI | `.github/workflows/kotlin-ci.yml`（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする | 未着手 |
+| CI | `.github/workflows/kotlin-ci.yml`（Nix → Gradle のビルド・テスト・detekt・Kover）。参照実装の CI を雛形にし、Python CI と同じくキャッシュのパスを実在するものにする | 一部完了（B7。`./gradlew check` でテスト・ktlint・Notebook の出力検査を行う。detekt・Kover は B9 で追加する） |
 
 ### 章別執筆計画（Kotlin）
 
@@ -466,7 +466,7 @@ PCA（第 13 章）は Tribuo にモジュールが無いので、自作（Tribu
 |----|--------|----------------|--------------------|
 | 1 | 機械学習とはじめてのテスト | `kotlin.test`、data class、`File.readLines` と BOM（`U+FEFF`）の除去、`Assumptions` による実データテストのスキップ | — |
 | 2 | データの前処理と三角測量 | Kotlin DataFrame の CSV 読み込み、欠損値を `Double?` で表す null 安全、`kotlin.random.Random(seed)` による分割 | DataFrame の `fillNulls` と自作補完の突き合わせ |
-| 3 | 決定木による分類と明白な実装 | sealed interface による `Leaf`／`Node`、`when` の網羅性、再帰、浮動小数点数の比較（`assertEquals` の許容誤差） | Tribuo の CART |
+| 3 | 決定木による分類と明白な実装 | sealed interface による `Leaf`／`Node`、`when` の網羅性、再帰、浮動小数点数の比較（`assertEquals` の許容誤差） | Tribuo の CART（同数の多数決と同じ不純度の分割候補の選び方が違い、深さ 3 以上で 1 件の予測が違う。原因をテストで記録） |
 | 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`build/`・`.gradle/`・`.kotlin/` の除外、乱数シード | — |
 | 5 | パッケージ管理と静的解析 | Gradle Kotlin DSL、バージョンカタログ（`libs.versions.toml`）、Gradle Wrapper、detekt・ktlint、Kover | — |
 | 6 | タスクランナーと CI/CD | Gradle タスク、GitHub Actions と Nix、JDK ツールチェーン、Kotlin Notebook の導入と出力セルの削除 | — |
@@ -514,6 +514,8 @@ Python 版と同じく、B7・B8 で型（プロジェクト構成・テスト�
 - [x] JDK 21 のツールチェーンと Gradle Wrapper でビルド環境を固定すること
 - [x] 付録 A の Kotlin 版を作らないこと
 - [x] B7（ウォーキングスケルトン）の範囲
+
+B7〜B8（Kotlin 版の第 1 部）は 2026-09-17 に完了した。
 
 TypeScript 版の章別執筆計画は、Kotlin 版の B8 の完了後に本ファイルへ追加する。
 

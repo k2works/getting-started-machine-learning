@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Update**: Kotlin 版 B8 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md) の前提整備（Kotlin）・Bolt の状態と、[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗を更新。
 * **Creation**: [Kotlin 第 3 章](/article/getting-start-ml/kotlin/03-decision-tree-and-obvious-implementation.md) を新規作成。Tribuo の CART と予測が一致しない原因を調べた結果を含む。
 * **Creation**: [Kotlin 第 2 章](/article/getting-start-ml/kotlin/02-data-preprocessing-and-triangulation.md) を新規作成。第 1 章に captureStdout の移動を追記。
 * **Update**: [ADR 002](/adr/002-kotlin-ml-libraries.md) を訂正。Kandy 0.8.5 が DataFrame 1.0.0-rc01 に依存していたため当初の検証が 1.0.0-rc01 のものだったと判明し、DataFrame 0.15.0 と組み合わせられる Kandy 0.8.0 に改め、Kotlin Notebook を IDE なしで実行できることを追記。[執筆計画](/article/getting-start-ml/outline.md) の該当箇所も修正。
