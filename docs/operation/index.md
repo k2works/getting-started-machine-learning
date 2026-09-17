@@ -29,7 +29,23 @@
 | `gulp okf:enrich` | BigQuery データセットからバンドルを生成する（要 GCP 認証・`OKF_DATASET`） |
 | `gulp okf:help` | タスクと環境変数の一覧 |
 
-環境変数は `.env.example` の OKF セクションを参照してください。その他の運用コマンドは追加予定です。
+環境変数は `.env.example` の OKF セクションを参照してください。
+
+#### 学習データ
+
+記事シリーズ「機械学習から始めるプログラミング入門」の学習データは、書籍『スッキリわかる Python による機械学習入門』の配布 ZIP（`sukkiri-ml-codes.zip`）に含まれます。配布データは書籍購入者のみ利用できるため、リポジトリにはコミットせず、各自の環境で `apps/data/sukkiri-ml/`（`.gitignore` 対象）に配置します。方針は [執筆計画](../article/getting-start-ml/outline.md) の「学習データ」を参照してください。
+
+1. [書籍サポートページ](https://sukkiri.jp/books/sukkiri_ml) から `sukkiri-ml-codes.zip` を入手し、`tmp/` に置く（別の場所に置く場合は `ML_DATA_ZIP` でパスを指定）
+2. `gulp data:setup` で学習データを配置する
+3. `gulp data:check` で配置を確認する
+
+| コマンド | 概要 |
+| :--- | :--- |
+| `gulp data:setup` | 配布 ZIP を `tmp/sukkiri-ml/` に展開し、記事で使う 9 ファイルを `apps/data/sukkiri-ml/` に配置する |
+| `gulp data:check` | `apps/data/sukkiri-ml/` に学習データが揃っているか確認する。不足があれば非ゼロ終了 |
+| `gulp data:help` | タスクと環境変数の一覧 |
+
+その他の運用コマンドは追加予定です。
 
 ### インフラ
 
