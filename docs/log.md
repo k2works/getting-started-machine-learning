@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Python 第 14 章](/article/getting-start-ml/python/14-k-means-clustering.md) を新規作成。
 * **Creation**: [Python 第 9 章](/article/getting-start-ml/python/09-feature-engineering.md) を新規作成。
 * **Creation**: [Python 第 11 章](/article/getting-start-ml/python/11-evaluation-metrics-and-cross-validation.md) を新規作成。
 * **Creation**: [Python 第 8 章](/article/getting-start-ml/python/08-classification-and-preprocessing-pipeline.md) を新規作成。
