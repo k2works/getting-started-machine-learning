@@ -25,49 +25,49 @@ def write_csv(tmp_path: Path, rows: str) -> Path:
 
 class TestLoadPeople:
     def test_BOM付きCSVを読み込んで人物のリストを返す(self, tmp_path: Path) -> None:
-        csv_file = write_csv(tmp_path, "170,60,10,きのこ\n")
+        csv_file = write_csv(tmp_path, "165,58,30,きのこ\n")
 
         people = load_people(csv_file)
 
-        assert people == [Person(height=170, weight=60, age_group=10, faction="きのこ")]
+        assert people == [Person(height=165, weight=58, age_group=30, faction="きのこ")]
 
     def test_複数行のCSVを読み込んで行の順に人物のリストを返す(
         self, tmp_path: Path
     ) -> None:
-        csv_file = write_csv(tmp_path, "172,65,20,きのこ\n177,65,10,たけのこ\n")
+        csv_file = write_csv(tmp_path, "161,52,20,きのこ\n183,74,50,たけのこ\n")
 
         people = load_people(csv_file)
 
         assert people == [
-            Person(height=172, weight=65, age_group=20, faction="きのこ"),
-            Person(height=177, weight=65, age_group=10, faction="たけのこ"),
+            Person(height=161, weight=52, age_group=20, faction="きのこ"),
+            Person(height=183, weight=74, age_group=50, faction="たけのこ"),
         ]
 
 
 class TestSplitFeaturesAndLabels:
     def test_人物のリストを特徴量と正解ラベルに分ける(self) -> None:
         people = [
-            Person(height=172, weight=65, age_group=20, faction="きのこ"),
-            Person(height=177, weight=65, age_group=10, faction="たけのこ"),
+            Person(height=161, weight=52, age_group=20, faction="きのこ"),
+            Person(height=183, weight=74, age_group=50, faction="たけのこ"),
         ]
 
         features, labels = split_features_and_labels(people)
 
         assert features == [
-            Features(height=172, weight=65, age_group=20),
-            Features(height=177, weight=65, age_group=10),
+            Features(height=161, weight=52, age_group=20),
+            Features(height=183, weight=74, age_group=50),
         ]
         assert labels == ["きのこ", "たけのこ"]
 
 
 class TestPredictByRule:
     def test_20代ならきのこ派と判定する(self) -> None:
-        features = Features(height=172, weight=65, age_group=20)
+        features = Features(height=161, weight=52, age_group=20)
 
         assert predict_by_rule(features) == "きのこ"
 
     def test_20代以外ならたけのこ派と判定する(self) -> None:
-        features = Features(height=177, weight=65, age_group=10)
+        features = Features(height=183, weight=74, age_group=50)
 
         assert predict_by_rule(features) == "たけのこ"
 
