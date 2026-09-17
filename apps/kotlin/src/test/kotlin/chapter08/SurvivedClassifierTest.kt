@@ -8,9 +8,11 @@ import chapter03.predictWithTribuo
 import chapter03.trainTribuoTree
 import dataset.dataDir
 import org.jetbrains.kotlinx.dataframe.AnyFrame
+import org.jetbrains.kotlinx.dataframe.api.Infer
 import org.jetbrains.kotlinx.dataframe.api.asColumnGroup
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.dataframe.api.pivotMatches
+import org.jetbrains.kotlinx.dataframe.api.toColumn
 import org.jetbrains.kotlinx.dataframe.api.toMap
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import support.captureStdout
@@ -277,15 +279,7 @@ class SplitFeaturesAndTargetTest {
 }
 
 private fun passengers(vararg rows: List<Any?>): AnyFrame =
-    dataFrameOf(
-        *FEATURES
-            .mapIndexed { i, name ->
-                name to
-                    rows.map {
-                        it[i]
-                    }
-            }.toTypedArray(),
-    )
+    dataFrameOf(FEATURES.mapIndexed { i, name -> rows.map { it[i] }.toColumn(name, Infer.Type) })
 
 private fun trainingData(): Pair<AnyFrame, List<Int>> {
     val x =
@@ -388,16 +382,10 @@ class SurvivedDataTest {
     fun `実データの件数と欠損値の数を確認する`() {
         val df = loadSurvived(csvFile)
 
+        val missing = listOf("Age", "Cabin", "Embarked").associateWith { name -> df[name].values().count { it == null } }
+
         assertEquals(891, df.rowsCount())
-        assertEquals(
-            mapOf("Age" to 177, "Cabin" to 687, "Embarked" to 2),
-            listOf("Age", "Cabin", "Embarked").associateWith { name ->
-                df[name].values().count {
-                    it ==
-                        null
-                }
-            },
-        )
+        assertEquals(mapOf("Age" to 177, "Cabin" to 687, "Embarked" to 2), missing)
     }
 
     @Test
