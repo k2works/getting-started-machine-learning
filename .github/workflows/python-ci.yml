@@ -1,0 +1,53 @@
+name: Python CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/python/**"
+      - ".github/workflows/python-ci.yml"
+      - "ops/nix/environments/python/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/python/**"
+      - ".github/workflows/python-ci.yml"
+      - "ops/nix/environments/python/**"
+      - "flake.nix"
+      - "flake.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Cache Nix store
+        uses: actions/cache@v4
+        with:
+          path: /tmp/nix-cache
+          key: ${{ runner.os }}-nix-python-${{ hashFiles('flake.lock', 'ops/nix/environments/python/shell.nix') }}
+          restore-keys: |
+            ${{ runner.os }}-nix-python-
+
+      # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
+      - name: Run tests
+        run: nix develop .#python --command bash -c "cd apps/python && uv sync && uv run tox -e test"
+
+      - name: Run lint
+        run: nix develop .#python --command bash -c "cd apps/python && uv run tox -e lint"
+
+      - name: Run type check
+        run: nix develop .#python --command bash -c "cd apps/python && uv run tox -e type"
