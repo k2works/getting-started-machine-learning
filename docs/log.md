@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Python 第 15 章](/article/getting-start-ml/python/15-machine-learning-api-and-module-design.md) を新規作成。
 * **Creation**: [Python 第 13 章](/article/getting-start-ml/python/13-principal-component-analysis.md) を新規作成。
 * **Creation**: [Python 第 12 章](/article/getting-start-ml/python/12-regularization-and-model-selection.md) を新規作成。
 * **Creation**: [Python 付録 A 総合演習（Bank）](/article/getting-start-ml/python/appendix-a-bank-exercise.md) を新規作成。
