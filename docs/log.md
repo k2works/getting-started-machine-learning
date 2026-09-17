@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-17
+* **Creation**: [Kotlin 第 8 章](/article/getting-start-ml/kotlin/08-classification-and-preprocessing-pipeline.md) を新規作成。
 * **Creation**: [Kotlin 第 9 章](/article/getting-start-ml/kotlin/09-feature-engineering.md) を新規作成。
 * **Creation**: [Kotlin 第 10 章](/article/getting-start-ml/kotlin/10-logistic-regression-and-ensemble.md) を新規作成。
 * **Creation**: [Kotlin 第 7 章](/article/getting-start-ml/kotlin/07-linear-regression.md) を新規作成。

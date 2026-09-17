@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 8 章: 実践的な分類と前処理パイプライン"
+description: "Survived データのグループ別中央値・最頻値の補完とダミー変数化を interface Transformer のパイプラインにまとめ、クラスの重みを付けた決定木・モデルの保存と読み込みを TDD で実装して Tribuo の CART と突き合わせる。"
+tags: [article,getting-start-ml,kotlin]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T06:07:39Z }
+---
+
 # 第 8 章: 実践的な分類と前処理パイプライン
 
 ## 8.1 はじめに
