@@ -722,12 +722,14 @@ TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関�
 
 ### 承認が必要な事項（F#）
 
-- [ ] F# を第 2 波から第 1 波へ移し、第 1 波を Python・Kotlin・TypeScript・F# の 4 言語にすること（多言語統合解説は 4 言語の完了後に着手する）
-- [ ] F# 版の Notebook に Polyglot Notebooks を使い、廃止のリスクを ADR 004 と記事に明記すること（Polyglot Notebooks を使うのは F# 版だけとし、Python 版・Kotlin 版の Notebook と、Notebook を作らない TypeScript 版はそのままにする）
-- [ ] ライブラリの第一候補を ML.NET・FSharp.Stats・FSharp.Data・Plotly.NET・Giraffe とし、置き換えの範囲を ADR 004 で章ごとに確かめること
-- [ ] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/fsharp/` に置くこと
-- [ ] Bolt を B18〜B22 の 5 つにまとめ、B21 で第 7〜14 章を並行して進めること
-- [ ] B18（ウォーキングスケルトン）の範囲
+次の点を確認した（2026-09-18 承認）。
+
+- [x] F# を第 2 波から第 1 波へ移し、第 1 波を Python・Kotlin・TypeScript・F# の 4 言語にすること（多言語統合解説は 4 言語の完了後に着手する）
+- [x] F# 版の Notebook に Polyglot Notebooks を使い、廃止のリスクを ADR 004 と記事に明記すること（Polyglot Notebooks を使うのは F# 版だけとし、Python 版・Kotlin 版の Notebook と、Notebook を作らない TypeScript 版はそのままにする）
+- [x] ライブラリの第一候補を ML.NET・FSharp.Stats・FSharp.Data・Plotly.NET・Giraffe とし、置き換えの範囲を ADR 004 で章ごとに確かめること
+- [x] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/fsharp/` に置くこと
+- [x] Bolt を B18〜B22 の 5 つにまとめ、B21 で第 7〜14 章を並行して進めること
+- [x] B18（ウォーキングスケルトン）の範囲
 
 ## リスクと対応
 
