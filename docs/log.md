@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-18
+* **Creation**: [TypeScript 第 10 章](/article/getting-start-ml/typescript/10-logistic-regression-and-ensemble.md) を新規作成。
 * **Creation**: [TypeScript 第 14 章](/article/getting-start-ml/typescript/14-k-means-clustering.md) を新規作成。
 * **Creation**: [TypeScript 第 12 章](/article/getting-start-ml/typescript/12-regularization-and-model-selection.md) を新規作成。
 * **Creation**: [TypeScript 第 13 章](/article/getting-start-ml/typescript/13-principal-component-analysis.md) を新規作成。

@@ -48,7 +48,7 @@
 
 | 章 | テーマ | Python | Kotlin | TypeScript |
 |----|--------|--------|--------|------------|
-| 10 | ロジスティック回帰とアンサンブル学習 | [Python](python/10-logistic-regression-and-ensemble.md) | [Kotlin](kotlin/10-logistic-regression-and-ensemble.md) | — |
+| 10 | ロジスティック回帰とアンサンブル学習 | [Python](python/10-logistic-regression-and-ensemble.md) | [Kotlin](kotlin/10-logistic-regression-and-ensemble.md) | [TypeScript](typescript/10-logistic-regression-and-ensemble.md) |
 | 11 | 評価指標と交差検証 | [Python](python/11-evaluation-metrics-and-cross-validation.md) | [Kotlin](kotlin/11-evaluation-metrics-and-cross-validation.md) | — |
 | 12 | 正則化とモデル選択 | [Python](python/12-regularization-and-model-selection.md) | [Kotlin](kotlin/12-regularization-and-model-selection.md) | [TypeScript](typescript/12-regularization-and-model-selection.md) |
 

@@ -78,7 +78,7 @@ node src/chapter01/main.ts
 
 | 章 | テーマ |
 |----|--------|
-| 第 10 章（未執筆） | ロジスティック回帰とアンサンブル学習 |
+| [第 10 章](10-logistic-regression-and-ensemble.md) | ロジスティック回帰とアンサンブル学習 |
 | 第 11 章（未執筆） | 評価指標と交差検証 |
 | [第 12 章](12-regularization-and-model-selection.md) | 正則化とモデル選択 |
 

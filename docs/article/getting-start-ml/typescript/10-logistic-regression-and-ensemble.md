@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 10 章: ロジスティック回帰とアンサンブル学習"
+description: "ソフトマックスと勾配降下のロジスティック回帰、第 3 章の決定木を再利用したランダムフォレストと特徴量の重要度を TDD で自作し、構造的部分型の Classifier で ml.js と並べて、型アサーションの落とし穴と ml-logistic-regression に切片が無いことを突き止める。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:53:11Z }
+---
+
 # 第 10 章: ロジスティック回帰とアンサンブル学習
 
 ## 10.1 はじめに
