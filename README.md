@@ -8,7 +8,10 @@
 
 | ソフトウェア | バージョン | 備考 |
 | :----------- | :--------- | :--- |
-| nodejs       | 22.x       |      |
+| nodejs       | 22.x / 24.x | 25.x は vitest 非対応のため不可 |
+| uv           | 最新       | Python サンプル（`apps/python`） |
+| JDK          | 21 以上    | Kotlin サンプル（`apps/kotlin`） |
+| .NET SDK     | 10.0.101 以上 | F# サンプル（`apps/dotnet`、`global.json` で固定） |
 
 ## 構成
 
@@ -227,6 +230,34 @@ VS Code で Dev Container を使用する場合：
 **[⬆ back to top](#構成)**
 
 ### 開発
+
+#### サンプル実装のセットアップ
+
+記事の各言語版サンプル（`apps/python`・`apps/node`・`apps/kotlin`・`apps/dotnet`）の環境を用意します。
+
+1. **学習データを入手する**
+    - [書籍サポートページ](https://sukkiri.jp/books/sukkiri_ml) から `sukkiri-ml-codes.zip` を入手し、`apps/data/` または `tmp/` に置きます（別の場所なら `ML_DATA_ZIP` でパスを指定）。
+    - 配布データは書籍購入者のみ利用できます。`apps/data/` は `.gitignore` 対象なのでコミットされません。
+
+2. **セットアップする**
+    ```bash
+    npm install      # ルートの Gulp などを導入
+    npm run setup    # 学習データの配置（未配置時のみ）と全アプリの依存関係インストール
+    ```
+
+3. **動作を確認する**
+    ```bash
+    npm run check    # 学習データの確認と全アプリのテスト・静的解析
+    ```
+
+アプリを個別に扱う場合は `npx gulp apps:setup:<python|node|kotlin|fsharp>`・`npx gulp apps:check:<python|node|kotlin|fsharp>` を使います。ローカルのツールが見つからないかバージョンが合わない場合は、Nix が導入されていれば対応する Nix 環境（`nix develop .#python`・`.#node`・`.#kotlin`・`.#dotnet`）の中で自動的に実行します。タスクの一覧は `npx gulp apps:help`、詳細は [運用](docs/operation/index.md) を参照してください。
+
+| npm スクリプト | 内容 |
+| :--- | :--- |
+| `npm run setup` | 学習データを配置し、全アプリの依存関係をインストールする |
+| `npm run check` | 全アプリのテスト・静的解析を実行する |
+| `npm run data:setup` | 配布 ZIP を展開し `apps/data/sukkiri-ml/` に学習データを配置する |
+| `npm run data:check` | 学習データが揃っているか確認する |
 
 #### Nix による開発環境
 

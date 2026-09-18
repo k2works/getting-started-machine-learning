@@ -35,7 +35,7 @@
 
 記事シリーズ「機械学習から始めるプログラミング入門」の学習データは、書籍『スッキリわかる Python による機械学習入門』の配布 ZIP（`sukkiri-ml-codes.zip`）に含まれます。配布データは書籍購入者のみ利用できるため、リポジトリにはコミットせず、各自の環境で `apps/data/sukkiri-ml/`（`.gitignore` 対象）に配置します。方針は [執筆計画](../article/getting-start-ml/outline.md) の「学習データ」を参照してください。
 
-1. [書籍サポートページ](https://sukkiri.jp/books/sukkiri_ml) から `sukkiri-ml-codes.zip` を入手し、`tmp/` に置く（別の場所に置く場合は `ML_DATA_ZIP` でパスを指定）
+1. [書籍サポートページ](https://sukkiri.jp/books/sukkiri_ml) から `sukkiri-ml-codes.zip` を入手し、`tmp/` または `apps/data/` に置く（別の場所に置く場合は `ML_DATA_ZIP` でパスを指定）
 2. `gulp data:setup` で学習データを配置する
 3. `gulp data:check` で配置を確認する
 
@@ -55,3 +55,17 @@
 
 - 現在はカテゴリ索引のみ存在します。
 - テンプレートは [template/アプリケーション開発環境セットアップ手順書.md](../template/アプリケーション開発環境セットアップ手順書.md)、[template/開発環境セットアップ手順書.md](../template/開発環境セットアップ手順書.md)、[template/AWSステージング環境セットアップ手順書.md](../template/AWSステージング環境セットアップ手順書.md)、[template/AWSプロダクション環境セットアップ手順書.md](../template/AWSプロダクション環境セットアップ手順書.md) を利用できます。
+
+#### サンプル実装（apps/）
+
+記事の各言語版サンプル（`apps/python`・`apps/node`・`apps/kotlin`・`apps/dotnet`）の環境をまとめて用意します。前提ツール（uv・Node.js 22／24 系・JDK 21 以上・.NET SDK 10.0.101 以上）は `nix develop .#python`・`.#node`・`.#kotlin`・`.#dotnet` で揃います。ローカルのツールが見つからないかバージョンが合わない場合、タスクは Nix が導入されていれば対応する環境の中で自動的に実行します。
+
+| コマンド | 概要 |
+| :--- | :--- |
+| `gulp apps:setup` | 学習データを配置し（未配置時のみ）、全アプリの依存関係をインストールする |
+| `gulp apps:setup:<name>` | 指定アプリ（`python`・`node`・`kotlin`・`fsharp`）の依存関係をインストールする |
+| `gulp apps:check` | 学習データを確認し、全アプリのテスト・静的解析を実行する |
+| `gulp apps:check:<name>` | 指定アプリのテスト・静的解析を実行する |
+| `gulp apps:help` | タスクの一覧 |
+
+`npm run setup`（= `gulp apps:setup`）・`npm run check`（= `gulp apps:check`）・`npm run data:setup`・`npm run data:check` でも呼び出せます。
