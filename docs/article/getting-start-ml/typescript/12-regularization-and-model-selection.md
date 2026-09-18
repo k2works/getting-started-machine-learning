@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 12 章: 正則化とモデル選択"
+description: "ml-matrix でリッジ回帰を閉形式で TDD で自作し、検証データで alpha を選び、ml-regression-lasso の lambda が標準化した尺度の罰則であることと既定の設定では収束しないまま結果を返すことを学習用テストで突き止める。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:51:23Z }
+---
+
 # 第 12 章: 正則化とモデル選択
 
 ## 12.1 はじめに

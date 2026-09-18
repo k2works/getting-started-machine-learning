@@ -28,7 +28,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 | TypeScript の版 | 最新は 7.0.2。typescript-eslint 8.70.0 の peerDependencies は `typescript >=4.8.4 <6.1.0` なので、6.0.3 を使う | npm レジストリ |
 | Node.js の型除去 | Node.js 22.18.0 で `node main.ts` が警告なしに実行でき、`.ts` 拡張子付きの import も解決できた | 実行 |
 | Nix の Node.js | 本リポジトリの `flake.lock` が固定する nixpkgs では `nodejs_22` が 22.21.1 | nixpkgs のソース |
-| 型定義 | ml-matrix・ml-random-forest・ml-pca・ml-regression-multivariate-linear・ml-confusion-matrix・ml-kmeans・csv-parse・Hono・zod は型定義を同梱する。ml-cart・ml-logistic-regression・ml-cross-validation・ml-regression-lasso は同梱せず、`strict` では `TS7016` になる | `tsc --noEmit` |
+| 型定義 | ml-matrix・ml-random-forest・ml-pca・ml-regression-multivariate-linear・ml-confusion-matrix・ml-kmeans・csv-parse・Hono・zod は型定義を同梱する（ml-regression-lasso も `package.json` の `typings` で同梱していた。B16 で訂正）。ml-cart・ml-logistic-regression・ml-cross-validation は同梱せず、`strict` では `TS7016` になる | `tsc --noEmit` |
 | ESM からの読み込み | ml-kmeans・csv-parse・Hono・zod は ESM。ほかは CommonJS で、名前付き export（`DecisionTreeClassifier`・`RandomForestClassifier`・`PCA`・`EVD` など）とデフォルト export（ml-logistic-regression・ml-regression-multivariate-linear）で読み込めた。ml-regression-lasso はデフォルト export がオブジェクトで、名前付きの `LassoRegression` を使う | 実行 |
 | ml-matrix | `solve` で連立方程式を解ける。`EVD` の `realEigenvalues` は小さい順に並ぶ | 実行 |
 | ml-cart 2.1.1 | 分割基準は `gini` だけ、境界は平均値（`splitFunction: 'mean'`）だけ。`minNumSamples` の既定値は 3、`maxDepth` を指定できる。クラスの重み付けは無い。正解ラベルは 0 始まりの整数でなければならず、文字列を渡すと `RangeError: Invalid array length` になる。`toJSON` で木を JSON にできる | ソースと実行 |
@@ -82,6 +82,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 |----|------------|
 | 7 | ml-regression-multivariate-linear 2.0.4 は特徴量の行列の最後に 1 の列を足すので `weights` の切片が最後に並び、`Xᵀ X` の逆行列を SVD で求める（ソース）。自作の正規方程式とノイズ付きの架空データ 30 件で係数・予測値が小数第 9 位まで、実データで決定係数が一致した。ml-matrix の `solve` は正方行列を部分ピボット選択付きの LU 分解で解き、対角成分が 0 の連立方程式でも自作と同じ解を返した。型定義を同梱するので `declare module` は不要 |
 | 13 | ml-matrix の `EVD` は `isSymmetric()` で対称と判定すると `tred2`・`tql2` で計算し、最後に固有値を小さい順に並べ替える（非対称なら並べ替えず、虚部は `imaginaryEigenvalues`）。ml-pca 4.1.1 は型定義を同梱し、既定は SVD。`getExplainedVariance()`・`getEigenvalues()`（n − 1 で割った分散）は自作と小数第 9 位まで一致した。`getEigenvectors()` は列に主成分が並び符号はそろえない（`method: "covarianceMatrix"` では第 1 主成分の符号が SVD と逆）。向きをそろえると Boston の 15 主成分すべてが一致した |
+| 12 | ml-regression-lasso 0.1.2 は特徴量と正解の両方を標準化してから `(1/2n)‖ts − Xs w‖² + λ‖w‖₁` を最小化する（特徴量が 1 つなら係数は「相関係数 − λ」を 0 で切ったもの）ので、scikit-learn・Tribuo の alpha とは尺度が違う。既定の `maxIter` 200・`tolerance` 1e-5 では相関の強い特徴量で収束せず、例外にならずに `converged: false` のまま係数を返す（実データの λ=0.01 でも発生）。`fitLasso` は tolerance 1e-10・上限 10 万回で学習し、収束しなければ例外にする。λ=0 は自作の最小二乗と 6 桁で、alpha=0 の自作リッジ回帰は ml-regression-multivariate-linear と 9 桁で一致した。ml-matrix の `add`・`mul`・`subRowVector` は呼び出した行列を書き換える |
 
 ### 検討した代替案
 
