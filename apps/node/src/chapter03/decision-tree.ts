@@ -60,7 +60,7 @@ export type Tree<K extends string> =
   | { kind: "leaf"; label: string }
   | { kind: "node"; split: Split<K>; left: Tree<K>; right: Tree<K> };
 
-function majority(labels: readonly string[]): string {
+export function majority(labels: readonly string[]): string {
   let best = "";
   let bestCount = 0;
   for (const [label, count] of countLabels(labels)) {
