@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 9 章: 特徴量エンジニアリング"
+description: "ダミー変数・標準化・多項式特徴量・IQR による外れ値の検出・タブ区切りと Shift_JIS の表の結合を TDD で自作し、ml-matrix の標準化が不偏標準偏差で割ることを学習用テストで確かめ、型チェックとテストがそれぞれ見つけた問題から役割分担を学ぶ。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:53:48Z }
+---
+
 # 第 9 章: 特徴量エンジニアリング
 
 ## 9.1 はじめに
