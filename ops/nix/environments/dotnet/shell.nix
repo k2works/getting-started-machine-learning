@@ -5,7 +5,7 @@ in
 packages.mkShell {
   inherit (baseShell) pure;
   buildInputs = baseShell.buildInputs ++ (with packages; [
-    dotnet-sdk
+    dotnet-sdk_10
   ]);
   shellHook = ''
     ${baseShell.shellHook}
