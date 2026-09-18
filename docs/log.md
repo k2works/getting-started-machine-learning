@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-18
+* **Creation**: [TypeScript 第 8 章](/article/getting-start-ml/typescript/08-classification-and-preprocessing-pipeline.md) を新規作成。
 * **Creation**: [TypeScript 第 9 章](/article/getting-start-ml/typescript/09-feature-engineering.md) を新規作成。
 * **Creation**: [TypeScript 第 10 章](/article/getting-start-ml/typescript/10-logistic-regression-and-ensemble.md) を新規作成。
 * **Creation**: [TypeScript 第 14 章](/article/getting-start-ml/typescript/14-k-means-clustering.md) を新規作成。

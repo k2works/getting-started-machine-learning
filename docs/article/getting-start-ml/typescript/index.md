@@ -71,7 +71,7 @@ node src/chapter01/main.ts
 | 章 | テーマ |
 |----|--------|
 | [第 7 章](07-linear-regression.md) | 線形回帰による数値予測 |
-| 第 8 章（未執筆） | 実践的な分類と前処理パイプライン |
+| [第 8 章](08-classification-and-preprocessing-pipeline.md) | 実践的な分類と前処理パイプライン |
 | [第 9 章](09-feature-engineering.md) | 特徴量エンジニアリング |
 
 ### 第 4 部: モデルの改善と評価

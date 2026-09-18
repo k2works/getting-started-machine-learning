@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 8 章: 実践的な分類と前処理パイプライン"
+description: "Survived データのグループ別中央値・最頻値の補完とダミー変数化を、学習した値と変換の関数に分けて TDD で実装し、クラスの重みを付けた決定木とつないで JSON で保存・zod で検証し、ml-cart・第 3 章の決定木と突き合わせる。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:54:57Z }
+---
+
 # 第 8 章: 実践的な分類と前処理パイプライン
 
 ## 8.1 はじめに
