@@ -1516,11 +1516,20 @@ Vitest は型の注釈を取り除いて実行するだけなので、型の誤�
 npx vitest run test/chapter07
 ```
 
-第 7 章のテストは 29 件です。データが無い環境では、実データのテスト 3 件がスキップされます。リポジトリ全体では次のとおりです。
+```text
+ Test Files  5 passed (5)
+      Tests  29 passed (29)
+```
+
+第 7 章のテストは 29 件です。データが無い環境では、実データのテスト 3 件がスキップされます。
+
+```bash
+ML_DATA_DIR=/nonexistent npx vitest run test/chapter07
+```
 
 ```text
- Test Files  11 passed | 4 skipped (15)
-      Tests  75 passed | 17 skipped (92)
+ Test Files  4 passed | 1 skipped (5)
+      Tests  26 passed | 3 skipped (29)
 ```
 
 <details>

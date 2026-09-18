@@ -1619,17 +1619,7 @@ TypeScript 版では Notebook による探索と可視化を扱いません。`a
 npm run check
 ```
 
-```text
- Test Files  14 passed (14)
-      Tests  92 passed (92)
-```
-
-データが無い環境では、第 12 章の実データのテスト 3 件を含む 17 件がスキップされます。
-
-```text
- Test Files  10 passed | 4 skipped (14)
-      Tests  75 passed | 17 skipped (92)
-```
+整形・ESLint・型チェックに指摘は無く、テストはすべて通りました。テストの件数はほかの章を含むリポジトリ全体の数なので、第 12 章のテストの件数は 12.10 節の `npx vitest run test/chapter12` で確かめてください。
 
 <details>
 <summary>この章の完成コード（src/chapter12/regularization.ts）</summary>

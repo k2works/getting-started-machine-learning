@@ -1826,11 +1826,20 @@ describe.skipIf(!existsSync(csvFile))("Survived.csv の実データ", () => {
 npx vitest run test/chapter08
 ```
 
+```text
+ Test Files  2 passed (2)
+      Tests  39 passed (39)
+```
+
 第 8 章のテストは 39 件です。データが無い環境では、実データのテスト 12 件（パラメータ化した 6 件を含む）がスキップされます。
 
+```bash
+ML_DATA_DIR=/nonexistent npx vitest run test/chapter08
+```
+
 ```text
- Test Files  8 passed | 4 skipped (12)
-      Tests  76 passed | 26 skipped (102)
+ Test Files  1 passed | 1 skipped (2)
+      Tests  27 passed | 12 skipped (39)
 ```
 
 **TODO リスト**:

@@ -1632,12 +1632,16 @@ import { mean, type Point } from "./kmeans.ts";
 npm run check
 ```
 
-```text
- Test Files  14 passed (14)
-      Tests  92 passed (92)
+整形・ESLint・型チェックに指摘は無く、テストはすべて通りました。第 14 章のテストだけを実行すると次のとおりです。
+
+```bash
+npx vitest run test/chapter14
 ```
 
-これは、第 1〜3 章と第 14 章のテストを合わせた件数です。
+```text
+ Test Files  4 passed (4)
+      Tests  29 passed (29)
+```
 
 <details>
 <summary>この章の完成コード（src/chapter14/kmeans.ts）</summary>
