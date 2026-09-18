@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 11 章: 評価指標と交差検証"
+description: "混同行列・適合率・再現率・F 値・回帰の指標と K 分割交差検証を、評価関数を関数の型で渡す設計とジェネレーターによる遅延評価で TDD で自作し、ml-confusion-matrix・ml-cross-validation と突き合わせて適合率の NaN や余りの行を捨てる分け方などの癖を学習用テストに残す。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:57:46Z }
+---
+
 # 第 11 章: 評価指標と交差検証
 
 ## 11.1 はじめに
