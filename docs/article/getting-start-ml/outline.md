@@ -150,7 +150,7 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 |----|--------|------|-----------|------------------|------|
 | 1 | python | Python | pytest（uv） | pandas, scikit-learn | 参照実装。Wiki 記事と同じ言語 |
 | 1 | kotlin | Kotlin | kotlin.test（Gradle） | Kotlin DataFrame, Tribuo（「Kotlin 版執筆計画」を参照） | 静的型付け・OOP と FP の融合。Kotlin Notebook による可視化を扱う |
-| 1 | node | TypeScript | Vitest（npm） | danfo.js, ml.js 系パッケージ | ML ライブラリが未成熟な言語での自作の価値を示す |
+| 1 | node | TypeScript | Vitest（npm） | ml.js 系パッケージ（「TypeScript 版執筆計画」を参照） | ML ライブラリが未成熟な言語での自作の価値を示す |
 | 2 | java | Java | JUnit 5（Gradle） | Tribuo, Smile | 静的型付け OOP の代表。Kotlin 版の実装と対比する |
 | 2 | dotnet | C# | xUnit | ML.NET, Microsoft.Data.Analysis | |
 | 2 | dotnet | F# | xUnit | ML.NET, Deedle | 型プロバイダ・パイプライン |
@@ -606,9 +606,9 @@ Kotlin 版で、第 1〜3 章の型を固めた後は依存関係の無い章を
 |------|------|---------|
 | B13 ウォーキングスケルトン（完了） | Nix の `node` 環境の更新、`apps/node/` の雛形、ADR 003、第 1 章の実装と記事、TypeScript 版トップ、nav、Node CI | `apps/node/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される |
 | B14（完了） | 第 2〜3 章（型付きレコード、シード付き乱数、ml.js の導入） | 自作の決定木と ml-cart の結果を並べて載せられる |
-| B15 | 第 4〜6 章 | npm scripts・ESLint・Prettier・カバレッジ・CI が記事どおりに動く |
-| B16 | 第 7〜14 章（依存関係の無い章を並行して進める） | 各章のテストが通り、記事がそろっている |
-| B17 | 第 15 章 | TypeScript 版の全章完了。Python 版と節構成がそろっている |
+| B15（完了） | 第 4〜6 章 | npm scripts・ESLint・Prettier・カバレッジ・CI が記事どおりに動く |
+| B16（完了） | 第 7〜14 章（依存関係の無い章を並行して進める） | 各章のテストが通り、記事がそろっている |
+| B17（完了） | 第 15 章 | TypeScript 版の全章完了。Python 版と節構成がそろっている |
 
 B16 の前に、共有するファイル（`package.json` の依存、第 2 章の分割の型など）を親が整えてから並行作業に入る。第 15 章は第 7・8 章の実装に依存するので、B16 の取り込み後に着手する。
 
@@ -622,6 +622,8 @@ B16 の前に、共有するファイル（`package.json` の依存、第 2 章�
 - [x] API を Hono + zod で作ること
 - [x] 可視化の節と付録 A を TypeScript 版では作らず、Python 版・Kotlin 版へ案内すること
 - [x] Bolt を B13〜B17 の 5 つにまとめ、B16 で第 7〜14 章を並行して進めること
+
+B15〜B17（第 4〜15 章）は 2026-09-18 に完了し、TypeScript 版の全 15 章がそろった。着手前に第 7〜15 章で使う ml.js 系・Hono・zod を `package.json` に追加し、第 4〜6 章と第 7〜14 章を worktree のサブエージェントで並行して書き、第 7・8 章の取り込み後に第 15 章を書いた。B15 では ESLint 10 関連の依存が Node.js 22.13.0 以上を求めることが分かり、`engines` の下限を上げた。並行して書いた章の記事に載っていたリポジトリ全体のテスト件数は統合後の値と合わないので、章ごとの実測値に置き換えた。ml.js の各パッケージで確かめた癖（ml-logistic-regression に切片が無い、ml-regression-lasso の `lambda` の尺度と収束しないまま返す挙動、ml-cross-validation の余りの行の扱いなど）は ADR 003 に記録した。
 - [x] B13（ウォーキングスケルトン）の範囲
 
 ## リスクと対応

@@ -8,13 +8,13 @@
 
 ## 言語別解説
 
-言語は 3 つの波に分けて順に追加します。第 1 波の Python 版と Kotlin 版は全章を執筆済みで、現在は TypeScript 版を執筆しています。
+言語は 3 つの波に分けて順に追加します。第 1 波の Python 版・Kotlin 版・TypeScript 版は全章を執筆済みです。
 
 | 波 | 言語 | 環境 | 特徴 | 状況 |
 |----|------|------|------|------|
 | 1 | [Python](python/index.md) | CPython | 機械学習ライブラリが成熟、型ヒント、Jupyter Lab による探索と可視化 | 完了 |
 | 1 | [Kotlin](kotlin/index.md) | JVM | 静的型付け、OOP と FP の融合、Kotlin Notebook による探索と可視化 | 完了 |
-| 1 | [TypeScript](typescript/index.md) | Node.js | 静的型付け、機械学習ライブラリが限られる環境での自作 | 執筆中 |
+| 1 | [TypeScript](typescript/index.md) | Node.js | 静的型付け、機械学習ライブラリが限られる環境での自作 | 完了 |
 | 2 | Java / C# / F# / Scala / Rust / Go | — | — | 未着手 |
 | 3 | Ruby / PHP / Elixir / Clojure / Haskell | — | — | 未着手 |
 
@@ -58,7 +58,7 @@
 |----|--------|--------|--------|------------|
 | 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) |
 | 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | [TypeScript](typescript/14-k-means-clustering.md) |
-| 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | — |
+| 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | [TypeScript](typescript/15-machine-learning-api-and-module-design.md) |
 
 ### 付録
 

@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-18
+* **Update**: TypeScript 版 B15〜B17 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 003](/adr/003-typescript-ml-libraries.md) に第 7〜15 章で確かめた結果を追記。
+* **Creation**: [TypeScript 第 15 章](/article/getting-start-ml/typescript/15-machine-learning-api-and-module-design.md) を新規作成。
 * **Creation**: [TypeScript 第 11 章](/article/getting-start-ml/typescript/11-evaluation-metrics-and-cross-validation.md) を新規作成。
 * **Creation**: [TypeScript 第 8 章](/article/getting-start-ml/typescript/08-classification-and-preprocessing-pipeline.md) を新規作成。
 * **Creation**: [TypeScript 第 9 章](/article/getting-start-ml/typescript/09-feature-engineering.md) を新規作成。

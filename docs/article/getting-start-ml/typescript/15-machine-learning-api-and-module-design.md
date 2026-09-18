@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 15 章: 機械学習 API とモジュール設計"
+description: "第 7・8 章のモデルを使う予測 API を、構造的部分型の interface とオブジェクトリテラルのスタブでインサイドアウトに TDD し、判別可能なユニオンの Result で失敗を表し、Hono の app.request と zod の safeParse でエンドポイントと入力の検証を作ってサーバーを起動せずに統合テストする。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T01:08:46Z }
+---
+
 # 第 15 章: 機械学習 API とモジュール設計
 
 ## 15.1 はじめに
