@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 4 章: バージョン管理とデータ管理"
+description: "Conventional Commits、npm の生成物と学習データを除外する .gitignore、Prettier のための改行コードの固定、describe.skipIf によるデータなしのテスト、自作のシード付き乱数と Node.js の版による再現性を学ぶ。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:45:55Z }
+---
+
 # 第 4 章: バージョン管理とデータ管理
 
 ## 4.1 はじめに

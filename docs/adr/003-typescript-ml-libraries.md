@@ -42,6 +42,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 | csv-parse 7.0.2 | `csv-parse/sync` の `parse` で `bom: true`・`columns: true` を指定すると BOM を除いて列名付きのオブジェクトにできる。値はすべて文字列で、空欄は `""` になる | 実行 |
 | Shift_JIS | Node.js 22 の `TextDecoder('shift_jis')` で読める | 実行 |
 | Hono 4.13.8 + zod 4.6.5 | `app.request` でサーバーを起動せずにリクエストを送れ、zod の `safeParse` の結果で 200 と 422 を返し分けられた | 実行 |
+| Node.js の下限（B15） | ESLint 10 関連のパッケージが engines に `^20.19.0 \|\| ^22.13.0 \|\| >=24` を求めるので、`engine-strict` のもとでは Node.js 22.12.0 で `npm ci` が EBADENGINE になる。`engines` の下限を 22.13.0 にした。Nix の node 環境の TypeScript（5.9.3）はプロジェクトの 6.0.3 と違うが、npm scripts は `node_modules/.bin` の版を使う | 実行・CI のログ |
 | danfojs-node 1.2.0 | 2025-04 以降更新が無く、`@tensorflow/tfjs-node` 3 系（ネイティブのバイナリ）と非推奨の `request` に依存する | npm レジストリ |
 
 ## 決定

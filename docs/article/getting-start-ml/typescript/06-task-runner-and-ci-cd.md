@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 6 章: タスクランナーと CI/CD"
+description: "npm scripts で品質チェックを check にまとめ、Gulp と役割を分け、Nix と GitHub Actions で CI を動かし、CI に載せるまでに手元で見つけた問題の調べ方を学ぶ。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:45:55Z }
+---
+
 # 第 6 章: タスクランナーと CI/CD
 
 ## 6.1 はじめに

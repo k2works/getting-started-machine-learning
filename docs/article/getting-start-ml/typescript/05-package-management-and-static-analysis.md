@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 5 章: パッケージ管理と静的解析"
+description: "npm の save-exact・package-lock.json・npm ci と engine-strict による版の固定、tsc の strict 系オプションと型宣言の自作、ESLint・Prettier による静的解析、@vitest/coverage-v8 のカバレッジと npm audit を学ぶ。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:45:55Z }
+---
+
 # 第 5 章: パッケージ管理と静的解析
 
 ## 5.1 はじめに

@@ -1,5 +1,10 @@
 # Docs Update Log
 
+## 2026-09-18
+* **Creation**: [TypeScript 第 6 章](/article/getting-start-ml/typescript/06-task-runner-and-ci-cd.md) を新規作成。
+* **Creation**: [TypeScript 第 5 章](/article/getting-start-ml/typescript/05-package-management-and-static-analysis.md) を新規作成。
+* **Creation**: [TypeScript 第 4 章](/article/getting-start-ml/typescript/04-version-control-and-data-management.md) を新規作成。
+
 ## 2026-09-17
 * **Update**: TypeScript 版 B14 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 003](/adr/003-typescript-ml-libraries.md) の第 3 章の方針に ml-cart で確かめた違いを追記。
 * **Creation**: [TypeScript 第 3 章](/article/getting-start-ml/typescript/03-decision-tree-and-obvious-implementation.md) を新規作成。

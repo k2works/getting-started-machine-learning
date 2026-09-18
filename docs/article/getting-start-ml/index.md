@@ -32,9 +32,9 @@
 
 | 章 | テーマ | Python | Kotlin | TypeScript |
 |----|--------|--------|--------|------------|
-| 4 | バージョン管理とデータ管理 | [Python](python/04-version-control-and-data-management.md) | [Kotlin](kotlin/04-version-control-and-data-management.md) | — |
-| 5 | パッケージ管理と静的解析 | [Python](python/05-package-management-and-static-analysis.md) | [Kotlin](kotlin/05-package-management-and-static-analysis.md) | — |
-| 6 | タスクランナーと CI/CD | [Python](python/06-task-runner-and-ci-cd.md) | [Kotlin](kotlin/06-task-runner-and-ci-cd.md) | — |
+| 4 | バージョン管理とデータ管理 | [Python](python/04-version-control-and-data-management.md) | [Kotlin](kotlin/04-version-control-and-data-management.md) | [TypeScript](typescript/04-version-control-and-data-management.md) |
+| 5 | パッケージ管理と静的解析 | [Python](python/05-package-management-and-static-analysis.md) | [Kotlin](kotlin/05-package-management-and-static-analysis.md) | [TypeScript](typescript/05-package-management-and-static-analysis.md) |
+| 6 | タスクランナーと CI/CD | [Python](python/06-task-runner-and-ci-cd.md) | [Kotlin](kotlin/06-task-runner-and-ci-cd.md) | [TypeScript](typescript/06-task-runner-and-ci-cd.md) |
 
 ### 第 3 部: 回帰と実践的な前処理
 
