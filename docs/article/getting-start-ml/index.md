@@ -57,7 +57,7 @@
 | 章 | テーマ | Python | Kotlin | TypeScript |
 |----|--------|--------|--------|------------|
 | 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) |
-| 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | — |
+| 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | [TypeScript](typescript/14-k-means-clustering.md) |
 | 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | — |
 
 ### 付録

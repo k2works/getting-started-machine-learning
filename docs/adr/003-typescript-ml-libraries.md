@@ -83,6 +83,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 | 7 | ml-regression-multivariate-linear 2.0.4 は特徴量の行列の最後に 1 の列を足すので `weights` の切片が最後に並び、`Xᵀ X` の逆行列を SVD で求める（ソース）。自作の正規方程式とノイズ付きの架空データ 30 件で係数・予測値が小数第 9 位まで、実データで決定係数が一致した。ml-matrix の `solve` は正方行列を部分ピボット選択付きの LU 分解で解き、対角成分が 0 の連立方程式でも自作と同じ解を返した。型定義を同梱するので `declare module` は不要 |
 | 13 | ml-matrix の `EVD` は `isSymmetric()` で対称と判定すると `tred2`・`tql2` で計算し、最後に固有値を小さい順に並べ替える（非対称なら並べ替えず、虚部は `imaginaryEigenvalues`）。ml-pca 4.1.1 は型定義を同梱し、既定は SVD。`getExplainedVariance()`・`getEigenvalues()`（n − 1 で割った分散）は自作と小数第 9 位まで一致した。`getEigenvectors()` は列に主成分が並び符号はそろえない（`method: "covarianceMatrix"` では第 1 主成分の符号が SVD と逆）。向きをそろえると Boston の 15 主成分すべてが一致した |
 | 12 | ml-regression-lasso 0.1.2 は特徴量と正解の両方を標準化してから `(1/2n)‖ts − Xs w‖² + λ‖w‖₁` を最小化する（特徴量が 1 つなら係数は「相関係数 − λ」を 0 で切ったもの）ので、scikit-learn・Tribuo の alpha とは尺度が違う。既定の `maxIter` 200・`tolerance` 1e-5 では相関の強い特徴量で収束せず、例外にならずに `converged: false` のまま係数を返す（実データの λ=0.01 でも発生）。`fitLasso` は tolerance 1e-10・上限 10 万回で学習し、収束しなければ例外にする。λ=0 は自作の最小二乗と 6 桁で、alpha=0 の自作リッジ回帰は ml-regression-multivariate-linear と 9 桁で一致した。ml-matrix の `add`・`mul`・`subRowVector` は呼び出した行列を書き換える |
+| 14 | ml-kmeans 7.0.1 に同じ初期中心を渡すと、実データの k = 1〜10 × シード 10 通りの 100 通りすべてでクラスタ番号・中心・SSE・反復回数が自作と一致した。ml-kmeans は中心の移動が `1e-6` 以下で止まり（自作は中心が変わらなくなるまで）、返す `clusters` は更新前の中心への割り当てなので、反復を打ち切ると自作と違う。`maxIterations: 0` は上限なしを意味し（既定値 100）、アダプターでは 300 を明示した。k-means++ の k = 5 の SSE は 1058.77 で scikit-learn・Tribuo と同じ。データを `number[][]` で受け取るので、`readonly` の点は写してから渡す |
 
 ### 検討した代替案
 

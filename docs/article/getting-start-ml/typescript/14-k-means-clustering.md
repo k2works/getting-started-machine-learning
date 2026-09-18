@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 14 章: K-means によるクラスタリング"
+description: "readonly な点の配列と配列のメソッドで K-means を TDD で自作し、エルボー法でクラスタ数を選んで、同じ初期中心を渡した ml-kmeans と割り当て・中心・反復回数まで突き合わせる。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:52:03Z }
+---
+
 # 第 14 章: K-means によるクラスタリング
 
 ## 14.1 はじめに
