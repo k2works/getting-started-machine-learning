@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 7 章: 線形回帰による数値予測"
+description: "行列の積・転置・部分ピボット選択付きのガウスの消去法を関数で作って正規方程式による線形回帰を TDD で自作し、null の比較と正解ラベルの欠損を型チェックで見つけて、ml-regression-multivariate-linear・ml-matrix と係数・決定係数を突き合わせる。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:49:58Z }
+---
+
 # 第 7 章: 線形回帰による数値予測
 
 ## 7.1 はじめに

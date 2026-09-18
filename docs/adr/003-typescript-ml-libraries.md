@@ -76,6 +76,13 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-17T10:18:56Z }
 | 13 | ml-pca、ml-matrix の `EVD` | 寄与率を突き合わせる。固有値の並び順（`EVD` は小さい順）と固有ベクトルの符号の違いを扱う |
 | 14 | ml-kmeans | 同じ初期中心を渡して、割り当てと中心を突き合わせる |
 
+### B15〜B17 で確かめた結果
+
+| 章 | 確かめた結果 |
+|----|------------|
+| 7 | ml-regression-multivariate-linear 2.0.4 は特徴量の行列の最後に 1 の列を足すので `weights` の切片が最後に並び、`Xᵀ X` の逆行列を SVD で求める（ソース）。自作の正規方程式とノイズ付きの架空データ 30 件で係数・予測値が小数第 9 位まで、実データで決定係数が一致した。ml-matrix の `solve` は正方行列を部分ピボット選択付きの LU 分解で解き、対角成分が 0 の連立方程式でも自作と同じ解を返した。型定義を同梱するので `declare module` は不要 |
+| 13 | ml-matrix の `EVD` は `isSymmetric()` で対称と判定すると `tred2`・`tql2` で計算し、最後に固有値を小さい順に並べ替える（非対称なら並べ替えず、虚部は `imaginaryEigenvalues`）。ml-pca 4.1.1 は型定義を同梱し、既定は SVD。`getExplainedVariance()`・`getEigenvalues()`（n − 1 で割った分散）は自作と小数第 9 位まで一致した。`getEigenvectors()` は列に主成分が並び符号はそろえない（`method: "covarianceMatrix"` では第 1 主成分の符号が SVD と逆）。向きをそろえると Boston の 15 主成分すべてが一致した |
+
 ### 検討した代替案
 
 | 代替案 | 採用しなかった理由 |

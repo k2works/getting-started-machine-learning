@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-18
+* **Creation**: [TypeScript 第 13 章](/article/getting-start-ml/typescript/13-principal-component-analysis.md) を新規作成。
+* **Creation**: [TypeScript 第 7 章](/article/getting-start-ml/typescript/07-linear-regression.md) を新規作成。
 * **Creation**: [TypeScript 第 6 章](/article/getting-start-ml/typescript/06-task-runner-and-ci-cd.md) を新規作成。
 * **Creation**: [TypeScript 第 5 章](/article/getting-start-ml/typescript/05-package-management-and-static-analysis.md) を新規作成。
 * **Creation**: [TypeScript 第 4 章](/article/getting-start-ml/typescript/04-version-control-and-data-management.md) を新規作成。

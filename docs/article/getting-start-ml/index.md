@@ -40,7 +40,7 @@
 
 | 章 | テーマ | Python | Kotlin | TypeScript |
 |----|--------|--------|--------|------------|
-| 7 | 線形回帰による数値予測 | [Python](python/07-linear-regression.md) | [Kotlin](kotlin/07-linear-regression.md) | — |
+| 7 | 線形回帰による数値予測 | [Python](python/07-linear-regression.md) | [Kotlin](kotlin/07-linear-regression.md) | [TypeScript](typescript/07-linear-regression.md) |
 | 8 | 実践的な分類と前処理パイプライン | [Python](python/08-classification-and-preprocessing-pipeline.md) | [Kotlin](kotlin/08-classification-and-preprocessing-pipeline.md) | — |
 | 9 | 特徴量エンジニアリング | [Python](python/09-feature-engineering.md) | [Kotlin](kotlin/09-feature-engineering.md) | — |
 
@@ -56,7 +56,7 @@
 
 | 章 | テーマ | Python | Kotlin | TypeScript |
 |----|--------|--------|--------|------------|
-| 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | — |
+| 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) |
 | 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | — |
 | 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | — |
 

@@ -1,3 +1,12 @@
+---
+type: Article
+title: "第 13 章: 主成分分析による次元削減"
+description: "ml-matrix の EVD で主成分分析を TDD で自作し、固有値の並び順（小さい順）・すり抜けた符号と欠損値の仮実装のテストを扱い、ml-pca と寄与率・固有値・向きをそろえた主成分を突き合わせる。"
+tags: [article,getting-start-ml,typescript]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-18T00:50:04Z }
+---
+
 # 第 13 章: 主成分分析による次元削減
 
 ## 13.1 はじめに
