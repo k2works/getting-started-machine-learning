@@ -23,8 +23,8 @@ verified:
 | 方針 | 内容 |
 |------|------|
 | 自作からライブラリへ | 各アルゴリズムはまず TDD で自作し、次にその言語の ML ライブラリで置き換えて結果を突き合わせる。自作で原理とその言語の書き方を学び、置き換えでエコシステムを学ぶ |
-| 段階的な言語拡大 | 第 1 波の 3 言語（Python・Kotlin・TypeScript）で章構成と記事の型を固め、第 2 波・第 3 波で言語を広げる |
-| Notebook による可視化は Python と Kotlin のみ | データの探索と可視化は Python（Jupyter Lab）と Kotlin（Kotlin Notebook）の記事だけで扱う。他の言語は可視化を扱わず、自作とライブラリの実装に集中する |
+| 段階的な言語拡大 | 第 1 波の 4 言語（Python・Kotlin・TypeScript・F#）で章構成と記事の型を固め、第 2 波・第 3 波で言語を広げる。F# は当初第 2 波だったが、2026-09-18 に第 1 波へ移した |
+| Notebook による可視化は Python・Kotlin・F# のみ | データの探索と可視化は Python（Jupyter Lab）・Kotlin（Kotlin Notebook）・F#（Polyglot Notebooks）の記事だけで扱う。他の言語は可視化を扱わず、自作とライブラリの実装に集中する |
 | 学習データはコミットしない | 学習データは『スッキリわかる Python による機械学習入門』の配布データを使うが、リポジトリには含めない（後述の「学習データ」を参照） |
 | 数値は実測値を載せる | 記事に載せる件数・正解率・係数などは、`apps/{env}/` の実装を実データで動かした結果だけを載せる。Wiki 記事の数値は転記しない |
 
@@ -151,9 +151,9 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 | 1 | python | Python | pytest（uv） | pandas, scikit-learn | 参照実装。Wiki 記事と同じ言語 |
 | 1 | kotlin | Kotlin | kotlin.test（Gradle） | Kotlin DataFrame, Tribuo（「Kotlin 版執筆計画」を参照） | 静的型付け・OOP と FP の融合。Kotlin Notebook による可視化を扱う |
 | 1 | node | TypeScript | Vitest（npm） | ml.js 系パッケージ（「TypeScript 版執筆計画」を参照） | ML ライブラリが未成熟な言語での自作の価値を示す |
+| 1 | dotnet | F# | xUnit | ML.NET, FSharp.Stats（「F# 版執筆計画」を参照） | 判別共用体・パイプライン・型プロバイダ。Polyglot Notebooks による可視化を扱う |
 | 2 | java | Java | JUnit 5（Gradle） | Tribuo, Smile | 静的型付け OOP の代表。Kotlin 版の実装と対比する |
 | 2 | dotnet | C# | xUnit | ML.NET, Microsoft.Data.Analysis | |
-| 2 | dotnet | F# | xUnit | ML.NET, Deedle | 型プロバイダ・パイプライン |
 | 2 | scala | Scala | ScalaTest（sbt） | Smile | |
 | 2 | rust | Rust | cargo test | linfa, ndarray, polars | 所有権と数値計算 |
 | 2 | go | Go | go test | gonum | ライブラリが限定的なので自作の比重が大きい |
@@ -333,6 +333,7 @@ apps/
 ├── node/                 # TypeScript（npm プロジェクト）
 ├── java/                 # Java（Gradle プロジェクト）
 ├── dotnet/               # C# / F#（.NET ソリューション）
+│   └── notebooks/        # F# の Polyglot Notebooks（出力セルを消してコミット）
 ├── scala/                # Scala（sbt プロジェクト）
 ├── rust/                 # Rust（Cargo プロジェクト）
 ├── go/                   # Go（Go Modules プロジェクト）
@@ -359,9 +360,10 @@ apps/
 | U1 Python | 第 1〜15 章・付録 A、`apps/python/`、CI | U0 |
 | U2 Kotlin | 第 1〜15 章、`apps/kotlin/`（Notebook を含む）、`kotlin` の Nix 環境、CI | U0、U1（章の節構成・可視化の節構成） |
 | U3 TypeScript | 第 1〜15 章、`apps/node/`、CI | U0、U1（章の節構成） |
-| U4〜U9 第 2 波 | Java・C#・F#・Scala・Rust・Go の各言語 | U0、U1 |
+| U4 F# | 第 1〜15 章、`apps/dotnet/`（Polyglot Notebooks を含む）、CI | U0、U1（章の節構成・可視化の節構成） |
+| U5〜U9 第 2 波 | Java・C#・Scala・Rust・Go の各言語 | U0、U1 |
 | U10〜U14 第 3 波 | Ruby・PHP・Elixir・Clojure・Haskell の各言語 | U0、U1 |
-| U15 多言語統合解説 | `integration/` | 第 1 波の 3 言語完了後に着手し、波ごとに更新 |
+| U15 多言語統合解説 | `integration/` | 第 1 波の 4 言語完了後に着手し、波ごとに更新 |
 
 ### Bolt 計画（第 1 波）
 
@@ -622,9 +624,110 @@ B16 の前に、共有するファイル（`package.json` の依存、第 2 章�
 - [x] API を Hono + zod で作ること
 - [x] 可視化の節と付録 A を TypeScript 版では作らず、Python 版・Kotlin 版へ案内すること
 - [x] Bolt を B13〜B17 の 5 つにまとめ、B16 で第 7〜14 章を並行して進めること
+- [x] B13（ウォーキングスケルトン）の範囲
 
 B15〜B17（第 4〜15 章）は 2026-09-18 に完了し、TypeScript 版の全 15 章がそろった。着手前に第 7〜15 章で使う ml.js 系・Hono・zod を `package.json` に追加し、第 4〜6 章と第 7〜14 章を worktree のサブエージェントで並行して書き、第 7・8 章の取り込み後に第 15 章を書いた。B15 では ESLint 10 関連の依存が Node.js 22.13.0 以上を求めることが分かり、`engines` の下限を上げた。並行して書いた章の記事に載っていたリポジトリ全体のテスト件数は統合後の値と合わないので、章ごとの実測値に置き換えた。ml.js の各パッケージで確かめた癖（ml-logistic-regression に切片が無い、ml-regression-lasso の `lambda` の尺度と収束しないまま返す挙動、ml-cross-validation の余りの行の扱いなど）は ADR 003 に記録した。
-- [x] B13（ウォーキングスケルトン）の範囲
+
+## F# 版執筆計画
+
+F# は当初第 2 波の言語だったが、2026-09-18 に第 1 波へ移し、第 1 波の 4 番目の言語として書き起こす。Python 版と同じ 5 部 15 章の節構成で、Kotlin 版と同じく Notebook による探索と可視化の節を設ける。Notebook には Polyglot Notebooks（.NET Interactive の F# カーネル）を使う。Python 版・Kotlin 版・TypeScript 版との対比の軸は次の 3 つとする。
+
+- **型**: 判別共用体（`type Tree = Leaf of string | Node of Split * Tree * Tree`）と網羅性の検査、`option` による欠損値、レコード型と型推論。Kotlin の sealed interface、TypeScript の判別可能なユニオンと比べる
+- **データの表現**: 型プロバイダ（FSharp.Data の `CsvProvider`）で CSV の列を型にする。学習データはコミットしないので、型の元にするサンプルは架空の値で作る。処理は `|>` のパイプラインと `List`・`Array`・`Seq` のモジュール関数で組み立てる
+- **ライブラリ**: .NET の機械学習ライブラリ（ML.NET）は C# 向けの API（`IDataView`・可変なクラス）なので、F# から使うときの型の橋渡しを題材にする。数値計算は F# 向けの FSharp.Stats と比べる
+
+付録 A（総合演習）は Kotlin 版・TypeScript 版と同じく作らず、F# 版トップから Python 版の付録 A へ案内する。
+
+### 確認した事実（2026-09-18 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| Polyglot Notebooks | Microsoft は 2026-02-11 に Polyglot Notebooks と .NET Interactive の廃止を告知した。拡張機能は 2026-03-27、.NET Interactive は 2026-04-24 に廃止され、リポジトリはアーカイブされた。インストール済みの拡張機能は動き続け、.NET Interactive は他の Jupyter のフロントエンドのカーネルとしても動くが、機能追加・バグ修正は無く、将来の VS Code・.NET SDK の更新で動かなくなる可能性がある。Microsoft は代替として VS Code の Jupyter 拡張機能と別のカーネルを挙げている | [dotnet/interactive#4163](https://github.com/dotnet/interactive/issues/4163) |
+| .NET Interactive の版 | dotnet ツール `Microsoft.dotnet-interactive` の最新は 1.0.712001。Plotly.NET.Interactive（Notebook でグラフを表示する拡張）の最新は 5.0.0 | NuGet |
+| ローカル環境 | .NET SDK 10.0.101 | `dotnet --list-sdks` |
+| Nix 環境 | `ops/nix/environments/dotnet/shell.nix` は `dotnet-sdk`（版は nixpkgs の既定）。本リポジトリの CI で `dotnet` 環境を使うワークフローは無い | ファイルと `.github/workflows/` を読んだ |
+| 参照実装 | `tmp/getting-started-tdd/apps/dotnet/` は F# のライブラリとテストのプロジェクトを 1 つのソリューションにまとめ、xUnit 2 系・coverlet、`fsharplint.json` を使う（`net8.0`） | ファイルを読んだ |
+| ライブラリの最新版 | ML.NET（Microsoft.ML・Microsoft.ML.FastTree）5.0.0、FSharp.Stats 0.6.0、FSharp.Data 8.2.0、Deedle 8.1.0、Plotly.NET 5.1.0、Giraffe 8.3.0、xunit.v3 4.0.1、Fantomas 8.0.0、FSharpLint 0.27.0 | NuGet |
+
+ライセンス、F# からの使いやすさ、各アルゴリズムの有無（ML.NET に単一の決定木があるか、正則化付き回帰・PCA・K-means の初期中心の指定など）、.NET Interactive が .NET SDK 10 で動くかは未検証。B18 の ADR 004 で確かめてから確定する。
+
+### ライブラリ方針（ADR 004 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| 言語・実行環境 | F#（.NET SDK 10、`net10.0`） | 手元の SDK と一致し、長期サポート版 | .NET 8 |
+| テスト・カバレッジ | xUnit（v3）+ coverlet | 参照実装と同じ系統で、`dotnet test` で動く | Expecto、FsUnit |
+| 静的解析・整形 | Fantomas（整形）、FSharpLint、コンパイラの警告をエラーにする（`TreatWarningsAsErrors`） | 参照実装で FSharpLint を使っている | — |
+| データの表現 | FSharp.Data の `CsvProvider`（架空の値のサンプルから型を作る）とレコード型のリスト | 型プロバイダは F# 固有の題材になる | Deedle のデータフレーム |
+| 乱数 | `System.Random(seed)` | シードを指定できる。.NET の版で乱数列が変わりうることを第 4 章で扱う | 自作 |
+| 機械学習 | ML.NET（決定木系・ロジスティック回帰・K-means など）、FSharp.Stats（線形回帰・PCA など） | ML.NET は .NET の標準的な機械学習ライブラリ。F# 向けの API は FSharp.Stats が持つ | 自作のみ（置き換えの節を省略） |
+| API | Giraffe（ASP.NET Core）、`Microsoft.AspNetCore.TestHost` による統合テスト | 本計画の「言語ごとの焦点」で挙げた候補 | ASP.NET Core Minimal API |
+| 可視化 | Polyglot Notebooks + Plotly.NET（Plotly.NET.Interactive） | 2026-09-18 の方針変更による。廃止のリスクは下記のとおり扱う | F# スクリプト（`.fsx`）と Plotly.NET の HTML 出力 |
+
+### Polyglot Notebooks の廃止への対応
+
+- 使う版（VS Code の拡張機能、`Microsoft.dotnet-interactive`、Plotly.NET.Interactive）を ADR 004 と記事に明記し、固定する
+- ADR 004 と F# 版の記事に、廃止されていることと、将来の VS Code・.NET SDK の更新で動かなくなる可能性があることを明記する
+- Notebook は探索と可視化に限り、テスト・記事の数値は `apps/dotnet/` のプロジェクトのコードから求める。Notebook が動かなくなっても、実装・テスト・記事の数値は影響を受けない
+- 動かなくなった時点で、F# スクリプトと Plotly.NET の HTML 出力（代替案）に移すかを判断する
+
+### 前提整備（F#）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `nix develop .#dotnet` の .NET SDK の版を CI で確かめ、`global.json` で SDK の版を固定するか決める | 未着手 |
+| アプリ雛形 | `apps/dotnet/`（ソリューション、F# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props` による版の一元管理）にテストが 1 本通る最小構成 | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは、データが無ければスキップする（xUnit v3 の `Assert.Skip` など） | 未着手 |
+| Notebook 環境 | VS Code の Polyglot Notebooks で F# のカーネルが動き、Plotly.NET のグラフを表示できることを確かめる。出力セルを消す仕組みは Python 版・Kotlin 版と同じものを使う | 未着手 |
+| ライブラリ選定 | ADR 004（F# 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/dotnet-ci.yml`（Nix → `dotnet restore` → 整形の確認・静的解析・`dotnet test`、カバレッジの表示）。NuGet のキャッシュを使う | 未着手 |
+
+### 章別執筆計画（F#）
+
+| 章 | テーマ | F# での焦点 | ライブラリへの置き換え |
+|----|--------|------------|--------------------|
+| 1 | 機械学習とはじめてのテスト | xUnit、レコード型、`File.ReadAllLines` と BOM、データが無いときのスキップ | — |
+| 2 | データの前処理と三角測量 | `CsvProvider` と架空のサンプル、`option` による欠損値、`System.Random(seed)` による分割、ジェネリックな関数 | — |
+| 3 | 決定木による分類と明白な実装 | 判別共用体による木、パターンマッチと網羅性の警告、再帰 | ML.NET の決定木系（単一の決定木が無ければ、置き換えの範囲を ADR 004 で決める） |
+| 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`bin/`・`obj/` の除外、乱数と .NET の版 | — |
+| 5 | パッケージ管理と静的解析 | NuGet と中央パッケージ管理、`packages.lock.json`、Fantomas・FSharpLint、警告をエラーにする設定、coverlet | — |
+| 6 | タスクランナーと CI/CD | `dotnet` CLI と Gulp の分担、GitHub Actions と Nix、Notebook の出力を消す仕組み | — |
+| 7 | 線形回帰による数値予測 | 配列による行列と正規方程式、評価指標 | FSharp.Stats・ML.NET の線形回帰 |
+| 8 | 実践的な分類と前処理パイプライン | グループ別の補完、ダミー変数化、関数の合成（`>>`）によるパイプライン、モデルの保存と読み込み | ML.NET（クラスの重み付けの可否は ADR 004 で確認） |
+| 9 | 特徴量エンジニアリング | 標準化・多項式特徴量の自作、`Map` による表の結合、Shift_JIS の読み込み（`CodePagesEncodingProvider`） | ML.NET の正規化 |
+| 10 | ロジスティック回帰とアンサンブル学習 | ソフトマックスと勾配降下、第 3 章の決定木を再利用したランダムフォレスト | ML.NET のロジスティック回帰・FastForest |
+| 11 | 評価指標と交差検証 | 評価関数を関数の型で渡す、K 分割、`seq` 式による遅延評価 | ML.NET の評価・交差検証 |
+| 12 | 正則化とモデル選択 | リッジ回帰の閉形式、不変なレコードによる実験結果の記録 | FSharp.Stats・ML.NET の正則化（有無は ADR 004 で確認） |
+| 13 | 主成分分析による次元削減 | 分散共分散行列と固有値分解、固有ベクトルの符号 | FSharp.Stats の PCA |
+| 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、エルボー法 | ML.NET・FSharp.Stats の K-means（初期中心を渡せるかは ADR 004 で確認） |
+| 15 | 機械学習 API とモジュール設計 | Giraffe、レイヤードアーキテクチャ、`Result` 型によるエラー表現、TestHost による統合テスト | — |
+
+Notebook は Kotlin 版と同じ章（第 2・3・7〜14 章）に作り、`apps/dotnet/notebooks/` に置く。Notebook から `apps/dotnet/` のライブラリを読み込み、記事の可視化の節と同じグラフを描く。
+
+### Python 版・Kotlin 版・TypeScript 版との数値の違い
+
+分割は他の言語と同じ手順で行うが、乱数生成器が違うので、訓練データ・テストデータに入る行は他の言語と一致しない。件数は一致させ、記事の数値は F# 版の実装で実測したものだけを載せ、自作とライブラリの突き合わせは F# 版の中で完結させる。
+
+### Bolt 計画（F#）
+
+TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関係の無い章を worktree のサブエージェントで並行して進める。
+
+| Bolt | 内容 | 完了条件 |
+|------|------|---------|
+| B18 ウォーキングスケルトン | Nix の `dotnet` 環境の確認、`apps/dotnet/` の雛形、ADR 004、第 1 章の実装と記事、F# 版トップ、nav、.NET CI、Polyglot Notebooks の動作確認（Plotly.NET のグラフを 1 つ表示する） | `apps/dotnet/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される。Polyglot Notebooks が手元で動く |
+| B19 | 第 2〜3 章と Notebook（型プロバイダ、乱数、ML.NET の導入） | 自作の決定木とライブラリの結果を並べて載せられる。Notebook の可視化が記事と一致する |
+| B20 | 第 4〜6 章 | NuGet・Fantomas・FSharpLint・カバレッジ・CI・Notebook の出力の除去が記事どおりに動く |
+| B21 | 第 7〜14 章と Notebook（依存関係の無い章を並行して進める） | 各章のテストが通り、記事と Notebook がそろっている |
+| B22 | 第 15 章 | F# 版の全章完了。Python 版と節構成がそろっている |
+
+### 承認が必要な事項（F#）
+
+- [ ] F# を第 2 波から第 1 波へ移し、第 1 波を Python・Kotlin・TypeScript・F# の 4 言語にすること（多言語統合解説は 4 言語の完了後に着手する）
+- [ ] F# 版の Notebook に Polyglot Notebooks を使い、廃止のリスクを ADR 004 と記事に明記すること（Polyglot Notebooks を使うのは F# 版だけとし、Python 版・Kotlin 版の Notebook と、Notebook を作らない TypeScript 版はそのままにする）
+- [ ] ライブラリの第一候補を ML.NET・FSharp.Stats・FSharp.Data・Plotly.NET・Giraffe とし、置き換えの範囲を ADR 004 で章ごとに確かめること
+- [ ] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/fsharp/` に置くこと
+- [ ] Bolt を B18〜B22 の 5 つにまとめ、B21 で第 7〜14 章を並行して進めること
+- [ ] B18（ウォーキングスケルトン）の範囲
 
 ## リスクと対応
 
@@ -634,6 +737,7 @@ B15〜B17（第 4〜15 章）は 2026-09-18 に完了し、TypeScript 版の全 
 | CI で実データを使えない | 実データでの数値（正解率など）の劣化を CI で検知できない | 実データの検証はローカルのタスクで行い、記事に載せる数値は Bolt 完了時に再計測する。CI での実データ取得の可否は別途判断する |
 | 言語による ML ライブラリの成熟度の差 | 章によってはライブラリへの置き換えができない | 自作を主とし、置き換えは任意の節にする。ADR で言語ごとの対応範囲を記録する |
 | Notebook の出力に学習データが残る | 出力セル経由でデータを PUBLIC リポジトリに再配布してしまう | 出力セルを消してからコミットする仕組みを前提整備で用意し、レビューで確認する |
+| Polyglot Notebooks が廃止されている | 将来の VS Code・.NET SDK の更新で F# 版の Notebook が動かなくなる | 使う版を固定して記事に明記する。Notebook は探索と可視化に限り、実装・テスト・記事の数値を Notebook に依存させない。動かなくなったら F# スクリプトと Plotly.NET の HTML 出力への移行を判断する |
 | Kotlin Notebook が IntelliJ IDEA に依存する | IDE を使わない読者が Kotlin の可視化を再現できない | 記事の環境構築の節に IntelliJ IDEA の導入を明記する。IDE 以外での実行方法は ADR の検討事項とする |
 | 言語・ライブラリ間で結果が一致しない | 乱数・浮動小数点・分割アルゴリズムの違いで数値がずれ、読者が混乱する | 分割は自作関数で揃え、比較は許容誤差付きで行う。ずれの理由を記事に書く |
 | Wiki 記事の数値が配布データと合わない | 件数・評価値をそのまま載せると読者の手元で再現しない | Wiki 記事の数値は使わず、実装の実測値のみ載せる |

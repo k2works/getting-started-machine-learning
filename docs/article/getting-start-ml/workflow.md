@@ -39,7 +39,7 @@ repeat
 repeat while (TODO が残っている？) is (yes)
 ->no;
 :tox などで品質チェックを通す;
-if (Python・Kotlin で可視化の節がある？) then (yes)
+if (Python・Kotlin・F# で可視化の節がある？) then (yes)
   :Notebook で探索と可視化を行う;
   :分かったことをテストに反映する;
   :出力セルを消す;
@@ -157,4 +157,5 @@ stop
 | Python | 完了 | 完了 | 完了 | 完了 | 完了 | 完了 | B1〜B6 完了 |
 | Kotlin | 完了 | 完了 | 完了 | 完了 | 完了 | —（Python 版の付録 A を案内） | B7〜B12 完了 |
 | TypeScript | 完了 | 完了 | 完了 | 完了 | 完了 | —（Python 版の付録 A を案内） | B13〜B17 完了 |
+| F# | 未着手 | 未着手 | 未着手 | 未着手 | 未着手 | —（Python 版の付録 A を案内） | 計画中（B18〜B22） |
 | 多言語統合解説 | — | — | — | — | — | — | 未着手 |

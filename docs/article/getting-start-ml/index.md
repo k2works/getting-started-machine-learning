@@ -8,14 +8,15 @@
 
 ## 言語別解説
 
-言語は 3 つの波に分けて順に追加します。第 1 波の Python 版・Kotlin 版・TypeScript 版は全章を執筆済みです。
+言語は 3 つの波に分けて順に追加します。第 1 波のうち Python 版・Kotlin 版・TypeScript 版は全章を執筆済みで、F# 版を計画しています。F# は当初第 2 波でしたが、第 1 波に移しました。
 
 | 波 | 言語 | 環境 | 特徴 | 状況 |
 |----|------|------|------|------|
 | 1 | [Python](python/index.md) | CPython | 機械学習ライブラリが成熟、型ヒント、Jupyter Lab による探索と可視化 | 完了 |
 | 1 | [Kotlin](kotlin/index.md) | JVM | 静的型付け、OOP と FP の融合、Kotlin Notebook による探索と可視化 | 完了 |
 | 1 | [TypeScript](typescript/index.md) | Node.js | 静的型付け、機械学習ライブラリが限られる環境での自作 | 完了 |
-| 2 | Java / C# / F# / Scala / Rust / Go | — | — | 未着手 |
+| 1 | F# | .NET | 判別共用体・パイプライン・型プロバイダ、Polyglot Notebooks による探索と可視化 | 計画中 |
+| 2 | Java / C# / Scala / Rust / Go | — | — | 未着手 |
 | 3 | Ruby / PHP / Elixir / Clojure / Haskell | — | — | 未着手 |
 
 ## 章構成
