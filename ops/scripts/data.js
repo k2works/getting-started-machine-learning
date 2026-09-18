@@ -34,12 +34,18 @@ const REQUIRED_FILES = [
 // ヘルパー関数
 // ============================================
 
+/** 配布 ZIP の既定の置き場所（先に見つかったものを使う） */
+const DEFAULT_ZIPS = [
+  path.join('tmp', 'sukkiri-ml-codes.zip'),
+  path.join('apps', 'data', 'sukkiri-ml-codes.zip'),
+];
+
 /**
- * 配布 ZIP のパス（既定 tmp/sukkiri-ml-codes.zip）
+ * 配布 ZIP のパス（ML_DATA_ZIP → tmp/ → apps/data/ の順）
  * @returns {string}
  */
 function zipPath() {
-  return process.env.ML_DATA_ZIP || path.join('tmp', 'sukkiri-ml-codes.zip');
+  return process.env.ML_DATA_ZIP || DEFAULT_ZIPS.find((zip) => fs.existsSync(zip)) || DEFAULT_ZIPS[0];
 }
 
 /**
@@ -89,6 +95,15 @@ export default function (gulp) {
     done();
   });
 
+  gulp.task('data:setup:ifmissing', (done) => {
+    if (missingFiles().length === 0) {
+      console.log(`学習データは配置済みです（${DATA_DIR}）。`);
+      done();
+      return;
+    }
+    gulp.series('data:setup')(done);
+  });
+
   gulp.task('data:check', (done) => {
     const missing = missingFiles();
     if (missing.length > 0) {
@@ -104,11 +119,12 @@ export default function (gulp) {
 学習データ（スッキリわかる Python による機械学習入門 配布データ）
 
   gulp data:setup   配布 ZIP を展開し、${DATA_DIR} に学習データを配置する
+  gulp data:setup:ifmissing  学習データが未配置の場合のみ data:setup を実行する
   gulp data:check   ${DATA_DIR} に学習データが揃っているか確認する
   gulp data:help    このヘルプを表示する
 
 環境変数:
-  ML_DATA_ZIP       配布 ZIP のパス（既定 tmp/sukkiri-ml-codes.zip）
+  ML_DATA_ZIP       配布 ZIP のパス（既定 tmp/ → apps/data/ の sukkiri-ml-codes.zip）
 
 配布 ZIP は書籍購入者のみ利用できます。入手先: ${SUPPORT_URL}
 学習データはリポジトリにコミットしないでください（apps/data/ は .gitignore 対象）。
