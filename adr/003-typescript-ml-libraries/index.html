@@ -3427,6 +3427,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../article/getting-start-ml/typescript/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5669,7 +5704,7 @@
 </tr>
 </tbody>
 </table>
-<p>ライブラリは使う章に入ってから <code>apps/node/package.json</code> に正確な版で追加する。型定義を同梱しないパッケージには、プロジェクトの中に使う範囲だけの型宣言（<code>declare module</code>）を書く。</p>
+<p>ライブラリは <code>apps/node/package.json</code> に正確な版で追加する（第 3 章までは使う章に入ってから、第 7〜15 章の分は並行して書く B16 の前にまとめて追加した）。型定義を同梱しないパッケージには、プロジェクトの中に使う範囲だけの型宣言（<code>declare module</code>）を書く。</p>
 <p>データフレームのライブラリは使わず、1 行を <code>interface</code> で型付けしたレコードの配列で表す。<code>Math.random</code> はシードを指定できないので、シード付きの疑似乱数生成器を第 2 章で自作する。</p>
 <h3 id="_4">章ごとのライブラリへの置き換え方針<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <table>
@@ -5742,32 +5777,36 @@
 <td>ml-regression-multivariate-linear 2.0.4 は特徴量の行列の最後に 1 の列を足すので <code>weights</code> の切片が最後に並び、<code>Xᵀ X</code> の逆行列を SVD で求める（ソース）。自作の正規方程式とノイズ付きの架空データ 30 件で係数・予測値が小数第 9 位まで、実データで決定係数が一致した。ml-matrix の <code>solve</code> は正方行列を部分ピボット選択付きの LU 分解で解き、対角成分が 0 の連立方程式でも自作と同じ解を返した。型定義を同梱するので <code>declare module</code> は不要</td>
 </tr>
 <tr>
-<td>13</td>
-<td>ml-matrix の <code>EVD</code> は <code>isSymmetric()</code> で対称と判定すると <code>tred2</code>・<code>tql2</code> で計算し、最後に固有値を小さい順に並べ替える（非対称なら並べ替えず、虚部は <code>imaginaryEigenvalues</code>）。ml-pca 4.1.1 は型定義を同梱し、既定は SVD。<code>getExplainedVariance()</code>・<code>getEigenvalues()</code>（n − 1 で割った分散）は自作と小数第 9 位まで一致した。<code>getEigenvectors()</code> は列に主成分が並び符号はそろえない（<code>method: "covarianceMatrix"</code> では第 1 主成分の符号が SVD と逆）。向きをそろえると Boston の 15 主成分すべてが一致した</td>
-</tr>
-<tr>
-<td>12</td>
-<td>ml-regression-lasso 0.1.2 は特徴量と正解の両方を標準化してから <code>(1/2n)‖ts − Xs w‖² + λ‖w‖₁</code> を最小化する（特徴量が 1 つなら係数は「相関係数 − λ」を 0 で切ったもの）ので、scikit-learn・Tribuo の alpha とは尺度が違う。既定の <code>maxIter</code> 200・<code>tolerance</code> 1e-5 では相関の強い特徴量で収束せず、例外にならずに <code>converged: false</code> のまま係数を返す（実データの λ=0.01 でも発生）。<code>fitLasso</code> は tolerance 1e-10・上限 10 万回で学習し、収束しなければ例外にする。λ=0 は自作の最小二乗と 6 桁で、alpha=0 の自作リッジ回帰は ml-regression-multivariate-linear と 9 桁で一致した。ml-matrix の <code>add</code>・<code>mul</code>・<code>subRowVector</code> は呼び出した行列を書き換える</td>
-</tr>
-<tr>
-<td>14</td>
-<td>ml-kmeans 7.0.1 に同じ初期中心を渡すと、実データの k = 1〜10 × シード 10 通りの 100 通りすべてでクラスタ番号・中心・SSE・反復回数が自作と一致した。ml-kmeans は中心の移動が <code>1e-6</code> 以下で止まり（自作は中心が変わらなくなるまで）、返す <code>clusters</code> は更新前の中心への割り当てなので、反復を打ち切ると自作と違う。<code>maxIterations: 0</code> は上限なしを意味し（既定値 100）、アダプターでは 300 を明示した。k-means++ の k = 5 の SSE は 1058.77 で scikit-learn・Tribuo と同じ。データを <code>number[][]</code> で受け取るので、<code>readonly</code> の点は写してから渡す</td>
-</tr>
-<tr>
-<td>10</td>
-<td>ml-logistic-regression 2.0.0 には切片の項が無く（重みは特徴量の数だけ）、iris のテストデータで 26/45 にとどまるが、値が 1 の列を足すと 43/45 になった（自作のソフトマックスは 42/45）。勾配は平均でなく合計で、既定は 50000 回・学習率 5e-4 のため 1 回の学習に約 2 秒かかる。ml-random-forest 2.1.0 は <code>noOOB: true</code> なら木が少なくても学習でき、<code>maxFeatures</code> は 0 より大きく 1 以下なら割合として扱うので <code>1</code> は 100% を意味する。既定の <code>replacement: true</code> は特徴量を重複を許して選ぶ。<code>featureImportance()</code> は同梱の型定義に無く、計算式も自作と違う。<code>replacement: false</code>・<code>noOOB: true</code>・内側の ml-cart を <code>minNumSamples: 1</code>・<code>gainThreshold: 0</code> にそろえても乱数の生成器が違うので木は一致しない（iris のテストデータで ml-random-forest 44/45、自作 42/45）</td>
+<td>8</td>
+<td>重み付けなし・前処理後のデータで ml-cart と突き合わせると、深さ 1〜6 は 179 件すべて一致し、深さ 7〜10 では 8・6・9・6 件の予測が違った（境界ちょうどの値に当たった行は 0 件、同数の葉に落ちた行は深さ 9 で 2 件・深さ 10 で 4 件、残りは分割の選び方の違いと見られる）。第 3 章の <code>DecisionTree</code> とは深さ 1〜10 で一致した。重み付けの効果は自作で示し、深さ 5 でテストデータの生存者 67 人のうち見つけた人数が <code>none</code> の 40 人から <code>balanced</code> の 50 人に増えた。モデルは JSON で保存し zod で検証する。<code>Map</code> は JSON で <code>{}</code> になるので <code>Record&lt;string, number&gt;</code> を使い、スキーマを <code>z.ZodType&lt;FittedPipeline&gt;</code> と注釈して型との食い違いを型チェックに見つけさせる</td>
 </tr>
 <tr>
 <td>9</td>
 <td>ml-matrix 6.15.0 の <code>center("column").scale("column")</code> で標準化できるが、<code>scale</code> と <code>standardDeviation</code> の既定は不偏標準偏差（件数 − 1 で割る）で、<code>{ unbiased: false }</code> で件数で割る。自作は scikit-learn と同じく件数で割るので、置き換えずに自作を最終実装にした。<code>CholeskyDecomposition#isPositiveDefinite()</code> で列が独立でない正規方程式を検出できた。<code>Map.groupBy</code> は Node.js 22 で動くが <code>lib: ES2023</code> では <code>TS2550</code> になるので手書きで集計した。<code>TextDecoder("shift_jis")</code> で読めるが書き出しはできず、csv-parse は Shift_JIS のバイト列を例外なしに U+FFFD に化かす</td>
 </tr>
 <tr>
-<td>8</td>
-<td>重み付けなし・前処理後のデータで ml-cart と突き合わせると、深さ 1〜6 は 179 件すべて一致し、深さ 7〜10 では 8・6・9・6 件の予測が違った（境界ちょうどの値に当たった行は 0 件、同数の葉に落ちた行は深さ 9 で 2 件・深さ 10 で 4 件、残りは分割の選び方の違いと見られる）。第 3 章の <code>DecisionTree</code> とは深さ 1〜10 で一致した。重み付けの効果は自作で示し、深さ 5 でテストデータの生存者 67 人のうち見つけた人数が <code>none</code> の 40 人から <code>balanced</code> の 50 人に増えた。モデルは JSON で保存し zod で検証する。<code>Map</code> は JSON で <code>{}</code> になるので <code>Record&lt;string, number&gt;</code> を使い、スキーマを <code>z.ZodType&lt;FittedPipeline&gt;</code> と注釈して型との食い違いを型チェックに見つけさせる</td>
+<td>10</td>
+<td>ml-logistic-regression 2.0.0 には切片の項が無く（重みは特徴量の数だけ）、iris のテストデータで 26/45 にとどまるが、値が 1 の列を足すと 43/45 になった（自作のソフトマックスは 42/45）。勾配は平均でなく合計で、既定は 50000 回・学習率 5e-4 のため 1 回の学習に約 2 秒かかる。ml-random-forest 2.1.0 は <code>noOOB: true</code> なら木が少なくても学習でき、<code>maxFeatures</code> は 0 より大きく 1 以下なら割合として扱うので <code>1</code> は 100% を意味する。既定の <code>replacement: true</code> は特徴量を重複を許して選ぶ。<code>featureImportance()</code> は同梱の型定義に無く、計算式も自作と違う。<code>replacement: false</code>・<code>noOOB: true</code>・内側の ml-cart を <code>minNumSamples: 1</code>・<code>gainThreshold: 0</code> にそろえても乱数の生成器が違うので木は一致しない（iris のテストデータで ml-random-forest 44/45、自作 42/45）</td>
 </tr>
 <tr>
 <td>11</td>
 <td>ml-confusion-matrix 2.0.0 は同じ予測なら件数・正解率・適合率・再現率・F 値が自作と一致した。正例を一度も予測しないと適合率は NaN（再現率・F 値は 0）、無いラベルを正例に指定すると例外になる。<code>fromLabels(["0","0"], …)</code> は型引数が <code>"0"</code> に推論されるので <code>fromLabels&lt;string&gt;</code> と書く。ml-cross-validation 1.3.0 は関数を渡す形の引数の順序が <code>kFold(features, labels, k, callback)</code> で README に例が無く、<code>getFolds</code> は <code>Math.random</code> を使う（<code>vi.spyOn(Math, "random")</code> で再現）。余りは最後の分割に足され、余りが分割数以上だと行を捨てる（11 件 4 分割でテストされるのは 9 件）。分割ごとのスコアは返さず全分割の予測を 1 つの混同行列に足し合わせる。Survived・5 分割の ml-cart は深さ 1〜2 で自作と一致し、深さ 3・4 で 1 件、制限なしで 55 件違った。回帰の指標は ml.js に無いので突き合わせを省略した</td>
+</tr>
+<tr>
+<td>12</td>
+<td>ml-regression-lasso 0.1.2 は特徴量と正解の両方を標準化してから <code>(1/2n)‖ts − Xs w‖² + λ‖w‖₁</code> を最小化する（特徴量が 1 つなら係数は「相関係数 − λ」を 0 で切ったもの）ので、scikit-learn・Tribuo の alpha とは尺度が違う。既定の <code>maxIter</code> 200・<code>tolerance</code> 1e-5 では相関の強い特徴量で収束せず、例外にならずに <code>converged: false</code> のまま係数を返す（実データの λ=0.01 でも発生）。<code>fitLasso</code> は tolerance 1e-10・上限 10 万回で学習し、収束しなければ例外にする。λ=0 は自作の最小二乗と 6 桁で、alpha=0 の自作リッジ回帰は ml-regression-multivariate-linear と 9 桁で一致した。ml-matrix の <code>add</code>・<code>mul</code>・<code>subRowVector</code> は呼び出した行列を書き換える</td>
+</tr>
+<tr>
+<td>13</td>
+<td>ml-matrix の <code>EVD</code> は <code>isSymmetric()</code> で対称と判定すると <code>tred2</code>・<code>tql2</code> で計算し、最後に固有値を小さい順に並べ替える（非対称なら並べ替えず、虚部は <code>imaginaryEigenvalues</code>）。ml-pca 4.1.1 は型定義を同梱し、既定は SVD。<code>getExplainedVariance()</code>・<code>getEigenvalues()</code>（n − 1 で割った分散）は自作と小数第 9 位まで一致した。<code>getEigenvectors()</code> は列に主成分が並び符号はそろえない（<code>method: "covarianceMatrix"</code> では第 1 主成分の符号が SVD と逆）。向きをそろえると Boston の 15 主成分すべてが一致した</td>
+</tr>
+<tr>
+<td>14</td>
+<td>ml-kmeans 7.0.1 に同じ初期中心を渡すと、実データの k = 1〜10 × シード 10 通りの 100 通りすべてでクラスタ番号・中心・SSE・反復回数が自作と一致した。ml-kmeans は中心の移動が <code>1e-6</code> 以下で止まり（自作は中心が変わらなくなるまで）、返す <code>clusters</code> は更新前の中心への割り当てなので、反復を打ち切ると自作と違う。<code>maxIterations: 0</code> は上限なしを意味し（既定値 100）、アダプターでは 300 を明示した。k-means++ の k = 5 の SSE は 1058.77 で scikit-learn・Tribuo と同じ。データを <code>number[][]</code> で受け取るので、<code>readonly</code> の点は写してから渡す</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Hono 4.13.8 の <code>c.req.json&lt;T&gt;()</code> の型引数は型を宣言するだけで検証しない（検証前は数値の項目に文字列を送っても 200）。壊れた JSON は <code>SyntaxError</code> になり、既定の <code>errorHandler</code> が 500 を返すので、<code>app.onError</code> でモデルが無いことを 503 に変換した。zod 4.6.5 は <code>z.literal([1, 2, 3])</code> で値の候補を並べられ、メッセージは <code>{ error: "..." }</code> で指定する（既定は英語）。<code>.nullish()</code> と <code>.transform</code> で JSON の項目名をドメインの型に写し、<code>z.ZodType&lt;T, unknown&gt;</code> と注釈すると transform 付きのスキーマも同じ関数で受け取れる。@hono/node-server 2.1.1 の <code>serve</code> は <code>port: 0</code> で空いているポートを選ぶので、テストで起動して <code>fetch</code> し <code>close</code> できた。Hono・@hono/node-server・zod は型定義を同梱する</td>
 </tr>
 </tbody>
 </table>
