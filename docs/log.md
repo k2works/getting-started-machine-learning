@@ -1,6 +1,9 @@
 # Docs Update Log
 
 ## 2026-09-18
+* **Creation**: [ADR 004](/adr/004-fsharp-ml-libraries.md) を新規作成。
+* **Update**: F# 版 B18 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、F# 版トップを追加。
+* **Creation**: [F# 第 1 章](/article/getting-start-ml/fsharp/01-machine-learning-and-first-test.md) を新規作成。
 * **Update**: F# を第 2 波から第 1 波へ移し、Polyglot Notebooks を使う F# 版執筆計画を [執筆計画](/article/getting-start-ml/outline.md) に追加。[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新。
 * **Update**: TypeScript 版 B15〜B17 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 003](/adr/003-typescript-ml-libraries.md) に第 7〜15 章で確かめた結果を追記。
 * **Creation**: [TypeScript 第 15 章](/article/getting-start-ml/typescript/15-machine-learning-api-and-module-design.md) を新規作成。

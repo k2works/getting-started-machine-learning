@@ -675,12 +675,12 @@ F# は当初第 2 波の言語だったが、2026-09-18 に第 1 波へ移し、
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| Nix 環境 | `nix develop .#dotnet` の .NET SDK の版を CI で確かめ、`global.json` で SDK の版を固定するか決める | 未着手 |
-| アプリ雛形 | `apps/dotnet/`（ソリューション、F# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props` による版の一元管理）にテストが 1 本通る最小構成 | 未着手 |
-| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは、データが無ければスキップする（xUnit v3 の `Assert.Skip` など） | 未着手 |
-| Notebook 環境 | VS Code の Polyglot Notebooks で F# のカーネルが動き、Plotly.NET のグラフを表示できることを確かめる。出力セルを消す仕組みは Python 版・Kotlin 版と同じものを使う | 未着手 |
-| ライブラリ選定 | ADR 004（F# 版のライブラリ）を作成する | 未着手 |
-| CI | `.github/workflows/dotnet-ci.yml`（Nix → `dotnet restore` → 整形の確認・静的解析・`dotnet test`、カバレッジの表示）。NuGet のキャッシュを使う | 未着手 |
+| Nix 環境 | `nix develop .#dotnet` の .NET SDK の版を CI で確かめ、`global.json` で SDK の版を固定するか決める | 完了（nixpkgs の `dotnet-sdk` は 8.0 だったので `dotnet-sdk_10` に変更。CI で 10.0.101 を確認し、`global.json` で 10.0.101 に固定） |
+| アプリ雛形 | `apps/dotnet/`（ソリューション、F# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props` による版の一元管理）にテストが 1 本通る最小構成 | 完了（xUnit v3 を Microsoft.Testing.Platform で実行。FSharp.Core を明示して参照） |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは、データが無ければスキップする（xUnit v3 の `Assert.Skip` など） | 完了（`Assert.SkipUnless`。既定の場所は `__SOURCE_DIRECTORY__` から求める） |
+| Notebook 環境 | VS Code の Polyglot Notebooks で F# のカーネルが動き、Plotly.NET のグラフを表示できることを確かめる。出力セルを消す仕組みは Python 版・Kotlin 版と同じものを使う | 確認済み（`Microsoft.dotnet-interactive` 1.0.712001 が .NET 10 で動き、Jupyter から画面なしで実行できた。nbstripout で出力を消せる。Notebook の追加は B19） |
+| ライブラリ選定 | ADR 004（F# 版のライブラリ）を作成する | 完了（ADR 004） |
+| CI | `.github/workflows/dotnet-ci.yml`（Nix → `dotnet restore` → 整形の確認・静的解析・`dotnet test`、カバレッジの表示）。NuGet のキャッシュを使う | 完了（B18。整形の確認・FSharpLint・`dotnet test` とカバレッジの表示が成功） |
 
 ### 章別執筆計画（F#）
 
@@ -714,7 +714,7 @@ TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関�
 
 | Bolt | 内容 | 完了条件 |
 |------|------|---------|
-| B18 ウォーキングスケルトン | Nix の `dotnet` 環境の確認、`apps/dotnet/` の雛形、ADR 004、第 1 章の実装と記事、F# 版トップ、nav、.NET CI、Polyglot Notebooks の動作確認（Plotly.NET のグラフを 1 つ表示する） | `apps/dotnet/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される。Polyglot Notebooks が手元で動く |
+| B18 ウォーキングスケルトン（完了） | Nix の `dotnet` 環境の確認、`apps/dotnet/` の雛形、ADR 004、第 1 章の実装と記事、F# 版トップ、nav、.NET CI、Polyglot Notebooks の動作確認（Plotly.NET のグラフを 1 つ表示する） | `apps/dotnet/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される。Polyglot Notebooks が手元で動く |
 | B19 | 第 2〜3 章と Notebook（型プロバイダ、乱数、ML.NET の導入） | 自作の決定木とライブラリの結果を並べて載せられる。Notebook の可視化が記事と一致する |
 | B20 | 第 4〜6 章 | NuGet・Fantomas・FSharpLint・カバレッジ・CI・Notebook の出力の除去が記事どおりに動く |
 | B21 | 第 7〜14 章と Notebook（依存関係の無い章を並行して進める） | 各章のテストが通り、記事と Notebook がそろっている |
