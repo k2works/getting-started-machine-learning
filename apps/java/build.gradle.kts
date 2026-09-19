@@ -77,3 +77,13 @@ tasks.test {
     inputs.property("mlDataDir", mlDataDir.orElse(""))
     mlDataDir.orNull?.let { environment("ML_DATA_DIR", it) }
 }
+
+// 章ごとの main を実行する: ./gradlew runChapter -Pchapter=01
+tasks.register<JavaExec>("runChapter") {
+    group = "application"
+    description = "章の main メソッドを実行する"
+    val chapter = providers.gradleProperty("chapter").orElse("01")
+    mainClass.set(chapter.map { "chapter$it.Main" })
+    classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs("-Dfile.encoding=UTF-8", "-Dstdout.encoding=UTF-8")
+}

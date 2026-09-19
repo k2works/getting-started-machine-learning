@@ -50,7 +50,7 @@ Tribuo の各アルゴリズムの振る舞いは、Kotlin 版の [ADR 002](002-
 | 機械学習 | Tribuo | 4.3.2 | Apache License 2.0 | 第 3 章 |
 | API | Javalin | 7.2.3 | Apache License 2.0 | 第 15 章 |
 
-- JDK と Gradle は Kotlin 版と同じく、`jvmToolchain(21)` と `gradle/gradle-daemon-jvm.properties` で 21 に固定する。手元の JDK が 25 でも、ビルドとデーモンは JDK 21 で動く
+- JDK と Gradle は Kotlin 版と同じく、ツールチェーン（`java.toolchain`）と `gradle/gradle-daemon-jvm.properties` で 21 に固定する。手元の JDK が 25 でも、ビルドとデーモンは JDK 21 で動く
 - 整形・静的解析・カバレッジは B24 から `./gradlew check` に組み込む。F# 版で静的解析のルールが 1 件も有効になっていなかった教訓から、わざと違反を入れて `check` が失敗することを確かめる
 - 機械学習と API のライブラリは、使う章に入ってから `gradle/libs.versions.toml` に追加する
 
