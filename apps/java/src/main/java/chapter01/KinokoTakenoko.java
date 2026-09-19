@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 /** きのこ派・たけのこ派の判定。 */
 public final class KinokoTakenoko {
-  private static final String BOM = "﻿";
+  private static final String BOM = "\uFEFF";
 
   /** 「20 代ならきのこ派」というルールの年代 */
   private static final int KINOKO_AGE_GROUP = 20;
