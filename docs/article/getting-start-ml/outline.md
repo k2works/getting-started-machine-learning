@@ -924,7 +924,7 @@ Kotlin 版は Kotlin DataFrame の表（列名で値を引く）でデータを�
 
 | 対象 | 表し方（案） | 理由 |
 |------|------------|------|
-| 読み込んだ行 | `record Row(Map<String, Double> values)`。欠損値は `null` の値で表し、読み出しは `OptionalDouble get(String column)` に限る | 第 7〜14 章では列の違う CSV を何種類も読むので、データセットごとに record を作るより、列名で引く形のほうが章をまたいで使い回せる。F# 版の `Map<string, float option>` と同じ考え方。`null` はクラスの外に出さず、`OptionalDouble` で「値が無い場合」を呼び出し側に見せる |
+| 読み込んだ行 | `record Row(Map<String, String> cells)`。CSV のセルの文字列をそのまま持ち、`OptionalDouble number(String column)`（空欄なら空）と `String text(String column)` で読み出す（2026-09-20 に `Map<String, Double>` から改めた。正解ラベルや第 8 章の文字列の特徴量を持てないため） | 第 7〜14 章では列の違う CSV を何種類も読むので、データセットごとに record を作るより、列名で引く形のほうが章をまたいで使い回せる。F# 版の `Map<string, float option>` と同じ考え方。空欄は `OptionalDouble` の空として呼び出し側に見せる |
 | 補完した後の特徴量 | `record Features(List<String> columns, double[] values)`。欠損値を持てない | 補完するまでモデルに渡せないことを型で分ける。Kotlin 版の `Double?` と `Double` の区別に当たる。Tribuo の `ArrayExample`（特徴量名の配列と `double` の配列）にもそのまま渡せる |
 | 分割の結果 | `record TrainTestSplit<T>(List<Features> xTrain, List<Features> xTest, List<T> tTrain, List<T> tTest)` | Kotlin 版と同じ形。正解ラベルの型を型引数にして、第 7 章の数値の正解ラベルにも使う |
 | 決定木 | `sealed interface Tree permits Leaf, Node` と record の `Leaf`・`Node`。予測は `switch` のパターンマッチで書く | 網羅性をコンパイラが検査する。Kotlin 版の sealed interface と `when` に当たる |
@@ -955,7 +955,7 @@ Kotlin 版は Kotlin DataFrame の表（列名で値を引く）でデータを�
 
 次の点を確認した（2026-09-20 承認）。
 
-- [x] データの表し方（読み込んだ行を `Map<String, Double>` を包む `Row`、補完後を欠損値を持てない `Features`、決定木を sealed interface と record）
+- [x] データの表し方（読み込んだ行をセルの文字列の `Map<String, String>` を包む `Row`（当初の `Map<String, Double>` から 2026-09-20 に改めた）、補完後を欠損値を持てない `Features`、決定木を sealed interface と record）
 - [x] 乱数に `java.util.Random` を使い、数値は Java 版の実測値を載せること
 - [x] B25 のステップ 1〜9
 
