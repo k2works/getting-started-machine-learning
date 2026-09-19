@@ -366,9 +366,9 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('apps/kotlin/**/*.gradle.kts', 'apps/kotlin/gradle/libs.versions.toml', 'apps/kotlin/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-kotlin-${{ hashFiles('apps/kotlin/**/*.gradle.kts', 'apps/kotlin/gradle/libs.versions.toml', 'apps/kotlin/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-kotlin-
 
       # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
       - name: Run tests, ktlint, detekt and Notebook output check

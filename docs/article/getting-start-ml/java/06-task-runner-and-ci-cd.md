@@ -328,7 +328,7 @@ jobs:
 - **`paths` で対象を絞る** — Java の実装・このワークフロー・Nix の環境定義が変わったときだけ実行します。記事だけの変更や、ほかの言語の変更では実行されません
 - **Nix で環境をそろえる** — `nix develop .#java` で、`ops/nix/environments/java/shell.nix` に定義した環境（JDK・Maven・Gradle）に入ってからコマンドを実行します
 - **Gradle は Wrapper を使う** — Nix の環境にも Gradle（執筆時点では 8.14.3）が入っていますが、CI では `./gradlew` を使い、Wrapper で固定した Gradle 9.7.1 でビルドします
-- **Gradle のキャッシュを使う** — ダウンロードした Gradle と依存ライブラリ（`~/.gradle/caches`・`~/.gradle/wrapper`）を保存します。キャッシュのキーには、依存ライブラリの版を決めるファイル（`*.gradle.kts`・`libs.versions.toml`・Wrapper の設定）のハッシュを使い、版を変えたら新しいキャッシュになるようにしています。キーの接頭辞は `gradle-java-` として、Java CI が `restore-keys` で Kotlin CI のキャッシュ（キーは `gradle-` とハッシュ）を復元しないようにしています
+- **Gradle のキャッシュを使う** — ダウンロードした Gradle と依存ライブラリ（`~/.gradle/caches`・`~/.gradle/wrapper`）を保存します。キャッシュのキーには、依存ライブラリの版を決めるファイル（`*.gradle.kts`・`libs.versions.toml`・Wrapper の設定）のハッシュを使い、版を変えたら新しいキャッシュになるようにしています。キーの接頭辞は `gradle-java-` として、Java CI が `restore-keys` で Kotlin CI のキャッシュを復元しないようにしています。Kotlin CI の接頭辞も、はじめは `gradle-` だけで Java CI のキャッシュに一致しえたので、`gradle-kotlin-` に改めました
 - **手元と同じコマンドを使う** — 各ステップは手元と同じ `./gradlew check` と `./gradlew jacocoTestReport` を実行します
 - **学習データは置かない** — 学習データは再配布できないので CI には置きません。実データのテストは `assumeTrue` でスキップされます
 - **カバレッジは表示だけ** — JaCoCo の CSV から命令単位のカバレッジを計算してログに出します。`awk` は Nix の環境の外（GitHub のランナー）で実行するので、パスはリポジトリのルートからの `apps/java/build/...` です
