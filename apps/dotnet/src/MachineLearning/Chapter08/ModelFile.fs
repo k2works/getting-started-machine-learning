@@ -33,6 +33,8 @@ type PipelineDto =
         Tree: TreeDto
     }
 
+// 左右の部分木を変換してからレコードにまとめるので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private treeToDto (tree: Tree<int>) : TreeDto =
     match tree with
     | Leaf label ->
@@ -50,6 +52,8 @@ let rec private treeToDto (tree: Tree<int>) : TreeDto =
             Right = Some(treeToDto right)
         }
 
+// 左右の部分木を変換してから結果をまとめるので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private treeOfDto (dto: TreeDto) : Result<Tree<int>, string> =
     match dto with
     | {
