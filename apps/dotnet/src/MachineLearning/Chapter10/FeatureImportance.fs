@@ -4,6 +4,8 @@ open MachineLearning.Chapter03.DecisionTree
 open MachineLearning.Chapter10.RandomForest
 
 /// 学習に使ったデータをもう一度木に流して、節ごとに「分割に使った特徴量と、件数で重み付けした不純度の減少量」を集める
+// 左右の部分木の結果をつなぐので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private impurityDecreases (tree: Tree<'L>) (x: Map<string, float> list) (t: 'L list) : (string * float) list =
     match tree with
     | Leaf _ -> []

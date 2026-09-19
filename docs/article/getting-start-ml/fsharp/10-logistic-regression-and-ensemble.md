@@ -770,6 +770,8 @@ let ``分割で減った不純度を件数で重み付けして割合にする``
 
 ```fsharp
 /// 学習に使ったデータをもう一度木に流して、節ごとに「分割に使った特徴量と、件数で重み付けした不純度の減少量」を集める
+// 左右の部分木の結果をつなぐので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private impurityDecreases (tree: Tree<'L>) (x: Map<string, float> list) (t: 'L list) : (string * float) list =
     match tree with
     | Leaf _ -> []
@@ -806,6 +808,7 @@ let treeImportances (tree: Tree<'L>) (x: Map<string, float> list) (t: 'L list) :
 ```
 
 - データを左右に振り分ける部分は、第 3 章の `fit` と同じ形の再帰です。`Leaf` と `Node` をパターンマッチで場合分けし、`Node(split, left, right)` で節の中身を名前に取り出しています
+- FSharpLint は、`let rec` の関数に、末尾再帰であることをコンパイラに確かめさせる `[<TailCall>]` 属性を求めます（FL0085）。この関数は左右の部分木の結果をつなぐので末尾再帰ではなく、属性を付けるとコンパイラの警告 FS3569 になります。再帰の深さは木の深さまでなので、理由をコメントに書き、`// fsharplint:disable-next-line` で次の行だけ検査を外しています
 - `a :: b @ c` は、「`a` を先頭に置き、`b` と `c` をつなげたリスト」です。書き換える変数を持たずに、再帰の結果をつないでいます
 - `x.Head |> Map.map ...` は、1 行目の列名をキーにした `Map` を作り、値を「その特徴量の減少量の合計」に置き換えています
 
@@ -1828,6 +1831,8 @@ open MachineLearning.Chapter03.DecisionTree
 open MachineLearning.Chapter10.RandomForest
 
 /// 学習に使ったデータをもう一度木に流して、節ごとに「分割に使った特徴量と、件数で重み付けした不純度の減少量」を集める
+// 左右の部分木の結果をつなぐので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private impurityDecreases (tree: Tree<'L>) (x: Map<string, float> list) (t: 'L list) : (string * float) list =
     match tree with
     | Leaf _ -> []
