@@ -74,7 +74,7 @@ d8344658 docs(getting-start-ml): F# 版トップと第 1 章を追加し、nav�
 
 `git log --oneline` で見ると、どのコミットが何のための変更かを type と scope だけで区別できます。環境（`chore(nix)`）、ビルドの設定（`chore(dotnet)`）、実装（`feat(dotnet)`）、CI（`ci(dotnet)`）、CI で見つかった問題の修正（`fix(dotnet)`）、記事（`docs`）を分けてあるので、たとえば「CI で何が起きて、どう直したか」を追いたいときは `ci` と `fix` のコミットだけを見れば済みます。`63bd9ffb` の経緯は第 5 章で扱います。
 
-ここに並んだコミットの scope が `dotnet` なのは、当時は実装を `apps/dotnet/` に置いていたためです。C# 版と場所が重ならないよう `apps/fsharp/` に移してからは、scope も `fsharp` にしています。
+ここに並んだコミットの scope が `dotnet` なのは、当時は実装を `apps/fsharp/` に置いていたためです。C# 版と場所が重ならないよう `apps/fsharp/` に移してからは、scope も `fsharp` にしています。
 
 コミットメッセージの本文には、変更の **理由** を書きます。`889e9e3a` の本文は次のとおりです。
 
