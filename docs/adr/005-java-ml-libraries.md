@@ -61,6 +61,8 @@ ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら�
 | 章 | 置き換え | 方針 |
 |----|---------|------|
 | 3 | Tribuo の CART（ジニ不純度） | 自作の決定木と予測を突き合わせる |
+| 4 | `java.util.Random` の数列は Javadoc の「Java implementations must use all the algorithms shown here」により仕様で保証されるが、`Collections.shuffle` の並べ方は実装の説明にとどまる。JDK 17・21・25 では `Collections.shuffle(0..9, new Random(0))` が同じ並びになった。ツールチェーンを JDK 21 に固定して再現性を保つ |
+| 5 | Gradle の依存のロック（`dependencyLocking`）を試すと、ロックファイルがバージョンカタログより優先され、カタログの版を下げても警告なくロックの版で解決した。範囲指定・動的な版が無いので、ロックは使わず、バージョンカタログの版を正とする。BOM の文字は Spotless・Error Prone・PMD・javac のどれも検出しないので、`verifyNoBomCharacter` で検査する |
 | 7 | Java でも最小二乗解と一致するのは `SLMTrainer(true)` と `LARSTrainer()` だけ（実データの決定係数が自作と 1e-9 以内で一致）。`SLMTrainer(false)`・`LinearSGDTrainer` の予測は Kotlin 版と同じ値になる。`SparseLinearModel` の重みは正規化した空間の値で、元の単位に戻すと自作の係数と 1e-9 以内で一致する。Tribuo は特徴量を名前の順に並べるので、重みの位置は `getFeatureIDMap().getID(name)` で引く。`RegressionEvaluator` の MAE・RMSE・R² は自作と一致する |
 | 9 | Tribuo の `MeanStdDevTransformation` は Java から呼んでも不偏標準偏差（件数 − 1 で割る）を使い、自作の値に √((n−1)/n) を掛けると一致する（ADR 002 と同じ）。Shift_JIS の `weather.csv` を UTF-8 として読むと、Java の `Files.readAllLines` は `MalformedInputException` を投げる（Kotlin DataFrame は置換文字に置き換えて読み進める）。正規方程式は Tribuo の `DenseMatrix` のコレスキー分解で解き、`choleskyFactorization()` は `Optional` を返す |
 | 10 | `LinearSGDTrainer`（ロジスティック回帰の既定の設定）は 5 エポックで訓練 0.9238・テスト 0.8889、50・500・5000 エポックでは自作と同じ 0.9143・0.9111 で落ち着く。`RandomForestTrainer` は `minChildWeight` の既定値 5 では訓練データを分け切らず（0.9905）、1 にすると分け切る。内側の決定木の `fractionFeaturesInSplit` が 1 だとコンストラクターで例外になる。`RandomForestTrainer` の `tribuo-common-tree` は `tribuo-classification-tree` から推移的に入る。PMD は型のパターンの使わない変数を `UnusedLocalVariable` で指摘するので、Java 21 では `case Leaf ignored ->` と書く |
