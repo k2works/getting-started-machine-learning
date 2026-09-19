@@ -87,3 +87,22 @@ tasks.register<JavaExec>("runChapter") {
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("-Dfile.encoding=UTF-8", "-Dstdout.encoding=UTF-8")
 }
+
+// ソースに BOM の文字（U+FEFF）がそのまま入っていれば失敗する。BOM は \uFEFF のエスケープで書く
+tasks.register("verifyNoBomCharacter") {
+    group = "verification"
+    description = "ソースに BOM の文字がそのまま入っていないかを検査する"
+    val sources = fileTree("src") { include("**/*.java") }
+    inputs.files(sources)
+    doLast {
+        val bom = "\uFEFF"
+        val found = sources.files.filter { it.readText(Charsets.UTF_8).contains(bom) }
+        if (found.isNotEmpty()) {
+            throw GradleException("BOM の文字が入っているファイル: ${found.joinToString { it.name }}（\\uFEFF のエスケープで書く）")
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn("verifyNoBomCharacter")
+}
