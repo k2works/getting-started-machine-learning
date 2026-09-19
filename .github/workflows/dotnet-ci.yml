@@ -57,8 +57,15 @@ jobs:
       - name: Check formatting
         run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet fantomas --check ."
 
+      # ソリューションに含まれないスクリプト（tools/*.fsx）は別に指定する
       - name: Lint
-        run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet fsharplint lint MachineLearning.sln"
+        run: >-
+          nix develop .#dotnet --command bash -c
+          "cd apps/dotnet && dotnet fsharplint lint MachineLearning.sln && dotnet fsharplint lint tools/notebooks.fsx"
+
+      # Notebook の出力セルには学習データが含まれうるので、残っていれば失敗させる
+      - name: Check Notebook outputs
+        run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet fsi tools/notebooks.fsx verify"
 
       # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
       - name: Run tests with coverage
