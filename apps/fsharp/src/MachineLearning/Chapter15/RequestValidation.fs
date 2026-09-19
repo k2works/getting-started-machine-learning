@@ -1,3 +1,4 @@
+/// プレゼンテーション層。HTTP の本文（JSON）を検証して、ドメイン層の型にする
 module MachineLearning.Chapter15.RequestValidation
 
 open System.Text.Json

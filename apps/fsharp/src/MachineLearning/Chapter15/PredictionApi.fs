@@ -1,3 +1,4 @@
+/// プレゼンテーション層。Giraffe のエンドポイントと、HTTP の状態コード。ドメイン層とアプリケーション層を知り、インフラ層は知らない
 module MachineLearning.Chapter15.PredictionApi
 
 open System.Text.Encodings.Web

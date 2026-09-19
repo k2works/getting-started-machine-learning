@@ -1,3 +1,4 @@
+/// アプリケーション層。置き場からモデルを読み込んで予測するユースケースと、ヘルスチェック。ドメイン層だけを知る
 module MachineLearning.Chapter15.PredictionService
 
 open MachineLearning.Chapter15.Domain

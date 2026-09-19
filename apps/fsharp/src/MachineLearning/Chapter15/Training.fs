@@ -1,3 +1,4 @@
+/// インフラ層。第 7・8 章と同じ条件でモデルを学習し、ファイルに保存する
 module MachineLearning.Chapter15.Training
 
 open System.IO

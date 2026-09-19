@@ -1,3 +1,4 @@
+/// インフラ層。学習済みモデルのファイルへの保存・読み込みと、第 7・8 章のモデルをドメイン層の約束に合わせるアダプター
 module MachineLearning.Chapter15.FileModelStore
 
 open System.IO

@@ -1,3 +1,4 @@
+/// 起動。どの置き場（インフラ層）を使うかを決めて、プレゼンテーション層の API を組み立てて起動する
 module MachineLearning.Chapter15.Main
 
 open Microsoft.AspNetCore.Builder
