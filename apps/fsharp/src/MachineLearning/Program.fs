@@ -8,6 +8,7 @@ let chapters: Map<string, (string -> unit) -> unit> =
             "chapter02", Chapter02.Main.run
             "chapter03", Chapter03.Main.run
             "chapter07", Chapter07.Main.run
+            "chapter08", Chapter08.Main.run
         ]
 
 [<EntryPoint>]
