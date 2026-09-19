@@ -742,6 +742,8 @@ let scores =
 
 グラフの画像は、第 2 章と同じ理由で記事に載せていません。
 
+次の完成コードは、第 5 章で FSharpLint の設定を直したときに加えた `[<TailCall>]` 属性と、指摘を抑える理由のコメントを含みます（[第 5 章の 5.5 節](05-package-management-and-static-analysis.md)）。
+
 <details>
 <summary>この章の完成コード（src/MachineLearning/Chapter03/DecisionTree.fs）</summary>
 
@@ -775,7 +777,9 @@ let private splitsOf (feature: string) (x: Map<string, float> list) (t: 'L list)
     |> List.filter (fun i -> fst pairs[i - 1] <> fst pairs[i])
     |> List.map (fun i ->
         let left, right = List.splitAt i pairs
-        let impurityOf (part: (float * 'L) list) = float part.Length * gini (List.map snd part)
+
+        let impurityOf (part: (float * 'L) list) =
+            float part.Length * gini (List.map snd part)
 
         {
             Feature = feature
@@ -807,6 +811,8 @@ let majority (labels: 'L list) : 'L =
     labels |> List.countBy id |> List.maxBy snd |> fst
 
 /// 深さの上限（None なら制限なし）まで、分け方を選んで再帰的に木を作る
+// 左右の部分木を作ってから Node にまとめるので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec fit (maxDepth: int option) (x: Map<string, float> list) (t: 'L list) : Tree<'L> =
     let split = if maxDepth = Some 0 then None else bestSplit x t
 
@@ -816,9 +822,13 @@ let rec fit (maxDepth: int option) (x: Map<string, float> list) (t: 'L list) : T
         let goesLeft (row: Map<string, float>, _) = row[split.Feature] <= split.Threshold
         let left, right = List.zip x t |> List.partition goesLeft
         let childDepth = maxDepth |> Option.map (fun depth -> depth - 1)
-        let fitPart part = fit childDepth (List.map fst part) (List.map snd part)
+
+        let fitPart part =
+            fit childDepth (List.map fst part) (List.map snd part)
+
         Node(split, fitPart left, fitPart right)
 
+[<TailCall>]
 let rec predictOne (tree: Tree<'L>) (row: Map<string, float>) : 'L =
     match tree with
     | Leaf label -> label
@@ -831,8 +841,11 @@ let rec predictOne (tree: Tree<'L>) (row: Map<string, float>) : 'L =
 let predict (tree: Tree<'L>) (rows: Map<string, float> list) : 'L list = rows |> List.map (predictOne tree)
 
 /// 木を、条件ごとに字下げした行のリストにする
+// 左右の部分木の行を連結するので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec formatTree (tree: Tree<'L>) : string list =
-    let indent lines = lines |> List.map (fun line -> "  " + line)
+    let indent lines =
+        lines |> List.map (fun line -> "  " + line)
 
     match tree with
     | Leaf label -> [ string label ]
