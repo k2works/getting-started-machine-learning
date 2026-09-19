@@ -84,6 +84,8 @@ ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら�
 | 10 | `LinearSGDTrainer`（ロジスティック回帰の既定の設定）は 5 エポックで訓練 0.9238・テスト 0.8889、50・500・5000 エポックでは自作と同じ 0.9143・0.9111 で落ち着く。`RandomForestTrainer` は `minChildWeight` の既定値 5 では訓練データを分け切らず（0.9905）、1 にすると分け切る。内側の決定木の `fractionFeaturesInSplit` が 1 だとコンストラクターで例外になる。`RandomForestTrainer` の `tribuo-common-tree` は `tribuo-classification-tree` から推移的に入る。PMD は型のパターンの使わない変数を `UnusedLocalVariable` で指摘するので、Java 21 では `case Leaf ignored ->` と書く |
 | 11 | `LabelEvaluator` は正例を 1 件も予測しないと適合率・再現率・F 値を NaN ではなく 0.0 にし、混同行列の件数を double で返す。`RegressionEvaluator` に MSE は無いが、RMSE の 2 乗が自作の MSE と一致する。`KFoldSplitter` の余りの配り方は自作と一致し、1 回分の分割 `TrainTestFold` は `train`・`test` を public なフィールドで持つ。Error Prone は `DoubleStream` の戻り値を捨てると `ReturnValueIgnored` で止める |
 | 12 | `ElasticNetCDTrainer` の `l1Ratio` は 0 と 1e-13 を拒否し（`PropertyException`）、1e-12 を受け付ける。alpha を件数で割って渡すと、自作のリッジ回帰と係数・切片が 1e-6 以内で一致する。係数は `getWeights()` で取り出し、特徴量の番号は `getFeatureIDMap().get(name).getID()` で引く |
+| 13 | `DenseMatrix.eigenDecomposition()` は Java から呼んでも ADR 002 と同じく固有値を大きい順に返し、対称でない行列では空の `Optional` を返し、固有ベクトルの符号に規則は無い。分割も乱数も使わないので、寄与率・負荷量は Kotlin 版と一致した。PCA のモジュールが無いので自作を最終実装とした |
+| 14 | `KMeansTrainer` は初期中心を受け取れず、同じシードなら SSE は Kotlin 版と一致する。`KMeansModel.getCentroidVectors()` は `DenseVector[]` の配列を返す。自作の K-means では、空のクラスタの中心が 0.0 / 0 で NaN になる問題をテストで見つけて直した |
 
 ### 検討した代替案
 
