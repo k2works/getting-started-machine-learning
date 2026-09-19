@@ -380,15 +380,17 @@ let private sweep (a: float[][], v: float[][]) : float[][] * float[][] =
                 multiply (multiply (Array.transpose j) a) j, multiply v j)
         (a, v)
 
+/// 対角行列に近づくか、上限の回数に達するまで 1 巡を繰り返す
+[<TailCall>]
+let rec private diagonalize (sweepsLeft: int) (a: float[][], v: float[][]) : float[][] * float[][] =
+    if sweepsLeft = 0 || offDiagonal a <= Tolerance then
+        a, v
+    else
+        diagonalize (sweepsLeft - 1) (sweep (a, v))
+
 /// 対称行列の固有値と固有ベクトルを、固有値の大きい順に返す（ヤコビ法）。
 /// 回転で対角行列に近づけると、対角成分が固有値、回転を掛け合わせた行列の列が固有ベクトルになる
 let symmetricEigen (a: float[][]) : EigenPair list =
-    let rec diagonalize sweepsLeft (a, v) =
-        if sweepsLeft = 0 || offDiagonal a <= Tolerance then
-            a, v
-        else
-            diagonalize (sweepsLeft - 1) (sweep (a, v))
-
     let diagonal, vectors = diagonalize MaxSweeps (a, identity a.Length)
     let columns = Array.transpose vectors
 
@@ -404,6 +406,7 @@ let symmetricEigen (a: float[][]) : EigenPair list =
 - `[ for p in ... do for q in ... do p, q ]` は **リスト式** で、上三角の位置 `(p, q)` の組をすべて並べます
 - `List.fold` は、状態（ここでは行列 `a` と、回転を掛け合わせた `v` の組）を初期値から始めて、要素ごとに更新していきます。行列を書き換えずに、回転のたびに新しい行列を作って次に渡します。`(p, q)` 要素がすでに 0 なら、回転は不要なのでそのまま渡します（`theta` の計算で 0 で割るのも避けられます）
 - `let rec diagonalize` は、対角行列に近づくか上限に達するまで 1 巡を繰り返す再帰関数です。`MaxSweeps` は、万一収束しないときに無限に繰り返さないための上限です
+- `diagonalize` の再帰呼び出しは、関数の最後に行う **末尾呼び出し** です。`[<TailCall>]` 属性を付けると、末尾呼び出しになっていない再帰呼び出しをコンパイラが警告（FS3569）で知らせます。末尾再帰の関数は、何回繰り返してもスタックを使い切りません（属性の付け方は 13.15 節）
 - 行列は 15 × 15 程度なので、回転のたびに行列の積を 3 回計算しても、実行時間は問題になりません。速さより「`Jᵀ A J` を繰り返す」という式との対応の分かりやすさを選びました
 
 ```text
@@ -1541,7 +1544,6 @@ dotnet test --filter-namespace "MachineLearning.Tests.Chapter13"
 ```
 
 ```text
-========== Summary: 0 warnings ==========
 テストの実行の概要: 成功!
   合計: 26
   失敗: 0
@@ -1549,9 +1551,17 @@ dotnet test --filter-namespace "MachineLearning.Tests.Chapter13"
   スキップ済み: 0
 ```
 
-第 13 章のテストは 26 件です。データが無い環境では、実データのテスト 3 件がスキップされます。`--filter-namespace` は、xUnit v3 を Microsoft.Testing.Platform で動かしているときに使える絞り込みで、この章のテストだけを実行します。
+FSharpLint の警告は、この章のファイルでは 0 件です。第 13 章のテストは 26 件です。データが無い環境では、実データのテスト 3 件がスキップされます。`--filter-namespace` は、xUnit v3 を Microsoft.Testing.Platform で動かしているときに使える絞り込みで、この章のテストだけを実行します。
 
 Fantomas は、`CsvProvider` の長い型引数を複数行に分け、`NumericColumns` のリストを 1 行 1 要素に整形しました。
+
+FSharpLint は、最初に書いた `symmetricEigen` の中の `let rec diagonalize` に、規則 FL0085（EnsureTailCallDiagnosticsInRecursiveFunctions）の警告を出しました。
+
+```text
+The 'diagonalize' function has a "rec" keyword, but no [<TailCall>] attribute. Consider adding [<TailCall>] attribute to the function and <WarningsAsErrors>FS3569</WarningsAsErrors> property to project file (but only on .NET 8 and higher). NOTE: As this function is nested, you might need to convert it to private and non-nested (module-level or type-level) in case the version of F# you are using doesn't support adding attributes to nested functions.
+```
+
+`let rec` の関数には `[<TailCall>]` 属性を付けて、末尾再帰になっていることをコンパイラに確かめさせよ、という規則です。関数の中で定義した関数に属性を付けると、`error FS0010: 予期しない シンボル '[<' です 束縛内` でコンパイルできませんでした。警告のメッセージにあるとおり、`diagonalize` をモジュールの `private` な関数に移してから属性を付けています。プロジェクトは警告をエラーにしているので、末尾再帰でなくなれば FS3569 でビルドが止まります。
 
 <details>
 <summary>この章の完成コード（src/MachineLearning/Chapter13/Eigen.fs）</summary>
@@ -1627,15 +1637,17 @@ let private sweep (a: float[][], v: float[][]) : float[][] * float[][] =
                 multiply (multiply (Array.transpose j) a) j, multiply v j)
         (a, v)
 
+/// 対角行列に近づくか、上限の回数に達するまで 1 巡を繰り返す
+[<TailCall>]
+let rec private diagonalize (sweepsLeft: int) (a: float[][], v: float[][]) : float[][] * float[][] =
+    if sweepsLeft = 0 || offDiagonal a <= Tolerance then
+        a, v
+    else
+        diagonalize (sweepsLeft - 1) (sweep (a, v))
+
 /// 対称行列の固有値と固有ベクトルを、固有値の大きい順に返す（ヤコビ法）。
 /// 回転で対角行列に近づけると、対角成分が固有値、回転を掛け合わせた行列の列が固有ベクトルになる
 let symmetricEigen (a: float[][]) : EigenPair list =
-    let rec diagonalize sweepsLeft (a, v) =
-        if sweepsLeft = 0 || offDiagonal a <= Tolerance then
-            a, v
-        else
-            diagonalize (sweepsLeft - 1) (sweep (a, v))
-
     let diagonal, vectors = diagonalize MaxSweeps (a, identity a.Length)
     let columns = Array.transpose vectors
 

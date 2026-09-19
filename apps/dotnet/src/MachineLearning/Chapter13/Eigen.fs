@@ -68,15 +68,17 @@ let private sweep (a: float[][], v: float[][]) : float[][] * float[][] =
                 multiply (multiply (Array.transpose j) a) j, multiply v j)
         (a, v)
 
+/// 対角行列に近づくか、上限の回数に達するまで 1 巡を繰り返す
+[<TailCall>]
+let rec private diagonalize (sweepsLeft: int) (a: float[][], v: float[][]) : float[][] * float[][] =
+    if sweepsLeft = 0 || offDiagonal a <= Tolerance then
+        a, v
+    else
+        diagonalize (sweepsLeft - 1) (sweep (a, v))
+
 /// 対称行列の固有値と固有ベクトルを、固有値の大きい順に返す（ヤコビ法）。
 /// 回転で対角行列に近づけると、対角成分が固有値、回転を掛け合わせた行列の列が固有ベクトルになる
 let symmetricEigen (a: float[][]) : EigenPair list =
-    let rec diagonalize sweepsLeft (a, v) =
-        if sweepsLeft = 0 || offDiagonal a <= Tolerance then
-            a, v
-        else
-            diagonalize (sweepsLeft - 1) (sweep (a, v))
-
     let diagonal, vectors = diagonalize MaxSweeps (a, identity a.Length)
     let columns = Array.transpose vectors
 
