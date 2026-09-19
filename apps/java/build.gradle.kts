@@ -13,6 +13,11 @@ repositories {
 dependencies {
     errorprone(libs.errorprone.core)
     implementation(libs.tribuo.classification.tree)
+    implementation(libs.tribuo.classification.sgd)
+    implementation(libs.tribuo.regression.slm)
+    implementation(libs.tribuo.regression.sgd)
+    implementation(libs.tribuo.clustering.kmeans)
+    implementation(libs.tribuo.math)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)
