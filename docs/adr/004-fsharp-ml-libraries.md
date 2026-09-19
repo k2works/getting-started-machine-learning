@@ -111,3 +111,13 @@ Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジ�
 - ML.NET の FastTree を `numberOfTrees = 1`・`minimumExampleCountPerLeaf = 1`（既定は 10）・`numberOfLeaves = 2^深さ` にし、`OneVersusAll` で多クラスにした。iris のテストデータでは、深さ 2 で自作の決定木と 45 件すべて予測が一致し、深さ 1 では 32 件だった（OneVersusAll はクラスごとに木を作るので、葉が 2 つでも 3 クラスを予測できる）
 - ML.NET の特徴量ベクトルの長さは、属性（`VectorType`）ではなく `SchemaDefinition` で実行時に指定できる。これで特徴量の数によらないアダプターを書ける
 - .NET Interactive は F# のリストを表示すると内部の構造（`Head`・`Tail`）まで展開し、空のリストの `Head` の例外まで表示する。Notebook で表を見せるときは匿名レコードの配列にする
+
+### B20 で確かめたこと（2026-09-19）
+
+- `fsharplint.json` は既定の設定に足し合わされるのではなく、既定を置き換える。`ignoreFiles` だけを書いた設定では 97 ルールすべてが無効になり、「0 warnings」は何も検査していない結果だった。FSharpLint 0.27.0 の既定の設定を写し、`ignoreFiles` に `obj/` を加えて 42 ルールを有効にした。ツールの版を上げたら写し直す
+- FSharpLint 0.27.0 は警告があると終了コード 127 を返す
+- 既定のルールの FL0085 は `let rec` に `[<TailCall>]` を求める。末尾再帰でない関数に付けるとコンパイラの FS3569 になり、`TreatWarningsAsErrors` でエラーになるので、理由をコメントに書いて行単位で FL0085 を抑える
+- coverlet（coverlet.MTP）で `--coverlet-include` を付けないと、テストは成功（終了コード 0）するのにカバレッジのファイルが作られず、メッセージも出ない
+- シード付きの `System.Random` の乱数列は .NET 8.0.22・9.0.11・10.0.1 で一致した（`Random 0` の `Next()` の 3 回が `[1559595546; 1755192844; 1649316166]`）。シードを渡したときは互換用の実装が使われるが、公式ドキュメントは版をまたいだ一致を約束していない
+- Notebook の出力の検査・除去は、Python の nbstripout の代わりに F# スクリプト `tools/notebooks.fsx`（`dotnet fsi` で `verify`・`strip`・`execute`）で行い、CI と `apps:check:fsharp` に組み込んだ
+- 実装の場所を `apps/dotnet/` から `apps/fsharp/` に移し、CI を `fsharp-ci.yml` に改めた。Nix の環境 `.#dotnet` は .NET SDK の環境として C# 版と共用する

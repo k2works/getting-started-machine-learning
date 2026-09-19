@@ -1,6 +1,10 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Update**: F# 版 B20 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B20 で確かめたことを追記。実装の場所を `apps/fsharp/` に改めた。
+* **Creation**: [F# 第 6 章](/article/getting-start-ml/fsharp/06-task-runner-and-ci-cd.md) を新規作成。
+* **Creation**: [F# 第 5 章](/article/getting-start-ml/fsharp/05-package-management-and-static-analysis.md) を新規作成。
+* **Creation**: [F# 第 4 章](/article/getting-start-ml/fsharp/04-version-control-and-data-management.md) を新規作成。
 * **Update**: F# 版 B19 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B19 で確かめたことを追記。
 * **Creation**: [F# 第 3 章](/article/getting-start-ml/fsharp/03-decision-tree-and-obvious-implementation.md) を新規作成。
 * **Creation**: [F# 第 2 章](/article/getting-start-ml/fsharp/02-data-preprocessing-and-triangulation.md) を新規作成。
