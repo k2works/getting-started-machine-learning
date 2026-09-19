@@ -86,6 +86,7 @@ ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら�
 | 12 | `ElasticNetCDTrainer` の `l1Ratio` は 0 と 1e-13 を拒否し（`PropertyException`）、1e-12 を受け付ける。alpha を件数で割って渡すと、自作のリッジ回帰と係数・切片が 1e-6 以内で一致する。係数は `getWeights()` で取り出し、特徴量の番号は `getFeatureIDMap().get(name).getID()` で引く |
 | 13 | `DenseMatrix.eigenDecomposition()` は Java から呼んでも ADR 002 と同じく固有値を大きい順に返し、対称でない行列では空の `Optional` を返し、固有ベクトルの符号に規則は無い。分割も乱数も使わないので、寄与率・負荷量は Kotlin 版と一致した。PCA のモジュールが無いので自作を最終実装とした |
 | 14 | `KMeansTrainer` は初期中心を受け取れず、同じシードなら SSE は Kotlin 版と一致する。`KMeansModel.getCentroidVectors()` は `DenseVector[]` の配列を返す。自作の K-means では、空のクラスタの中心が 0.0 / 0 で NaN になる問題をテストで見つけて直した |
+| 15 | Javalin 7 の `ctx.bodyAsClass` は、JSON が読めないときや型が合わないときに `BadRequestResponse` に包まず、Jackson の例外（`JsonEOFException`・`InvalidFormatException` など）をそのまま投げる。`BadRequestResponse` にハンドラーを登録すると 500 になるので、`JacksonException` に登録して 422 にする。422 の定数名は `HttpStatus.UNPROCESSABLE_CONTENT`。PMD の `AvoidUsingHardCodedIP` を受けて、待ち受けるアドレスは `InetAddress.getLoopbackAddress()` から求める。Javalin 7.2.3 は Jackson 2 系（`com.fasterxml.jackson`）の `JavalinJackson` と Jackson 3 系の `JavalinJackson3` の両方を持ち、Jackson は任意の依存なので明示して加える |
 
 ### 検討した代替案
 

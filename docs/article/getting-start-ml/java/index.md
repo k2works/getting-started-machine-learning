@@ -50,8 +50,6 @@ Windows の PowerShell では `./gradlew` の代わりに `.\gradlew.bat` を使
 
 ## 章構成
 
-Java 版は執筆中です。書き終えた章から順に公開します。
-
 ### 第 1 部: 機械学習と TDD の基本サイクル
 
 | 章 | テーマ |
@@ -90,7 +88,7 @@ Java 版は執筆中です。書き終えた章から順に公開します。
 |----|--------|
 | [第 13 章](13-principal-component-analysis.md) | 主成分分析による次元削減 |
 | [第 14 章](14-k-means-clustering.md) | K-means によるクラスタリング |
-| 第 15 章 | 機械学習 API とモジュール設計 |
+| [第 15 章](15-machine-learning-api-and-module-design.md) | 機械学習 API とモジュール設計 |
 
 ### 付録
 

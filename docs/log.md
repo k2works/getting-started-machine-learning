@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Creation**: Java 版の第 2〜15 章を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[Java 版トップ](/article/getting-start-ml/java/index.md)・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B25〜B28 の完了と Java 版の章別の焦点を反映し、[ADR 005](/adr/005-java-ml-libraries.md) に各章で確かめた Tribuo・Javalin の振る舞いを追記。
 * **Creation**: [Java 版トップ](/article/getting-start-ml/java/index.md)・[第 1 章](/article/getting-start-ml/java/01-machine-learning-and-first-test.md)・[ADR 005](/adr/005-java-ml-libraries.md) を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md) と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B24 の完了を反映し、[執筆ワークフロー](/article/getting-start-ml/workflow.md) の同期チェックリストに BOM の文字の混入の検査を追加。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に Java 版執筆計画と B24 のステップ計画を追加し、承認を記録。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に第 2 波（Java・C#・Scala・Go・Rust）の執筆計画と Bolt 計画（B24〜B49）を追加し、承認を記録。

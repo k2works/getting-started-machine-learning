@@ -804,10 +804,10 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 | Bolt | 言語 | 内容 | 完了条件 |
 |------|------|------|---------|
 | B24 ウォーキングスケルトン（完了） | Java | Nix の `java` 環境の確認、`apps/java/` の雛形、ADR 005、第 1 章の実装と記事、Java 版トップ、nav、Java CI | 第 1 章のテストが CI でグリーン。記事がサイトで表示される。静的解析のルールが有効になっている |
-| B25 | Java | 第 2〜3 章 | 自作の決定木とライブラリの結果を並べて載せられる |
-| B26 | Java | 第 4〜6 章 | ビルド・静的解析・カバレッジ・CI が記事どおりに動く |
-| B27 | Java | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
-| B28 | Java | 第 15 章 | Java 版の全章完了。Python 版と節構成がそろっている |
+| B25（完了） | Java | 第 2〜3 章 | 自作の決定木とライブラリの結果を並べて載せられる |
+| B26（完了） | Java | 第 4〜6 章 | ビルド・静的解析・カバレッジ・CI が記事どおりに動く |
+| B27（完了） | Java | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
+| B28（完了） | Java | 第 15 章 | Java 版の全章完了。Python 版と節構成がそろっている |
 | B29〜B33 | C# | B24〜B28 と同じ区切り（ADR 006、`apps/dotnet/`） | C# 版の全章完了 |
 | B34〜B38 | Scala | 同上（ADR 007、`apps/scala/`） | Scala 版の全章完了 |
 | B39〜B43 | Go | 同上（ADR 008、`apps/go/`） | Go 版の全章完了 |
@@ -885,10 +885,17 @@ Tribuo の各アルゴリズムの振る舞いは Kotlin 版で確かめた ADR 
 | 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`build/` の除外 | — |
 | 5 | パッケージ管理と静的解析 | Gradle とバージョンカタログ、依存の固定、Spotless・Error Prone・PMD、JaCoCo | — |
 | 6 | タスクランナーと CI/CD | Gradle のタスクと Gulp の分担、GitHub Actions と Nix | — |
-| 7〜14 | Kotlin 版と同じテーマ | Kotlin 版の実装を Stream API と record で書き直し、違いを節ごとに示す | ADR 002 で Kotlin 版が決めた範囲をもとに、ADR 005 で確かめる |
+| 7 | 線形回帰による数値予測 | `double[][]` を包む不変の `Matrix` と正規方程式、`LinkedHashMap` で列の順を保つ係数 | Tribuo の `SLMTrainer(true)`・`LARSTrainer` |
+| 8 | 実践的な分類と前処理パイプライン | `Transformer` と `FittedTransformer` のインターフェースによるパイプライン、Java のシリアライズと `ObjectInputFilter` の許可リスト | Tribuo の CART（重み付けは自作） |
+| 9 | 特徴量エンジニアリング | `Standardizer` の record、TSV と Shift_JIS の読み込み（`MalformedInputException`） | Tribuo の `MeanStdDevTransformation` |
+| 10 | ロジスティック回帰とアンサンブル学習 | モデル共通の `Classifier` インターフェースとアダプター、第 3 章の決定木を再利用したランダムフォレスト | Tribuo の `LogisticRegressionTrainer`・`RandomForestTrainer` |
+| 11 | 評価指標と交差検証 | 評価関数を `java.util.function` の関数型インターフェースで渡す、K 分割交差検証 | Tribuo の評価器・`KFoldSplitter` |
+| 12 | 正則化とモデル選択 | 閉形式のリッジ回帰（第 7 章の `Matrix` の `solve`）、座標降下法のラッソ回帰 | Tribuo の `ElasticNetCDTrainer` |
+| 13 | 主成分分析による次元削減 | 分散共分散行列と Tribuo の固有値分解、固有ベクトルの符号 | なし（Tribuo に PCA が無い） |
+| 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、空のクラスタの扱い、エルボー法 | Tribuo の `KMeansTrainer` |
 | 15 | 機械学習 API とモジュール設計 | Javalin、パッケージによる層の分離、統合テスト | — |
 
-第 7〜14 章の Java での焦点は、B26 の完了時に第 1〜6 章の実績を踏まえてこの表に書き足す。
+第 7〜14 章の Java での焦点は、各章の実装を終えた 2026-09-20 に書き足した。
 
 ### B24 のステップ計画（Java のウォーキングスケルトン）
 
@@ -975,6 +982,16 @@ Kotlin 版は Kotlin DataFrame の表（列名で値を引く）でデータを�
 - 各サブエージェントは隔離した worktree で作業し、章ごとにコミットする。利用上限で止まっても親が引き継げるように、実装と記事は章ごとに分けてコミットする
 - 依存（Tribuo の各モジュール）は親が先に加えた。サブエージェントは `build.gradle.kts`・`libs.versions.toml`・`mkdocs.yml`・シリーズ索引・Java 版トップ・執筆計画・`docs/log.md` を変更せず、必要なら報告に書く。ADR 005 に書くべき結果も報告に書き、親が書き足す
 - 親は章ごとに取り込み、`./gradlew check`（データあり）・データなしのテスト・学習データの行の混入・BOM の文字・絶対パスを検査してから記事に OKF を適用する
+
+### Java 版の完了（2026-09-20）
+
+B25〜B28 は 2026-09-20 に完了し、Java 版の全 15 章がそろった。親が第 2〜3 章と第 15 章を実装し、第 2〜3 章の記事・第 4〜6 章・第 7〜14 章（5 つに分けて）・第 15 章の記事を worktree のサブエージェントで並行して書いた。第 11〜14 章は第 7・9 章の取り込み後に着手した。親は章ごとに取り込み、`./gradlew check`（データあり）・データなしのテスト（実データのテスト 70 件がスキップされる）・学習データの行の混入・BOM の文字・絶対パスを検査した。各章で Tribuo・Javalin について確かめた結果は ADR 005 の「各章で確かめた結果」に記録した。
+
+- B25 の着手時に、`Row` の中身を `Map<String, Double>` から、セルの文字列を持つ `Map<String, String>` に改めた（人の判断による）。正解ラベルや第 8 章の文字列の特徴量を持てないため
+- `Features` は `double[]` を持つので、Error Prone の `ArrayRecordComponent` に従い record ではなくクラスにした
+- 分割に `java.util.Random` を使うので、訓練データとテストデータの行は Kotlin 版と一致しない。その結果、第 9 章の交互作用の項・第 12 章のリッジ回帰・第 8 章のクラスの重み付けの結論が Kotlin 版と分かれた章がある。記事ではそれを、分割しだいで結論が変わる例として扱った
+- 第 15 章の統合テストが、6 つのサブエージェントが同時に Gradle を動かしていた間に 1 回だけ 503 のはずが 400 で失敗した。その後の単独実行 3 回と全体の `check` 5 回では再現せず、原因は分かっていない
+- `verifyNoBomCharacter` タスクを `check` に加え、ソースに BOM の文字がそのまま入ると失敗するようにした。Kotlin CI のキャッシュのキーの接頭辞を `gradle-kotlin-` にして、Java CI と分けた
 
 ## リスクと対応
 
