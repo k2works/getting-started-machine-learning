@@ -69,3 +69,11 @@
 | `gulp apps:help` | タスクの一覧 |
 
 `npm run setup`（= `gulp apps:setup`）・`npm run check`（= `gulp apps:check`）・`npm run data:setup`・`npm run data:check` でも呼び出せます。
+
+`gulp apps:check:fsharp` は、`.NET CI`（`.github/workflows/dotnet-ci.yml`）と同じ順に、整形の検査（Fantomas）・静的解析（FSharpLint。ソリューションと `tools/notebooks.fsx`）・Notebook の出力セルの検査・テストを実行します。F# 版の Notebook（`apps/dotnet/notebooks/`）は、`apps/dotnet` で次のコマンドを使って扱います。
+
+| コマンド | 概要 |
+| :--- | :--- |
+| `dotnet fsi tools/notebooks.fsx verify` | 出力セル・実行番号・実行の記録が残っている Notebook があれば非ゼロ終了（CI と `gulp apps:check:fsharp` で実行） |
+| `dotnet fsi tools/notebooks.fsx strip` | 出力セルを消す（コミットの前に実行） |
+| `dotnet fsi tools/notebooks.fsx execute` | Notebook を画面なしで実行し、結果を `bin/notebooks/` に書き出す。学習データ・Jupyter・.NET Interactive のカーネルが必要（`jupyter` が PATH に無ければ環境変数 `JUPYTER` で指定）。CI では実行しない |
