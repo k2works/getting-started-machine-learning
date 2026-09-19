@@ -993,6 +993,75 @@ B25〜B28 は 2026-09-20 に完了し、Java 版の全 15 章がそろった。�
 - 第 15 章の統合テストが、6 つのサブエージェントが同時に Gradle を動かしていた間に 1 回だけ 503 のはずが 400 で失敗した。その後の単独実行 3 回と全体の `check` 5 回では再現せず、原因は分かっていない
 - `verifyNoBomCharacter` タスクを `check` に加え、ソースに BOM の文字がそのまま入ると失敗するようにした。Kotlin CI のキャッシュのキーの接頭辞を `gradle-kotlin-` にして、Java CI と分けた
 
+## C# 版執筆計画
+
+C# は第 2 波の 2 番目の言語で、F# 版の実装を対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。F# 版と同じ .NET・ML.NET・xUnit v3 を使うので、違いは言語の書き方と API の見え方に絞られる。対比の軸は次の 3 つとする。
+
+- **型**: F# の判別共用体とパターンマッチに対し、C# は record と sealed interface、`switch` 式のパターンマッチで表す。網羅性の検査の効き方（C# は既定では警告）を比べる。欠損値は F# の `option` に対し null 許容参照型（NRT）で表す
+- **データの表現**: F# の型プロバイダ（`CsvProvider`）に対し、C# は record のリストと LINQ で表す。Java 版と同じく、列名で引く自作の表を使うかは B29 で決める
+- **ライブラリ**: ML.NET は C# 向けの API（`IDataView`・可変なクラス・属性による列の対応づけ）なので、F# 版が書いた「型の橋渡し」が C# では不要になる箇所を示す
+
+### 確認した事実（2026-09-20 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| ローカル環境 | .NET SDK は 8.0.416・9.0.308・10.0.100。F# 版の `global.json` は 10.0.101 を `rollForward: latestPatch` で指定しているので、手元の 10.0.100 では解決できない（F# 版は Nix の 10.0.101 で動かしている） | `dotnet --list-sdks`、`global.json` |
+| Nix 環境 | `nix develop .#dotnet` の .NET SDK は 10.0.101。Java 版と同じく CI もこの環境で動かす | `dotnet --version` |
+| F# 版の構成 | ソリューション、`Directory.Build.props`（`TargetFramework` net10.0、`TreatWarningsAsErrors`、`RestorePackagesWithLockFile`）、`Directory.Packages.props`（中央パッケージ管理）、`.config/dotnet-tools.json`（fantomas・dotnet-fsharplint）、`.editorconfig` | ファイルを読んだ |
+| ライブラリの最新版 | Microsoft.ML 5.0.0、Microsoft.Data.Analysis 0.23.0（0.24.0 はプレビュー）、xunit.v3 4.0.1、coverlet.MTP 10.0.1、Roslynator.Analyzers 5.0.0、SonarAnalyzer.CSharp 10.34.0.3385、Microsoft.CodeAnalysis.NetAnalyzers 10.0.401、StyleCop.Analyzers は安定版が 1.1.118 で 1.2.0 はベータ | NuGet |
+| 実装の置き場所 | `apps/dotnet/` は空になった（F# 版を `apps/fsharp/` に移した後に残っていたビルドの中間ファイルは、Git の管理外のまま消えた） | ファイルを確認 |
+
+ライセンス、Microsoft.Data.Analysis の保守状況（0.x のまま）、アナライザーの指摘の量、ML.NET を C# から使うときの癖は未検証。B29 の ADR 006 で確かめてから確定する。
+
+### ライブラリ方針（ADR 006 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| 言語・実行環境 | C#（.NET SDK 10.0.101、`net10.0`）。`global.json` で版を固定する | F# 版と同じ環境にそろえる | .NET 8 |
+| テスト・カバレッジ | xUnit v3（Microsoft.Testing.Platform）+ coverlet.MTP | F# 版と同じ | NUnit、MSTest |
+| 整形 | `dotnet format`（SDK 同梱）と `.editorconfig` | 追加の依存が要らない | CSharpier |
+| 静的解析 | .NET アナライザー（`AnalysisMode: All`）+ 警告をエラーにする（`TreatWarningsAsErrors`）。追加のアナライザーの要否は B29 で判断する | SDK 同梱で、C# の標準的な解析 | Roslynator、SonarAnalyzer.CSharp、StyleCop（安定版が 1.1.118 で古い） |
+| データの表現 | record のリストと LINQ。列名で引く表が要るかは B29 で決める | Java 版と同じ考え方で、ライブラリを増やさない | Microsoft.Data.Analysis の `DataFrame`（0.x） |
+| 乱数 | `System.Random(seed)` | F# 版と同じ。分割の結果も F# 版と一致するはず（B29 で確かめる） | 自作 |
+| 機械学習 | ML.NET（Microsoft.ML・Microsoft.ML.FastTree） | .NET の標準的な機械学習ライブラリ。F# 版で癖を確かめてある（ADR 004） | 自作のみ |
+| API | ASP.NET Core Minimal API と `Microsoft.AspNetCore.Mvc.Testing`（または `TestHost`） | 「言語ごとのバリエーション」で挙げた候補 | Giraffe（F# 版） |
+
+### 前提整備（C#）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `nix develop .#dotnet` で .NET SDK 10.0.101 が使えることを CI で確かめる（F# 版と共用） | 未着手 |
+| アプリ雛形 | `apps/dotnet/`（ソリューション、C# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props`・`global.json`・`.editorconfig`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは xUnit v3 の `Assert.SkipUnless` でデータが無ければスキップする | 未着手 |
+| 静的解析 | `dotnet format --verify-no-changes`・アナライザー・`TreatWarningsAsErrors` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
+| ライブラリ選定 | ADR 006（C# 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/csharp-ci.yml`（Nix → `dotnet restore --locked-mode` → 整形の確認・ビルド・テスト・カバレッジの表示）。NuGet のキャッシュを使う | 未着手 |
+| タスク | `ops/scripts/apps.js` に `csharp` を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 未着手 |
+
+### B29 のステップ計画（C# のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：ライセンス、Microsoft.Data.Analysis の保守状況、アナライザーの選定（SDK 同梱だけで足りるか）、`global.json` の版をどうするか（手元の 10.0.100 と Nix の 10.0.101 の差の扱い）。結果を本節の「確認した事実」に書き足す | 「未検証」の項目が無くなる |
+| 2 | ADR 006 を書く（章ごとの置き換えの範囲は ADR 004（F# 版）を起点にする） | ADR 006 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/dotnet/` の雛形：ソリューション、ライブラリとテストのプロジェクト、中央パッケージ管理、`packages.lock.json`、最初のテストが 1 本通る | 手元と `nix develop .#dotnet` の両方で `dotnet test` が成功する |
+| 4 | 整形・静的解析・カバレッジ：`dotnet format`・アナライザー・`TreatWarningsAsErrors`・coverlet を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・F# 版の教訓） | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：Python 版・Java 版と同じ TODO リストを TDD で進める。実データのテストは `Assert.SkipUnless` でスキップする | データありで全テストが通り、データなしではスキップされる。正解率が F# 版・Java 版と一致する |
+| 6 | 記事：第 1 章、C# 版トップ（`csharp/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/csharp-ci.yml`、`ops/scripts/apps.js` への `csharp` の追加 | push 後に C# CI がグリーン。`apps:check:csharp` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（C#）
+
+次の点を確認した（2026-09-20 承認）。
+
+- [x] C# 版の対比の軸（型・データの表現・ライブラリ）と、データフレームのライブラリ（Microsoft.Data.Analysis）を使わずに record と LINQ で表すこと
+- [x] ライブラリの第一候補（xUnit v3・coverlet.MTP・`dotnet format`・.NET アナライザー・ML.NET・ASP.NET Core Minimal API）を ADR 006 で確定すること
+- [x] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/csharp/` に置き、.NET SDK の版を F# 版にそろえること
+- [x] B29 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
