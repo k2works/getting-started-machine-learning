@@ -715,7 +715,7 @@ TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関�
 | Bolt | 内容 | 完了条件 |
 |------|------|---------|
 | B18 ウォーキングスケルトン（完了） | Nix の `dotnet` 環境の確認、`apps/dotnet/` の雛形、ADR 004、第 1 章の実装と記事、F# 版トップ、nav、.NET CI、Polyglot Notebooks の動作確認（Plotly.NET のグラフを 1 つ表示する） | `apps/dotnet/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される。Polyglot Notebooks が手元で動く |
-| B19 | 第 2〜3 章と Notebook（型プロバイダ、乱数、ML.NET の導入） | 自作の決定木とライブラリの結果を並べて載せられる。Notebook の可視化が記事と一致する |
+| B19（完了） | 第 2〜3 章と Notebook（型プロバイダ、乱数、ML.NET の導入） | 自作の決定木とライブラリの結果を並べて載せられる。Notebook の可視化が記事と一致する |
 | B20 | 第 4〜6 章 | NuGet・Fantomas・FSharpLint・カバレッジ・CI・Notebook の出力の除去が記事どおりに動く |
 | B21 | 第 7〜14 章と Notebook（依存関係の無い章を並行して進める） | 各章のテストが通り、記事と Notebook がそろっている |
 | B22 | 第 15 章 | F# 版の全章完了。Python 版と節構成がそろっている |
@@ -730,6 +730,8 @@ TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関�
 - [x] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/fsharp/` に置くこと
 - [x] Bolt を B18〜B22 の 5 つにまとめ、B21 で第 7〜14 章を並行して進めること
 - [x] B18（ウォーキングスケルトン）の範囲
+
+B19（第 2〜3 章と Notebook）は 2026-09-19 に完了した。特徴量は列名から値への `Map<string, float option>` で表し、型プロバイダの型は読み込みの入り口だけで使う。`CsvProvider` は `Schema` を指定しないと小数の列を `decimal`、空欄のある列を `string` と推論するので、`Schema` で `float option` を指定した。第 3 章は 1 本だけの FastTree を `OneVersusAll` で多クラスにして突き合わせ、深さ 2 でテストデータの予測が 45 件すべて一致した。Notebook の表示とライブラリの癖は ADR 004 に記録した。
 
 ## リスクと対応
 

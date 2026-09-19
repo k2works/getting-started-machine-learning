@@ -1,6 +1,8 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Update**: F# 版 B19 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B19 で確かめたことを追記。
+* **Creation**: [F# 第 3 章](/article/getting-start-ml/fsharp/03-decision-tree-and-obvious-implementation.md) を新規作成。
 * **Creation**: [F# 第 2 章](/article/getting-start-ml/fsharp/02-data-preprocessing-and-triangulation.md) を新規作成。
 
 ## 2026-09-18

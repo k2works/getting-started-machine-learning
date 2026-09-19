@@ -104,3 +104,10 @@ Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジ�
 - 著者: claude-code/claude-opus-5
 - 確認に使った使い捨てのプロジェクトと Notebook はスクラッチパッドに置き、リポジトリには含めていない
 - Giraffe と ASP.NET Core の TestHost による統合テストは、第 15 章（B22）で確かめる
+
+### B19 で確かめたこと（2026-09-19）
+
+- FSharp.Data の `CsvProvider` は、`Schema` を指定しないと小数の列を `decimal`、空欄のある列を `string`（空欄は `""`）と推論する。`Schema="float option,..."` で空欄を `None` にできる。日本語の列名はそのままプロパティ名になる
+- ML.NET の FastTree を `numberOfTrees = 1`・`minimumExampleCountPerLeaf = 1`（既定は 10）・`numberOfLeaves = 2^深さ` にし、`OneVersusAll` で多クラスにした。iris のテストデータでは、深さ 2 で自作の決定木と 45 件すべて予測が一致し、深さ 1 では 32 件だった（OneVersusAll はクラスごとに木を作るので、葉が 2 つでも 3 クラスを予測できる）
+- ML.NET の特徴量ベクトルの長さは、属性（`VectorType`）ではなく `SchemaDefinition` で実行時に指定できる。これで特徴量の数によらないアダプターを書ける
+- .NET Interactive は F# のリストを表示すると内部の構造（`Head`・`Tail`）まで展開し、空のリストの `Head` の例外まで表示する。Notebook で表を見せるときは匿名レコードの配列にする
