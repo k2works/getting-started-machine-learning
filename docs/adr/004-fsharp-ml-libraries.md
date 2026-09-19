@@ -121,3 +121,19 @@ Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジ�
 - シード付きの `System.Random` の乱数列は .NET 8.0.22・9.0.11・10.0.1 で一致した（`Random 0` の `Next()` の 3 回が `[1559595546; 1755192844; 1649316166]`）。シードを渡したときは互換用の実装が使われるが、公式ドキュメントは版をまたいだ一致を約束していない
 - Notebook の出力の検査・除去は、Python の nbstripout の代わりに F# スクリプト `tools/notebooks.fsx`（`dotnet fsi` で `verify`・`strip`・`execute`）で行い、CI と `apps:check:fsharp` に組み込んだ
 - 実装の場所を `apps/dotnet/` から `apps/fsharp/` に移し、CI を `fsharp-ci.yml` に改めた。Nix の環境 `.#dotnet` は .NET SDK の環境として C# 版と共用する
+
+### B21・B22 で確かめたこと（2026-09-19）
+
+- FSharp.Stats 0.6.0 の `LinearRegression.fit` は、行を 1 件のデータとする行列を受け取り、切片・係数の順のベクトルを返す。第 7 章の係数と決定係数の突き合わせに使えた
+- FSharp.Stats 0.6.0 の `LinearRegression.OLS.Linear.RidgeRegression.fit` は、罰則の行列の大きさを特徴量の数にしても切片の分を足しても、次元が合わない例外を投げて使えなかった。第 12 章のリッジ回帰は ML.NET の SDCA と突き合わせた
+- ML.NET の SDCA（回帰）の目的関数は「(1/n) × 誤差の二乗和 + (l2 / 2) × 係数の二乗和」で、自作の「誤差の二乗和 + alpha × 係数の二乗和」とは `l2 = 2 × alpha / n` で一致する（`Shuffle = false`・1 スレッド・収束の判定を厳しくして、小数第 3 位まで一致）
+- ML.NET のクラスの重みは、行の重み（`ExampleWeightColumnName`）で表せた（第 8 章）
+- ML.NET の `LbfgsMaximumEntropy` などの学習器は、F# からは `IEstimator<ITransformer>` として渡せない（F# の型検査は共変性を使わない）。第 10 章では、学習器を `:> IEstimator<_>` でインターフェースの型に明示的にアップキャストして渡した
+- ML.NET の `NormalizeMeanVariance` は、`fixZero = false` にすると自作の標準化（母標準偏差）と小数第 5 位まで一致した（第 9 章）
+- ML.NET の評価（`BinaryClassification.EvaluateNonCalibrated`・`Regression.Evaluate`）は、同じ正解と予測を渡すと自作の適合率・再現率・F 値・MAE・RMSE と一致した。`CrossValidate` は分け方を ML.NET が決めるので、交差検証の平均は突き合わせていない（第 11 章）
+- FSharp.Stats の `IterativeClustering.kmeans` は初期中心を作る関数を受け取り、同じ初期中心なら自作の K-means と 100 通りすべてで割り当てと SSE が一致した。クラスタ番号は 1 から始まる。距離の関数は `FSharp.Stats.DistanceMetrics` を使う（`FSharp.Stats.ML.DistanceMetrics` は非推奨で FS0044 になる）。ML.NET の K-means（k-means++）は初期中心を渡せないので、SSE を比べるだけにした（第 14 章）
+- 型プロバイダは、サンプルに空欄の無い列に空欄があると読めない（`RAD is missing`）。`AssumeMissingValues=true` で、どの列にも空欄がありうるものとして型を作らせる（第 12 章）。列の多い CSV は型を持たない `CsvFile` で読んだ（第 9 章）
+- Shift_JIS の CSV は、`Encoding.RegisterProvider CodePagesEncodingProvider.Instance` で登録してから読む（第 9 章）
+- System.Text.Json は F# のレコード・`option`・リスト・文字列がキーの `Map` を読み書きできるが、判別共用体と、組がキーの `Map` は扱えない（第 8 章）
+- Giraffe 8.3.0 と `Microsoft.AspNetCore.TestHost` 10.0.12 は .NET 10.0.1 の実行環境で動いた。TestHost のクライアントは同期の `Send` に対応しない（`NotSupportedException`）。System.Text.Json は既定で日本語をエスケープするので、`JavaScriptEncoder.Create(UnicodeRanges.All)` を指定した（第 15 章）
+- F# の匿名レコードはフィールドを名前の順に並べるので、JSON の項目の順を決めたいときは名前付きのレコードにする（第 15 章）

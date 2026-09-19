@@ -1,6 +1,16 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Update**: F# 版 B21・B22 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B21・B22 で確かめたことを追記。F# 版の全 15 章がそろった。
+* **Creation**: [F# 第 15 章](/article/getting-start-ml/fsharp/15-machine-learning-api-and-module-design.md) を新規作成。
+* **Creation**: [F# 第 14 章](/article/getting-start-ml/fsharp/14-k-means-clustering.md) を新規作成。
+* **Creation**: [F# 第 13 章](/article/getting-start-ml/fsharp/13-principal-component-analysis.md) を新規作成。
+* **Creation**: [F# 第 12 章](/article/getting-start-ml/fsharp/12-regularization-and-model-selection.md) を新規作成。
+* **Creation**: [F# 第 11 章](/article/getting-start-ml/fsharp/11-evaluation-metrics-and-cross-validation.md) を新規作成。
+* **Creation**: [F# 第 10 章](/article/getting-start-ml/fsharp/10-logistic-regression-and-ensemble.md) を新規作成。
+* **Creation**: [F# 第 9 章](/article/getting-start-ml/fsharp/09-feature-engineering.md) を新規作成。
+* **Creation**: [F# 第 8 章](/article/getting-start-ml/fsharp/08-classification-and-preprocessing-pipeline.md) を新規作成。
+* **Creation**: [F# 第 7 章](/article/getting-start-ml/fsharp/07-linear-regression.md) を新規作成。
 * **Update**: F# 版 B20 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B20 で確かめたことを追記。実装の場所を `apps/fsharp/` に改めた。
 * **Creation**: [F# 第 6 章](/article/getting-start-ml/fsharp/06-task-runner-and-ci-cd.md) を新規作成。
 * **Creation**: [F# 第 5 章](/article/getting-start-ml/fsharp/05-package-management-and-static-analysis.md) を新規作成。
