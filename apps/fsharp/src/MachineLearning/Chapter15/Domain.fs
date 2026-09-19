@@ -46,6 +46,8 @@ type SurvivalPrediction = { Survived: bool }
 type PredictionError =
     /// 学習済みモデルが見つからない。持つのはモデルの名前だけで、ファイルのパスは持たない
     | ModelNotFound of model: string
+    /// 学習済みモデルのファイルはあるが、読み込めない（壊れている・形が違う）
+    | ModelUnreadable of model: string
 
 /// 映画の特徴量から興行収入を予測するモデル
 type SalesModel = Movie -> float

@@ -22,3 +22,4 @@ let health (store: ModelStore) : Health =
 let describe (error: PredictionError) : string =
     match error with
     | ModelNotFound model -> $"学習済みモデル {model} が見つかりません"
+    | ModelUnreadable model -> $"学習済みモデル {model} を読み込めません"
