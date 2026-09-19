@@ -2314,13 +2314,85 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#b25-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B25 のステップ計画（第 2〜3 章）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="B25 のステップ計画（第 2〜3 章）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データの表し方（第 2 章以降のすべての章に効く判断）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乱数と数値
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        承認が必要な事項（B25）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b25b28-2026-09-20java" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B25〜B28 の進め方（2026-09-20、目標「Java 執筆完了」による）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_21" class="md-nav__link">
+  <a href="#_23" class="md-nav__link">
     <span class="md-ellipsis">
       
         リスクと対応
@@ -2331,7 +2403,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_22" class="md-nav__link">
+  <a href="#_24" class="md-nav__link">
     <span class="md-ellipsis">
       
         承認が必要な事項
@@ -9886,7 +9958,157 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Gradle の設定を Kotlin DSL で書き、JDK・Gradle の版を Kotlin 版にそろえること</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B24 のステップ 1〜8</li>
 </ul>
-<h2 id="_21">リスクと対応<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<h3 id="b25-23">B25 のステップ計画（第 2〜3 章）<a class="headerlink" href="#b25-23" title="Permanent link">&para;</a></h3>
+<h4 id="2_3">データの表し方（第 2 章以降のすべての章に効く判断）<a class="headerlink" href="#2_3" title="Permanent link">&para;</a></h4>
+<p>Kotlin 版は Kotlin DataFrame の表（列名で値を引く）でデータを持ち、決定木も列名で特徴量を引く。Java 版はデータフレームのライブラリを使わないので、次の形にする案とする。</p>
+<table>
+<thead>
+<tr>
+<th>対象</th>
+<th>表し方（案）</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>読み込んだ行</td>
+<td><code>record Row(Map&lt;String, String&gt; cells)</code>。CSV のセルの文字列をそのまま持ち、<code>OptionalDouble number(String column)</code>（空欄なら空）と <code>String text(String column)</code> で読み出す（2026-09-20 に <code>Map&lt;String, Double&gt;</code> から改めた。正解ラベルや第 8 章の文字列の特徴量を持てないため）</td>
+<td>第 7〜14 章では列の違う CSV を何種類も読むので、データセットごとに record を作るより、列名で引く形のほうが章をまたいで使い回せる。F# 版の <code>Map&lt;string, float option&gt;</code> と同じ考え方。空欄は <code>OptionalDouble</code> の空として呼び出し側に見せる</td>
+</tr>
+<tr>
+<td>補完した後の特徴量</td>
+<td><code>record Features(List&lt;String&gt; columns, double[] values)</code>。欠損値を持てない</td>
+<td>補完するまでモデルに渡せないことを型で分ける。Kotlin 版の <code>Double?</code> と <code>Double</code> の区別に当たる。Tribuo の <code>ArrayExample</code>（特徴量名の配列と <code>double</code> の配列）にもそのまま渡せる</td>
+</tr>
+<tr>
+<td>分割の結果</td>
+<td><code>record TrainTestSplit&lt;T&gt;(List&lt;Features&gt; xTrain, List&lt;Features&gt; xTest, List&lt;T&gt; tTrain, List&lt;T&gt; tTest)</code></td>
+<td>Kotlin 版と同じ形。正解ラベルの型を型引数にして、第 7 章の数値の正解ラベルにも使う</td>
+</tr>
+<tr>
+<td>決定木</td>
+<td><code>sealed interface Tree permits Leaf, Node</code> と record の <code>Leaf</code>・<code>Node</code>。予測は <code>switch</code> のパターンマッチで書く</td>
+<td>網羅性をコンパイラが検査する。Kotlin 版の sealed interface と <code>when</code> に当たる</td>
+</tr>
+</tbody>
+</table>
+<p>代替案は、iris 専用の record（<code>IrisRow(Double sepalLength, ...)</code>）を作る形。型は強くなるが、章ごとにデータセット専用の型と、列名で特徴量を選ぶ仕組みの両方が要るので採らない。</p>
+<h4 id="_21">乱数と数値<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h4>
+<p>分割は <code>java.util.Random(seed)</code> と <code>Collections.shuffle</code> で行う。Kotlin 版の <code>kotlin.random.Random</code> とは乱数列が違うので、訓練データとテストデータに入る行は Kotlin 版と一致しない。件数（105 件と 45 件）は一致させ、正解率などの数値は Java 版の実測値を載せる。Tribuo との突き合わせは Java 版の中で完結させる。</p>
+<h4 id="_22">ステップ<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ステップ</th>
+<th>内容</th>
+<th>完了条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>第 2 章の読み込み：<code>Row</code> と、BOM 付きで空欄を含む CSV の読み込み、列ごとの欠損値の数</td>
+<td>架空の値の CSV で、BOM が列名に残らず、空欄が欠損値になるテストが通る</td>
+</tr>
+<tr>
+<td>2</td>
+<td>第 2 章の前処理：欠損値を除いた列ごとの平均値、補完して <code>Features</code> にする、特徴量と正解ラベルに分ける</td>
+<td>元の行を変更しないことを含めてテストが通る</td>
+</tr>
+<tr>
+<td>3</td>
+<td>第 2 章の分割：<code>splitTrainTest</code> を三角測量で進める（割合どおりの件数、重複の無さ、特徴量とラベルの対応、同じシードで同じ分け方、数値のラベル）</td>
+<td>Kotlin 版と同じ 8 つの観点のテストが通る</td>
+</tr>
+<tr>
+<td>4</td>
+<td>第 2 章の実データ：iris.csv の欠損値の数（2・1・2・2）、105 件と 45 件への分割と補完、<code>Main</code> の表示</td>
+<td>データありで通り、データなしでスキップされる</td>
+</tr>
+<tr>
+<td>5</td>
+<td>第 3 章の決定木：ジニ不純度、最良の分割、<code>Tree</code> の構築と予測、深さの制限、学習前の予測のエラー、木の表示</td>
+<td>Kotlin 版と同じ観点のテストが通る</td>
+</tr>
+<tr>
+<td>6</td>
+<td>第 3 章の Tribuo：<code>tribuo-classification-tree</code> を依存に加え、<code>Features</code> を <code>ArrayExample</code> に変える橋渡し、CART との突き合わせ。一致しない場合の理由（同数の多数決・同じ不純度の分割候補）を ADR 002 の結果と照らしてテストに残す</td>
+<td>突き合わせのテストが通る。Kotlin 版と違う振る舞いが出たら ADR 005 に書く</td>
+</tr>
+<tr>
+<td>7</td>
+<td>第 3 章の実データ：深さごとの正解率と深さ 2 の木を表示する <code>Main</code></td>
+<td>記事に載せる数値をテストで固定する</td>
+</tr>
+<tr>
+<td>8</td>
+<td>記事：第 2 章・第 3 章を書き、Java 版トップ・シリーズ索引・nav に登録する。途中段階の出力は、その段階を再現して実測する</td>
+<td>記事の数値・出力が実測と一致する。サイトのビルドでリンク切れが無い</td>
+</tr>
+<tr>
+<td>9</td>
+<td>仕上げ：学習データの行・BOM の文字・絶対パスの検査、OKF、執筆計画の B25 の完了、<code>docs/log.md</code>、push して Java CI とサイトの公開を確かめる</td>
+<td>検査に指摘が無く、CI がグリーン</td>
+</tr>
+</tbody>
+</table>
+<p>第 2 章と第 3 章は、第 3 章が第 2 章の <code>Features</code> と分割に依存するので、並行させずに順に進める。</p>
+<h3 id="b25">承認が必要な事項（B25）<a class="headerlink" href="#b25" title="Permanent link">&para;</a></h3>
+<p>次の点を確認した（2026-09-20 承認）。</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> データの表し方（読み込んだ行をセルの文字列の <code>Map&lt;String, String&gt;</code> を包む <code>Row</code>（当初の <code>Map&lt;String, Double&gt;</code> から 2026-09-20 に改めた）、補完後を欠損値を持てない <code>Features</code>、決定木を sealed interface と record）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 乱数に <code>java.util.Random</code> を使い、数値は Java 版の実測値を載せること</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B25 のステップ 1〜9</li>
+</ul>
+<h3 id="b25b28-2026-09-20java">B25〜B28 の進め方（2026-09-20、目標「Java 執筆完了」による）<a class="headerlink" href="#b25b28-2026-09-20java" title="Permanent link">&para;</a></h3>
+<p>2026-09-20 に人から「Java 執筆完了」を目標として受け取ったので、B25 の途中から B28 までを続けて進める。各 Bolt のステップは B25 と同じ形（TDD で実装 → 実データで確認 → 記事 → 検査）とし、並行作業の割り当てを次のとおりにする。</p>
+<table>
+<thead>
+<tr>
+<th>作業</th>
+<th>担当</th>
+<th>依存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第 2〜3 章の実装</td>
+<td>親</td>
+<td>—</td>
+</tr>
+<tr>
+<td>第 2〜3 章の記事</td>
+<td>サブエージェント A</td>
+<td>第 2〜3 章の実装</td>
+</tr>
+<tr>
+<td>第 4〜6 章（実装と記事）</td>
+<td>サブエージェント B</td>
+<td>第 1〜3 章</td>
+</tr>
+<tr>
+<td>第 7〜8 章・第 9〜10 章・第 11〜12 章・第 13〜14 章（実装と記事）</td>
+<td>サブエージェント C〜F</td>
+<td>第 1〜3 章</td>
+</tr>
+<tr>
+<td>第 15 章</td>
+<td>親</td>
+<td>第 7・8 章</td>
+</tr>
+<tr>
+<td>索引・nav・執筆計画・ログ・ADR 005 の統合</td>
+<td>親</td>
+<td>各章の取り込み</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>各サブエージェントは隔離した worktree で作業し、章ごとにコミットする。利用上限で止まっても親が引き継げるように、実装と記事は章ごとに分けてコミットする</li>
+<li>依存（Tribuo の各モジュール）は親が先に加えた。サブエージェントは <code>build.gradle.kts</code>・<code>libs.versions.toml</code>・<code>mkdocs.yml</code>・シリーズ索引・Java 版トップ・執筆計画・<code>docs/log.md</code> を変更せず、必要なら報告に書く。ADR 005 に書くべき結果も報告に書き、親が書き足す</li>
+<li>親は章ごとに取り込み、<code>./gradlew check</code>（データあり）・データなしのテスト・学習データの行の混入・BOM の文字・絶対パスを検査してから記事に OKF を適用する</li>
+</ul>
+<h2 id="_23">リスクと対応<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -9943,7 +10165,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 </tr>
 </tbody>
 </table>
-<h2 id="_22">承認が必要な事項<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h2>
+<h2 id="_24">承認が必要な事項<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h2>
 <p>本計画の承認とあわせて、次の点を確認した（2026-09-17 承認）。</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 5 部 15 章＋付録の章構成と、書かないと決めた内容</li>
