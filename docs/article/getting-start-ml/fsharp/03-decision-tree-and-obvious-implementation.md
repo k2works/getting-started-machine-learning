@@ -717,7 +717,7 @@ dotnet test
 
 ## 3.10 Notebook で探索する
 
-Notebook は `apps/dotnet/notebooks/chapter03_decision_tree_exploration.ipynb` にあります。第 2 章と同じく、先に `dotnet build` でプロジェクトをビルドしておきます。Polyglot Notebooks が廃止されていることは、[第 2 章の 2.10 節](02-data-preprocessing-and-triangulation.md) を参照してください。
+Notebook は `apps/fsharp/notebooks/chapter03_decision_tree_exploration.ipynb` にあります。第 2 章と同じく、先に `dotnet build` でプロジェクトをビルドしておきます。Polyglot Notebooks が廃止されていることは、[第 2 章の 2.10 節](02-data-preprocessing-and-triangulation.md) を参照してください。
 
 ```fsharp
 let depths = [ 1..8 ]

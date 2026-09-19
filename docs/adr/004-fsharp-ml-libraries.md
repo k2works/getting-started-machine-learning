@@ -21,7 +21,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-18T04:54:55Z }
 
 [執筆計画](../article/getting-start-ml/outline.md) の「F# 版執筆計画」で、F# を第 1 波に移すこと、Notebook に Polyglot Notebooks を使い廃止のリスクを明記すること、ライブラリの第一候補を ML.NET・FSharp.Stats・FSharp.Data・Plotly.NET・Giraffe とすることを承認した。ただし、各ライブラリが F# からどこまで使えるか、各章の「ライブラリへの置き換え」に使えるか、廃止された .NET Interactive が .NET SDK 10 で動くかは未検証だった。
 
-そこで B18 で、NuGet の情報の確認と、使い捨てのプロジェクト（.NET SDK 10.0.101、`net10.0`）・Notebook での実行、`apps/dotnet/` の雛形と CI での実行によって、次を確かめた。
+そこで B18 で、NuGet の情報の確認と、使い捨てのプロジェクト（.NET SDK 10.0.101、`net10.0`）・Notebook での実行、`apps/fsharp/` の雛形と CI での実行によって、次を確かめた。
 
 | 確認したこと | 結果 | 確認方法 |
 |------------|------|---------|
@@ -54,11 +54,11 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-18T04:54:55Z }
 | 可視化 | Polyglot Notebooks（`Microsoft.dotnet-interactive`）、Plotly.NET、Plotly.NET.Interactive | 1.0.712001、5.1.0、5.0.0 | MIT | 第 2 章 |
 | API | Giraffe | 8.3.0 | Apache-2.0 | 第 15 章 |
 
-ライブラリは使う章に入ってから `apps/dotnet/Directory.Packages.props` に正確な版で追加し、`packages.lock.json` をコミットする。Deedle のデータフレームは使わず、レコード型のリストで表す。
+ライブラリは使う章に入ってから `apps/fsharp/Directory.Packages.props` に正確な版で追加し、`packages.lock.json` をコミットする。Deedle のデータフレームは使わず、レコード型のリストで表す。
 
 ### Polyglot Notebooks の扱い
 
-Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジトリはアーカイブされた（[dotnet/interactive#4163](https://github.com/dotnet/interactive/issues/4163)）。上の表の版に固定し、F# 版の記事に廃止されていることを明記する。Notebook は探索と可視化だけに使い、実装・テスト・記事の数値は `apps/dotnet/` のプロジェクトから求める。将来の VS Code・.NET SDK の更新で動かなくなったら、F# スクリプト（`.fsx`）と Plotly.NET の HTML 出力に移すかを判断する。
+Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジトリはアーカイブされた（[dotnet/interactive#4163](https://github.com/dotnet/interactive/issues/4163)）。上の表の版に固定し、F# 版の記事に廃止されていることを明記する。Notebook は探索と可視化だけに使い、実装・テスト・記事の数値は `apps/fsharp/` のプロジェクトから求める。将来の VS Code・.NET SDK の更新で動かなくなったら、F# スクリプト（`.fsx`）と Plotly.NET の HTML 出力に移すかを判断する。
 
 ### 章ごとのライブラリへの置き換え方針
 
@@ -95,8 +95,8 @@ Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジ�
 
 ## コンプライアンス
 
-- `apps/dotnet/Directory.Packages.props` と `.config/dotnet-tools.json` に上記のライブラリとツールの版だけが記載されている
-- .NET CI（`.github/workflows/dotnet-ci.yml`）がグリーンである
+- `apps/fsharp/Directory.Packages.props` と `.config/dotnet-tools.json` に上記のライブラリとツールの版だけが記載されている
+- F# CI（`.github/workflows/fsharp-ci.yml`）がグリーンである
 - F# 版の記事に Polyglot Notebooks が廃止されていることが書かれている
 
 ## 備考

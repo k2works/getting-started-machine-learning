@@ -16,7 +16,7 @@ F# は .NET で動く関数型ファーストの言語で、判別共用体・�
 Notebook による探索と可視化は、Kotlin 版と同じ章（第 2・3・7〜14 章）で扱います。Notebook には **Polyglot Notebooks** を使います。
 
 !!! warning "Polyglot Notebooks は廃止されています"
-    Polyglot Notebooks と、それを動かす .NET Interactive は、2026 年に Microsoft が廃止しました（[dotnet/interactive#4163](https://github.com/dotnet/interactive/issues/4163)）。インストール済みの拡張機能は動き続けますが、機能追加やバグ修正は無く、将来の VS Code・.NET SDK の更新で動かなくなる可能性があります。本シリーズでは `Microsoft.dotnet-interactive` 1.0.712001 と Plotly.NET.Interactive 5.0.0 で動作を確かめています。Notebook は探索と可視化だけに使い、テストや記事の数値は `apps/dotnet/` のプロジェクトから求めるので、Notebook が動かなくなっても実装とテストは影響を受けません。
+    Polyglot Notebooks と、それを動かす .NET Interactive は、2026 年に Microsoft が廃止しました（[dotnet/interactive#4163](https://github.com/dotnet/interactive/issues/4163)）。インストール済みの拡張機能は動き続けますが、機能追加やバグ修正は無く、将来の VS Code・.NET SDK の更新で動かなくなる可能性があります。本シリーズでは `Microsoft.dotnet-interactive` 1.0.712001 と Plotly.NET.Interactive 5.0.0 で動作を確かめています。Notebook は探索と可視化だけに使い、テストや記事の数値は `apps/fsharp/` のプロジェクトから求めるので、Notebook が動かなくなっても実装とテストは影響を受けません。
 
 ## 開発環境
 
@@ -42,10 +42,10 @@ Notebook による探索と可視化は、Kotlin 版と同じ章（第 2・3・7
 
 ## サンプルコード
 
-サンプルコードは `apps/dotnet/` にあります。学習データの配置方法は [第 1 章](01-machine-learning-and-first-test.md) の「題材とデータ」を参照してください。
+サンプルコードは `apps/fsharp/` にあります。学習データの配置方法は [第 1 章](01-machine-learning-and-first-test.md) の「題材とデータ」を参照してください。
 
 ```bash
-cd apps/dotnet
+cd apps/fsharp
 dotnet tool restore
 dotnet test
 dotnet run --project src/MachineLearning -- chapter01

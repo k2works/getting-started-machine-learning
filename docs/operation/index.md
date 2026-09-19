@@ -58,7 +58,7 @@
 
 #### サンプル実装（apps/）
 
-記事の各言語版サンプル（`apps/python`・`apps/node`・`apps/kotlin`・`apps/dotnet`）の環境をまとめて用意します。前提ツール（uv・Node.js 22／24 系・JDK 21 以上・.NET SDK 10.0.101 以上）は `nix develop .#python`・`.#node`・`.#kotlin`・`.#dotnet` で揃います。ローカルのツールが見つからないかバージョンが合わない場合、タスクは Nix が導入されていれば対応する環境の中で自動的に実行します。
+記事の各言語版サンプル（`apps/python`・`apps/node`・`apps/kotlin`・`apps/fsharp`）の環境をまとめて用意します。前提ツール（uv・Node.js 22／24 系・JDK 21 以上・.NET SDK 10.0.101 以上）は `nix develop .#python`・`.#node`・`.#kotlin`・`.#dotnet` で揃います。ローカルのツールが見つからないかバージョンが合わない場合、タスクは Nix が導入されていれば対応する環境の中で自動的に実行します。
 
 | コマンド | 概要 |
 | :--- | :--- |

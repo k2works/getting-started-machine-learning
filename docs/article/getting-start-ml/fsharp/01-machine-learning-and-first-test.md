@@ -148,10 +148,10 @@ npx gulp data:check
 
 ### プロジェクトの構成
 
-F# の実装は `apps/dotnet/` にあります。この章を書き終えた時点の構成です。
+F# の実装は `apps/fsharp/` にあります。この章を書き終えた時点の構成です。
 
 ```text
-apps/dotnet/
+apps/fsharp/
 ├── MachineLearning.sln
 ├── global.json
 ├── Directory.Build.props
@@ -248,7 +248,7 @@ error : Testing with VSTest target is no longer supported by Microsoft.Testing.P
 整形の Fantomas と静的解析の FSharpLint は、プロジェクトのローカルツールとして `.config/dotnet-tools.json` に版を記録しています。依存パッケージとツールは次のコマンドで入れます。
 
 ```bash
-cd apps/dotnet
+cd apps/fsharp
 dotnet tool restore
 dotnet restore
 ```
@@ -366,7 +366,7 @@ let ``環境変数が無ければ apps/data/sukkiri-ml を使う`` () =
   Xunit.MicrosoftTestingPlatform.XunitException: System.ArgumentException : オプション値は None でした (Parameter 'option')
 ```
 
-他の言語の版と同じく、既定の場所を `apps/dotnet/` から見た相対パス `../data/sukkiri-ml` にしました。
+他の言語の版と同じく、既定の場所を `apps/fsharp/` から見た相対パス `../data/sukkiri-ml` にしました。
 
 ```fsharp
 let dataDirFrom (getenv: string -> string option) : string =
@@ -403,7 +403,7 @@ let dataDir () : string =
     dataDirFrom (Environment.GetEnvironmentVariable >> Option.ofObj)
 ```
 
-- `__SOURCE_DIRECTORY__` は、このソースファイルがあるディレクトリ（`apps/dotnet/src/MachineLearning`）に、コンパイル時に置き換わります。そこから 3 つ上がると `apps/` です。ビルドした環境のパスが埋め込まれるので、ビルドしたマシンでテストや実行をする本シリーズの使い方に向いた方法です
+- `__SOURCE_DIRECTORY__` は、このソースファイルがあるディレクトリ（`apps/fsharp/src/MachineLearning`）に、コンパイル時に置き換わります。そこから 3 つ上がると `apps/` です。ビルドした環境のパスが埋め込まれるので、ビルドしたマシンでテストや実行をする本シリーズの使い方に向いた方法です
 - `Environment.GetEnvironmentVariable` は、環境変数が無いと `null` を返す .NET の関数です。`Option.ofObj` で `null` を `None` に変えます。`>>` は、2 つの関数をつないで 1 つの関数にする **関数合成** です
 
 ```text

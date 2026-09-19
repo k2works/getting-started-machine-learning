@@ -1,19 +1,19 @@
-name: .NET CI
+name: F# CI
 
 on:
   push:
     branches: [main, develop]
     paths:
-      - "apps/dotnet/**"
-      - ".github/workflows/dotnet-ci.yml"
+      - "apps/fsharp/**"
+      - ".github/workflows/fsharp-ci.yml"
       - "ops/nix/environments/dotnet/**"
       - "flake.nix"
       - "flake.lock"
   pull_request:
     branches: [main]
     paths:
-      - "apps/dotnet/**"
-      - ".github/workflows/dotnet-ci.yml"
+      - "apps/fsharp/**"
+      - ".github/workflows/fsharp-ci.yml"
       - "ops/nix/environments/dotnet/**"
       - "flake.nix"
       - "flake.lock"
@@ -43,30 +43,30 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('apps/dotnet/**/packages.lock.json', 'apps/dotnet/.config/dotnet-tools.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('apps/fsharp/**/packages.lock.json', 'apps/fsharp/.config/dotnet-tools.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
       - name: Show the .NET SDK version
-        run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet --version"
+        run: nix develop .#dotnet --command bash -c "cd apps/fsharp && dotnet --version"
 
       # packages.lock.json と食い違う依存があれば失敗させる
       - name: Restore tools and packages
-        run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet tool restore && dotnet restore --locked-mode"
+        run: nix develop .#dotnet --command bash -c "cd apps/fsharp && dotnet tool restore && dotnet restore --locked-mode"
 
       - name: Check formatting
-        run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet fantomas --check ."
+        run: nix develop .#dotnet --command bash -c "cd apps/fsharp && dotnet fantomas --check ."
 
       - name: Lint
-        run: nix develop .#dotnet --command bash -c "cd apps/dotnet && dotnet fsharplint lint MachineLearning.sln"
+        run: nix develop .#dotnet --command bash -c "cd apps/fsharp && dotnet fsharplint lint MachineLearning.sln"
 
       # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
       - name: Run tests with coverage
         run: >-
           nix develop .#dotnet --command bash -c
-          "cd apps/dotnet && dotnet test --no-restore --coverlet --coverlet-include '[MachineLearning]*'
+          "cd apps/fsharp && dotnet test --no-restore --coverlet --coverlet-include '[MachineLearning]*'
           --coverlet-output-format cobertura --results-directory TestResults"
 
       # 実データのテストがスキップされるので、手元より低い値になる。下限は設けず表示だけする
       - name: Show coverage
-        run: grep -o -m 1 'line-rate="[0-9.]*"' apps/dotnet/TestResults/*.cobertura.*xml
+        run: grep -o -m 1 'line-rate="[0-9.]*"' apps/fsharp/TestResults/*.cobertura.*xml

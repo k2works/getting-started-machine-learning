@@ -11,7 +11,7 @@
 | nodejs       | 22.x / 24.x | 25.x は vitest 非対応のため不可 |
 | uv           | 最新       | Python サンプル（`apps/python`） |
 | JDK          | 21 以上    | Kotlin サンプル（`apps/kotlin`） |
-| .NET SDK     | 10.0.101 以上 | F# サンプル（`apps/dotnet`、`global.json` で固定） |
+| .NET SDK     | 10.0.101 以上 | F# サンプル（`apps/fsharp`、`global.json` で固定） |
 
 ## 構成
 
@@ -233,7 +233,7 @@ VS Code で Dev Container を使用する場合：
 
 #### サンプル実装のセットアップ
 
-記事の各言語版サンプル（`apps/python`・`apps/node`・`apps/kotlin`・`apps/dotnet`）の環境を用意します。
+記事の各言語版サンプル（`apps/python`・`apps/node`・`apps/kotlin`・`apps/fsharp`）の環境を用意します。
 
 1. **学習データを入手する**
     - [書籍サポートページ](https://sukkiri.jp/books/sukkiri_ml) から `sukkiri-ml-codes.zip` を入手し、`apps/data/` または `tmp/` に置きます（別の場所なら `ML_DATA_ZIP` でパスを指定）。

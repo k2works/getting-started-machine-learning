@@ -766,7 +766,7 @@ F# 版の探索と可視化には、Polyglot Notebooks（.NET Interactive の F#
 
 > Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、機能追加もバグ修正もされなくなりました（[dotnet/interactive#4163](https://github.com/dotnet/interactive/issues/4163)）。この記事は `Microsoft.dotnet-interactive` 1.0.712001、Plotly.NET 5.1.0、Plotly.NET.Interactive 5.0.0 で動作を確かめています。将来の VS Code や .NET SDK の更新で動かなくなる可能性があります。Notebook は探索と可視化だけに使い、記事の数値はすべてプロジェクトのコードとテストから求めているので、Notebook が動かなくなっても本文の内容には影響しません。
 
-Notebook は `apps/dotnet/notebooks/chapter02_iris_exploration.ipynb` にあります。VS Code の Polyglot Notebooks の拡張機能で開くか、Jupyter のカーネルとして登録して開きます。事前に `dotnet build` でプロジェクトをビルドしておきます。
+Notebook は `apps/fsharp/notebooks/chapter02_iris_exploration.ipynb` にあります。VS Code の Polyglot Notebooks の拡張機能で開くか、Jupyter のカーネルとして登録して開きます。事前に `dotnet build` でプロジェクトをビルドしておきます。
 
 ```fsharp
 #r "nuget: FSharp.Data, 8.2.0"
@@ -863,7 +863,7 @@ jupyter nbconvert --to notebook --execute chapter02_iris_exploration.ipynb --out
 Notebook の出力セルにはデータが残るので、コミットの前に消します。Python 版と同じ nbstripout で、Polyglot Notebooks の形式（`polyglot_notebook` のメタデータ）を保ったまま出力を消せます。
 
 ```bash
-nbstripout apps/dotnet/notebooks/chapter02_iris_exploration.ipynb
+nbstripout apps/fsharp/notebooks/chapter02_iris_exploration.ipynb
 ```
 
 出力の除去をタスクや CI に組み込む方法は、第 6 章で扱います。

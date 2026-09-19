@@ -360,7 +360,7 @@ apps/
 | U1 Python | 第 1〜15 章・付録 A、`apps/python/`、CI | U0 |
 | U2 Kotlin | 第 1〜15 章、`apps/kotlin/`（Notebook を含む）、`kotlin` の Nix 環境、CI | U0、U1（章の節構成・可視化の節構成） |
 | U3 TypeScript | 第 1〜15 章、`apps/node/`、CI | U0、U1（章の節構成） |
-| U4 F# | 第 1〜15 章、`apps/dotnet/`（Polyglot Notebooks を含む）、CI | U0、U1（章の節構成・可視化の節構成） |
+| U4 F# | 第 1〜15 章、`apps/fsharp/`（Polyglot Notebooks を含む）、CI | U0、U1（章の節構成・可視化の節構成） |
 | U5〜U9 第 2 波 | Java・C#・Scala・Rust・Go の各言語 | U0、U1 |
 | U10〜U14 第 3 波 | Ruby・PHP・Elixir・Clojure・Haskell の各言語 | U0、U1 |
 | U15 多言語統合解説 | `integration/` | 第 1 波の 4 言語完了後に着手し、波ごとに更新 |
@@ -646,7 +646,7 @@ F# は当初第 2 波の言語だったが、2026-09-18 に第 1 波へ移し、
 | .NET Interactive の版 | dotnet ツール `Microsoft.dotnet-interactive` の最新は 1.0.712001。Plotly.NET.Interactive（Notebook でグラフを表示する拡張）の最新は 5.0.0 | NuGet |
 | ローカル環境 | .NET SDK 10.0.101 | `dotnet --list-sdks` |
 | Nix 環境 | `ops/nix/environments/dotnet/shell.nix` は `dotnet-sdk`（版は nixpkgs の既定）。本リポジトリの CI で `dotnet` 環境を使うワークフローは無い | ファイルと `.github/workflows/` を読んだ |
-| 参照実装 | `tmp/getting-started-tdd/apps/dotnet/` は F# のライブラリとテストのプロジェクトを 1 つのソリューションにまとめ、xUnit 2 系・coverlet、`fsharplint.json` を使う（`net8.0`） | ファイルを読んだ |
+| 参照実装 | `tmp/getting-started-tdd/apps/fsharp/` は F# のライブラリとテストのプロジェクトを 1 つのソリューションにまとめ、xUnit 2 系・coverlet、`fsharplint.json` を使う（`net8.0`） | ファイルを読んだ |
 | ライブラリの最新版 | ML.NET（Microsoft.ML・Microsoft.ML.FastTree）5.0.0、FSharp.Stats 0.6.0、FSharp.Data 8.2.0、Deedle 8.1.0、Plotly.NET 5.1.0、Giraffe 8.3.0、xunit.v3 4.0.1、Fantomas 8.0.0、FSharpLint 0.27.0 | NuGet |
 
 ライセンス、F# からの使いやすさ、各アルゴリズムの有無（ML.NET に単一の決定木があるか、正則化付き回帰・PCA・K-means の初期中心の指定など）、.NET Interactive が .NET SDK 10 で動くかは未検証。B18 の ADR 004 で確かめてから確定する。
@@ -668,7 +668,7 @@ F# は当初第 2 波の言語だったが、2026-09-18 に第 1 波へ移し、
 
 - 使う版（VS Code の拡張機能、`Microsoft.dotnet-interactive`、Plotly.NET.Interactive）を ADR 004 と記事に明記し、固定する
 - ADR 004 と F# 版の記事に、廃止されていることと、将来の VS Code・.NET SDK の更新で動かなくなる可能性があることを明記する
-- Notebook は探索と可視化に限り、テスト・記事の数値は `apps/dotnet/` のプロジェクトのコードから求める。Notebook が動かなくなっても、実装・テスト・記事の数値は影響を受けない
+- Notebook は探索と可視化に限り、テスト・記事の数値は `apps/fsharp/` のプロジェクトのコードから求める。Notebook が動かなくなっても、実装・テスト・記事の数値は影響を受けない
 - 動かなくなった時点で、F# スクリプトと Plotly.NET の HTML 出力（代替案）に移すかを判断する
 
 ### 前提整備（F#）
@@ -676,11 +676,11 @@ F# は当初第 2 波の言語だったが、2026-09-18 に第 1 波へ移し、
 | 項目 | 内容 | 状態 |
 |------|------|------|
 | Nix 環境 | `nix develop .#dotnet` の .NET SDK の版を CI で確かめ、`global.json` で SDK の版を固定するか決める | 完了（nixpkgs の `dotnet-sdk` は 8.0 だったので `dotnet-sdk_10` に変更。CI で 10.0.101 を確認し、`global.json` で 10.0.101 に固定） |
-| アプリ雛形 | `apps/dotnet/`（ソリューション、F# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props` による版の一元管理）にテストが 1 本通る最小構成 | 完了（xUnit v3 を Microsoft.Testing.Platform で実行。FSharp.Core を明示して参照） |
+| アプリ雛形 | `apps/fsharp/`（ソリューション、F# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props` による版の一元管理）にテストが 1 本通る最小構成 | 完了（xUnit v3 を Microsoft.Testing.Platform で実行。FSharp.Core を明示して参照） |
 | 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは、データが無ければスキップする（xUnit v3 の `Assert.Skip` など） | 完了（`Assert.SkipUnless`。既定の場所は `__SOURCE_DIRECTORY__` から求める） |
 | Notebook 環境 | VS Code の Polyglot Notebooks で F# のカーネルが動き、Plotly.NET のグラフを表示できることを確かめる。出力セルを消す仕組みは Python 版・Kotlin 版と同じものを使う | 確認済み（`Microsoft.dotnet-interactive` 1.0.712001 が .NET 10 で動き、Jupyter から画面なしで実行できた。nbstripout で出力を消せる。Notebook の追加は B19） |
 | ライブラリ選定 | ADR 004（F# 版のライブラリ）を作成する | 完了（ADR 004） |
-| CI | `.github/workflows/dotnet-ci.yml`（Nix → `dotnet restore` → 整形の確認・静的解析・`dotnet test`、カバレッジの表示）。NuGet のキャッシュを使う | 完了（B18。整形の確認・FSharpLint・`dotnet test` とカバレッジの表示が成功） |
+| CI | `.github/workflows/fsharp-ci.yml`（Nix → `dotnet restore` → 整形の確認・静的解析・`dotnet test`、カバレッジの表示）。NuGet のキャッシュを使う | 完了（B18。整形の確認・FSharpLint・`dotnet test` とカバレッジの表示が成功） |
 
 ### 章別執筆計画（F#）
 
@@ -702,7 +702,7 @@ F# は当初第 2 波の言語だったが、2026-09-18 に第 1 波へ移し、
 | 14 | K-means によるクラスタリング | 初期中心を引数で渡せる設計、エルボー法 | ML.NET・FSharp.Stats の K-means（初期中心を渡せるかは ADR 004 で確認） |
 | 15 | 機械学習 API とモジュール設計 | Giraffe、レイヤードアーキテクチャ、`Result` 型によるエラー表現、TestHost による統合テスト | — |
 
-Notebook は Kotlin 版と同じ章（第 2・3・7〜14 章）に作り、`apps/dotnet/notebooks/` に置く。Notebook から `apps/dotnet/` のライブラリを読み込み、記事の可視化の節と同じグラフを描く。
+Notebook は Kotlin 版と同じ章（第 2・3・7〜14 章）に作り、`apps/fsharp/notebooks/` に置く。Notebook から `apps/fsharp/` のライブラリを読み込み、記事の可視化の節と同じグラフを描く。
 
 ### Python 版・Kotlin 版・TypeScript 版との数値の違い
 
@@ -714,7 +714,7 @@ TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関�
 
 | Bolt | 内容 | 完了条件 |
 |------|------|---------|
-| B18 ウォーキングスケルトン（完了） | Nix の `dotnet` 環境の確認、`apps/dotnet/` の雛形、ADR 004、第 1 章の実装と記事、F# 版トップ、nav、.NET CI、Polyglot Notebooks の動作確認（Plotly.NET のグラフを 1 つ表示する） | `apps/dotnet/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される。Polyglot Notebooks が手元で動く |
+| B18 ウォーキングスケルトン（完了） | Nix の `dotnet` 環境の確認、`apps/fsharp/` の雛形、ADR 004、第 1 章の実装と記事、F# 版トップ、nav、F# CI、Polyglot Notebooks の動作確認（Plotly.NET のグラフを 1 つ表示する） | `apps/fsharp/` の第 1 章のテストが CI でグリーン。記事がサイトで表示される。Polyglot Notebooks が手元で動く |
 | B19（完了） | 第 2〜3 章と Notebook（型プロバイダ、乱数、ML.NET の導入） | 自作の決定木とライブラリの結果を並べて載せられる。Notebook の可視化が記事と一致する |
 | B20 | 第 4〜6 章 | NuGet・Fantomas・FSharpLint・カバレッジ・CI・Notebook の出力の除去が記事どおりに動く |
 | B21 | 第 7〜14 章と Notebook（依存関係の無い章を並行して進める） | 各章のテストが通り、記事と Notebook がそろっている |
@@ -727,7 +727,7 @@ TypeScript 版と同じく、第 1〜3 章で型を固めてから、依存関�
 - [x] F# を第 2 波から第 1 波へ移し、第 1 波を Python・Kotlin・TypeScript・F# の 4 言語にすること（多言語統合解説は 4 言語の完了後に着手する）
 - [x] F# 版の Notebook に Polyglot Notebooks を使い、廃止のリスクを ADR 004 と記事に明記すること（Polyglot Notebooks を使うのは F# 版だけとし、Python 版・Kotlin 版の Notebook と、Notebook を作らない TypeScript 版はそのままにする）
 - [x] ライブラリの第一候補を ML.NET・FSharp.Stats・FSharp.Data・Plotly.NET・Giraffe とし、置き換えの範囲を ADR 004 で章ごとに確かめること
-- [x] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/fsharp/` に置くこと
+- [x] 実装を `apps/fsharp/`、記事を `docs/article/getting-start-ml/fsharp/` に置くこと
 - [x] Bolt を B18〜B22 の 5 つにまとめ、B21 で第 7〜14 章を並行して進めること
 - [x] B18（ウォーキングスケルトン）の範囲
 

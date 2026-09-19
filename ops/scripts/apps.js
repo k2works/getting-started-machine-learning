@@ -36,7 +36,7 @@ const APPS = [
   {
     name: 'fsharp',
     nix: 'dotnet',
-    dir: path.join('apps', 'dotnet'),
+    dir: path.join('apps', 'fsharp'),
     // global.json の SDK バージョンで解決できるかをアプリのディレクトリで確かめる
     tools: [{ cmd: 'dotnet', version: 'dotnet --version' }],
     setup: 'dotnet tool restore && dotnet restore --locked-mode && dotnet build --no-restore',
