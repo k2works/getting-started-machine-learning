@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToDoubleFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,18 +66,17 @@ class EvaluationDataTest {
             () -> new TribuoEvaluationTest.TribuoTree(2), data, Experiments.SURVIVED_METRICS);
     assertScores(
         Map.of(
-            "正解率",
-                evaluations.stream().mapToDouble(LabelEvaluation::accuracy).average().orElseThrow(),
-            "適合率",
-                evaluations.stream()
-                    .mapToDouble(e -> e.precision(positive))
-                    .average()
-                    .orElseThrow(),
-            "再現率",
-                evaluations.stream().mapToDouble(e -> e.recall(positive)).average().orElseThrow(),
-            "F値", evaluations.stream().mapToDouble(e -> e.f1(positive)).average().orElseThrow()),
+            "正解率", mean(evaluations, LabelEvaluation::accuracy),
+            "適合率", mean(evaluations, e -> e.precision(positive)),
+            "再現率", mean(evaluations, e -> e.recall(positive)),
+            "F値", mean(evaluations, e -> e.f1(positive))),
         scores,
         1e-12);
+  }
+
+  private static double mean(
+      List<LabelEvaluation> evaluations, ToDoubleFunction<LabelEvaluation> score) {
+    return evaluations.stream().mapToDouble(score).average().orElseThrow();
   }
 
   @Test
