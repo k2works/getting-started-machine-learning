@@ -1,0 +1,7000 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="NuGet の中央パッケージ管理と packages.lock.json、global.json・Nix・ローカルツールによる版の固定、Fantomas による整形、何も検査していなかった FSharpLint の設定の直し方、警告をエラーにする設定、coverlet によるカバレッジ計測を学ぶ。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+        <link rel="prev" href="../04-version-control-and-data-management/">
+      
+      
+        <link rel="next" href="../06-task-runner-and-ci-cd/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>第 5 章: パッケージ管理と静的解析 - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#5" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第 5 章: パッケージ管理と静的解析
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../reference/" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/001-python-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    001 Python 版の機械学習・可視化・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/002-kotlin-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    002 Kotlin 版の機械学習・データ・可視化・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/003-typescript-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    003 TypeScript 版の機械学習・データ・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/004-fsharp-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    004 F# 版の機械学習・データ・可視化・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    機械学習から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    機械学習から始めるプログラミング入門
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../outline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    執筆計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    執筆ワークフロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_4" id="__nav_9_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/appendix-a-bank-exercise/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    付録 A 総合演習（Bank）
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_5" id="__nav_9_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kotlin
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Kotlin
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_6" id="__nav_9_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    TypeScript
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_7" id="__nav_9_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    F#
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    F#
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 はじめに
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#52-nuget" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 NuGet によるパッケージ管理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 NuGet によるパッケージ管理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#packagereference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プロジェクトファイルと PackageReference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        中央パッケージ管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本番依存と開発依存
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ライブラリを追加する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#packageslockjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        packages.lock.json で環境を再現する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        依存関係の脆弱性を確かめる
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#53-net-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 .NET SDK とツールの版を固定する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3 .NET SDK とツールの版を固定する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#globaljson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        global.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nix-net-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nix の .NET SDK
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ローカルツール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fsharpcore-nugetorg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FSharp.Core を nuget.org から取る
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#54-fantomas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 整形 — Fantomas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4 整形 — Fantomas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fantomas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fantomas の設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fantomas_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fantomas の実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#55-fsharplint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 静的解析 — FSharpLint
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5 静的解析 — FSharpLint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fantomas-fsharplint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fantomas と FSharpLint の役割
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#0-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        「0 warnings」を疑う
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既定の設定を写して、除外だけを加える
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        指摘ごとに対応を決める
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#56-f" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 型チェックと警告 — F# コンパイラ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#57-coverlet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 コードカバレッジ — coverlet
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.7 コードカバレッジ — coverlet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        計測の対象を絞る理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#58" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.8 まとめ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../functional-desgin-ppp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical-database-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-docker-kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/SonarQube%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="5">第 5 章: パッケージ管理と静的解析<a class="headerlink" href="#5" title="Permanent link">&para;</a></h1>
+<h2 id="51">5.1 はじめに<a class="headerlink" href="#51" title="Permanent link">&para;</a></h2>
+<p>前の章では、実験を再現するには乱数のシードに加えて、ライブラリ・.NET SDK・実行環境の版を固定する必要があると述べました。この章では、それを担う NuGet と .NET SDK の仕組みと、コードを実行せずに問題を見つける <strong>静的解析</strong>、テストがコードのどこを通ったかを測る <strong>カバレッジ</strong> を整えます。</p>
+<table>
+<thead>
+<tr>
+<th>道具</th>
+<th>役割</th>
+<th>本章の節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://learn.microsoft.com/ja-jp/nuget/">NuGet</a>（中央パッケージ管理・<code>packages.lock.json</code>）</td>
+<td>依存ライブラリの版を管理し、ロックする</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><code>global.json</code>・Nix・ローカルツール</td>
+<td>.NET SDK と開発ツールの版を固定する</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><a href="https://fsprojects.github.io/fantomas/">Fantomas</a></td>
+<td>コードの整形</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td><a href="https://fsprojects.github.io/FSharpLint/">FSharpLint</a></td>
+<td>コードの問題（命名・再帰など）の検査</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>F# コンパイラ（<code>TreatWarningsAsErrors</code>）</td>
+<td>型チェックと、警告をエラーにする設定</td>
+<td>5.6</td>
+</tr>
+<tr>
+<td><a href="https://github.com/coverlet-coverage/coverlet">coverlet</a>（coverlet.MTP）</td>
+<td>テストのカバレッジ計測</td>
+<td>5.7</td>
+</tr>
+</tbody>
+</table>
+<p>本章のバージョンは、執筆時点の <code>global.json</code>・<code>Directory.Packages.props</code>・<code>.config/dotnet-tools.json</code> に書かれたものです（.NET SDK 10.0.101、FSharp.Core 10.0.101、Fantomas 8.0.0、FSharpLint 0.27.0、coverlet.MTP 10.0.1）。選定の理由は <a href="../../../../adr/004-fsharp-ml-libraries/">ADR 004</a> を参照してください。</p>
+<p><a href="../../python/05-package-management-and-static-analysis/">Python 版の第 5 章</a>・<a href="../../kotlin/05-package-management-and-static-analysis/">Kotlin 版の第 5 章</a>・<a href="../../typescript/05-package-management-and-static-analysis/">TypeScript 版の第 5 章</a> と比べると、Python の uv・Ruff・mypy・pytest-cov に当たるものを、F# では <code>dotnet</code> CLI と NuGet、ローカルツールの Fantomas・FSharpLint で組み立てます。F# 版では、次の 2 点に注目してください。</p>
+<ul>
+<li><strong>設定が既定に重なるか、置き換えるか</strong> — FSharpLint の設定ファイルは既定の設定を置き換えます。これを知らずに書いた設定のせいで、第 1 章からずっと静的解析が何も検査していなかったことが、この章で分かりました</li>
+<li><strong>警告をエラーにする</strong> — F# のコンパイラは、パターンマッチの漏れや末尾再帰になっていない再帰を警告で知らせます。<code>TreatWarningsAsErrors</code> で、それを見落とせないようにします</li>
+</ul>
+<h2 id="52-nuget">5.2 NuGet によるパッケージ管理<a class="headerlink" href="#52-nuget" title="Permanent link">&para;</a></h2>
+<h3 id="packagereference">プロジェクトファイルと PackageReference<a class="headerlink" href="#packagereference" title="Permanent link">&para;</a></h3>
+<p>.NET のライブラリは、<a href="https://www.nuget.org/">NuGet</a> のパッケージとして配布されます。どのパッケージを使うかは、プロジェクトファイル（<code>.fsproj</code>）の <code>PackageReference</code> に書きます。本体のプロジェクトの <code>MachineLearning.fsproj</code> は次のとおりです。</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&lt;ItemGroup&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Data"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Stats"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">"Microsoft.ML"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">"Microsoft.ML.FastTree"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/ItemGroup&gt;</span>
+</code></pre></div>
+<p><code>PackageReference</code> には版（<code>Version</code>）を書いていません。版は、次の <code>Directory.Packages.props</code> にまとめて書いています。</p>
+<h3 id="_1">中央パッケージ管理<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p><code>Directory.Packages.props</code> は、ソリューションのすべてのプロジェクトが使うパッケージの版を 1 か所にまとめるファイルです（<strong>中央パッケージ管理</strong>、Central Package Management）。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;Project&gt;</span>
+<span class="w">  </span><span class="nt">&lt;PropertyGroup&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 依存ライブラリの版をこのファイルにまとめる（中央パッケージ管理） --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;ManagePackageVersionsCentrally&gt;</span>true<span class="nt">&lt;/ManagePackageVersionsCentrally&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/PropertyGroup&gt;</span>
+<span class="w">  </span><span class="nt">&lt;ItemGroup&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"coverlet.MTP"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"10.0.1"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- .NET SDK 10.0.101 に同梱の版 --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Core"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"10.0.101"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Data"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"8.2.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Stats"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"0.6.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"Microsoft.ML"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"5.0.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"Microsoft.ML.FastTree"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"5.0.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"xunit.v3"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"4.0.1"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/ItemGroup&gt;</span>
+<span class="nt">&lt;/Project&gt;</span>
+</code></pre></div>
+<ul>
+<li><code>ManagePackageVersionsCentrally</code> を <code>true</code> にすると、<code>PackageReference</code> に <code>Version</code> を書くとエラーになり、版は必ずこのファイルの <code>PackageVersion</code> から取られます</li>
+<li>本体とテストの 2 つのプロジェクトが同じライブラリ（たとえば FSharp.Core）を使っても、版が食い違うことがありません。Kotlin 版のバージョンカタログ（<code>libs.versions.toml</code>）に当たる仕組みです</li>
+</ul>
+<p><code>Directory.Build.props</code>（第 1 章）と同じく、このファイルも同じディレクトリとその下のプロジェクトに自動で読み込まれます。</p>
+<h3 id="_2">本番依存と開発依存<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>本番のコードとテストだけが使うものは、プロジェクトを分けることで区別しています。</p>
+<table>
+<thead>
+<tr>
+<th>プロジェクト</th>
+<th>参照するパッケージ</th>
+<th>判断の基準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/MachineLearning</code></td>
+<td>FSharp.Data・FSharp.Stats・ML.NET</td>
+<td>章のプログラムを動かすのに必要なもの</td>
+</tr>
+<tr>
+<td><code>tests/MachineLearning.Tests</code></td>
+<td>xunit.v3・coverlet.MTP（と <code>src/MachineLearning</code> のプロジェクト）</td>
+<td>テストの実行と計測だけに必要なもの</td>
+</tr>
+<tr>
+<td>両方（<code>Directory.Build.props</code>）</td>
+<td>FSharp.Core</td>
+<td>F# のプログラムすべてに必要な標準ライブラリ</td>
+</tr>
+<tr>
+<td>ローカルツール（<code>.config/dotnet-tools.json</code>）</td>
+<td>Fantomas・FSharpLint</td>
+<td>プログラムとは無関係で、開発者が実行するもの（5.3 節）</td>
+</tr>
+</tbody>
+</table>
+<p>テストのプロジェクトは <code>ProjectReference</code> で本体のプロジェクトを参照するので、本体が使うライブラリはテストからも使えます。逆に、xUnit は本体の依存関係には入りません。</p>
+<h3 id="_3">ライブラリを追加する<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>ライブラリを追加するときは、次の 2 か所に 1 行ずつ書き、<code>dotnet restore</code> を実行します。第 7 章以降で使う FSharp.Stats を追加したコミット（<code>35cf8f8b</code>）の変更です。</p>
+<div class="highlight"><pre><span></span><code><span class="gi">+    &lt;PackageVersion Include="FSharp.Stats" Version="0.6.0" /&gt;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="gi">+    &lt;PackageReference Include="FSharp.Stats" /&gt;</span>
+</code></pre></div>
+<p>1 つ目が <code>Directory.Packages.props</code>、2 つ目が <code>MachineLearning.fsproj</code> です。このコミットでは、あわせて 2 つの <code>packages.lock.json</code> に合わせて 89 行が加わりました。FSharp.Stats が依存する FSharpAux などのパッケージも記録されるためです。</p>
+<p>依存関係は <code>dotnet list package</code> で確認できます。<code>--include-transitive</code> を付けると、依存関係の依存関係（推移的なパッケージ）も表示されます。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>list<span class="w"> </span>src/MachineLearning<span class="w"> </span>package<span class="w"> </span>--include-transitive
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>プロジェクト 'MachineLearning' に次のパッケージ参照が含まれています
+   [net10.0]: 
+   最上位レベル パッケージ                 要求済み       解決済み    
+   &gt; FSharp.Core                10.0.101   10.0.101
+   &gt; FSharp.Data                8.2.0      8.2.0   
+   &gt; FSharp.Stats               0.6.0      0.6.0   
+   &gt; Microsoft.ML               5.0.0      5.0.0   
+   &gt; Microsoft.ML.FastTree      5.0.0      5.0.0   
+
+   推移的なパッケージ                            解決済み  
+   &gt; FSharp.Data.Csv.Core               8.2.0 
+   &gt; FSharp.Data.Html.Core              8.2.0 
+   &gt; FSharp.Data.Http                   8.2.0 
+   &gt; FSharp.Data.Json.Core              8.2.0 
+   &gt; FSharp.Data.Runtime.Utilities      8.2.0 
+   &gt; FSharp.Data.WorldBank.Core         8.2.0 
+   &gt; FSharp.Data.Xml.Core               8.2.0 
+   &gt; FSharpAux                          2.0.0 
+   &gt; FSharpAux.Core                     2.0.0 
+   &gt; FSharpAux.IO                       2.0.0 
+   &gt; Microsoft.Bcl.AsyncInterfaces      9.0.4 
+   &gt; Microsoft.ML.CpuMath               5.0.0 
+   &gt; Microsoft.ML.DataView              5.0.0 
+   &gt; Newtonsoft.Json                    13.0.3
+   &gt; OptimizedPriorityQueue             5.1.0 
+   &gt; System.CodeDom                     9.0.4 
+   &gt; System.Numerics.Tensors            9.0.4 
+</code></pre></div>
+<p>直接の依存関係は 5 つですが、推移的なものを含めると 22 のパッケージを使っています。</p>
+<h3 id="packageslockjson">packages.lock.json で環境を再現する<a class="headerlink" href="#packageslockjson" title="Permanent link">&para;</a></h3>
+<p><code>Version="8.2.0"</code> は、NuGet では「8.2.0 <strong>以上</strong>」という範囲の意味です。NuGet は範囲に当てはまる最も低い版を選ぶので、ふつうは 8.2.0 が選ばれますが、推移的なパッケージの版は、そのパッケージを参照する側の指定と、パッケージソースに何があるかで決まります。Kotlin 版では依存関係に範囲指定が無いことを確かめてロックファイルを使いませんでしたが、F# 版では第 1 章から <strong>ロックファイル</strong> を使っています。</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="cm">&lt;!-- 依存関係の依存関係まで正確な版を packages.lock.json に記録する --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;RestorePackagesWithLockFile&gt;</span>true<span class="nt">&lt;/RestorePackagesWithLockFile&gt;</span>
+</code></pre></div>
+<p><code>Directory.Build.props</code> のこの設定で、<code>dotnet restore</code> はプロジェクトごとに <code>packages.lock.json</code> を書き出します。</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"net10.0"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"FSharp.Core"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Direct"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"requested"</span><span class="p">:</span><span class="w"> </span><span class="s2">"[10.0.101, )"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"resolved"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10.0.101"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"contentHash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mrS3J7cLtvXM3u3CmiaFq8oyBdlevzZY1VAAAbFk1gUDQtDEjUOybN5XpQglx5wAgJ0wLdDl6OSSfS7ZDFNcpA=="</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"FSharp.Data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Direct"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"requested"</span><span class="p">:</span><span class="w"> </span><span class="s2">"[8.2.0, )"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"resolved"</span><span class="p">:</span><span class="w"> </span><span class="s2">"8.2.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"contentHash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"U9ymmHeGVsRtKu46UNq6dS4wl3Y/0TpzHx5i0mNhzsX/eY0FTblFq1zrOLcuuRNJAbsznwZcnKzOQKkyHxp8fA=="</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"FSharp.Core"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6.0.1"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"FSharp.Data.Csv.Core"</span><span class="p">:</span><span class="w"> </span><span class="s2">"8.2.0"</span><span class="p">,</span>
+</code></pre></div>
+<ul>
+<li><code>requested</code> の <code>[8.2.0, )</code> は、「8.2.0 以上、上限なし」という範囲の書き方です。<code>Version="8.2.0"</code> が範囲であることが、ここに表れています</li>
+<li><code>resolved</code> が実際に選ばれた版、<code>contentHash</code> がパッケージの中身のハッシュです</li>
+<li><code>type</code> は、直接の依存関係なら <code>Direct</code>、推移的なものなら <code>Transitive</code> です。本体のロックファイルには 17、テストのロックファイルには 42 の <code>Transitive</code> が記録されています</li>
+</ul>
+<p><code>dotnet restore --locked-mode</code> は、ロックファイルと食い違う依存関係があると、ロックファイルを書き換えずに失敗します。CI ではこのオプションを使い、手元でロックファイルを更新し忘れた変更を見つけます。試しに <code>Directory.Packages.props</code> の FSharp.Stats を 0.5.0 に書き換えて実行すると、次のように失敗しました（パスは省略しています）。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>restore<span class="w"> </span>--locked-mode
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>MachineLearning.fsproj : error NU1004: パッケージ参照 FSharp.Stats のバージョンが [0.6.0, ) から [0.5.0, ) に変更されました。パッケージ ロック ファイルはプロジェクトの依存関係と一貫性がないため、ロック モードで復元を実行できません。RestoreLockedMode MSBuild プロパティを無効にするか、明示的な --force-evaluate オプションを渡して復元を実行し、ロック ファイルを更新してください。
+MachineLearning.Tests.fsproj : error NU1004: CentralTransitive としてマークされたロック ファイルの依存関係の requestedVersion と、中央のパッケージ管理ファイルに指定されたバージョンが一致しません。ロック ファイル バージョン [0.6.0, )、中央のパッケージ管理バージョン [0.5.0, )。
+</code></pre></div>
+<p>テストのプロジェクトも失敗しているのは、本体を参照しているので、FSharp.Stats を推移的に使っているからです。版を変えるときは、<code>--locked-mode</code> を付けずに <code>dotnet restore</code> を実行してロックファイルを更新し、<code>Directory.Packages.props</code> と 2 つの <code>packages.lock.json</code> を一緒にコミットします。</p>
+<h3 id="_4">依存関係の脆弱性を確かめる<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>TypeScript 版の <code>npm audit</code> と同じく、依存関係に既知の脆弱性があるかを確かめられます。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>list<span class="w"> </span>package<span class="w"> </span>--vulnerable<span class="w"> </span>--include-transitive
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>指定されたプロジェクト 'MachineLearning' には、現在のソースが指定された脆弱なパッケージはありません。
+指定されたプロジェクト 'MachineLearning.Tests' には、現在のソースが指定された脆弱なパッケージはありません。
+</code></pre></div>
+<h2 id="53-net-sdk">5.3 .NET SDK とツールの版を固定する<a class="headerlink" href="#53-net-sdk" title="Permanent link">&para;</a></h2>
+<h3 id="globaljson">global.json<a class="headerlink" href="#globaljson" title="Permanent link">&para;</a></h3>
+<p><code>global.json</code> は、このディレクトリで <code>dotnet</code> のコマンドを実行したときに使う .NET SDK の版を決めます（第 1 章）。</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"sdk"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10.0.101"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"rollForward"</span><span class="p">:</span><span class="w"> </span><span class="s2">"latestPatch"</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"test"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"runner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Microsoft.Testing.Platform"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>version</code> は 10.0.101 です。<code>rollForward</code> の <code>latestPatch</code> は、「10.0.1xx の中で、入っている最も新しい修正版を使う」という意味です。10.0.101 が無くても 10.0.102 があれば使い、10.0.200 や 11.0 には上げません</li>
+<li>条件に合う SDK が無ければ、<code>dotnet</code> のコマンドはビルドを始める前に失敗します。第 4 章の乱数列のテストと合わせて、SDK の版が変わったことに気づけます</li>
+</ul>
+<h3 id="nix-net-sdk">Nix の .NET SDK<a class="headerlink" href="#nix-net-sdk" title="Permanent link">&para;</a></h3>
+<p>CI と、Nix を使う読者の環境では、<code>nix develop .#dotnet</code> で .NET SDK を用意します（<code>ops/nix/environments/dotnet/shell.nix</code>）。</p>
+<div class="highlight"><pre><span></span><code>  <span class="ss">buildInputs</span> <span class="o">=</span> baseShell<span class="o">.</span>buildInputs <span class="o">++</span> <span class="p">(</span><span class="k">with</span> packages<span class="p">;</span> <span class="p">[</span>
+    dotnet-sdk_10
+  <span class="p">]);</span>
+</code></pre></div>
+<p>最初、この環境は <code>dotnet-sdk</code> を使っていましたが、本リポジトリの <code>flake.lock</code> が固定する nixpkgs では、<code>dotnet-sdk</code> は .NET 8 を指していました。<code>global.json</code> の 10.0.101 を満たさないので、F# 版のプロジェクトを作る前に <code>dotnet-sdk_10</code> に変えています（<code>03a99d1a</code>）。CI のログにも、<code>.NET SDK: 10.0.101</code> と表示されます。</p>
+<h3 id="_5">ローカルツール<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>整形の Fantomas と静的解析の FSharpLint は、NuGet で配布される <strong>.NET ツール</strong> です。<code>.config/dotnet-tools.json</code> に版を書いておくと、そのディレクトリの中だけで使える <strong>ローカルツール</strong> になります。</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"isRoot"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tools"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"fantomas"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"8.0.0"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"fantomas"</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"rollForward"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"dotnet-fsharplint"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.27.0"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"dotnet-fsharplint"</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"rollForward"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>tool<span class="w"> </span>restore
+dotnet<span class="w"> </span>tool<span class="w"> </span>list
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>パッケージ ID               バージョン       コマンド                   マニフェスト
+fantomas               8.0.0       fantomas               ...\apps\dotnet\.config\dotnet-tools.json
+dotnet-fsharplint      0.27.0      dotnet-fsharplint      ...\apps\dotnet\.config\dotnet-tools.json
+</code></pre></div>
+<ul>
+<li><code>dotnet tool restore</code> は、ファイルに書かれた版のツールを入れます。マシン全体に入れる（グローバルツール）必要が無いので、読者や CI の環境でも同じ版を使えます</li>
+<li>ツールは <code>dotnet fantomas</code>・<code>dotnet fsharplint</code> のように、<code>dotnet</code> に続けて実行します</li>
+</ul>
+<h3 id="fsharpcore-nugetorg">FSharp.Core を nuget.org から取る<a class="headerlink" href="#fsharpcore-nugetorg" title="Permanent link">&para;</a></h3>
+<p>第 1 章で <code>Directory.Build.props</code> に書いた次の設定は、CI で初めて見つかった問題への対処です。</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="cm">&lt;!-- .NET SDK 同梱の FSharp.Core（library-packs）は nuget.org のものとハッシュが違い、</span>
+<span class="cm">         packages.lock.json の検証が環境によって失敗するので、nuget.org からだけ取る --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;DisableImplicitLibraryPacksFolder&gt;</span>true<span class="nt">&lt;/DisableImplicitLibraryPacksFolder&gt;</span>
+</code></pre></div>
+<p>.NET SDK には、FSharp.Core のパッケージが同梱されています（手元の Windows では <code>C:\Program Files\dotnet\sdk\10.0.101\FSharp\library-packs\FSharp.Core.10.0.101.nupkg</code>）。SDK は、このフォルダーを暗黙のパッケージソースに加えます。手元で作った <code>packages.lock.json</code> と、CI（Nix の .NET SDK）での <code>dotnet restore --locked-mode</code> が食い違い、最初の CI の実行が次のエラーで失敗しました。</p>
+<div class="highlight"><pre><span></span><code>MachineLearning.fsproj : error NU1403: Package content hash validation failed for FSharp.Core.10.0.101. The package is different than the last restore.
+</code></pre></div>
+<p>同じ 10.0.101 という版でも、Nix の SDK に同梱されたパッケージは、ロックファイルに記録したハッシュと中身が一致しなかったのです。ロックファイルは、版だけでなく中身のハッシュまで確かめるので、この違いに気づけました。<code>DisableImplicitLibraryPacksFolder</code> で SDK 同梱のフォルダーを使わないようにし、FSharp.Core もほかのパッケージと同じく nuget.org からだけ取るようにすると、CI が成功しました（<code>63bd9ffb</code>）。</p>
+<p>もう 1 つの <code>DisableImplicitFSharpCoreReference</code> と、FSharp.Core を明示して参照する設定の経緯は、第 1 章の 1.5 節で紹介しました。</p>
+<h2 id="54-fantomas">5.4 整形 — Fantomas<a class="headerlink" href="#54-fantomas" title="Permanent link">&para;</a></h2>
+<h3 id="fantomas">Fantomas の設定<a class="headerlink" href="#fantomas" title="Permanent link">&para;</a></h3>
+<p>コードの整形には Fantomas を使います。設定は <code>.editorconfig</code> に書き、ここでは改行コードだけを既定から変えています。</p>
+<div class="highlight"><pre><span></span><code><span class="na">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+
+<span class="c1"># Fantomas の設定。改行コードを .gitattributes と同じ LF にそろえる</span>
+<span class="k">[*.{fs,fsi,fsx}]</span>
+<span class="na">end_of_line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">lf</span>
+</code></pre></div>
+<p>Windows では、Fantomas は既定で CRLF で書き出します。<code>.gitattributes</code> の LF（第 4 章）と食い違うと、手元で整形するたびに全行が変わってしまうので、LF にそろえました（<code>889e9e3a</code>）。</p>
+<p>それ以外は Fantomas の既定の書式です。既定では 1 行の上限（<code>max_line_length</code>）が 120 文字で、それとは別に、<code>let</code> の右辺が 80 文字（<code>fsharp_max_value_binding_width</code>）を超えると改行します。</p>
+<h3 id="fantomas_1">Fantomas の実行<a class="headerlink" href="#fantomas_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 検査する（CI 向け）</span>
+dotnet<span class="w"> </span>fantomas<span class="w"> </span>--check<span class="w"> </span>.
+
+<span class="c1"># 整形する</span>
+dotnet<span class="w"> </span>fantomas<span class="w"> </span>.
+</code></pre></div>
+<p>第 6 章で作る Notebook の道具（<code>tools/notebooks.fsx</code>）を書いた直後に検査すると、整形が必要なファイルとして見つかりました。</p>
+<div class="highlight"><pre><span></span><code>! .\tools\notebooks.fsx needs formatting.
+
+1 file needs formatting, 20 already formatted. Run dotnet fantomas . to format it.
+</code></pre></div>
+<p>このときの終了コードは 99 でした。整形が必要なファイルがあると 0 以外で終わるので、CI の失敗として検出できます。整形すると、たとえば次の行が 2 行に分かれました。</p>
+<div class="highlight"><pre><span></span><code><span class="gd">-let notebookDir = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "notebooks"))</span>
+<span class="gi">+let notebookDir =</span>
+<span class="gi">+    Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", "notebooks"))</span>
+</code></pre></div>
+<p>1 行は 120 文字に収まっていますが、右辺が 80 文字を超えているためです。</p>
+<p><code>dotnet fantomas .</code> は、プロジェクトに含まれないスクリプト（<code>.fsx</code>）も含めて、ディレクトリの下の F# のファイルをすべて整形します。</p>
+<h2 id="55-fsharplint">5.5 静的解析 — FSharpLint<a class="headerlink" href="#55-fsharplint" title="Permanent link">&para;</a></h2>
+<h3 id="fantomas-fsharplint">Fantomas と FSharpLint の役割<a class="headerlink" href="#fantomas-fsharplint" title="Permanent link">&para;</a></h3>
+<p>Fantomas が「どう書くか（書式）」を揃えるのに対して、FSharpLint は「何を書いたか（コードの中身）」の問題を探します。</p>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>Fantomas</th>
+<th>FSharpLint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>字下げ・空白・改行の位置</td>
+<td>整形する</td>
+<td>扱わない（書式のルールは既定で無効）</td>
+</tr>
+<tr>
+<td>命名規則（PascalCase・camelCase）</td>
+<td>扱わない</td>
+<td>検査する</td>
+</tr>
+<tr>
+<td>再帰関数と末尾呼び出し</td>
+<td>扱わない</td>
+<td><code>[&lt;TailCall&gt;]</code> の付け忘れを検査する</td>
+</tr>
+<tr>
+<td>冗長な書き方（不要な <code>new</code>、<code>fun x -&gt; x</code> を <code>id</code> にできる、など）</td>
+<td>扱わない</td>
+<td>検査する（<code>fun x -&gt; x</code> などはヒントとして）</td>
+</tr>
+<tr>
+<td>自動修正</td>
+<td>できる</td>
+<td>本リポジトリの使い方ではしない</td>
+</tr>
+</tbody>
+</table>
+<h3 id="0-warnings">「0 warnings」を疑う<a class="headerlink" href="#0-warnings" title="Permanent link">&para;</a></h3>
+<p>第 1 章から、FSharpLint の設定ファイル <code>fsharplint.json</code> は次の 3 行でした。</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">"ignoreFiles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"**/obj/**"</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>obj/</code> には、xUnit が自動で生成するエントリポイントのファイルがあり、FSharpLint が命名規則の警告を出すので、除外したつもりの設定です。実行すると警告は 0 件でした。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>fsharplint<span class="w"> </span>lint<span class="w"> </span>MachineLearning.sln
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Running FSharpLint with 97 rules (0 enabled, 97 disabled)...
+...
+========== Summary: 0 warnings ==========
+</code></pre></div>
+<p>出力の 1 行目をよく見ると、<strong>97 のルールのうち、有効なものが 0</strong> です。警告が 0 件なのは、コードに問題が無いからではなく、何も検査していなかったからでした。</p>
+<p>FSharpLint のドキュメントには、次のように書かれています。</p>
+<blockquote>
+<p>At this moment in time the configuration requires every rule to be added to your file, rather than a typical approach where you would override just the rules you want to change from their defaults.</p>
+<p>— <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html">FSharpLint: Rule Configuration</a></p>
+</blockquote>
+<p>設定ファイルは既定の設定に <strong>重なる</strong> のではなく、既定の設定を <strong>置き換えます</strong>。書かなかったルールは無効になります。Kotlin 版の detekt は <code>buildUponDefaultConfig = true</code> で既定に重ねられましたが、FSharpLint 0.27.0 にはその仕組みがありません。</p>
+<p>設定ファイルを置かずに実行すると、既定の設定が使われます。</p>
+<div class="highlight"><pre><span></span><code>Running FSharpLint with 98 rules (42 enabled, 56 disabled)...
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>The 'fit' function has a "rec" keyword, but no [&lt;TailCall&gt;] attribute. Consider adding [&lt;TailCall&gt;] attribute to the function and &lt;WarningsAsErrors&gt;FS3569&lt;/WarningsAsErrors&gt; property to project file (but only on .NET 8 and higher).
+Error on line 64 starting at column 8
+let rec fit (maxDepth: int option) (x: Map&lt;string, float&gt; list) (t: 'L list) : Tree&lt;'L&gt; =
+        ^
+See https://fsprojects.github.io/FSharpLint/how-tos/rules/FL0085.html
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Consider changing `_nqyFv2P81` to PascalCase.
+Error on line 3 starting at column 36
+module internal Xunit.AutoGenerated._nqyFv2P81
+                                    ^
+See https://fsprojects.github.io/FSharpLint/how-tos/rules/FL0042.html
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>========== Summary: 5 warnings ==========
+</code></pre></div>
+<p>有効なルールは 42 で、警告は 5 件でした。第 3 章の <code>fit</code>・<code>predictOne</code>・<code>formatTree</code> への FL0085 が 3 件と、<code>obj/</code> の自動生成ファイルへの FL0042（命名規則）が 2 件です。このとき、終了コードは 127 でした。</p>
+<h3 id="_6">既定の設定を写して、除外だけを加える<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p>既定の設定は、FSharpLint のパッケージの中の <code>fsharplint.json</code> です（ローカルツールを入れた環境では <code>~/.nuget/packages/dotnet-fsharplint/0.27.0/tools/net8.0/any/fsharplint.json</code>）。これを <code>apps/fsharp/fsharplint.json</code> に写し、先頭の <code>ignoreFiles</code> に <code>obj/</code> を加えました。</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">"ignoreFiles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"assemblyinfo.*"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"obj/"</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"global"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"numIndentationSpaces"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">    </span><span class="p">},</span>
+</code></pre></div>
+<ul>
+<li>ドキュメントによると、<code>ignoreFiles</code> の規則は <code>/</code> で終わればそのディレクトリの中のすべてのファイルに当てはまります</li>
+<li>既定の設定を丸ごと写したので、ファイルは 494 行あります。FSharpLint の版を上げるときは、新しい版の既定の設定を写し直し、<code>ignoreFiles</code> だけを加え直します</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Running FSharpLint with 98 rules (42 enabled, 56 disabled)...
+========== Summary: 3 warnings ==========
+</code></pre></div>
+<p><code>obj/</code> への警告が消え、第 3 章のコードへの 3 件が残りました。</p>
+<h3 id="_7">指摘ごとに対応を決める<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>FL0085 は、<code>let rec</code> の再帰関数に <code>[&lt;TailCall&gt;]</code> 属性が無いことを指摘するルールです。<code>[&lt;TailCall&gt;]</code> を付けると、F# のコンパイラは、その関数の再帰呼び出しが <strong>末尾呼び出し</strong>（呼び出しの結果をそのまま返し、呼び出しの後に何もしない形）になっているかを検査します。末尾呼び出しの再帰はループに変換されるので、どれだけ深く再帰してもスタックを使い果たしません。</p>
+<p>3 つの関数すべてに <code>[&lt;TailCall&gt;]</code> を付けてビルドすると、2 つがエラーになりました。</p>
+<div class="highlight"><pre><span></span><code>DecisionTree.fs(76,13): error FS3569: メンバーまたは関数 'fit' には 'TailCallAttribute' 属性がありますが、末尾の再帰的な方法では使用されていません。
+DecisionTree.fs(102,19): error FS3569: メンバーまたは関数 'formatTree' には 'TailCallAttribute' 属性がありますが、末尾の再帰的な方法では使用されていません。
+DecisionTree.fs(104,19): error FS3569: メンバーまたは関数 'formatTree' には 'TailCallAttribute' 属性がありますが、末尾の再帰的な方法では使用されていません。
+</code></pre></div>
+<p>FS3569 は本来は警告ですが、<code>TreatWarningsAsErrors</code>（5.6 節）でエラーになっています。コンパイラの判定に沿って、対応を分けました。</p>
+<p><strong>predictOne（属性を付ける）</strong>: 葉に着くまで、左右どちらかの部分木で自分を呼び、その結果をそのまま返します。末尾呼び出しなので、<code>[&lt;TailCall&gt;]</code> を付けたままにしました。今後この関数を書き換えて末尾呼び出しでなくなれば、コンパイラが知らせてくれます。</p>
+<div class="highlight"><pre><span></span><code><span class="o">[&lt;</span><span class="n">TailCall</span><span class="o">&gt;]</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">rec</span><span class="w"> </span><span class="n">predictOne</span><span class="w"> </span><span class="o">(</span><span class="n">tree</span><span class="o">:</span><span class="w"> </span><span class="n">Tree</span><span class="o">&lt;</span><span class="k">'</span><span class="n">L</span><span class="o">&gt;)</span><span class="w"> </span><span class="o">(</span><span class="n">row</span><span class="o">:</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">,</span><span class="w"> </span><span class="kt">float</span><span class="o">&gt;)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">'</span><span class="n">L</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">tree</span><span class="w"> </span><span class="k">with</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Leaf</span><span class="w"> </span><span class="n">label</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">label</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Node</span><span class="o">(</span><span class="n">split</span><span class="o">,</span><span class="w"> </span><span class="n">left</span><span class="o">,</span><span class="w"> </span><span class="n">right</span><span class="o">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">row</span><span class="o">[</span><span class="n">split</span><span class="o">.</span><span class="n">Feature</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">split</span><span class="o">.</span><span class="n">Threshold</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="n">predictOne</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="n">row</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="n">predictOne</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="n">row</span>
+</code></pre></div>
+<p><strong>fit と formatTree（理由を書いて抑える）</strong>: <code>fit</code> は左右の部分木を作ってから <code>Node</code> にまとめ、<code>formatTree</code> は左右の部分木の行を <code>@</code> で連結します。どちらも再帰呼び出しの後に仕事が残るので、末尾呼び出しにはなりません。再帰の深さは木の深さまでで、iris のデータでは深さ 5 で訓練データに完全に当てはまりました（第 3 章）。末尾呼び出しに書き換えると読みにくくなるだけなので、この 2 か所は、理由をコメントに書いたうえで、行単位で指摘を抑えました。</p>
+<div class="highlight"><pre><span></span><code><span class="sd">/// 深さの上限（None なら制限なし）まで、分け方を選んで再帰的に木を作る</span>
+<span class="c1">// 左右の部分木を作ってから Node にまとめるので末尾再帰ではない。再帰の深さは木の深さまで</span>
+<span class="c1">// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">rec</span><span class="w"> </span><span class="n">fit</span><span class="w"> </span><span class="o">(</span><span class="n">maxDepth</span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="n">option</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="n">x</span><span class="o">:</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">,</span><span class="w"> </span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="kt">list</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="n">t</span><span class="o">:</span><span class="w"> </span><span class="k">'</span><span class="n">L</span><span class="w"> </span><span class="kt">list</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Tree</span><span class="o">&lt;</span><span class="k">'</span><span class="n">L</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span>
+</code></pre></div>
+<ul>
+<li><code>// fsharplint:disable-next-line &lt;ルール名&gt;</code> は、次の 1 行にだけ、指定したルールを当てはめないというコメントです</li>
+<li>設定ファイルでルールそのものを無効にしなかったのは、これから書く再帰関数（第 10 章のランダムフォレストなど）にも、同じ判断を 1 つずつ求めたいからです</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Running FSharpLint with 98 rules (42 enabled, 56 disabled)...
+========== Summary: 0 warnings ==========
+</code></pre></div>
+<p>今度の「0 warnings」は、42 のルールで検査した結果です。第 3 章の記事の完成コードも、この変更に合わせて更新しました。</p>
+<h2 id="56-f">5.6 型チェックと警告 — F# コンパイラ<a class="headerlink" href="#56-f" title="Permanent link">&para;</a></h2>
+<p>Python 版では、型ヒントを mypy で検査しました。F# は静的型付けの言語なので、型チェックはコンパイラが行い、型が合わないコードはそもそもビルドできません。<code>dotnet test</code> は、テストの前に必ずビルドするので、型チェックとテストが 1 つのコマンドで続けて行われます（第 1 章）。</p>
+<p>F# のコンパイラは、型の誤りのほかに、実行時の問題につながりうる書き方を <strong>警告</strong> で知らせます。本リポジトリでは <code>Directory.Build.props</code> で警告をエラーにしています。</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="cm">&lt;!-- コンパイラの警告（パターンマッチの網羅漏れなど）をエラーにする --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;TreatWarningsAsErrors&gt;</span>true<span class="nt">&lt;/TreatWarningsAsErrors&gt;</span>
+</code></pre></div>
+<p>第 1 部と本章で、この設定がエラーにした警告は次のとおりです。</p>
+<table>
+<thead>
+<tr>
+<th>警告</th>
+<th>内容</th>
+<th>章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FS0025</td>
+<td>パターンマッチが不完全（判別共用体の <code>Node</code> の場合が無い）</td>
+<td>第 3 章</td>
+</tr>
+<tr>
+<td>FS3569</td>
+<td><code>[&lt;TailCall&gt;]</code> を付けた関数が末尾呼び出しになっていない</td>
+<td>本章</td>
+</tr>
+</tbody>
+</table>
+<p>警告のままだと、ビルドの出力に埋もれて見落としがちです。エラーにしておけば、直すまでテストも実行できません。</p>
+<p>一方で、型で守られない部分もあります。</p>
+<ul>
+<li><code>Map&lt;string, float&gt;</code> の <code>row[feature]</code> は、キーが無ければ実行時に例外（<code>KeyNotFoundException</code>）になります。特徴量の名前の打ち間違いは、コンパイラには分かりません</li>
+<li>ML.NET の <code>IDataView</code> は、列の名前と型を実行時に決めます。第 3 章では、特徴量ベクトルの長さを <code>SchemaDefinition</code> で実行時に指定しました</li>
+</ul>
+<p>こうした場所は、テストで守る必要があります。</p>
+<h2 id="57-coverlet">5.7 コードカバレッジ — coverlet<a class="headerlink" href="#57-coverlet" title="Permanent link">&para;</a></h2>
+<p>テストが本体のコードのどこを実行したかを、coverlet で計測します。第 1 章から、テストのプロジェクトに coverlet.MTP（Microsoft.Testing.Platform 向けの coverlet）を入れてあり、<code>dotnet test</code> にオプションを付けるだけで計測できます。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--coverlet<span class="w"> </span>--coverlet-include<span class="w"> </span><span class="s1">'[MachineLearning]*'</span><span class="w"> </span>--coverlet-output-format<span class="w"> </span>cobertura<span class="w"> </span>--results-directory<span class="w"> </span>TestResults
+</code></pre></div>
+<ul>
+<li><code>--coverlet</code> で計測を有効にし、結果を Cobertura 形式（XML）で <code>TestResults/</code> に書き出します</li>
+<li><code>--coverlet-include '[MachineLearning]*'</code> は、計測の対象を <code>MachineLearning</code> のアセンブリ（本体）だけに絞ります。<code>[アセンブリ名]型名</code> の形で、<code>*</code> は任意の文字列です</li>
+</ul>
+<p>学習データを配置した環境での結果です（XML の先頭の要素から抜き出しています）。</p>
+<div class="highlight"><pre><span></span><code>line-rate="0.925" branch-rate="0.7352"
+lines-covered="222" lines-valid="240"
+</code></pre></div>
+<p>行のカバレッジは 92.5%（240 行中 222 行）です。実行されなかった行の多くは <code>Program.fs</code>（コマンドラインの入り口）で、テストは各章の <code>Main.run</code> を直接呼ぶので、<code>Program.fs</code> は実行されません。</p>
+<p>学習データが無い環境での結果です。</p>
+<div class="highlight"><pre><span></span><code><span class="nv">ML_DATA_DIR</span><span class="o">=</span>/nonexistent<span class="w"> </span>dotnet<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--coverlet<span class="w"> </span>--coverlet-include<span class="w"> </span><span class="s1">'[MachineLearning]*'</span><span class="w"> </span>--coverlet-output-format<span class="w"> </span>cobertura<span class="w"> </span>--results-directory<span class="w"> </span>TestResults
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>line-rate="0.725" branch-rate="0.5489999999999999"
+lines-covered="174" lines-valid="240"
+</code></pre></div>
+<p>データが無いと、実データのテスト 7 件がスキップされ、各章の <code>Main.run</code> などが実行されないので、カバレッジが 72.5% に下がります。Python 版・Kotlin 版と同じく、カバレッジの数値を比べるときは、データのある環境で計測したものかを確認してください。</p>
+<h3 id="_8">計測の対象を絞る理由<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p><code>--coverlet-include</code> を付けずに実行すると、テストはすべて成功し、終了コードも 0 でしたが、<code>TestResults/</code> にはカバレッジのファイルが 1 つも書き出されませんでした。エラーのメッセージもありません。実行時間は、絞ったとき（約 3 秒）の 5 倍の約 15 秒でした。</p>
+<p>ADR 004 を書いたときに診断ログで調べたところ、coverlet は既定で FSharp.Core などテストが読み込むアセンブリも計測しようとし、Windows では実行中のファイルを書き換えられずに、計測全体が失敗していました。失敗がテストの結果に表れないので、カバレッジのファイルができていることを確かめるまで気づけません。これも「失敗しない」ことを疑うべき場面です。</p>
+<p>本リポジトリでは、カバレッジの下限を設けていません。CI には学習データを置けないので、CI で計測したカバレッジは手元より必ず低くなり、下限を決めても手元と CI で意味が変わってしまうためです。</p>
+<details>
+<summary>この章の完成コード（Directory.Build.props）</summary>
+
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;Project&gt;</span>
+<span class="w">  </span><span class="nt">&lt;PropertyGroup&gt;</span>
+<span class="w">    </span><span class="nt">&lt;TargetFramework&gt;</span>net10.0<span class="nt">&lt;/TargetFramework&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- コンパイラの警告（パターンマッチの網羅漏れなど）をエラーにする --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;TreatWarningsAsErrors&gt;</span>true<span class="nt">&lt;/TreatWarningsAsErrors&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 依存関係の依存関係まで正確な版を packages.lock.json に記録する --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;RestorePackagesWithLockFile&gt;</span>true<span class="nt">&lt;/RestorePackagesWithLockFile&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- FSharp.Core の版は Directory.Packages.props で固定する --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;DisableImplicitFSharpCoreReference&gt;</span>true<span class="nt">&lt;/DisableImplicitFSharpCoreReference&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- .NET SDK 同梱の FSharp.Core（library-packs）は nuget.org のものとハッシュが違い、</span>
+<span class="cm">         packages.lock.json の検証が環境によって失敗するので、nuget.org からだけ取る --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;DisableImplicitLibraryPacksFolder&gt;</span>true<span class="nt">&lt;/DisableImplicitLibraryPacksFolder&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/PropertyGroup&gt;</span>
+<span class="w">  </span><span class="nt">&lt;ItemGroup&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageReference</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Core"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/ItemGroup&gt;</span>
+<span class="nt">&lt;/Project&gt;</span>
+</code></pre></div>
+
+</details>
+
+<details>
+<summary>この章の完成コード（Directory.Packages.props）</summary>
+
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;Project&gt;</span>
+<span class="w">  </span><span class="nt">&lt;PropertyGroup&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 依存ライブラリの版をこのファイルにまとめる（中央パッケージ管理） --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;ManagePackageVersionsCentrally&gt;</span>true<span class="nt">&lt;/ManagePackageVersionsCentrally&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/PropertyGroup&gt;</span>
+<span class="w">  </span><span class="nt">&lt;ItemGroup&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"coverlet.MTP"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"10.0.1"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- .NET SDK 10.0.101 に同梱の版 --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Core"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"10.0.101"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Data"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"8.2.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"FSharp.Stats"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"0.6.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"Microsoft.ML"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"5.0.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"Microsoft.ML.FastTree"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"5.0.0"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;PackageVersion</span><span class="w"> </span><span class="na">Include=</span><span class="s">"xunit.v3"</span><span class="w"> </span><span class="na">Version=</span><span class="s">"4.0.1"</span><span class="w"> </span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/ItemGroup&gt;</span>
+<span class="nt">&lt;/Project&gt;</span>
+</code></pre></div>
+
+</details>
+
+<h2 id="58">5.8 まとめ<a class="headerlink" href="#58" title="Permanent link">&para;</a></h2>
+<p>この章では、再現できるビルドと、実行せずに問題を見つける仕組みを整えました。</p>
+<ol>
+<li><strong>NuGet と中央パッケージ管理</strong> — 依存ライブラリの版を <code>Directory.Packages.props</code> にまとめ、プロジェクトを分けて本番とテストの依存を区別する。<code>Version="8.2.0"</code> は「8.2.0 以上」の範囲なので、<code>packages.lock.json</code> で推移的なパッケージまで版とハッシュを固定し、CI では <code>--locked-mode</code> で食い違いを検出する</li>
+<li><strong>SDK とツールの版</strong> — .NET SDK を <code>global.json</code> と Nix の <code>dotnet-sdk_10</code> で、Fantomas・FSharpLint をローカルツールで固定する。SDK 同梱の FSharp.Core はハッシュが違ったので、nuget.org からだけ取る</li>
+<li><strong>Fantomas</strong> — 書式を検査・整形する。改行コードは <code>.editorconfig</code> で LF にそろえる</li>
+<li><strong>FSharpLint</strong> — 設定ファイルは既定を置き換えるので、既定の設定を写して除外だけを加える。指摘は 1 つずつ理由を考え、コンパイラに検査させるか、理由を書いて抑えるかを決める。「0 warnings」は、何を検査した結果なのかを確かめる</li>
+<li><strong>警告とカバレッジ</strong> — <code>TreatWarningsAsErrors</code> で警告を見落とせないようにする。カバレッジは本体のアセンブリに絞って計測し、結果のファイルができていることを確かめる</li>
+</ol>
+<p>次の章では、これらのコマンドの役割を <code>dotnet</code> CLI と Gulp で分け、Notebook の出力セルを検査する仕組みを加えて、GitHub Actions で自動実行します。</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>

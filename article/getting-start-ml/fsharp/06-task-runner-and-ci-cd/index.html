@@ -1,0 +1,7171 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="dotnet CLI と Gulp の役割を分けて品質チェックを 1 つのタスクにまとめ、Notebook の出力セルを F# スクリプトで検査・削除し、Nix と GitHub Actions で CI を動かす。CI に載せるまでに起きた「失敗しない問題」の調べ方も紹介する。">
+      
+      
+        <meta name="author" content="Project Team">
+      
+      
+      
+        <link rel="prev" href="../05-package-management-and-static-analysis/">
+      
+      
+        <link rel="next" href="../07-linear-regression/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>第 6 章: タスクランナーと CI/CD - Site Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#6-cicd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Site Name" class="md-header__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Site Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第 6 章: タスクランナーと CI/CD
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../strategy/" class="md-tabs__link">
+          
+  
+  
+  戦略
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../requirements/" class="md-tabs__link">
+          
+  
+  
+  要件
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../design/" class="md-tabs__link">
+          
+  
+  
+  設計
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../development/" class="md-tabs__link">
+          
+  
+  
+  開発
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../operation/" class="md-tabs__link">
+          
+  
+  
+  運用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../review/" class="md-tabs__link">
+          
+  
+  
+  レビュー
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../adr/" class="md-tabs__link">
+          
+  
+  
+  ADR
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../" class="md-tabs__link">
+          
+  
+  
+  記事
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../reference/" class="md-tabs__link">
+          
+  
+  
+  リファレンス
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../template/" class="md-tabs__link">
+          
+  
+  
+  テンプレート
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Site Name" class="md-nav__button md-logo" aria-label="Site Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Site Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/k2works/claude-code-booster" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    claude-code-booster
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    戦略
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    戦略
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    要件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    設計
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    運用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../operation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    レビュー
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    レビュー
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ADR
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/001-python-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    001 Python 版の機械学習・可視化・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/002-kotlin-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    002 Kotlin 版の機械学習・データ・可視化・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/003-typescript-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    003 TypeScript 版の機械学習・データ・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../adr/004-fsharp-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    004 F# 版の機械学習・データ・可視化・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    記事
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    記事
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    機械学習から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    機械学習から始めるプログラミング入門
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../outline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    執筆計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    執筆ワークフロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_4" id="__nav_9_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../python/appendix-a-bank-exercise/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    付録 A 総合演習（Bank）
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_5" id="__nav_9_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kotlin
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Kotlin
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kotlin/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_6" id="__nav_9_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    TypeScript
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/06-task-runner-and-ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../typescript/15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9_2_7" id="__nav_9_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    F#
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    F#
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-machine-learning-and-first-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 機械学習とはじめてのテスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-data-preprocessing-and-triangulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 データの前処理と三角測量
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-decision-tree-and-obvious-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 決定木による分類と明白な実装
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-version-control-and-data-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 バージョン管理とデータ管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-package-management-and-static-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 パッケージ管理と静的解析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 タスクランナーと CI/CD
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 はじめに
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#62-dotnet-cli-gulp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 タスクランナー — dotnet CLI と Gulp
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.2 タスクランナー — dotnet CLI と Gulp">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dotnet-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dotnet CLI のコマンド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gulp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gulp で品質チェックをまとめる
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dotnet-cli-gulp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dotnet CLI と Gulp の役割分担
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mainrun" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        章の Main.run を実行する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        タスクの実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dotnet-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        環境変数を dotnet test に渡す
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#63-notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Notebook による探索と出力セルの削除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.3 Notebook による探索と出力セルの削除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#polyglot-notebooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polyglot Notebooks でデータを探索する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notebook で分かったことをテストに移す
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        出力セルを消してからコミットする
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notebook_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        画面なしで Notebook を実行する
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#64-github-actions-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 GitHub Actions による CI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.4 GitHub Actions による CI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ワークフロー設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ワークフローのポイント
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI パイプラインの流れ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#65-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 CI に載せるまでに起きた問題を調べる
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.5 CI に載せるまでに起きた問題を調べる">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ci-fsharpcore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1 つ目: CI だけで FSharp.Core のハッシュが合わない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 つ目: 静的解析が何も検査していなかった
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 つ目: カバレッジのファイルができない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 つ目: Windows でだけ整形の差分が出る
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        この経緯から学べること
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#66-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 三種の神器と CI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.6 三種の神器と CI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        利用可能なコマンド一覧
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#67" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.7 まとめ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-linear-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 線形回帰による数値予測
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-classification-and-preprocessing-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 実践的な分類と前処理パイプライン
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-feature-engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 特徴量エンジニアリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-logistic-regression-and-ensemble/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 ロジスティック回帰とアンサンブル学習
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-evaluation-metrics-and-cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 評価指標と交差検証
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-regularization-and-model-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 正則化とモデル選択
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-principal-component-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 主成分分析による次元削減
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-k-means-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 K-means によるクラスタリング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-machine-learning-api-and-module-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 機械学習 API とモジュール設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-tdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト駆動開発から始めるプログラミング入門
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokkingfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Functional Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../grokking-concurrency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grokking Concurrency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../functional-desgin-ppp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    関数型デザイン - 原則、パターン、実践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../practical-database-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    実践データベース設計：基幹業務システム編
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-start-docker-kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker/Kubernetes 実践コンテナ解説
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リファレンス
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    リファレンス
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%88%E3%81%84%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%A8%E3%81%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    よいソフトウェアとは
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AD%E3%82%B8%E3%82%AB%E3%83%AB%E3%82%B7%E3%83%B3%E3%82%AD%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ロジカルシンキング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%B5%8C%E5%96%B6%E6%88%A6%E7%95%A5%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経営戦略分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E5%88%86%E6%9E%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ分析ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユースケース作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アーキテクチャ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    データモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%A2%E3%83%87%E3%83%AB%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ドメインモデル設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/UI%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI 設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テスト戦略ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%9D%9E%E6%A9%9F%E8%83%BD%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    非機能要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用要件定義ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E8%A8%AD%E8%A8%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ設計ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%A8%E3%83%86%E3%82%B9%E3%83%88%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コーディングとテストガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    エクストリームプログラミング
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリースガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E3%83%BB%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース・イテレーション計画ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E7%92%B0%E5%A2%83%E5%A4%89%E6%95%B0%E7%AE%A1%E7%90%86%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境変数管理ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E8%A8%80%E8%AA%9E%E5%88%A5%E9%96%8B%E7%99%BA%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    言語別開発ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Java%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Java アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/TypeScript%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TypeScript アプリケーション環境構築ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E7%94%A8%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BD%9C%E6%88%90%E3%82%AC%E3%82%A4%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運用スクリプト作成ガイド
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E3%83%95%E3%83%AD%E3%83%BC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP アプリケーション開発フロー
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/CodexCLIMCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E8%A8%AD%E5%AE%9A%E6%89%8B%E9%A0%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI MCP サーバー設定手順
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/SonarQube%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SonarQube ローカル環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/Vim%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vim 操作マニュアル
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E4%BC%81%E6%A5%AD%E7%B5%8C%E5%96%B6%E8%AB%96/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業経営論
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../reference/%E9%81%8B%E5%96%B6%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    運営管理
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    テンプレート
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    テンプレート
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%81%BE%E3%81%9A%E3%81%93%E3%82%8C%E3%82%92%E8%AA%AD%E3%82%82%E3%81%86%E3%83%AA%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    まずこれを読もうリスト
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ビジネスアーキテクチャ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A6%81%E4%BB%B6%E5%AE%9A%E7%BE%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    要件定義
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E5%AE%8C%E5%85%A8%E5%BD%A2%E5%BC%8F%E3%81%AE%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完全形式のユースケース
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E8%A8%AD%E8%A8%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%B3%E3%82%BB%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%87%E3%83%83%E3%82%AD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インセプションデッキ
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A4%E3%83%86%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    イテレーション完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%A8%88%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース計画
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E5%AE%8C%E4%BA%86%E5%A0%B1%E5%91%8A%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    リリース完了報告書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリケーション開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%83%B3%E3%82%B0%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS ステージング環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/AWS%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E7%92%B0%E5%A2%83%E3%82%BB%E3%83%83%E3%83%88%E3%82%A2%E3%83%83%E3%83%97%E6%89%8B%E9%A0%86%E6%9B%B8/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS プロダクション環境セットアップ手順書
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BC%81%E6%A5%AD%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    企業分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/%E4%BA%8B%E4%BE%8B%E5%88%86%E6%9E%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事例分析
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--stable"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../template/README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="6-cicd">第 6 章: タスクランナーと CI/CD<a class="headerlink" href="#6-cicd" title="Permanent link">&para;</a></h1>
+<h2 id="61">6.1 はじめに<a class="headerlink" href="#61" title="Permanent link">&para;</a></h2>
+<p>第 5 章までで、テスト（xUnit v3）、整形（Fantomas）、静的解析（FSharpLint）、警告をエラーにする設定、カバレッジ（coverlet）がそろいました。ただ、コマンドを覚えて毎回正しい順番で実行するのは手間で、実行し忘れも起きます。</p>
+<p>この章では、次の 3 つを整えます。</p>
+<ol>
+<li><strong>タスクランナー</strong> — <code>dotnet</code> CLI のコマンドと、リポジトリ全体の Gulp のタスクの役割を分け、品質チェックを 1 つのタスクで実行できるようにする</li>
+<li><strong>Notebook の運用</strong> — Polyglot Notebooks の出力セルを消してからコミットする仕組みを、F# のスクリプトとして作る（第 2 章で予告したもの）</li>
+<li><strong>CI/CD</strong> — GitHub Actions で、プッシュのたびに同じ品質チェックを自動実行する</li>
+</ol>
+<p>最後に、CI に載せるまでに起きた問題と、その調べ方を紹介します。</p>
+<p><a href="../../python/06-task-runner-and-ci-cd/">Python 版の第 6 章</a> では tox を、<a href="../../kotlin/06-task-runner-and-ci-cd/">Kotlin 版の第 6 章</a> では Gradle を、<a href="../../typescript/06-task-runner-and-ci-cd/">TypeScript 版の第 6 章</a> では npm scripts をタスクランナーにしました。F# 版では、<code>dotnet</code> CLI には品質チェックをまとめる仕組みが無いので、まとめる役をリポジトリの Gulp に任せます。Notebook の出力セルは、Kotlin 版と同じく Python のツールに頼らず、.NET SDK だけで検査します。</p>
+<h2 id="62-dotnet-cli-gulp">6.2 タスクランナー — dotnet CLI と Gulp<a class="headerlink" href="#62-dotnet-cli-gulp" title="Permanent link">&para;</a></h2>
+<h3 id="dotnet-cli">dotnet CLI のコマンド<a class="headerlink" href="#dotnet-cli" title="Permanent link">&para;</a></h3>
+<p>F# 版で使うコマンドは、どれも <code>dotnet</code> CLI とそのローカルツールです。</p>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>役割</th>
+<th>章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dotnet tool restore</code></td>
+<td>Fantomas・FSharpLint を入れる</td>
+<td>第 5 章</td>
+</tr>
+<tr>
+<td><code>dotnet restore</code></td>
+<td>依存パッケージを入れ、<code>packages.lock.json</code> を書き出す</td>
+<td>第 5 章</td>
+</tr>
+<tr>
+<td><code>dotnet build</code></td>
+<td>ビルドする（型チェックを含む）</td>
+<td>第 1 章</td>
+</tr>
+<tr>
+<td><code>dotnet test</code></td>
+<td>ビルドしてテストを実行する</td>
+<td>第 1 章</td>
+</tr>
+<tr>
+<td><code>dotnet fantomas --check .</code></td>
+<td>整形が必要なファイルがあれば失敗する</td>
+<td>第 5 章</td>
+</tr>
+<tr>
+<td><code>dotnet fsharplint lint MachineLearning.sln</code></td>
+<td>静的解析</td>
+<td>第 5 章</td>
+</tr>
+<tr>
+<td><code>dotnet fsi tools/notebooks.fsx verify</code></td>
+<td>Notebook の出力セルが残っていれば失敗する</td>
+<td>本章</td>
+</tr>
+<tr>
+<td><code>dotnet run --project src/MachineLearning -- chapter03</code></td>
+<td>章の <code>Main.run</code> を実行する</td>
+<td>第 1 章</td>
+</tr>
+</tbody>
+</table>
+<p>Gradle の <code>check</code> や npm scripts の <code>check</code> と違い、<code>dotnet</code> CLI には「整形の検査・静的解析・テストをまとめて実行する」コマンドがありません。MSBuild のターゲットを自分で書けばまとめられますが、ローカルツールの呼び出しをプロジェクトファイルに書き込むことになり、F# のプロジェクトとしては見慣れない形になります。</p>
+<h3 id="gulp">Gulp で品質チェックをまとめる<a class="headerlink" href="#gulp" title="Permanent link">&para;</a></h3>
+<p>本リポジトリには、言語に依存しない作業を受け持つ Gulp（ルートの <code>gulpfile.js</code> と <code>ops/scripts/</code>）があり、各言語の版の環境を用意する <code>apps:setup:*</code> と、品質チェックを実行する <code>apps:check:*</code> のタスクを定義しています（<code>ops/scripts/apps.js</code>）。F# 版の定義は次のとおりです。</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'fsharp'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">nix</span><span class="o">:</span><span class="w"> </span><span class="s1">'dotnet'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">dir</span><span class="o">:</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">'apps'</span><span class="p">,</span><span class="w"> </span><span class="s1">'dotnet'</span><span class="p">),</span>
+<span class="w">    </span><span class="c1">// global.json の SDK バージョンで解決できるかをアプリのディレクトリで確かめる</span>
+<span class="w">    </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">cmd</span><span class="o">:</span><span class="w"> </span><span class="s1">'dotnet'</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="s1">'dotnet --version'</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">setup</span><span class="o">:</span><span class="w"> </span><span class="s1">'dotnet tool restore &amp;&amp; dotnet restore --locked-mode &amp;&amp; dotnet build --no-restore'</span><span class="p">,</span>
+<span class="w">    </span><span class="c1">// CI（.github/workflows/fsharp-ci.yml）と同じ順に、整形・静的解析・Notebook の出力・テストを検査する</span>
+<span class="w">    </span><span class="nx">check</span><span class="o">:</span><span class="w"> </span><span class="s1">'dotnet fantomas --check . &amp;&amp; dotnet fsharplint lint MachineLearning.sln &amp;&amp; dotnet fsharplint lint tools/notebooks.fsx &amp;&amp; dotnet fsi tools/notebooks.fsx verify &amp;&amp; dotnet test'</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+</code></pre></div>
+<ul>
+<li><code>setup</code> と <code>check</code> は、<code>apps/fsharp</code> で実行するシェルのコマンドです。<code>&amp;&amp;</code> でつないでいるので、どれか 1 つが失敗するとそこで止まります</li>
+<li>順番は、速く終わり、直し方が機械的なものから並べています。書式の崩れは <code>dotnet fantomas .</code> で、出力セルは <code>strip</code> で直せるので先に、テストの失敗は原因を考える必要があるので最後に置いています</li>
+<li><code>tools</code> のコマンド（<code>dotnet --version</code>）が失敗したら、つまり <code>global.json</code> の SDK が手元に無ければ、Nix が使える環境では <code>nix develop .#dotnet</code> の中で同じコマンドを実行します</li>
+</ul>
+<p>この章で、<code>check</code> に Notebook の出力セルの検査（<code>dotnet fsi tools/notebooks.fsx verify</code>）と、スクリプトの静的解析を加えました。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 品質チェックをまとめて実行する（リポジトリのルートで）</span>
+npx<span class="w"> </span>gulp<span class="w"> </span>apps:check:fsharp
+</code></pre></div>
+<p>学習データを配置した環境での結果です（一部を抜き出しています）。</p>
+<div class="highlight"><pre><span></span><code>[apps\dotnet] dotnet fantomas --check . &amp;&amp; dotnet fsharplint lint MachineLearning.sln &amp;&amp; dotnet fsharplint lint tools/notebooks.fsx &amp;&amp; dotnet fsi tools/notebooks.fsx verify &amp;&amp; dotnet test
+Running FSharpLint with 98 rules (42 enabled, 56 disabled)...
+========== Summary: 0 warnings ==========
+Running FSharpLint with 98 rules (42 enabled, 56 disabled)...
+========== Summary: 0 warnings ==========
+テストの実行の概要: 成功!
+  合計: 53
+  失敗: 0
+  成功: 53
+  スキップ済み: 0
+</code></pre></div>
+<p><code>dotnet fantomas --check .</code> と <code>verify</code> は、問題が無ければ何も表示しません。</p>
+<h3 id="dotnet-cli-gulp">dotnet CLI と Gulp の役割分担<a class="headerlink" href="#dotnet-cli-gulp" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>道具</th>
+<th>実行する場所</th>
+<th>受け持つもの</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dotnet</code> CLI とローカルツール</td>
+<td><code>apps/fsharp</code></td>
+<td>F# 版の個々の作業（ビルド・テスト・整形・静的解析・Notebook の出力の検査）</td>
+</tr>
+<tr>
+<td>Gulp</td>
+<td>リポジトリのルート</td>
+<td>言語に依存しない作業（学習データの配置 <code>data:setup</code>、ドキュメントのビルド <code>mkdocs:build</code> など）と、各言語の版の品質チェックをまとめて呼ぶ <code>apps:check:*</code></td>
+</tr>
+</tbody>
+</table>
+<p>TypeScript 版では、Gulp から <code>apps/node</code> のテストを呼ばず、品質チェックを npm scripts だけで完結させていました。F# 版では <code>dotnet</code> CLI にまとめる仕組みが無いので、まとめる役だけを Gulp に任せています。個々のコマンドは <code>dotnet</code> CLI のものなので、Gulp を入れていない環境でも、上の表のコマンドを順に実行すれば同じ検査ができます。CI（6.4 節）も、Gulp を使わずに同じコマンドを 1 つずつ実行します。</p>
+<h3 id="mainrun">章の Main.run を実行する<a class="headerlink" href="#mainrun" title="Permanent link">&para;</a></h3>
+<p>各章の <code>Main.run</code> は、<code>Program.fs</code> の入り口から、章の名前を引数にして実行します。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/MachineLearning<span class="w"> </span>--<span class="w"> </span>chapter03
+</code></pre></div>
+<ul>
+<li><code>--project</code> で実行するプロジェクトを指定し、<code>--</code> より後ろの引数をプログラムに渡します</li>
+<li>章の名前が無いか間違っていると、使い方を表示して終了コード 1 で終わります</li>
+</ul>
+<div class="highlight"><pre><span></span><code>使い方: dotnet run --project src/MachineLearning -- (chapter01 | chapter02 | chapter03)
+</code></pre></div>
+<h3 id="_1">タスクの実行<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 品質チェックをまとめて実行する（リポジトリのルートで）</span>
+npx<span class="w"> </span>gulp<span class="w"> </span>apps:check:fsharp
+
+<span class="c1"># 個別に実行する（apps/fsharp で）</span>
+dotnet<span class="w"> </span><span class="nb">test</span>
+dotnet<span class="w"> </span>fantomas<span class="w"> </span>--check<span class="w"> </span>.
+dotnet<span class="w"> </span>fsharplint<span class="w"> </span>lint<span class="w"> </span>MachineLearning.sln
+dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>verify
+
+<span class="c1"># 整形する（コードと Notebook の出力セル）</span>
+dotnet<span class="w"> </span>fantomas<span class="w"> </span>.
+dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>strip
+
+<span class="c1"># カバレッジを計測する</span>
+dotnet<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--coverlet<span class="w"> </span>--coverlet-include<span class="w"> </span><span class="s1">'[MachineLearning]*'</span><span class="w"> </span>--coverlet-output-format<span class="w"> </span>cobertura<span class="w"> </span>--results-directory<span class="w"> </span>TestResults
+
+<span class="c1"># 章の Main.run を実行する（学習データが必要）</span>
+dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/MachineLearning<span class="w"> </span>--<span class="w"> </span>chapter03
+
+<span class="c1"># Notebook を実行して動作を確認する（学習データと Jupyter が必要）</span>
+dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>execute
+</code></pre></div>
+<h3 id="dotnet-test">環境変数を dotnet test に渡す<a class="headerlink" href="#dotnet-test" title="Permanent link">&para;</a></h3>
+<p><code>dotnet test</code> と <code>dotnet run</code> は、実行したシェルの環境変数をそのままテストやプログラムに引き継ぎます。Python 版の tox の <code>passenv</code> や、Kotlin 版の Gradle の <code>inputs.property</code> のような設定は要りません。Gulp の <code>apps:check:fsharp</code> も、子プロセスに環境変数を引き継ぐので、<code>ML_DATA_DIR</code> を指定して実行できます。</p>
+<h2 id="63-notebook">6.3 Notebook による探索と出力セルの削除<a class="headerlink" href="#63-notebook" title="Permanent link">&para;</a></h2>
+<h3 id="polyglot-notebooks">Polyglot Notebooks でデータを探索する<a class="headerlink" href="#polyglot-notebooks" title="Permanent link">&para;</a></h3>
+<p>Notebook は <code>apps/fsharp/notebooks/</code> に置いています。VS Code の Polyglot Notebooks で開くと、F# のカーネルで実行できます。Notebook からは、<code>dotnet build</code> で作ったプロジェクトの DLL を読み込み、テスト済みの関数を呼びます。</p>
+<div class="highlight"><pre><span></span><code><span class="o">#</span><span class="n">r</span><span class="w"> </span><span class="s">"nuget: FSharp.Data, 8.2.0"</span>
+<span class="o">#</span><span class="n">r</span><span class="w"> </span><span class="s">"nuget: Plotly.NET, 5.1.0"</span>
+<span class="o">#</span><span class="n">r</span><span class="w"> </span><span class="s">"nuget: Plotly.NET.Interactive, 5.0.0"</span>
+<span class="o">#</span><span class="n">r</span><span class="w"> </span><span class="s">"../src/MachineLearning/bin/Debug/net10.0/MachineLearning.dll"</span>
+</code></pre></div>
+<p>Notebook の中で前処理や学習の処理を書き直すと、テストで守られたコードと Notebook のコードが別々に育ってしまいます。Notebook は、テスト済みのコードを使ってデータを <strong>見る</strong> 場所にします。Polyglot Notebooks が廃止されていることと、使う版は <a href="../02-data-preprocessing-and-triangulation/">第 2 章の 2.10 節</a> を参照してください。</p>
+<h3 id="notebook">Notebook で分かったことをテストに移す<a class="headerlink" href="#notebook" title="Permanent link">&para;</a></h3>
+<p>Notebook は探索の場所であり、そこで分かったことは Notebook に残しただけでは守られません。次の流れで、分かったことをテストと本番コードに移します。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJBQ1RJVklUWSIgc3R5bGU9IndpZHRoOjI5OXB4O2hlaWdodDo0MjBweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iMjk5cHgiIGhlaWdodD0iNDIwcHgiIHZpZXdCb3g9IjAgMCAyOTkgNDIwIiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxlbGxpcHNlIGN4PSIxNDcuNzQxIiBjeT0iMjUiIHJ4PSIxMCIgcnk9IjEwIiBmaWxsPSIjMjIyIiBzdHlsZT0ic3Ryb2tlOiMyMjI7c3Ryb2tlLXdpZHRoOjE7Ii8+PHJlY3QgeD0iNTMuMDA1IiB5PSI1NSIgd2lkdGg9IjE4OS40NzIiIGhlaWdodD0iMzMuOTY5IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIxMi41IiByeT0iMTIuNSIvPjx0ZXh0IHg9IjYzLjAwNSIgeT0iNzYuMTM5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIxNjkuNDcyIj5Ob3RlYm9vayDjgafjg4fjg7zjgr/jgpLmjqLntKLjgZnjgos8L3RleHQ+PHJlY3QgeD0iMTAxLjc0MSIgeT0iMTA4Ljk2OSIgd2lkdGg9IjkyLjAwMSIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iMTExLjc0MSIgeT0iMTMwLjEwNyIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iNzIuMDAxIj7ku67oqqzjgpLnq4vjgabjgos8L3RleHQ+PHJlY3QgeD0iNDguMDcxIiB5PSIxNjIuOTM4IiB3aWR0aD0iMTk5LjMzOSIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iNTguMDcxIiB5PSIxODQuMDc2IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIxNzkuMzM5Ij7ku67oqqzjgpLjg4bjgrnjg4jjgajjgZfjgabmm7jjgY/vvIhSZWTvvIk8L3RleHQ+PHJlY3QgeD0iMTYiIHk9IjIxNi45MDYiIHdpZHRoPSIyNjMuNDgyIiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSIyNiIgeT0iMjM4LjA0NSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iMjQzLjQ4MiI+5pys55Wq44Kz44O844OJ44Gn5a6f6KOF44GZ44KL77yIR3JlZW7jg7tSZWZhY3Rvcu+8iTwvdGV4dD48cmVjdCB4PSI1OS4wMDUiIHk9IjI3MC44NzUiIHdpZHRoPSIxNzcuNDcxIiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSI2OS4wMDUiIHk9IjI5Mi4wMTQiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjE1Ny40NzEiPk5vdGVib29rIOOBruWHuuWKm+OCu+ODq+OCkua2iOOBmTwvdGV4dD48cmVjdCB4PSIxMDEuNzQxIiB5PSIzMjQuODQ0IiB3aWR0aD0iOTIuMDAxIiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSIxMTEuNzQxIiB5PSIzNDUuOTgyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSI3Mi4wMDEiPuOCs+ODn+ODg+ODiOOBmeOCizwvdGV4dD48ZWxsaXBzZSBjeD0iMTQ3Ljc0MSIgY3k9IjM4OS44MTMiIHJ4PSIxMSIgcnk9IjExIiBmaWxsPSJub25lIiBzdHlsZT0ic3Ryb2tlOiMyMjI7c3Ryb2tlLXdpZHRoOjE7Ii8+PGVsbGlwc2UgY3g9IjE0Ny43NDEiIGN5PSIzODkuODEzIiByeD0iNiIgcnk9IjYiIGZpbGw9IiMyMjIiIHN0eWxlPSJzdHJva2U6IzIyMjtzdHJva2Utd2lkdGg6MTsiLz48bGluZSB4MT0iMTQ3Ljc0MSIgeTE9IjM1IiB4Mj0iMTQ3Ljc0MSIgeTI9IjU1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNDMuNzQxLDQ1LDE0Ny43NDEsNTUsMTUxLjc0MSw0NSwxNDcuNzQxLDQ5IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxNDcuNzQxIiB5MT0iODguOTY5IiB4Mj0iMTQ3Ljc0MSIgeTI9IjEwOC45NjkiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE0My43NDEsOTguOTY5LDE0Ny43NDEsMTA4Ljk2OSwxNTEuNzQxLDk4Ljk2OSwxNDcuNzQxLDEwMi45NjkiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjE0Ny43NDEiIHkxPSIxNDIuOTM4IiB4Mj0iMTQ3Ljc0MSIgeTI9IjE2Mi45MzgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE0My43NDEsMTUyLjkzOCwxNDcuNzQxLDE2Mi45MzgsMTUxLjc0MSwxNTIuOTM4LDE0Ny43NDEsMTU2LjkzOCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTQ3Ljc0MSIgeTE9IjE5Ni45MDYiIHgyPSIxNDcuNzQxIiB5Mj0iMjE2LjkwNiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMTQzLjc0MSwyMDYuOTA2LDE0Ny43NDEsMjE2LjkwNiwxNTEuNzQxLDIwNi45MDYsMTQ3Ljc0MSwyMTAuOTA2IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxNDcuNzQxIiB5MT0iMjUwLjg3NSIgeDI9IjE0Ny43NDEiIHkyPSIyNzAuODc1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNDMuNzQxLDI2MC44NzUsMTQ3Ljc0MSwyNzAuODc1LDE1MS43NDEsMjYwLjg3NSwxNDcuNzQxLDI2NC44NzUiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjE0Ny43NDEiIHkxPSIzMDQuODQ0IiB4Mj0iMTQ3Ljc0MSIgeTI9IjMyNC44NDQiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE0My43NDEsMzE0Ljg0NCwxNDcuNzQxLDMyNC44NDQsMTUxLjc0MSwzMTQuODQ0LDE0Ny43NDEsMzE4Ljg0NCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTQ3Ljc0MSIgeTE9IjM1OC44MTMiIHgyPSIxNDcuNzQxIiB5Mj0iMzc4LjgxMyIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMTQzLjc0MSwzNjguODEzLDE0Ny43NDEsMzc4LjgxMywxNTEuNzQxLDM2OC44MTMsMTQ3Ljc0MSwzNzIuODEzIiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjw/cGxhbnR1bWwtc3JjIE5PdXgyaTkwNTRMeEwtNHdUMDVzNWpjMWR4NEg3NGJjMHBDRkpMSEc0NEg0OEgxMTlLZVFIVEc0TkNtcmR5dWpFMzZEczV4RVUtVE9lYzZBS2dORTFNam90WXIzeGE0c0E4OXdHaXNKZ1BUVUZDV0xyQUhRZ2hwMjhGREZVYS1GNHlaVHRtV1FHanIxM2tHMVNnYzFQN3MzZEJxWm5zM2pUcEpJU0I4dmZHaVZ3Zm1oUUFIclNVMWNzcTZYcTZKRFBBbTcyV3RNUVJHNER1a3BkeHVXalhfblUwcUxXZXZ2dWJOeExmaHZGZEwxejJxZVlZdDEtbnkwPz48L2c+PC9zdmc+" class="uml" alt="uml diagram" title="" /></p>
+<p>第 3 章では、Notebook で深さの上限を 1〜8 に変えたときの正解率を折れ線グラフにしました。深さ 2 の木の正解数（45 件中 40 件）は、Notebook の表だけに残さず、実データのテストにしています。第 4 章では、この数値がシード付きの乱数列に頼っていることから、乱数列そのものも学習用テストにしました。</p>
+<h3 id="_2">出力セルを消してからコミットする<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>Notebook のファイル（<code>.ipynb</code>）には、コードに加えて実行結果（表・グラフ）が保存されます。出力を残したままコミットすると、次の問題が起きます。</p>
+<ul>
+<li>出力に学習データの行が含まれ、データをコミットしない方針（第 4 章）に反する</li>
+<li>グラフのデータでファイルが大きくなり、差分が読めなくなる</li>
+</ul>
+<p>第 2 章では、Python 版と同じ nbstripout で出力を消しました。ただ、nbstripout は Python のパッケージで、CI の Nix の <code>dotnet</code> 環境（共通の環境の Python 3 と .NET SDK）には入っていません。CI のために Python のパッケージを入れる手順を増やす代わりに、Kotlin 版と同じく、.NET SDK だけで動く道具を作ります。<code>.ipynb</code> の中身は JSON なので、.NET に標準で入っている <code>System.Text.Json</code> で読み書きできます。F# のプログラムは、プロジェクトを作らずに <strong>スクリプト</strong>（<code>.fsx</code>）として <code>dotnet fsi</code> で実行できるので、<code>apps/fsharp/tools/notebooks.fsx</code> に書きました。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// notebooks/ の Notebook の出力セルを検査・削除し、画面なしで実行する。</span>
+<span class="c1">//</span>
+<span class="c1">// 使い方（apps/fsharp で実行する）:</span>
+<span class="c1">//     dotnet fsi tools/notebooks.fsx verify   出力セルが残っている Notebook があれば失敗する</span>
+<span class="c1">//     dotnet fsi tools/notebooks.fsx strip    出力セルを消す</span>
+<span class="c1">//     dotnet fsi tools/notebooks.fsx execute  すべて実行する（結果は bin/notebooks に書き出す。学習データと Jupyter が必要）</span>
+
+<span class="k">open</span><span class="w"> </span><span class="nn">System</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Diagnostics</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.IO</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text.Encodings.Web</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text.Json</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text.Json.Nodes</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">notebookDir</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFullPath</span><span class="o">(</span><span class="nn">Path</span><span class="p">.</span><span class="n">Combine</span><span class="o">(__</span><span class="n">SOURCE_DIRECTORY__</span><span class="o">,</span><span class="w"> </span><span class="s">".."</span><span class="o">,</span><span class="w"> </span><span class="s">"notebooks"</span><span class="o">))</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">notebooks</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="kt">list</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">Directory</span><span class="p">.</span><span class="n">GetFiles</span><span class="o">(</span><span class="n">notebookDir</span><span class="o">,</span><span class="w"> </span><span class="s">"*.ipynb"</span><span class="o">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Array</span><span class="p">.</span><span class="n">sort</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Array</span><span class="p">.</span><span class="n">toList</span>
+
+<span class="sd">/// 実行したときに書き込まれるセルのメタデータ（nbstripout が既定で消すもの）</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">executionMetadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s">"execution"</span><span class="o">;</span><span class="w"> </span><span class="s">"ExecuteTime"</span><span class="o">;</span><span class="w"> </span><span class="s">"collapsed"</span><span class="o">;</span><span class="w"> </span><span class="s">"scrolled"</span><span class="w"> </span><span class="o">]</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">codeCells</span><span class="w"> </span><span class="o">(</span><span class="n">notebook</span><span class="o">:</span><span class="w"> </span><span class="n">JsonNode</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">JsonObject</span><span class="w"> </span><span class="kt">list</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">notebook</span><span class="o">[</span><span class="s">"cells"</span><span class="o">].</span><span class="n">AsArray</span><span class="bp">()</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Seq</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">cell</span><span class="o">.</span><span class="n">AsObject</span><span class="bp">()</span><span class="o">)</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Seq</span><span class="p">.</span><span class="n">filter</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"cell_type"</span><span class="o">].</span><span class="n">GetValue</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="bp">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"code"</span><span class="o">)</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Seq</span><span class="p">.</span><span class="n">toList</span>
+
+<span class="sd">/// 出力・実行番号・実行の記録のどれかが残っていれば、実行済みのセルとみなす</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">isExecuted</span><span class="w"> </span><span class="o">(</span><span class="n">cell</span><span class="o">:</span><span class="w"> </span><span class="n">JsonObject</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">cell</span><span class="o">[</span><span class="s">"outputs"</span><span class="o">].</span><span class="n">AsArray</span><span class="bp">()</span><span class="o">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="o">||</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="o">(</span><span class="n">isNull</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"execution_count"</span><span class="o">])</span>
+<span class="w">    </span><span class="o">||</span><span class="w"> </span><span class="n">executionMetadata</span>
+<span class="w">       </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">exists</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"metadata"</span><span class="o">].</span><span class="n">AsObject</span><span class="bp">()</span><span class="o">.</span><span class="n">ContainsKey</span><span class="w"> </span><span class="n">key</span><span class="o">)</span>
+</code></pre></div>
+<ul>
+<li><code>__SOURCE_DIRECTORY__</code> は、スクリプトのファイルがあるディレクトリ（<code>apps/fsharp/tools</code>）です。第 1 章の <code>Dataset.fs</code> と同じく、どこから実行しても <code>notebooks/</code> の場所が決まります</li>
+<li><code>JsonNode.Parse</code> で読んだ JSON は、<code>JsonNode</code>（任意の値）・<code>JsonObject</code>（オブジェクト）・<code>JsonArray</code>（配列）で表されます。<code>AsObject()</code>・<code>AsArray()</code> で、期待する形に変えてから使います。形が違えば実行時に例外になるので、ここは型で守られていない部分です</li>
+<li><code>cell["execution_count"]</code> は、JSON の <code>null</code> のとき F# では <code>null</code> になります。<code>isNull</code> で確かめます</li>
+<li>Jupyter で実行すると、出力と実行番号のほかに、セルのメタデータ <code>execution</code> に実行した時刻が書き込まれます。Kotlin 版は出力と実行番号だけを見ていましたが、F# 版では nbstripout が既定で消すメタデータも対象にしました</li>
+</ul>
+<p>最初は <code>List.exists cell["metadata"].AsObject().ContainsKey</code> と、メソッドをそのまま関数として渡そうとしましたが、次のエラーになりました。</p>
+<div class="highlight"><pre><span></span><code>notebooks.fsx(34,41): error FS0597: 複数の引数が連続する場合、スペースで区切るかタプル化します。関数またはメソッド アプリケーションに関する引数の場合、かっこで囲む必要があります。
+</code></pre></div>
+<p>関数の引数の位置に、インデクサー（<code>cell["metadata"]</code>）とメソッドの呼び出しが続く式を置くと、F# はどこまでが 1 つの引数かを決められません。<code>fun key -&gt; ...</code> のラムダにして解決しました。</p>
+<p>削除と書き出しは次のとおりです。</p>
+<div class="highlight"><pre><span></span><code><span class="k">let</span><span class="w"> </span><span class="nv">clear</span><span class="w"> </span><span class="o">(</span><span class="n">cell</span><span class="o">:</span><span class="w"> </span><span class="n">JsonObject</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">unit</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">cell</span><span class="o">[</span><span class="s">"outputs"</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">JsonArray</span><span class="bp">()</span>
+<span class="w">    </span><span class="n">cell</span><span class="o">[</span><span class="s">"execution_count"</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">null</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"metadata"</span><span class="o">].</span><span class="n">AsObject</span><span class="bp">()</span>
+<span class="w">    </span><span class="n">executionMetadata</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">iter</span><span class="w"> </span><span class="o">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">Remove</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">ignore</span><span class="o">)</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">load</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">JsonNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">JsonNode</span><span class="p">.</span><span class="n">Parse</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">isDirty</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">load</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">codeCells</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">exists</span><span class="w"> </span><span class="n">isExecuted</span>
+
+<span class="sd">/// Jupyter と同じ書式（字下げ 1、LF、日本語をエスケープしない、末尾に改行）で書き出す</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">jsonOptions</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">JsonSerializerOptions</span><span class="o">(</span>
+<span class="w">        </span><span class="n">WriteIndented</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="o">,</span>
+<span class="w">        </span><span class="n">IndentSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">,</span>
+<span class="w">        </span><span class="n">NewLine</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="o">,</span>
+<span class="w">        </span><span class="n">Encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">JavaScriptEncoder</span><span class="p">.</span><span class="n">UnsafeRelaxedJsonEscaping</span>
+<span class="w">    </span><span class="o">)</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">save</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="n">notebook</span><span class="o">:</span><span class="w"> </span><span class="n">JsonNode</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">unit</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">File</span><span class="p">.</span><span class="n">WriteAllText</span><span class="o">(</span><span class="n">path</span><span class="o">,</span><span class="w"> </span><span class="n">notebook</span><span class="o">.</span><span class="n">ToJsonString</span><span class="w"> </span><span class="n">jsonOptions</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="o">,</span><span class="w"> </span><span class="n">UTF8Encoding</span><span class="w"> </span><span class="k">false</span><span class="o">)</span>
+</code></pre></div>
+<ul>
+<li><code>JsonNode</code> は可変なオブジェクトで、<code>cell["outputs"] &lt;- JsonArray()</code> で中身を書き換えます。F# のレコードやリストと違い、書き換えは元の値に及びます。このスクリプトでは、読み込んで書き換えて書き出すまでを 1 つの関数の中で行い、可変な値を外に出していません</li>
+<li><code>metadata.Remove &gt;&gt; ignore</code> は、キーを消すメソッド（消せたかどうかを <code>bool</code> で返す）と <code>ignore</code> の <strong>関数合成</strong> です。戻り値の <code>bool</code> を捨て、<code>List.iter</code> に渡せる <code>string -&gt; unit</code> の関数にしています</li>
+<li>書き出しの設定は、Jupyter が保存する書式に合わせています。字下げを 1 文字（<code>IndentSize = 1</code>）、改行を LF（<code>NewLine = "\n"</code>）、日本語を <code>第</code> のようなエスケープにしない（<code>UnsafeRelaxedJsonEscaping</code>）、末尾に改行を付ける、の 4 つです。Windows で <code>NewLine</code> を指定しないと CRLF で書き出されます</li>
+<li><code>UTF8Encoding false</code> は、BOM を付けない UTF-8 です。第 1 章の CSV と違い、Notebook の JSON に BOM は付けません</li>
+</ul>
+<p>この書式でコミット済みの 2 つの Notebook を読んで書き戻すと、元のファイルとバイト単位で一致しました。出力の無い Notebook を書き直しても、差分が生まれません。</p>
+<p>最後に、3 つのサブコマンドを登録します。</p>
+<div class="highlight"><pre><span></span><code><span class="k">let</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">notebooks</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">filter</span><span class="w"> </span><span class="n">isDirty</span><span class="w"> </span><span class="k">with</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="bp">[]</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">dirty</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dirty</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFileName</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span><span class="w"> </span><span class="s">", "</span>
+<span class="w">        </span><span class="n">eprintfn</span><span class="w"> </span><span class="o">$</span><span class="s">"出力セルが残っている Notebook: {names}（dotnet fsi tools/notebooks.fsx strip で消す）"</span>
+<span class="w">        </span><span class="mi">1</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">strip</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">notebooks</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">filter</span><span class="w"> </span><span class="n">isDirty</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">notebook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">path</span>
+<span class="w">        </span><span class="n">codeCells</span><span class="w"> </span><span class="n">notebook</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">iter</span><span class="w"> </span><span class="n">clear</span>
+<span class="w">        </span><span class="n">save</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="n">notebook</span>
+<span class="w">        </span><span class="n">printfn</span><span class="w"> </span><span class="o">$</span><span class="s">"出力セルを消した: {Path.GetFileName path}"</span>
+
+<span class="w">    </span><span class="mi">0</span>
+
+<span class="c1">// ...（execute は後述）</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">commands</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Map</span><span class="p">.</span><span class="n">ofList</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s">"verify"</span><span class="o">,</span><span class="w"> </span><span class="n">verify</span><span class="o">;</span><span class="w"> </span><span class="s">"strip"</span><span class="o">,</span><span class="w"> </span><span class="n">strip</span><span class="o">;</span><span class="w"> </span><span class="s">"execute"</span><span class="o">,</span><span class="w"> </span><span class="n">execute</span><span class="w"> </span><span class="o">]</span>
+
+<span class="k">match</span><span class="w"> </span><span class="n">fsi</span><span class="o">.</span><span class="n">CommandLineArgs</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Array</span><span class="p">.</span><span class="n">tail</span><span class="w"> </span><span class="k">with</span>
+<span class="o">|</span><span class="w"> </span><span class="o">[|</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">|]</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">commands</span><span class="o">.</span><span class="n">ContainsKey</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">(</span><span class="n">commands</span><span class="o">[</span><span class="n">name</span><span class="o">]</span><span class="bp">()</span><span class="o">)</span>
+<span class="o">|</span><span class="w"> </span><span class="o">_</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">    </span><span class="n">eprintfn</span><span class="w"> </span><span class="s">"使い方: dotnet fsi tools/notebooks.fsx (verify | strip | execute)"</span>
+<span class="w">    </span><span class="n">exit</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+<ul>
+<li><code>verify</code> は、出力の残っている Notebook の名前と、消し方（<code>strip</code>）を表示して、終了コード 1 を返します。CI で失敗したときに、次に何をすればよいかが分かるようにするためです</li>
+<li><code>strip</code> は、出力の残っている Notebook だけを書き直します</li>
+<li><code>fsi.CommandLineArgs</code> は、スクリプトに渡された引数の配列です。先頭はスクリプトのパスなので、<code>Array.tail</code> で除きます</li>
+<li>サブコマンドの名前から関数への <code>Map</code> を作り、引数が 1 つで名前が登録されていれば、その関数の戻り値を終了コードにします。第 1 章の <code>Program.fs</code> の <code>chapters</code> と同じ形です</li>
+</ul>
+<p>コミットされている Notebook に対しては、<code>verify</code> は何も表示せずに成功します。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>verify
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>0
+</code></pre></div>
+<p>第 3 章の Notebook を Jupyter で実行した結果（出力セル付き）で置き換えてから実行すると、失敗します。</p>
+<div class="highlight"><pre><span></span><code>出力セルが残っている Notebook: chapter03_decision_tree_exploration.ipynb（dotnet fsi tools/notebooks.fsx strip で消す）
+</code></pre></div>
+<p>このときの終了コードは 1 です。<code>strip</code> で消すと、<code>verify</code> は再び成功します。</p>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>strip
+dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>verify
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>出力セルを消した: chapter03_decision_tree_exploration.ipynb
+</code></pre></div>
+<p>同じ実行結果のファイルを nbstripout でも消して、<code>strip</code> の結果と比べました。改行コードを除いて、バイト単位で一致しました（手元の Windows では、nbstripout は CRLF で書き出しました。コミットするときは <code>.gitattributes</code> で LF になります）。第 2 章の手順で nbstripout を使っても、このスクリプトを使っても、コミットされる内容は同じです。</p>
+<p>なお、Jupyter で実行した Notebook は、JSON のキーが名前の順に並び替えられ、カーネルの F# の版（<code>language_info</code> の <code>version</code>）が加わります。どちらも出力ではないので、<code>strip</code> は残します。</p>
+<h3 id="notebook_1">画面なしで Notebook を実行する<a class="headerlink" href="#notebook_1" title="Permanent link">&para;</a></h3>
+<p>Notebook がテスト済みのコードの変更で動かなくなっていないかは、VS Code を使わずに確かめられます。第 2 章の 2.10 節の <code>jupyter nbconvert</code> を、すべての Notebook に順に実行するサブコマンドです。</p>
+<div class="highlight"><pre><span></span><code><span class="sd">/// 環境変数 JUPYTER で jupyter のコマンドを指定できる（既定は PATH の jupyter）</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">execute</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">jupyter</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="nn">Environment</span><span class="p">.</span><span class="n">GetEnvironmentVariable</span><span class="w"> </span><span class="s">"JUPYTER"</span>
+<span class="w">        </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Option</span><span class="p">.</span><span class="n">ofObj</span>
+<span class="w">        </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Option</span><span class="p">.</span><span class="n">defaultValue</span><span class="w"> </span><span class="s">"jupyter"</span>
+
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">outputDir</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFullPath</span><span class="o">(</span><span class="nn">Path</span><span class="p">.</span><span class="n">Combine</span><span class="o">(__</span><span class="n">SOURCE_DIRECTORY__</span><span class="o">,</span><span class="w"> </span><span class="s">".."</span><span class="o">,</span><span class="w"> </span><span class="s">"bin"</span><span class="o">,</span><span class="w"> </span><span class="s">"notebooks"</span><span class="o">))</span>
+
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">run</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">printfn</span><span class="w"> </span><span class="o">$</span><span class="s">"実行: {Path.GetFileName path}"</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">startInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProcessStartInfo</span><span class="o">(</span><span class="n">jupyter</span><span class="o">,</span><span class="w"> </span><span class="n">WorkingDirectory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">notebookDir</span><span class="o">)</span>
+
+<span class="w">        </span><span class="o">[</span>
+<span class="w">            </span><span class="s">"nbconvert"</span>
+<span class="w">            </span><span class="s">"--to"</span>
+<span class="w">            </span><span class="s">"notebook"</span>
+<span class="w">            </span><span class="s">"--execute"</span>
+<span class="w">            </span><span class="s">"--output-dir"</span>
+<span class="w">            </span><span class="n">outputDir</span>
+<span class="w">            </span><span class="s">"--ExecutePreprocessor.timeout=300"</span>
+<span class="w">            </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFileName</span><span class="w"> </span><span class="n">path</span>
+<span class="w">        </span><span class="o">]</span>
+<span class="w">        </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">iter</span><span class="w"> </span><span class="n">startInfo</span><span class="o">.</span><span class="n">ArgumentList</span><span class="o">.</span><span class="n">Add</span>
+
+<span class="w">        </span><span class="k">use</span><span class="w"> </span><span class="n">proc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Process</span><span class="p">.</span><span class="n">Start</span><span class="w"> </span><span class="n">startInfo</span>
+<span class="w">        </span><span class="n">proc</span><span class="o">.</span><span class="n">WaitForExit</span><span class="bp">()</span>
+<span class="w">        </span><span class="n">proc</span><span class="o">.</span><span class="n">ExitCode</span>
+
+<span class="w">    </span><span class="n">notebooks</span><span class="w"> </span><span class="bp">()</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">fold</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">code</span><span class="o">)</span><span class="w"> </span><span class="mi">0</span>
+</code></pre></div>
+<ul>
+<li>実行結果は <code>bin/notebooks/</code> に書き出し、<code>notebooks/</code> の元のファイルは変えません。<code>bin/</code> は <code>.gitignore</code> の対象（第 4 章）なので、出力セルの付いたファイルがコミットされる心配がありません</li>
+<li>引数は 1 つずつ <code>ArgumentList</code> に加えます。1 つの文字列にまとめて渡すと、パスに空白があったときに分かれてしまいます</li>
+<li><code>use proc = ...</code> の <code>use</code> は、スコープを抜けるときに <code>Dispose</code> を呼ぶ束縛です。プロセスの資源を確実に解放します</li>
+<li><code>List.fold</code> で、失敗した Notebook があればそれ以降を実行せず、その終了コードを返します</li>
+<li>学習データ・Jupyter・.NET Interactive のカーネル（第 2 章）が必要なので、CI では実行しません</li>
+</ul>
+<p>手元では、Python 版の仮想環境の <code>jupyter</code> を環境変数 <code>JUPYTER</code> で指定して実行しました（出力の一部を抜き出しています）。</p>
+<div class="highlight"><pre><span></span><code><span class="nv">JUPYTER</span><span class="o">=</span>../python/.venv/Scripts/jupyter.exe<span class="w"> </span>dotnet<span class="w"> </span>fsi<span class="w"> </span>tools/notebooks.fsx<span class="w"> </span>execute
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>実行: chapter02_iris_exploration.ipynb
+[NbConvertApp] Writing 41908 bytes to ...\apps\dotnet\bin\notebooks\chapter02_iris_exploration.ipynb
+実行: chapter03_decision_tree_exploration.ipynb
+[NbConvertApp] Writing 27668 bytes to ...\apps\dotnet\bin\notebooks\chapter03_decision_tree_exploration.ipynb
+</code></pre></div>
+<h2 id="64-github-actions-ci">6.4 GitHub Actions による CI<a class="headerlink" href="#64-github-actions-ci" title="Permanent link">&para;</a></h2>
+<h3 id="_3">ワークフロー設定<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>プッシュのたびに品質チェックを自動実行するため、<code>.github/workflows/fsharp-ci.yml</code> を用意しています。この章で、スクリプトの静的解析と Notebook の出力セルの検査を加えました。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F# CI</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">develop</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"apps/fsharp/**"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">".github/workflows/fsharp-ci.yml"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"ops/nix/environments/dotnet/**"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"flake.nix"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"flake.lock"</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"apps/fsharp/**"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">".github/workflows/fsharp-ci.yml"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"ops/nix/environments/dotnet/**"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"flake.nix"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"flake.lock"</span>
+
+<span class="nt">permissions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">read</span>
+
+<span class="nt">env</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">DOTNET_CLI_TELEMETRY_OPTOUT</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
+<span class="w">  </span><span class="nt">DOTNET_NOLOGO</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Checkout the repository</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Nix</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cachix/install-nix-action@v30</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">nix_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nixpkgs=channel:nixos-unstable</span>
+
+<span class="w">      </span><span class="c1"># dotnet restore が再利用するダウンロード済みのパッケージ（~/.nuget/packages）を保存する</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cache NuGet packages</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/cache@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.nuget/packages</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ runner.os }}-nuget-${{ hashFiles('apps/fsharp/**/packages.lock.json', 'apps/fsharp/.config/dotnet-tools.json') }}</span>
+<span class="w">          </span><span class="nt">restore-keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">${{ runner.os }}-nuget-</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Show the .NET SDK version</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nix develop .#dotnet --command bash -c "cd apps/fsharp &amp;&amp; dotnet --version"</span>
+
+<span class="w">      </span><span class="c1"># packages.lock.json と食い違う依存があれば失敗させる</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Restore tools and packages</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nix develop .#dotnet --command bash -c "cd apps/fsharp &amp;&amp; dotnet tool restore &amp;&amp; dotnet restore --locked-mode"</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check formatting</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nix develop .#dotnet --command bash -c "cd apps/fsharp &amp;&amp; dotnet fantomas --check ."</span>
+
+<span class="w">      </span><span class="c1"># ソリューションに含まれないスクリプト（tools/*.fsx）は別に指定する</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Lint</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<span class="w">          </span><span class="no">nix develop .#dotnet --command bash -c</span>
+<span class="w">          </span><span class="no">"cd apps/fsharp &amp;&amp; dotnet fsharplint lint MachineLearning.sln &amp;&amp; dotnet fsharplint lint tools/notebooks.fsx"</span>
+
+<span class="w">      </span><span class="c1"># Notebook の出力セルには学習データが含まれうるので、残っていれば失敗させる</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check Notebook outputs</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nix develop .#dotnet --command bash -c "cd apps/fsharp &amp;&amp; dotnet fsi tools/notebooks.fsx verify"</span>
+
+<span class="w">      </span><span class="c1"># 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run tests with coverage</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<span class="w">          </span><span class="no">nix develop .#dotnet --command bash -c</span>
+<span class="w">          </span><span class="no">"cd apps/fsharp &amp;&amp; dotnet test --no-restore --coverlet --coverlet-include '[MachineLearning]*'</span>
+<span class="w">          </span><span class="no">--coverlet-output-format cobertura --results-directory TestResults"</span>
+
+<span class="w">      </span><span class="c1"># 実データのテストがスキップされるので、手元より低い値になる。下限は設けず表示だけする</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Show coverage</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grep -o -m 1 'line-rate="[0-9.]*"' apps/fsharp/TestResults/*.cobertura.*xml</span>
+</code></pre></div>
+<h3 id="_4">ワークフローのポイント<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>paths</code> で対象を絞る</strong> — F# の実装・このワークフロー・Nix の環境定義が変わったときだけ実行します。記事だけの変更や、ほかの言語の変更では実行されません</li>
+<li><strong>Nix で環境をそろえる</strong> — <code>nix develop .#dotnet</code> で、<code>ops/nix/environments/dotnet/shell.nix</code> に定義した環境（.NET SDK 10.0.101）に入ってからコマンドを実行します。SDK の版は最初のステップで表示します</li>
+<li><strong>ロックファイルで依存関係を確かめる</strong> — <code>dotnet restore --locked-mode</code> で、<code>packages.lock.json</code> と食い違う依存関係があれば失敗させます（第 5 章）。テストは <code>--no-restore</code> で、このステップで入れたパッケージを使います</li>
+<li><strong>NuGet のキャッシュを使う</strong> — ダウンロードしたパッケージ（<code>~/.nuget/packages</code>）を保存します。キャッシュのキーには、パッケージとツールの版を決めるファイル（<code>packages.lock.json</code>・<code>dotnet-tools.json</code>）のハッシュを使い、版を変えたら新しいキャッシュになるようにしています</li>
+<li><strong>手元と同じコマンドを使う</strong> — 各ステップは、6.2 節の <code>apps:check:fsharp</code> と同じコマンドを 1 つずつ実行します。ステップを分けておくと、GitHub の画面でどの検査が失敗したかがすぐに分かります</li>
+<li><strong>学習データは置かない</strong> — 学習データは再配布できないので CI には置きません。実データのテストは <code>Assert.SkipUnless</code> でスキップされます</li>
+<li><strong>カバレッジは表示だけ</strong> — 最後のステップは、カバレッジのファイルから <code>line-rate</code> を抜き出して表示します。第 5 章で見たように、計測に失敗してもテストは成功してしまいますが、ファイルが無ければこの <code>grep</code> が失敗するので、計測の失敗に気づけます</li>
+<li><strong>Notebook は検査だけ</strong> — CI の環境には Jupyter が無いので、<code>verify</code> だけを実行し、<code>execute</code> は手元で行います。<code>dotnet fsi</code> は .NET SDK に含まれているので、Python のパッケージを入れずに検査できます</li>
+</ul>
+<h3 id="ci">CI パイプラインの流れ<a class="headerlink" href="#ci" title="Permanent link">&para;</a></h3>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGRhdGEtZGlhZ3JhbS10eXBlPSJBQ1RJVklUWSIgc3R5bGU9IndpZHRoOjUxMXB4O2hlaWdodDo3MDRweDtiYWNrZ3JvdW5kOiNGRkZGRkY7IiB3aWR0aD0iNTExcHgiIGhlaWdodD0iNzA0cHgiIHZpZXdCb3g9IjAgMCA1MTEgNzA0IiB6b29tQW5kUGFuPSJtYWduaWZ5IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBjb250ZW50U3R5bGVUeXBlPSJ0ZXh0L2NzcyI+PD9wbGFudHVtbCAxLjIwMjYuOD8+PGRlZnMvPjxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBsZW5ndGhBZGp1c3Q9InNwYWNpbmciPjxlbGxpcHNlIGN4PSIxNzcuNDY2IiBjeT0iMjUiIHJ4PSIxMCIgcnk9IjEwIiBmaWxsPSIjMjIyIiBzdHlsZT0ic3Ryb2tlOiMyMjI7c3Ryb2tlLXdpZHRoOjE7Ii8+PHJlY3QgeD0iNjQuMTIzIiB5PSI1NSIgd2lkdGg9IjIyNi42ODUiIGhlaWdodD0iMzMuOTY5IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIxMi41IiByeT0iMTIuNSIvPjx0ZXh0IHg9Ijc0LjEyMyIgeT0iNzYuMTM5IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIyMDYuNjg1Ij7jg5fjg4Pjgrfjg6XvvIhhcHBzL2ZzaGFycCDjgarjganjga7lpInmm7TvvIk8L3RleHQ+PHJlY3QgeD0iODkuNDY1IiB5PSIxMDguOTY5IiB3aWR0aD0iMTc2LjAwMSIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iOTkuNDY1IiB5PSIxMzAuMTA3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIxNTYuMDAxIj7jg6rjg53jgrjjg4jjg6rjgpLjg4Hjgqfjg4Pjgq/jgqLjgqbjg4g8L3RleHQ+PHJlY3QgeD0iMTEzLjg1MiIgeT0iMTYyLjkzOCIgd2lkdGg9IjEyNy4yMjciIGhlaWdodD0iMzMuOTY5IiBmaWxsPSIjRjFGMUYxIiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIHJ4PSIxMi41IiByeT0iMTIuNSIvPjx0ZXh0IHg9IjEyMy44NTIiIHk9IjE4NC4wNzYiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjEwNy4yMjciPk5peCDjgpLjgqTjg7Pjgrnjg4jjg7zjg6s8L3RleHQ+PHJlY3QgeD0iOTIuNTc0IiB5PSIyMTYuOTA2IiB3aWR0aD0iMTY5Ljc4NCIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iMTAyLjU3NCIgeT0iMjM4LjA0NSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iMTQ5Ljc4NCI+TnVHZXQg44Gu44Kt44Oj44OD44K344Ol44KS5b6p5YWDPC90ZXh0PjxyZWN0IHg9IjExOS41NzQiIHk9IjI3MC44NzUiIHdpZHRoPSIxMTUuNzgzIiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSIxMjkuNTc0IiB5PSIyOTIuMDE0IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSI5NS43ODMiPmRvdG5ldCAtLXZlcnNpb248L3RleHQ+PHJlY3QgeD0iNzkuMzg0IiB5PSIzMjQuODQ0IiB3aWR0aD0iMTk2LjE2MiIgaGVpZ2h0PSI0Ny45MzgiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iODkuMzg0IiB5PSIzNDUuOTgyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIxMTIuNjQxIj5kb3RuZXQgdG9vbCByZXN0b3JlPC90ZXh0Pjx0ZXh0IHg9Ijg5LjM4NCIgeT0iMzU5Ljk1MSIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iMTc2LjE2MiI+ZG90bmV0IHJlc3RvcmUgLS1sb2NrZWQtbW9kZTwvdGV4dD48cmVjdCB4PSI4OS45OTkiIHk9IjM5Mi43ODEiIHdpZHRoPSIxNzQuOTM0IiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSI5OS45OTkiIHk9IjQxMy45MiIgZmlsbD0iIzAwMCIgZm9udC1zaXplPSIxMiIgdGV4dExlbmd0aD0iMTU0LjkzNCI+ZG90bmV0IGZhbnRvbWFzIC0tY2hlY2sgLjwvdGV4dD48cmVjdCB4PSIxNiIgeT0iNDQ2Ljc1IiB3aWR0aD0iMzIyLjkzMSIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iMjYiIHk9IjQ2Ny44ODkiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjMwMi45MzEiPmRvdG5ldCBmc2hhcnBsaW50IGxpbnTvvIjjgr3jg6rjg6Xjg7zjgrfjg6fjg7Pjgajjgrnjgq/jg6rjg5fjg4jvvIk8L3RleHQ+PHJlY3QgeD0iNTkuNjQ3IiB5PSI1MDAuNzE5IiB3aWR0aD0iMjM1LjYzNyIgaGVpZ2h0PSIzMy45NjkiIGZpbGw9IiNGMUYxRjEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MC41OyIgcng9IjEyLjUiIHJ5PSIxMi41Ii8+PHRleHQgeD0iNjkuNjQ3IiB5PSI1MjEuODU3IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSIyMTUuNjM3Ij5kb3RuZXQgZnNpIHRvb2xzL25vdGVib29rcy5mc3ggdmVyaWZ5PC90ZXh0PjxwYXRoIGQ9Ik0zMDAuNTc0LDU1OS4xMDUgTDMwMC41NzQsNTY3LjY3MiBMMjgwLjU3NCw1NzEuNjcyIEwzMDAuNTc0LDU3NS42NzIgTDMwMC41NzQsNTg0LjIzOCBBMCwwIDAgMCAwIDMwMC41NzQsNTg0LjIzOCBMNDkwLjU3NSw1ODQuMjM4IEEwLDAgMCAwIDAgNDkwLjU3NSw1ODQuMjM4IEw0OTAuNTc1LDU2OS4xMDUgTDQ4MC41NzUsNTU5LjEwNSBMMzAwLjU3NCw1NTkuMTA1IEEwLDAgMCAwIDAgMzAwLjU3NCw1NTkuMTA1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIGZpbGw9IiNGRUZGREQiLz48cGF0aCBkPSJNNDgwLjU3NSw1NTkuMTA1IEw0ODAuNTc1LDU2OS4xMDUgTDQ5MC41NzUsNTY5LjEwNSBMNDgwLjU3NSw1NTkuMTA1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjAuNTsiIGZpbGw9IiNGRUZGREQiLz48dGV4dCB4PSIzMDYuNTc0IiB5PSI1NzYuMTcyIiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEzIiB0ZXh0TGVuZ3RoPSIxNjkiPuWun+ODh+ODvOOCv+OBruODhuOCueODiOOBr+OCueOCreODg+ODlzwvdGV4dD48cmVjdCB4PSI3NC4zNTciIHk9IjU1NC42ODgiIHdpZHRoPSIyMDYuMjE4IiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSI4NC4zNTciIHk9IjU3NS44MjYiIGZpbGw9IiMwMDAiIGZvbnQtc2l6ZT0iMTIiIHRleHRMZW5ndGg9IjE4Ni4yMTgiPmRvdG5ldCB0ZXN077yI44Kr44OQ44Os44OD44K444KS6KiI5ris77yJPC90ZXh0PjxyZWN0IHg9IjEyMi4zNzgiIHk9IjYwOC42NTYiIHdpZHRoPSIxMTAuMTc2IiBoZWlnaHQ9IjMzLjk2OSIgZmlsbD0iI0YxRjFGMSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDowLjU7IiByeD0iMTIuNSIgcnk9IjEyLjUiLz48dGV4dCB4PSIxMzIuMzc4IiB5PSI2MjkuNzk1IiBmaWxsPSIjMDAwIiBmb250LXNpemU9IjEyIiB0ZXh0TGVuZ3RoPSI5MC4xNzYiPmxpbmUtcmF0ZSDjgpLooajnpLo8L3RleHQ+PGVsbGlwc2UgY3g9IjE3Ny40NjYiIGN5PSI2NzMuNjI1IiByeD0iMTEiIHJ5PSIxMSIgZmlsbD0ibm9uZSIgc3R5bGU9InN0cm9rZTojMjIyO3N0cm9rZS13aWR0aDoxOyIvPjxlbGxpcHNlIGN4PSIxNzcuNDY2IiBjeT0iNjczLjYyNSIgcng9IjYiIHJ5PSI2IiBmaWxsPSIjMjIyIiBzdHlsZT0ic3Ryb2tlOiMyMjI7c3Ryb2tlLXdpZHRoOjE7Ii8+PGxpbmUgeDE9IjE3Ny40NjYiIHkxPSIzNSIgeDI9IjE3Ny40NjYiIHkyPSI1NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMTczLjQ2Niw0NSwxNzcuNDY2LDU1LDE4MS40NjYsNDUsMTc3LjQ2Niw0OSIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTc3LjQ2NiIgeTE9Ijg4Ljk2OSIgeDI9IjE3Ny40NjYiIHkyPSIxMDguOTY5IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNzMuNDY2LDk4Ljk2OSwxNzcuNDY2LDEwOC45NjksMTgxLjQ2Niw5OC45NjksMTc3LjQ2NiwxMDIuOTY5IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxNzcuNDY2IiB5MT0iMTQyLjkzOCIgeDI9IjE3Ny40NjYiIHkyPSIxNjIuOTM4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNzMuNDY2LDE1Mi45MzgsMTc3LjQ2NiwxNjIuOTM4LDE4MS40NjYsMTUyLjkzOCwxNzcuNDY2LDE1Ni45MzgiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjE3Ny40NjYiIHkxPSIxOTYuOTA2IiB4Mj0iMTc3LjQ2NiIgeTI9IjIxNi45MDYiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE3My40NjYsMjA2LjkwNiwxNzcuNDY2LDIxNi45MDYsMTgxLjQ2NiwyMDYuOTA2LDE3Ny40NjYsMjEwLjkwNiIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTc3LjQ2NiIgeTE9IjI1MC44NzUiIHgyPSIxNzcuNDY2IiB5Mj0iMjcwLjg3NSIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMTczLjQ2NiwyNjAuODc1LDE3Ny40NjYsMjcwLjg3NSwxODEuNDY2LDI2MC44NzUsMTc3LjQ2NiwyNjQuODc1IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxNzcuNDY2IiB5MT0iMzA0Ljg0NCIgeDI9IjE3Ny40NjYiIHkyPSIzMjQuODQ0IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNzMuNDY2LDMxNC44NDQsMTc3LjQ2NiwzMjQuODQ0LDE4MS40NjYsMzE0Ljg0NCwxNzcuNDY2LDMxOC44NDQiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjE3Ny40NjYiIHkxPSIzNzIuNzgxIiB4Mj0iMTc3LjQ2NiIgeTI9IjM5Mi43ODEiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE3My40NjYsMzgyLjc4MSwxNzcuNDY2LDM5Mi43ODEsMTgxLjQ2NiwzODIuNzgxLDE3Ny40NjYsMzg2Ljc4MSIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTc3LjQ2NiIgeTE9IjQyNi43NSIgeDI9IjE3Ny40NjYiIHkyPSI0NDYuNzUiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE3My40NjYsNDM2Ljc1LDE3Ny40NjYsNDQ2Ljc1LDE4MS40NjYsNDM2Ljc1LDE3Ny40NjYsNDQwLjc1IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxNzcuNDY2IiB5MT0iNDgwLjcxOSIgeDI9IjE3Ny40NjYiIHkyPSI1MDAuNzE5IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNzMuNDY2LDQ5MC43MTksMTc3LjQ2Niw1MDAuNzE5LDE4MS40NjYsNDkwLjcxOSwxNzcuNDY2LDQ5NC43MTkiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PGxpbmUgeDE9IjE3Ny40NjYiIHkxPSI1MzQuNjg4IiB4Mj0iMTc3LjQ2NiIgeTI9IjU1NC42ODgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTsiLz48cG9seWdvbiBwb2ludHM9IjE3My40NjYsNTQ0LjY4OCwxNzcuNDY2LDU1NC42ODgsMTgxLjQ2Niw1NDQuNjg4LDE3Ny40NjYsNTQ4LjY4OCIgZmlsbD0iIzE4MTgxOCIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiLz48bGluZSB4MT0iMTc3LjQ2NiIgeTE9IjU4OC42NTYiIHgyPSIxNzcuNDY2IiB5Mj0iNjA4LjY1NiIgc3R5bGU9InN0cm9rZTojMTgxODE4O3N0cm9rZS13aWR0aDoxOyIvPjxwb2x5Z29uIHBvaW50cz0iMTczLjQ2Niw1OTguNjU2LDE3Ny40NjYsNjA4LjY1NiwxODEuNDY2LDU5OC42NTYsMTc3LjQ2Niw2MDIuNjU2IiBmaWxsPSIjMTgxODE4IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIvPjxsaW5lIHgxPSIxNzcuNDY2IiB5MT0iNjQyLjYyNSIgeDI9IjE3Ny40NjYiIHkyPSI2NjIuNjI1IiBzdHlsZT0ic3Ryb2tlOiMxODE4MTg7c3Ryb2tlLXdpZHRoOjE7Ii8+PHBvbHlnb24gcG9pbnRzPSIxNzMuNDY2LDY1Mi42MjUsMTc3LjQ2Niw2NjIuNjI1LDE4MS40NjYsNjUyLjYyNSwxNzcuNDY2LDY1Ni42MjUiIGZpbGw9IiMxODE4MTgiIHN0eWxlPSJzdHJva2U6IzE4MTgxODtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7Ii8+PD9wbGFudHVtbC1zcmMgSkwzQkpXOG41RHRGTF9HNzFsUm0wVXh5WHY3Zm8wSU9KamZnUzNjektPVVRTU0YyNkFFMmw2NlhZTVhHRi1QY3Exc191NnFidUFQZlV5dXp6dm9aVDIyckxxN2U4VzJRTHVKLVBmSzdRUWhBYVFlN0NjTU9aSjRST0pPbFVmdHJwU2pjclFiUV9YWlg1aXFJOFJUdFN1c0dlSGF1YUdNUTFwSEYxMTdwQzZ1cDJ2aVVtWkVRRHBVbUdmWE94RUkwUXJlbUhwRDNVRG12ODd4bkVJaEVXSllYcTBjSFZGLUtJbk1CUEYtYlhNV29vUEtNYWRsUmwtc0p3NHJIUV8zR1J1Y0d4cVVZOEQ2WTVJWjJRdExVUXgzSUZ5cDVSU1E5UGxRVzVqMXlrOW56UXpXUTZ6VzhzVDJjZTkwTWVqUm9scVBzQWg0cGZpZzlxRm44WThPZ0hRaERvN3FTZFZxcEpxUlRZV2QyNVNCS1BMekl5OXpYbGJ2RWRRUExPMzgtaGNrbGNEeVhOM2VWTnhPbGtEWE1jSXNTY3ZjVFh3eDdhdjNQQ1F6MjZSV2wwckFtZWxWM3h6dnhyUURvcWJ5MD8+PC9nPjwvc3ZnPg==" class="uml" alt="uml diagram" title="" /></p>
+<p>第 1 章の時点で CI が成功したときのログの一部です。</p>
+<div class="highlight"><pre><span></span><code>.NET development environment activated
+  - .NET SDK: 10.0.101
+========== Summary: 0 warnings ==========
+Test run summary: Passed!
+  succeeded: 13
+  skipped: 3
+line-rate="0.7659"
+</code></pre></div>
+<p>CI には学習データが無いので、第 1 章の時点では 13 件が成功し、実データのテスト 3 件がスキップされました。CI の Linux の環境では、テストの結果が英語で表示されます。</p>
+<h2 id="65-ci">6.5 CI に載せるまでに起きた問題を調べる<a class="headerlink" href="#65-ci" title="Permanent link">&para;</a></h2>
+<p>F# 版の CI は、最初の実行で一度だけ失敗しました。そのほかの問題は手元で起きたものですが、そのうち 2 つは <strong>何も失敗しない</strong> という形で現れました。</p>
+<h3 id="1-ci-fsharpcore">1 つ目: CI だけで FSharp.Core のハッシュが合わない<a class="headerlink" href="#1-ci-fsharpcore" title="Permanent link">&para;</a></h3>
+<p>最初の CI の実行（<code>c054a8c6</code>）は、<code>dotnet restore --locked-mode</code> のステップで失敗しました。</p>
+<div class="highlight"><pre><span></span><code>MachineLearning.fsproj : error NU1403: Package content hash validation failed for FSharp.Core.10.0.101. The package is different than the last restore.
+</code></pre></div>
+<p>手元では同じコマンドが成功していたので、違いは環境にあります。版は同じ 10.0.101 で、違うのは中身のハッシュです。「CI の FSharp.Core は、手元とは別の場所から来ている」と仮説を立て、.NET SDK が同梱の FSharp.Core（<code>library-packs</code>）を暗黙のパッケージソースにしていることに行き当たりました。SDK 同梱のフォルダーを使わない設定を加えると、次の実行（<code>63bd9ffb</code>）で成功しました（第 5 章）。ロックファイルでハッシュまで確かめていたので、手元と CI で違うパッケージを使っていることに、テストより前の段階で気づけました。</p>
+<h3 id="2">2 つ目: 静的解析が何も検査していなかった<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p>第 5 章で見たとおり、第 1 章で書いた <code>fsharplint.json</code> は、既定の設定を置き換えて 97 のルールをすべて無効にしていました。手元でも CI でも「0 warnings」で成功し続けていたので、失敗という形では現れません。出力の 1 行目の <code>0 enabled</code> に気づいて、初めて分かりました。</p>
+<h3 id="3">3 つ目: カバレッジのファイルができない<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p>第 5 章で見たとおり、coverlet の計測の対象を絞らないと、テストは成功するのにカバレッジのファイルが作られませんでした。こちらも、終了コードは 0 です。CI では、最後の <code>grep</code> がファイルを見つけられずに失敗するので、この問題が起きれば気づけます。</p>
+<h3 id="4-windows">4 つ目: Windows でだけ整形の差分が出る<a class="headerlink" href="#4-windows" title="Permanent link">&para;</a></h3>
+<p>Windows では、Fantomas は既定で CRLF で書き出します。Git は <code>.gitattributes</code> の設定で LF に変えてコミットするので、手元で整形するたびに全行が変わったように見えます。CI（Linux）では起きない、手元でだけの問題です。<code>.editorconfig</code> で Fantomas の改行コードも LF にそろえました（<code>889e9e3a</code>）。Notebook のスクリプトで <code>NewLine = "\n"</code> を指定したのも、同じ理由です。</p>
+<h3 id="_5">この経緯から学べること<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>CI と手元の違いを事実で突き合わせる</strong> — 1 つ目は、版は同じでハッシュが違うという事実から、「パッケージの出どころが違う」という仮説を立てられました。ロックファイルがハッシュを記録していなければ、手元と CI で違う FSharp.Core を使っていることに気づけなかったかもしれません</li>
+<li><strong>「失敗しない」も疑う</strong> — 2 つ目と 3 つ目は、どちらも成功という形で潜んでいました。検査の道具が「何を検査したか」（<code>42 enabled</code>）や、結果のファイルができたかを確かめて初めて、成功が本物だと言えます</li>
+<li><strong>検査の失敗を検出できる形にする</strong> — 3 つ目は、CI の最後のステップが結果のファイルを読むので、計測の失敗が CI の失敗として現れます。Notebook の出力も、目で確かめるのではなく、<code>verify</code> の終了コードで CI に失敗させます</li>
+</ul>
+<h2 id="66-ci">6.6 三種の神器と CI<a class="headerlink" href="#66-ci" title="Permanent link">&para;</a></h2>
+<p>第 4〜6 章で整えたものを、ソフトウェア開発の「三種の神器」（バージョン管理・テスティング・自動化）に当てはめると次のようになります。</p>
+<table>
+<thead>
+<tr>
+<th>三種の神器</th>
+<th>道具</th>
+<th>本シリーズでの使い方</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>バージョン管理</td>
+<td>Git、Conventional Commits、<code>.gitignore</code>、<code>.gitattributes</code></td>
+<td>学習データ・<code>bin/</code>・<code>obj/</code>・Notebook の出力をコミットしない。<code>packages.lock.json</code>・<code>global.json</code>・<code>dotnet-tools.json</code> はコミットする。改行コードを LF に固定する</td>
+</tr>
+<tr>
+<td>テスティング</td>
+<td>xUnit v3、coverlet</td>
+<td>単体テストは架空の値、実データのテストは <code>Assert.SkipUnless</code> でスキップ可能にする。乱数列は学習用テストで固定する</td>
+</tr>
+<tr>
+<td>自動化</td>
+<td><code>dotnet</code> CLI（NuGet・ローカルツール）、Fantomas、FSharpLint、F# スクリプト、GitHub Actions、Nix、Gulp</td>
+<td>環境の再現、品質チェックの一括実行、Notebook の出力の検査、データの配置、CI</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">利用可能なコマンド一覧<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>内容</th>
+<th>実行する場所</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>npx gulp data:setup</code></td>
+<td>学習データを配置する</td>
+<td>リポジトリのルート</td>
+</tr>
+<tr>
+<td><code>npx gulp data:check</code></td>
+<td>学習データの配置を確認する</td>
+<td>リポジトリのルート</td>
+</tr>
+<tr>
+<td><code>npx gulp apps:setup:fsharp</code></td>
+<td>ツールと依存パッケージを入れ、ビルドする</td>
+<td>リポジトリのルート</td>
+</tr>
+<tr>
+<td><code>npx gulp apps:check:fsharp</code></td>
+<td>整形の検査・静的解析・Notebook の出力の検査・テストをまとめて実行する</td>
+<td>リポジトリのルート</td>
+</tr>
+<tr>
+<td><code>dotnet test</code></td>
+<td>ビルドしてテストを実行する</td>
+<td><code>apps/fsharp</code></td>
+</tr>
+<tr>
+<td><code>dotnet fantomas .</code></td>
+<td>コードを整形する</td>
+<td><code>apps/fsharp</code></td>
+</tr>
+<tr>
+<td><code>dotnet fsi tools/notebooks.fsx strip</code></td>
+<td>Notebook の出力セルを消す</td>
+<td><code>apps/fsharp</code></td>
+</tr>
+<tr>
+<td><code>dotnet fsi tools/notebooks.fsx execute</code></td>
+<td>Notebook を実行して動作を確認する</td>
+<td><code>apps/fsharp</code></td>
+</tr>
+<tr>
+<td><code>dotnet list package --vulnerable --include-transitive</code></td>
+<td>依存関係の既知の脆弱性を確かめる</td>
+<td><code>apps/fsharp</code></td>
+</tr>
+<tr>
+<td><code>dotnet run --project src/MachineLearning -- chapter03</code></td>
+<td>章の <code>Main.run</code> を実行する</td>
+<td><code>apps/fsharp</code></td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>この章の完成コード（tools/notebooks.fsx）</summary>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// notebooks/ の Notebook の出力セルを検査・削除し、画面なしで実行する。</span>
+<span class="c1">//</span>
+<span class="c1">// 使い方（apps/fsharp で実行する）:</span>
+<span class="c1">//     dotnet fsi tools/notebooks.fsx verify   出力セルが残っている Notebook があれば失敗する</span>
+<span class="c1">//     dotnet fsi tools/notebooks.fsx strip    出力セルを消す</span>
+<span class="c1">//     dotnet fsi tools/notebooks.fsx execute  すべて実行する（結果は bin/notebooks に書き出す。学習データと Jupyter が必要）</span>
+
+<span class="k">open</span><span class="w"> </span><span class="nn">System</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Diagnostics</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.IO</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text.Encodings.Web</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text.Json</span>
+<span class="k">open</span><span class="w"> </span><span class="nn">System.Text.Json.Nodes</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">notebookDir</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFullPath</span><span class="o">(</span><span class="nn">Path</span><span class="p">.</span><span class="n">Combine</span><span class="o">(__</span><span class="n">SOURCE_DIRECTORY__</span><span class="o">,</span><span class="w"> </span><span class="s">".."</span><span class="o">,</span><span class="w"> </span><span class="s">"notebooks"</span><span class="o">))</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">notebooks</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="kt">list</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">Directory</span><span class="p">.</span><span class="n">GetFiles</span><span class="o">(</span><span class="n">notebookDir</span><span class="o">,</span><span class="w"> </span><span class="s">"*.ipynb"</span><span class="o">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Array</span><span class="p">.</span><span class="n">sort</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Array</span><span class="p">.</span><span class="n">toList</span>
+
+<span class="sd">/// 実行したときに書き込まれるセルのメタデータ（nbstripout が既定で消すもの）</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">executionMetadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s">"execution"</span><span class="o">;</span><span class="w"> </span><span class="s">"ExecuteTime"</span><span class="o">;</span><span class="w"> </span><span class="s">"collapsed"</span><span class="o">;</span><span class="w"> </span><span class="s">"scrolled"</span><span class="w"> </span><span class="o">]</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">codeCells</span><span class="w"> </span><span class="o">(</span><span class="n">notebook</span><span class="o">:</span><span class="w"> </span><span class="n">JsonNode</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">JsonObject</span><span class="w"> </span><span class="kt">list</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">notebook</span><span class="o">[</span><span class="s">"cells"</span><span class="o">].</span><span class="n">AsArray</span><span class="bp">()</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Seq</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">cell</span><span class="o">.</span><span class="n">AsObject</span><span class="bp">()</span><span class="o">)</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Seq</span><span class="p">.</span><span class="n">filter</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"cell_type"</span><span class="o">].</span><span class="n">GetValue</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="bp">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"code"</span><span class="o">)</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Seq</span><span class="p">.</span><span class="n">toList</span>
+
+<span class="sd">/// 出力・実行番号・実行の記録のどれかが残っていれば、実行済みのセルとみなす</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">isExecuted</span><span class="w"> </span><span class="o">(</span><span class="n">cell</span><span class="o">:</span><span class="w"> </span><span class="n">JsonObject</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">cell</span><span class="o">[</span><span class="s">"outputs"</span><span class="o">].</span><span class="n">AsArray</span><span class="bp">()</span><span class="o">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="o">||</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="o">(</span><span class="n">isNull</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"execution_count"</span><span class="o">])</span>
+<span class="w">    </span><span class="o">||</span><span class="w"> </span><span class="n">executionMetadata</span>
+<span class="w">       </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">exists</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"metadata"</span><span class="o">].</span><span class="n">AsObject</span><span class="bp">()</span><span class="o">.</span><span class="n">ContainsKey</span><span class="w"> </span><span class="n">key</span><span class="o">)</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">clear</span><span class="w"> </span><span class="o">(</span><span class="n">cell</span><span class="o">:</span><span class="w"> </span><span class="n">JsonObject</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">unit</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">cell</span><span class="o">[</span><span class="s">"outputs"</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">JsonArray</span><span class="bp">()</span>
+<span class="w">    </span><span class="n">cell</span><span class="o">[</span><span class="s">"execution_count"</span><span class="o">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">null</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">metadata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cell</span><span class="o">[</span><span class="s">"metadata"</span><span class="o">].</span><span class="n">AsObject</span><span class="bp">()</span>
+<span class="w">    </span><span class="n">executionMetadata</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">iter</span><span class="w"> </span><span class="o">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">Remove</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">ignore</span><span class="o">)</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">load</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">JsonNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">JsonNode</span><span class="p">.</span><span class="n">Parse</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">isDirty</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">load</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">codeCells</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">exists</span><span class="w"> </span><span class="n">isExecuted</span>
+
+<span class="sd">/// Jupyter と同じ書式（字下げ 1、LF、日本語をエスケープしない、末尾に改行）で書き出す</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">jsonOptions</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">JsonSerializerOptions</span><span class="o">(</span>
+<span class="w">        </span><span class="n">WriteIndented</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="o">,</span>
+<span class="w">        </span><span class="n">IndentSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">,</span>
+<span class="w">        </span><span class="n">NewLine</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="o">,</span>
+<span class="w">        </span><span class="n">Encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">JavaScriptEncoder</span><span class="p">.</span><span class="n">UnsafeRelaxedJsonEscaping</span>
+<span class="w">    </span><span class="o">)</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">save</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="n">notebook</span><span class="o">:</span><span class="w"> </span><span class="n">JsonNode</span><span class="o">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">unit</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="nn">File</span><span class="p">.</span><span class="n">WriteAllText</span><span class="o">(</span><span class="n">path</span><span class="o">,</span><span class="w"> </span><span class="n">notebook</span><span class="o">.</span><span class="n">ToJsonString</span><span class="w"> </span><span class="n">jsonOptions</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="o">,</span><span class="w"> </span><span class="n">UTF8Encoding</span><span class="w"> </span><span class="k">false</span><span class="o">)</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">notebooks</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">filter</span><span class="w"> </span><span class="n">isDirty</span><span class="w"> </span><span class="k">with</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="bp">[]</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">dirty</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dirty</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">map</span><span class="w"> </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFileName</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span><span class="w"> </span><span class="s">", "</span>
+<span class="w">        </span><span class="n">eprintfn</span><span class="w"> </span><span class="o">$</span><span class="s">"出力セルが残っている Notebook: {names}（dotnet fsi tools/notebooks.fsx strip で消す）"</span>
+<span class="w">        </span><span class="mi">1</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">strip</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">notebooks</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">filter</span><span class="w"> </span><span class="n">isDirty</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">notebook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">path</span>
+<span class="w">        </span><span class="n">codeCells</span><span class="w"> </span><span class="n">notebook</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">iter</span><span class="w"> </span><span class="n">clear</span>
+<span class="w">        </span><span class="n">save</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="n">notebook</span>
+<span class="w">        </span><span class="n">printfn</span><span class="w"> </span><span class="o">$</span><span class="s">"出力セルを消した: {Path.GetFileName path}"</span>
+
+<span class="w">    </span><span class="mi">0</span>
+
+<span class="sd">/// 環境変数 JUPYTER で jupyter のコマンドを指定できる（既定は PATH の jupyter）</span>
+<span class="k">let</span><span class="w"> </span><span class="nv">execute</span><span class="w"> </span><span class="bp">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">jupyter</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="nn">Environment</span><span class="p">.</span><span class="n">GetEnvironmentVariable</span><span class="w"> </span><span class="s">"JUPYTER"</span>
+<span class="w">        </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Option</span><span class="p">.</span><span class="n">ofObj</span>
+<span class="w">        </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Option</span><span class="p">.</span><span class="n">defaultValue</span><span class="w"> </span><span class="s">"jupyter"</span>
+
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">outputDir</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFullPath</span><span class="o">(</span><span class="nn">Path</span><span class="p">.</span><span class="n">Combine</span><span class="o">(__</span><span class="n">SOURCE_DIRECTORY__</span><span class="o">,</span><span class="w"> </span><span class="s">".."</span><span class="o">,</span><span class="w"> </span><span class="s">"bin"</span><span class="o">,</span><span class="w"> </span><span class="s">"notebooks"</span><span class="o">))</span>
+
+<span class="w">    </span><span class="k">let</span><span class="w"> </span><span class="nv">run</span><span class="w"> </span><span class="o">(</span><span class="n">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="o">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">printfn</span><span class="w"> </span><span class="o">$</span><span class="s">"実行: {Path.GetFileName path}"</span>
+<span class="w">        </span><span class="k">let</span><span class="w"> </span><span class="nv">startInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProcessStartInfo</span><span class="o">(</span><span class="n">jupyter</span><span class="o">,</span><span class="w"> </span><span class="n">WorkingDirectory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">notebookDir</span><span class="o">)</span>
+
+<span class="w">        </span><span class="o">[</span>
+<span class="w">            </span><span class="s">"nbconvert"</span>
+<span class="w">            </span><span class="s">"--to"</span>
+<span class="w">            </span><span class="s">"notebook"</span>
+<span class="w">            </span><span class="s">"--execute"</span>
+<span class="w">            </span><span class="s">"--output-dir"</span>
+<span class="w">            </span><span class="n">outputDir</span>
+<span class="w">            </span><span class="s">"--ExecutePreprocessor.timeout=300"</span>
+<span class="w">            </span><span class="nn">Path</span><span class="p">.</span><span class="n">GetFileName</span><span class="w"> </span><span class="n">path</span>
+<span class="w">        </span><span class="o">]</span>
+<span class="w">        </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">iter</span><span class="w"> </span><span class="n">startInfo</span><span class="o">.</span><span class="n">ArgumentList</span><span class="o">.</span><span class="n">Add</span>
+
+<span class="w">        </span><span class="k">use</span><span class="w"> </span><span class="n">proc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Process</span><span class="p">.</span><span class="n">Start</span><span class="w"> </span><span class="n">startInfo</span>
+<span class="w">        </span><span class="n">proc</span><span class="o">.</span><span class="n">WaitForExit</span><span class="bp">()</span>
+<span class="w">        </span><span class="n">proc</span><span class="o">.</span><span class="n">ExitCode</span>
+
+<span class="w">    </span><span class="n">notebooks</span><span class="w"> </span><span class="bp">()</span>
+<span class="w">    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">List</span><span class="p">.</span><span class="n">fold</span><span class="w"> </span><span class="o">(</span><span class="k">fun</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">code</span><span class="o">)</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="k">let</span><span class="w"> </span><span class="nv">commands</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Map</span><span class="p">.</span><span class="n">ofList</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s">"verify"</span><span class="o">,</span><span class="w"> </span><span class="n">verify</span><span class="o">;</span><span class="w"> </span><span class="s">"strip"</span><span class="o">,</span><span class="w"> </span><span class="n">strip</span><span class="o">;</span><span class="w"> </span><span class="s">"execute"</span><span class="o">,</span><span class="w"> </span><span class="n">execute</span><span class="w"> </span><span class="o">]</span>
+
+<span class="k">match</span><span class="w"> </span><span class="n">fsi</span><span class="o">.</span><span class="n">CommandLineArgs</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nn">Array</span><span class="p">.</span><span class="n">tail</span><span class="w"> </span><span class="k">with</span>
+<span class="o">|</span><span class="w"> </span><span class="o">[|</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">|]</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">commands</span><span class="o">.</span><span class="n">ContainsKey</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">(</span><span class="n">commands</span><span class="o">[</span><span class="n">name</span><span class="o">]</span><span class="bp">()</span><span class="o">)</span>
+<span class="o">|</span><span class="w"> </span><span class="o">_</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">    </span><span class="n">eprintfn</span><span class="w"> </span><span class="s">"使い方: dotnet fsi tools/notebooks.fsx (verify | strip | execute)"</span>
+<span class="w">    </span><span class="n">exit</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+
+</details>
+
+<h2 id="67">6.7 まとめ<a class="headerlink" href="#67" title="Permanent link">&para;</a></h2>
+<p>この章では、品質チェックを自動化し、どの環境でも同じ手順で実行できるようにしました。</p>
+<ol>
+<li><strong>dotnet CLI と Gulp</strong> — 個々の作業は <code>dotnet</code> CLI とローカルツールで行い、まとめて実行する役だけを Gulp の <code>apps:check:fsharp</code> に任せる。環境変数はそのまま子プロセスに引き継がれる</li>
+<li><strong>Notebook の運用</strong> — テスト済みのコードを DLL で読み込み、分かったことはテストに移す。出力セルは F# スクリプト（<code>dotnet fsi tools/notebooks.fsx</code>）で検査・削除し、<code>verify</code> を Gulp と CI で実行する。Python に頼らず、.NET SDK だけで動く</li>
+<li><strong>GitHub Actions</strong> — Nix で .NET SDK をそろえ、<code>--locked-mode</code> で依存関係を確かめ、手元と同じコマンドを 1 ステップずつ実行する。学習データの無い CI では実データのテストがスキップされ、カバレッジは表示だけにする</li>
+<li><strong>問題の調べ方</strong> — CI と手元の違いを事実で突き合わせ、「失敗しない」ことも疑い、検査の失敗が CI の失敗として現れる形にする</li>
+</ol>
+<p>第 2 部で、TDD を回し続けるための道具立てがそろいました。次の第 3 部では、回帰問題と、欠損値・カテゴリ値・外れ値を含む現実的なデータの前処理に取り組みます。</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/k2works" target="_blank" rel="noopener" title="GitHub Repository/claude-code-booster" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+        <script src="../../../../assets/js/extra.js"></script>
+      
+    
+  </body>
+</html>
