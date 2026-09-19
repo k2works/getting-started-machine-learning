@@ -31,54 +31,63 @@ API を作ると、機械学習とは別の関心事が増えます。
 
 ### 4 つの層と依存の向き
 
+他の版と同じく、4 つの層に分けます。
+
+| 層 | ファイル | 役割 | 知っている層 |
+|----|---------|------|------------|
+| ドメイン | `Domain.fs` | 入力（映画・乗客）と予測結果の型、予測できなかった理由（判別共用体）、「モデル」と「モデルの置き場」の約束（関数の型と関数のレコード） | 何も知らない |
+| アプリケーション | `PredictionService.fs` | 予測のユースケース（モデルを読み込んで予測する、ヘルスチェック） | ドメイン |
+| インフラ | `FileModelStore.fs`・`Training.fs` | モデルのファイルへの保存・読み込みと、第 7・8 章のモデルをドメインの約束に合わせるアダプター。学習して保存する処理 | ドメイン、第 7・8 章 |
+| プレゼンテーション | `RequestValidation.fs`・`PredictionApi.fs` | 入力の検証、Giraffe のエンドポイント、HTTP の状態コード | ドメイン、アプリケーション |
+
 ```plantuml
 @startuml
-title 第 15 章のモジュールと依存の向き
+title 依存の向き（矢印は「知っている」）
 
-package "API（Giraffe）" {
-  [PredictionApi]
-  [RequestValidation]
+package "プレゼンテーション（RequestValidation.fs・PredictionApi.fs）" as presentation {
+  [parseMovie / parsePassenger（and! の検証）]
+  [webApp / createWebApplication（Giraffe）]
 }
-package "サービス" {
-  [PredictionService]
+package "アプリケーション（PredictionService.fs）" as application {
+  [predictSales / predictSurvival / health]
 }
-package "ドメイン" {
-  [Domain]
+package "ドメイン（Domain.fs）" as domain {
+  [Movie / Passenger / PredictionError]
+  [SalesModel / SurvivalModel / ModelStore]
 }
-package "インフラ" {
-  [FileModelStore]
-  [Training]
+package "インフラ（FileModelStore.fs・Training.fs）" as infrastructure {
+  [fileModelStore]
+  [trainAndSaveModels]
 }
-package "第 7・8 章" {
-  [LinearRegression]
-  [Pipeline]
+package "第 7・8 章" as chapters {
+  [LinearModel]
+  [FittedPipeline]
 }
 
-[PredictionApi] --> [RequestValidation]
-[PredictionApi] --> [PredictionService]
-[RequestValidation] --> [Domain]
-[PredictionService] --> [Domain]
-[FileModelStore] --> [Domain]
-[FileModelStore] --> [LinearRegression]
-[FileModelStore] --> [Pipeline]
-[Training] --> [FileModelStore]
+presentation --> application
+presentation --> domain
+application --> domain
+infrastructure --> domain
+infrastructure --> chapters
 @enduml
 ```
 
-| 層 | モジュール | 役割 |
-|----|-----------|------|
-| ドメイン | `Domain` | 映画・乗客・予測・エラーの型と、モデルと置き場の約束 |
-| サービス | `PredictionService` | 置き場からモデルを読み込んで予測する |
-| API | `RequestValidation`・`PredictionApi` | JSON を検証してドメインの型にし、HTTP の応答にする |
-| インフラ | `FileModelStore`・`Training` | 学習済みモデルをファイルに保存し、読み込む |
+ポイントは、**アプリケーション層がインフラ層を知らない** ことです。`predictSales` は「モデルの置き場（`ModelStore`）から読み込んで予測する」ことしか知らず、それがファイルなのか、テスト用のスタブなのかを気にしません。
 
-- ドメインは、どの層にも依存しません。ML.NET も Giraffe も知りません
-- サービスは、ドメインにだけ依存します。モデルがファイルにあるのか、メモリにあるのかを知りません
-- F# では、ファイルの順番がそのまま依存の向きになります（第 1 章）。`.fsproj` に `Domain.fs`・`PredictionService.fs`・`RequestValidation.fs`・`PredictionApi.fs`・`FileModelStore.fs` の順に並べるので、ドメインが API を参照するような逆向きの依存は、そもそもコンパイルできません
+Kotlin 版・TypeScript 版と同じく、プレゼンテーション層の `createWebApplication` は、置き場を引数で受け取ります。どの置き場を使うかを決めるのは、サーバーを起動する `Main.fs`（15.8 節）です。このため、プレゼンテーション層もインフラ層を知りません。
+
+各モジュールの先頭には、どの層かをドキュメントコメントで書いています。
+
+```fsharp
+/// アプリケーション層。置き場からモデルを読み込んで予測するユースケースと、ヘルスチェック。ドメイン層だけを知る
+module MachineLearning.Chapter15.PredictionService
+```
+
+F# では、ファイルの順番がそのまま依存の向きになります（第 1 章）。`.fsproj` に `Domain.fs`・`PredictionService.fs`・`RequestValidation.fs`・`PredictionApi.fs`・`FileModelStore.fs`・`Training.fs`・`Main.fs` の順に並べるので、ドメイン層がプレゼンテーション層を参照するような逆向きの依存は、そもそもコンパイルできません。
 
 ### インサイドアウトで進める
 
-内側の層（ドメイン・サービス）から作り、外側（API・インフラ）へ進めます。内側の層は外側を知らないので、スタブだけでテストできます。
+TDD の進め方には、外側（API）から作る **アウトサイドイン** と、内側（ドメイン・アプリケーション）から作る **インサイドアウト** があります。この章ではインサイドアウトを選びます。内側の層は外側を知らないので、スタブだけでテストできます。
 
 ## 15.3 TODO リストの作成
 
@@ -96,7 +105,7 @@ package "第 7・8 章" {
 - [ ] モデルを保存して読み込む
 - [ ] 実データで学習したモデルで動かす
 
-## 15.4 ドメインと予測サービス
+## 15.4 ドメイン層とアプリケーション層
 
 ### ドメインを判別共用体で表す
 
@@ -257,7 +266,7 @@ error FS0025: この式のパターン マッチが不完全です たとえば�
 
 エラーの種類を増やしたときに、説明を書き忘れることがありません。第 3 章の網羅性の検査が、ここでも効いています。
 
-## 15.5 入力を検証する
+## 15.5 入力を検証する（プレゼンテーション層）
 
 ### 何を検証するか
 
@@ -412,7 +421,7 @@ error FS0064: このコンストラクトによって、コードの総称性は
 let inline private notNegative (name: string) (value: 'N) : Validation<'N> =
 ```
 
-## 15.6 Giraffe でエンドポイントを作る
+## 15.6 Giraffe でエンドポイントを作る（プレゼンテーション層）
 
 ### Giraffe を導入する
 
@@ -555,7 +564,7 @@ F# の匿名レコードは、フィールドを **名前の順** に並べま�
 type HealthResponse = { Status: string; Models: Health }
 ```
 
-## 15.7 モデルを保存して読み込む
+## 15.7 モデルを保存して読み込む（インフラ層）
 
 ### 第 7・8 章のモデルを約束に合わせる
 
@@ -708,7 +717,7 @@ let ``実データで学習して保存したモデルで API が予測する`` 
     }
 ```
 
-スタブで確かめた API に、本物の置き場を差し込むだけで、実データのモデルで動きます。置き場をレコードで表しておいたので、API の側は 1 行も変わっていません。
+スタブで確かめた API に、本物の置き場（インフラ層）を差し込むだけで、実データのモデルで動きます。置き場をレコードで表しておいたので、プレゼンテーション層とアプリケーション層は 1 行も変わっていません。
 
 ### 学習してサーバーを起動する
 
@@ -790,6 +799,7 @@ dotnet test
 <summary>この章の完成コード（src/MachineLearning/Chapter15/RequestValidation.fs）</summary>
 
 ```fsharp
+/// プレゼンテーション層。HTTP の本文（JSON）を検証して、ドメイン層の型にする
 module MachineLearning.Chapter15.RequestValidation
 
 open System.Text.Json
@@ -860,7 +870,7 @@ let private oneOf (name: string) (choices: (string * 'T) list) (value: JsonEleme
 
 この章では、第 7・8 章のモデルを HTTP の API として公開し、関心事ごとにモジュールを分けました。
 
-1. **依存の向きとファイルの順番** — ドメイン・サービス・API・インフラの層に分け、F# のファイルの順番で依存の向きを強制した
+1. **依存の向きとファイルの順番** — ドメイン・アプリケーション・インフラ・プレゼンテーションの層に分け、F# のファイルの順番で依存の向きを強制した
 2. **判別共用体のドメイン** — 客室の等級・性別・乗船港を判別共用体にし、ありえない値をドメインに入れないようにした。エラーを増やしたときは網羅性の検査が説明の書き忘れを知らせた
 3. **Result と and!** — 失敗を例外ではなく `Result` で返し、入力の検証では `and!` の計算式で理由をまとめて集めた。検証と変換を同時に行い、検証済みの値だけをドメインに渡した
 4. **関数のレコードで差し替える** — モデルの置き場を関数のレコードにして、テストではスタブ、本番ではファイルの置き場を差し込んだ
