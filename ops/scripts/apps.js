@@ -40,7 +40,8 @@ const APPS = [
     // global.json の SDK バージョンで解決できるかをアプリのディレクトリで確かめる
     tools: [{ cmd: 'dotnet', version: 'dotnet --version' }],
     setup: 'dotnet tool restore && dotnet restore --locked-mode && dotnet build --no-restore',
-    check: 'dotnet fantomas --check . && dotnet fsharplint lint MachineLearning.sln && dotnet test',
+    // CI（.github/workflows/fsharp-ci.yml）と同じ順に、整形・静的解析・Notebook の出力・テストを検査する
+    check: 'dotnet fantomas --check . && dotnet fsharplint lint MachineLearning.sln && dotnet fsharplint lint tools/notebooks.fsx && dotnet fsi tools/notebooks.fsx verify && dotnet test',
   },
 ];
 
