@@ -1,0 +1,96 @@
+---
+type: ADR
+title: "005 Java 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定"
+description: "Java 版のライブラリに JUnit 6・AssertJ・Spotless・Error Prone・PMD・JaCoCo・Tribuo・Javalin を採用し、章ごとの置き換え範囲を Kotlin 版の ADR 002 を起点に決める。"
+tags: [adr,getting-start-ml,java]
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-19T14:30:00Z }
+---
+
+# 005 Java 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定
+
+「機械学習から始めるプログラミング入門」Java 版で使うライブラリを決める。
+
+日付: 2026-09-19
+
+## ステータス
+
+2026-09-19 提案されました
+
+## コンテキスト
+
+[執筆計画](../article/getting-start-ml/outline.md) の「Java 版執筆計画」で、Java 版は Kotlin 版の実装を対比の相手にし、データフレームのライブラリを使わず record のリストと Stream API でデータを表すことを承認した。JDK と Gradle の版は Kotlin 版にそろえる。
+
+B24 のステップ 1 で、Maven Central の POM・JAR のクラスファイルの版と Gradle Plugin Portal のメタデータによって、次を確かめた。
+
+| 確認したこと | 結果 | 確認方法 |
+|------------|------|---------|
+| ライセンス | Tribuo 4.3.2・AssertJ 3.27.7・Error Prone 2.50.0・google-java-format 1.36.1・Spotless 8.10.2・Javalin 7.2.3 は Apache License 2.0。JUnit 6.1.3・JaCoCo 0.8.15 は EPL-2.0。PMD 7.27.0 は BSD 系 | 各 POM の `licenses` |
+| 必要な JDK | JUnit 6.1.3・Javalin 7.2.3 は Java 17（クラスファイルの major 61）、Error Prone 2.50.0・google-java-format 1.36.1 は Java 21（major 65）、Tribuo 4.3.2・PMD 7.27.0 は Java 8（major 52） | JAR のクラスファイルの版 |
+| Gradle プラグイン | Error Prone は `net.ltgt.errorprone` 5.1.1、Spotless は `com.diffplug.spotless` 8.10.2。PMD と JaCoCo は Gradle に組み込み | Gradle Plugin Portal |
+| Tribuo の保守 | 最新は 4.3.2 で、Maven Central の最終更新は 2025-04-08 | Maven Central のメタデータ |
+| AssertJ の版 | 4.0.0 はマイルストーン版（4.0.0-M1）のみ。安定版の最新は 3.27.7 | Maven Central のメタデータ |
+
+Tribuo の各アルゴリズムの振る舞いは、Kotlin 版の [ADR 002](002-kotlin-ml-libraries.md) で確かめている。Tribuo は Java 製なので、Java から使っても振る舞いは変わらないと考え、置き換えの範囲は ADR 002 を起点にする。
+
+## 決定
+
+| 用途 | 採用 | バージョン | ライセンス | 初出 |
+|------|------|-----------|-----------|------|
+| 言語・ビルド | Java（ツールチェーン）、Gradle Wrapper（Kotlin DSL）、バージョンカタログ | 21、9.7.1 | — | 第 1 章 |
+| テスト | JUnit、AssertJ | 6.1.3、3.27.7 | EPL-2.0、Apache License 2.0 | 第 1 章 |
+| 整形 | Spotless（google-java-format） | 8.10.2（1.36.1） | Apache License 2.0 | 第 1 章（記事での解説は第 5 章） |
+| 静的解析 | Error Prone、PMD | 2.50.0（プラグイン 5.1.1）、7.27.0 | Apache License 2.0、BSD 系 | 第 1 章（記事での解説は第 5 章） |
+| カバレッジ | JaCoCo | 0.8.15 | EPL-2.0 | 第 1 章（記事での解説は第 5 章） |
+| データの表現 | record のリストと Stream API（ライブラリなし） | — | — | 第 1 章 |
+| 機械学習 | Tribuo | 4.3.2 | Apache License 2.0 | 第 3 章 |
+| API | Javalin | 7.2.3 | Apache License 2.0 | 第 15 章 |
+
+- JDK と Gradle は Kotlin 版と同じく、`jvmToolchain(21)` と `gradle/gradle-daemon-jvm.properties` で 21 に固定する。手元の JDK が 25 でも、ビルドとデーモンは JDK 21 で動く
+- 整形・静的解析・カバレッジは B24 から `./gradlew check` に組み込む。F# 版で静的解析のルールが 1 件も有効になっていなかった教訓から、わざと違反を入れて `check` が失敗することを確かめる
+- 機械学習と API のライブラリは、使う章に入ってから `gradle/libs.versions.toml` に追加する
+
+### 章ごとのライブラリへの置き換え方針
+
+ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら振る舞いを確かめ、Kotlin 版と違う結果になったときは本 ADR に書き足す。
+
+| 章 | 置き換え | 方針 |
+|----|---------|------|
+| 3 | Tribuo の CART（ジニ不純度） | 自作の決定木と予測を突き合わせる |
+| 7 | Tribuo の `SLMTrainer(true)`・`LARSTrainer` | 係数と決定係数を突き合わせる |
+| 8 | Tribuo の決定木 | クラスの重み付けは自作の木で示し、Tribuo との突き合わせは重み付けなしで行う |
+| 9 | Tribuo の `MeanStdDevTransformation` | 不偏標準偏差を使う違いを踏まえて自作の標準化と突き合わせる |
+| 10 | Tribuo の `LogisticRegressionTrainer`・`RandomForestTrainer` | 正解率を比べる |
+| 11 | Tribuo の評価器 | 自作の評価指標と突き合わせる |
+| 12 | Tribuo の `ElasticNetCDTrainer` | ラッソ回帰とリッジ回帰を突き合わせる |
+| 13 | なし | PCA のモジュールが無いので、Tribuo の固有値分解を使った自作を最終実装とする |
+| 14 | Tribuo の `KMeansTrainer` | 初期中心を渡せないので、SSE の大きさを比べるにとどめる |
+
+### 検討した代替案
+
+| 代替案 | 採用しなかった理由 |
+|--------|------------------|
+| Maven | Kotlin 版と同じ Gradle にそろえると、ビルドの設定の違いではなく言語の違いに記事を集中できる |
+| JUnit 5 | JUnit 6 が安定版で、JDK 21 のツールチェーンで動く |
+| AssertJ 4.0.0-M1 | マイルストーン版で、API が変わる可能性がある |
+| Checkstyle | 整形は Spotless、規約の検査は PMD、バグになりやすい書き方は Error Prone で分担でき、規約の検査を 2 つ持つ必要が無い |
+| Tablesaw（データフレーム） | Kotlin 版の data class と対比するため、record と Stream API で表す。依存を増やさない |
+| Smile 6.x | GPL-3.0 で、PUBLIC リポジトリで配布するサンプルコードの利用条件に影響する（ADR 002 と同じ理由） |
+| Spring Boot（API） | 第 15 章の主題（層の分離と統合テスト）に対して依存が大きい |
+
+## 影響
+
+- 良い影響: すべてのライブラリが寛容なライセンスで、サンプルコードの利用条件が単純になる
+- 良い影響: Kotlin 版と同じ Tribuo・JDK・Gradle を使うので、記事の違いが言語の違いだけになる
+- 悪い影響: Tribuo の最終更新は 2025-04 で、保守が続くかは分からない。Kotlin 版と Java 版の両方が影響を受ける
+- 悪い影響: データフレームを使わないので、第 2 章・第 8 章・第 9 章の前処理は Kotlin 版より記述が長くなる。その長さ自体を対比の題材にする
+
+## コンプライアンス
+
+- `apps/java/gradle/libs.versions.toml` に上記のライブラリと版だけが記載されている
+- Java CI（`.github/workflows/java-ci.yml`）がグリーンである
+- わざと違反を入れると `./gradlew check` が失敗する（B24 のステップ 4 で確かめる）
+
+## 備考
+
+- 著者: claude-code/claude-opus-5
