@@ -30,6 +30,10 @@ B24 のステップ 1 で、Maven Central の POM・JAR のクラスファイル
 | Gradle プラグイン | Error Prone は `net.ltgt.errorprone` 5.1.1、Spotless は `com.diffplug.spotless` 8.10.2。PMD と JaCoCo は Gradle に組み込み | Gradle Plugin Portal |
 | Tribuo の保守 | 最新は 4.3.2 で、Maven Central の最終更新は 2025-04-08 | Maven Central のメタデータ |
 | AssertJ の版 | 4.0.0 はマイルストーン版（4.0.0-M1）のみ。安定版の最新は 3.27.7 | Maven Central のメタデータ |
+| 静的解析が効いているか（B24） | わざと違反を入れた 3 つのファイルで、`./gradlew check` がそれぞれ失敗した。例外を作って投げない（Error Prone の `DeadException`、エラー）、整形の崩れ（`spotlessJavaCheck`）、波かっこの無い if（PMD の `ControlStatementBraces`）。Error Prone の警告（`UnusedVariable`・`EmptyCatch`）も `-Werror` によってコンパイルを失敗させる | `apps/java` に一時的なファイルを置いて実行し、確かめた後に消した |
+| 名前による除外（B24） | `unused` という名前の変数は、Error Prone も PMD も意図して使わない変数とみなし、指摘しない | 同上 |
+| 名前付きのパッケージ（B24） | PMD の quickstart の `NoPackage` が、無名のパッケージのクラスを指摘する。テストも `setup` などのパッケージに置く | 同上 |
+| Nix の `java` 環境（B24） | `nix develop .#java` の JDK 21.0.8 で `./gradlew test` が成功した | 手元で実行 |
 
 Tribuo の各アルゴリズムの振る舞いは、Kotlin 版の [ADR 002](002-kotlin-ml-libraries.md) で確かめている。Tribuo は Java 製なので、Java から使っても振る舞いは変わらないと考え、置き換えの範囲は ADR 002 を起点にする。
 
@@ -89,7 +93,7 @@ ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら�
 
 - `apps/java/gradle/libs.versions.toml` に上記のライブラリと版だけが記載されている
 - Java CI（`.github/workflows/java-ci.yml`）がグリーンである
-- わざと違反を入れると `./gradlew check` が失敗する（B24 のステップ 4 で確かめる）
+- わざと違反を入れると `./gradlew check` が失敗する（B24 で確かめた）
 
 ## 備考
 
