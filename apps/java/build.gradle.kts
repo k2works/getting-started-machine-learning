@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     errorprone(libs.errorprone.core)
+    implementation(libs.tribuo.classification.tree)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)

@@ -70,6 +70,13 @@ ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら�
 | 13 | なし | PCA のモジュールが無いので、Tribuo の固有値分解を使った自作を最終実装とする |
 | 14 | Tribuo の `KMeansTrainer` | 初期中心を渡せないので、SSE の大きさを比べるにとどめる |
 
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 2 | record の成分に配列を使うと、Error Prone の `ArrayRecordComponent` が警告する（`-Werror` でエラー）。特徴量の `Features` は `double[]` を持つので、record ではなくクラスにし、配列を写して持って equals・hashCode・toString を中身で比べる |
+| 3 | Tribuo の CART（`CARTClassificationTrainer`、`minChildWeight` 1）と、同数の多数決・同じ不純度の分割候補の扱いが違うことは Kotlin 版（ADR 002）と同じ。Java 版の分割（`java.util.Random(0)`）では、深さ 1〜5 と制限なしのどれでも、テストデータ 45 件の予測が自作と全件一致した |
+
 ### 検討した代替案
 
 | 代替案 | 採用しなかった理由 |
