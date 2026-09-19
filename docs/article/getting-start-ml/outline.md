@@ -1011,16 +1011,22 @@ C# は第 2 波の 2 番目の言語で、F# 版の実装を対比の相手に�
 | ライブラリの最新版 | Microsoft.ML 5.0.0、Microsoft.Data.Analysis 0.23.0（0.24.0 はプレビュー）、xunit.v3 4.0.1、coverlet.MTP 10.0.1、Roslynator.Analyzers 5.0.0、SonarAnalyzer.CSharp 10.34.0.3385、Microsoft.CodeAnalysis.NetAnalyzers 10.0.401、StyleCop.Analyzers は安定版が 1.1.118 で 1.2.0 はベータ | NuGet |
 | 実装の置き場所 | `apps/dotnet/` は空になった（F# 版を `apps/fsharp/` に移した後に残っていたビルドの中間ファイルは、Git の管理外のまま消えた） | ファイルを確認 |
 
-ライセンス、Microsoft.Data.Analysis の保守状況（0.x のまま）、アナライザーの指摘の量、ML.NET を C# から使うときの癖は未検証。B29 の ADR 006 で確かめてから確定する。
+| ライセンス | Microsoft.ML 5.0.0・Microsoft.Data.Analysis 0.23.0・coverlet.MTP 10.0.1 は MIT、xunit.v3 4.0.1 は Apache-2.0 | NuGet のカタログ |
+| Microsoft.Data.Analysis の保守（B29） | 安定版の最新 0.23.0 は 2025-11-11 の公開で、以後はプレビュー（0.24.0-preview）だけ。1.0 に達していない | NuGet のカタログ |
+| `global.json` の版（B29） | `version` を 10.0.100・`rollForward` を `latestPatch` にすると、手元（10.0.100）でも Nix（10.0.101）でも解決できた。F# 版は 10.0.101 固定なので手元では解決できない | 使い捨てのプロジェクトで `dotnet --version` |
+| アナライザーの水準（B29） | `AnalysisMode` を `All` にすると、公開メソッドの引数の null 検査（CA1062）まで求められて記事のコードが読みにくくなる。`Recommended` では CA1304・CA1311（カルチャの指定）・CA1822（static にできる）などが出る。`TreatWarningsAsErrors` により、コンパイラの警告（CS0219 など）もエラーになる | 使い捨てのプロジェクトでビルド |
+| `dotnet format`（B29） | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると `WHITESPACE` の指摘が出る。`.editorconfig` を置いて規則を明示する | 同上 |
+
+ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章で確かめる。
 
 ### ライブラリ方針（ADR 006 で確定する案）
 
 | 用途 | 第一候補 | 理由 | 代替案 |
 |------|---------|------|--------|
-| 言語・実行環境 | C#（.NET SDK 10.0.101、`net10.0`）。`global.json` で版を固定する | F# 版と同じ環境にそろえる | .NET 8 |
+| 言語・実行環境 | C#（.NET SDK、`net10.0`）。`global.json` は 10.0.100 + `rollForward: latestPatch` にして、手元と Nix の両方で動くようにする | F# 版と同じ環境にそろえる | .NET 8 |
 | テスト・カバレッジ | xUnit v3（Microsoft.Testing.Platform）+ coverlet.MTP | F# 版と同じ | NUnit、MSTest |
 | 整形 | `dotnet format`（SDK 同梱）と `.editorconfig` | 追加の依存が要らない | CSharpier |
-| 静的解析 | .NET アナライザー（`AnalysisMode: All`）+ 警告をエラーにする（`TreatWarningsAsErrors`）。追加のアナライザーの要否は B29 で判断する | SDK 同梱で、C# の標準的な解析 | Roslynator、SonarAnalyzer.CSharp、StyleCop（安定版が 1.1.118 で古い） |
+| 静的解析 | .NET アナライザー（`AnalysisMode: Recommended`）+ 警告をエラーにする（`TreatWarningsAsErrors`）。追加のアナライザーは使わない（B29 で判断） | SDK 同梱で、C# の標準的な解析 | Roslynator、SonarAnalyzer.CSharp、StyleCop（安定版が 1.1.118 で古い） |
 | データの表現 | record のリストと LINQ。列名で引く表が要るかは B29 で決める | Java 版と同じ考え方で、ライブラリを増やさない | Microsoft.Data.Analysis の `DataFrame`（0.x） |
 | 乱数 | `System.Random(seed)` | F# 版と同じ。分割の結果も F# 版と一致するはず（B29 で確かめる） | 自作 |
 | 機械学習 | ML.NET（Microsoft.ML・Microsoft.ML.FastTree） | .NET の標準的な機械学習ライブラリ。F# 版で癖を確かめてある（ADR 004） | 自作のみ |
