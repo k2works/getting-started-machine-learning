@@ -1,12 +1,3 @@
----
-type: Article
-title: "機械学習から始める Java 入門"
-description: "Java 版の概要。record・sealed interface・Stream API で機械学習のアルゴリズムを TDD で自作し、Tribuo に置き換えて突き合わせる。"
-tags: [article,getting-start-ml,java]
-status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-19T15:45:00Z }
----
-
 # 機械学習から始める Java 入門
 
 Java は JVM 上で動く静的型付けの言語で、Java 16 以降の record、Java 17 以降の sealed interface、Java 21 の `switch` のパターンマッチによって、データとモデルを簡潔に表せるようになりました。本シリーズでは、Python 版と同じ題材の機械学習のアルゴリズムを TDD で自作し、次に Java 製の機械学習ライブラリ Tribuo に置き換えて結果を突き合わせながら、Java の書き方とエコシステムを学びます。

@@ -803,7 +803,7 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 
 | Bolt | 言語 | 内容 | 完了条件 |
 |------|------|------|---------|
-| B24 ウォーキングスケルトン | Java | Nix の `java` 環境の確認、`apps/java/` の雛形、ADR 005、第 1 章の実装と記事、Java 版トップ、nav、Java CI | 第 1 章のテストが CI でグリーン。記事がサイトで表示される。静的解析のルールが有効になっている |
+| B24 ウォーキングスケルトン（完了） | Java | Nix の `java` 環境の確認、`apps/java/` の雛形、ADR 005、第 1 章の実装と記事、Java 版トップ、nav、Java CI | 第 1 章のテストが CI でグリーン。記事がサイトで表示される。静的解析のルールが有効になっている |
 | B25 | Java | 第 2〜3 章 | 自作の決定木とライブラリの結果を並べて載せられる |
 | B26 | Java | 第 4〜6 章 | ビルド・静的解析・カバレッジ・CI が記事どおりに動く |
 | B27 | Java | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
@@ -867,13 +867,13 @@ Tribuo の各アルゴリズムの振る舞いは Kotlin 版で確かめた ADR 
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| Nix 環境 | `nix develop .#java` で JDK・Gradle が使えることを CI で確かめる | 未着手 |
-| アプリ雛形 | `apps/java/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・Gradle Wrapper・`src/main/java`・`src/test/java`）にテストが 1 本通る最小構成 | 未着手 |
-| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 未着手 |
-| 静的解析 | Spotless・Error Prone・PMD を `./gradlew check` に組み込み、わざと違反を入れて `check` が失敗することを確かめる | 未着手 |
-| ライブラリ選定 | ADR 005（Java 版のライブラリ）を作成する | 未着手 |
-| CI | `.github/workflows/java-ci.yml`（Nix → `./gradlew check` → カバレッジの表示）。Gradle のキャッシュは Kotlin CI と同じパス | 未着手 |
-| タスク | `ops/scripts/apps.js` に Java を加え、`apps:check:java` で手元の検査を実行できるようにする | 未着手 |
+| Nix 環境 | `nix develop .#java` で JDK・Gradle が使えることを CI で確かめる | 完了（手元の Nix は JDK 21.0.8、Java CI は 21.0.9。どちらでも `./gradlew check` が成功。CI のカバレッジは実データのテストがスキップされるので 85.2%、手元は 99.2%） |
+| アプリ雛形 | `apps/java/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・Gradle Wrapper・`src/main/java`・`src/test/java`）にテストが 1 本通る最小構成 | 完了（Gradle Wrapper・デーモンの JDK の設定は Kotlin 版から写した） |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 完了 |
+| 静的解析 | Spotless・Error Prone・PMD を `./gradlew check` に組み込み、わざと違反を入れて `check` が失敗することを確かめる | 完了（3 つとも失敗を確かめた。結果は ADR 005） |
+| ライブラリ選定 | ADR 005（Java 版のライブラリ）を作成する | 完了（ADR 005） |
+| CI | `.github/workflows/java-ci.yml`（Nix → `./gradlew check` → カバレッジの表示）。Gradle のキャッシュは Kotlin CI と同じパス | 完了（キャッシュのキーは `gradle-java-` で Kotlin CI と分けた） |
+| タスク | `ops/scripts/apps.js` に Java を加え、`apps:check:java` で手元の検査を実行できるようにする | 完了 |
 
 ### 章別執筆計画（Java）
 
@@ -904,6 +904,8 @@ Tribuo の各アルゴリズムの振る舞いは Kotlin 版で確かめた ADR 
 | 6 | 記事：第 1 章、Java 版トップ（`java/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
 | 7 | CI とタスク：`.github/workflows/java-ci.yml`、`ops/scripts/apps.js` への Java の追加 | push 後に Java CI がグリーン。`apps:check:java` が手元で成功する |
 | 8 | 仕上げ：学習データの行の混入・BOM・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+B24（Java のウォーキングスケルトン）は 2026-09-19 に完了した。静的解析は、わざと違反を入れたファイルで Spotless・Error Prone・PMD のそれぞれが `check` を失敗させることを確かめてから第 1 章に入った。Error Prone の警告も `-Werror` でエラーになるので、仮実装の段階に本実装の `stripBom` が残っていると `UnusedMethod` でコンパイルが止まった。PMD の quickstart は名前の無いパッケージ（`NoPackage`）を指摘するので、`SetupTest` も `setup` パッケージに置いた。ツールで書いたソースと記事の `\uFEFF` のエスケープが BOM の文字そのものに置き換わっていたので、エスケープに戻し、BOM の文字の混入を仕上げの検査に加えた。第 1 章の正解率は Python 版・Kotlin 版と同じ 0.7368。Java CI の初回は、カバレッジを表示するステップの `run:` に「`: `」を含む値をそのまま書いて YAML として不正になり、ブロック形式に直した。
 
 ### 承認が必要な事項（Java）
 
