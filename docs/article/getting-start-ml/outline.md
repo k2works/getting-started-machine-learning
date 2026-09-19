@@ -827,6 +827,89 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 - [x] 統合解説の更新を第 2 波の完了後にまとめて行うこと（B49）
 - [x] B24（Java のウォーキングスケルトン）の範囲
 
+## Java 版執筆計画
+
+Java は第 2 波の最初の言語で、Kotlin 版の実装を対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。Kotlin 版との対比の軸は次の 3 つとする。
+
+- **型**: record と sealed interface（Java 17 以降）で、Kotlin の data class と sealed interface と同じことを表す。欠損値は Kotlin の null 許容型に対し `OptionalDouble` か null で表し、コンパイラが null を検査しない違いを見せる
+- **データの表現**: Kotlin DataFrame に対し、record のリストと Stream API で表す。データフレームのライブラリは使わない
+- **ライブラリ**: Tribuo は Java 製なので、Kotlin 版で書いた橋渡しのコードが Java ではどう見えるかを比べる
+
+### 確認した事実（2026-09-19 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| ローカル環境 | JDK 25.0.2 | `java -version` |
+| Nix 環境 | `ops/nix/environments/java/shell.nix` は `jdk`・`maven`・`gradle`（nixpkgs の既定で JDK 21.0.8、Gradle 8.14.3、Maven 3.9.12）。`flake.nix` の `devShells` に登録済み。本リポジトリの CI で `java` 環境を使うワークフローは無い | ファイルと `nix eval` |
+| Kotlin 版の構成 | Gradle Wrapper 9.7.1、`jvmToolchain(21)`、Gradle デーモンの JDK を 21 に固定（`gradle-daemon-jvm.properties`）、`gradle/libs.versions.toml` で版を一元管理 | ファイルを読んだ |
+| Tribuo | 最新は 4.3.2 のまま（Maven Central の最終更新は 2025-04-08）。Kotlin 版で確かめた癖は ADR 002 にある | Maven Central |
+| そのほか | JUnit 6.1.3、AssertJ 3.27.7（4.0.0 はマイルストーン版のみ）、Spotless の Gradle プラグイン 8.10.2、google-java-format 1.36.1、Error Prone 2.50.0、PMD 7.27.0、Checkstyle 14.1.0、JaCoCo 0.8.15、Javalin 7.2.3 | Maven Central |
+
+各ライブラリのライセンス、JUnit 6・Error Prone が JDK 21 のツールチェーンで動くか、Javalin 7 の要求する JDK の版は未検証。B24 の ADR 005 で確かめてから確定する。
+
+### ライブラリ方針（ADR 005 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| 言語・ビルド | Java 21（ツールチェーン）、Gradle Wrapper 9.7.1（Kotlin DSL）、`libs.versions.toml` | Kotlin 版と同じ JDK・Gradle にそろえ、デーモンの JDK の問題を同じ方法で避ける | Maven |
+| テスト | JUnit 6 + AssertJ 3.27.7 | JUnit は「対象言語」の表のテスト基盤。AssertJ は安定版を使う | JUnit 5 |
+| 整形・静的解析 | Spotless（google-java-format）、Error Prone、PMD | 整形・コンパイル時の検査・規約の検査を分ける | Checkstyle |
+| カバレッジ | JaCoCo | Gradle に組み込みのプラグインで動く | — |
+| データの表現 | record のリストと Stream API | Kotlin 版の data class と対比しやすく、依存を増やさない | Tablesaw |
+| 機械学習 | Tribuo 4.3.2 | Kotlin 版と同じライブラリで、Java から直接使える | Smile 2.6.0（LGPL-3.0） |
+| API | Javalin 7 | 「言語ごとのバリエーション」の候補。Kotlin 版の Ktor と同じく軽量 | Spring Boot |
+
+### 前提整備（Java）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `nix develop .#java` で JDK・Gradle が使えることを CI で確かめる | 未着手 |
+| アプリ雛形 | `apps/java/`（`settings.gradle.kts`・`build.gradle.kts`・`gradle/libs.versions.toml`・Gradle Wrapper・`src/main/java`・`src/test/java`）にテストが 1 本通る最小構成 | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは JUnit の `Assumptions` でデータが無ければスキップする | 未着手 |
+| 静的解析 | Spotless・Error Prone・PMD を `./gradlew check` に組み込み、わざと違反を入れて `check` が失敗することを確かめる | 未着手 |
+| ライブラリ選定 | ADR 005（Java 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/java-ci.yml`（Nix → `./gradlew check` → カバレッジの表示）。Gradle のキャッシュは Kotlin CI と同じパス | 未着手 |
+| タスク | `ops/scripts/apps.js` に Java を加え、`apps:check:java` で手元の検査を実行できるようにする | 未着手 |
+
+### 章別執筆計画（Java）
+
+| 章 | テーマ | Java での焦点 | ライブラリへの置き換え |
+|----|--------|--------------|--------------------|
+| 1 | 機械学習とはじめてのテスト | JUnit 6、record、`Files.readAllLines` と BOM、データが無いときのスキップ | — |
+| 2 | データの前処理と三角測量 | null と `OptionalDouble` による欠損値、シード付きの `Random` による分割、ジェネリクス | — |
+| 3 | 決定木による分類と明白な実装 | sealed interface と record による木、`switch` のパターンマッチと網羅性の検査 | Tribuo の CART |
+| 4 | バージョン管理とデータ管理 | Git フロー（言語共通）、`build/` の除外 | — |
+| 5 | パッケージ管理と静的解析 | Gradle とバージョンカタログ、依存の固定、Spotless・Error Prone・PMD、JaCoCo | — |
+| 6 | タスクランナーと CI/CD | Gradle のタスクと Gulp の分担、GitHub Actions と Nix | — |
+| 7〜14 | Kotlin 版と同じテーマ | Kotlin 版の実装を Stream API と record で書き直し、違いを節ごとに示す | ADR 002 で Kotlin 版が決めた範囲をもとに、ADR 005 で確かめる |
+| 15 | 機械学習 API とモジュール設計 | Javalin、パッケージによる層の分離、統合テスト | — |
+
+第 7〜14 章の Java での焦点は、B26 の完了時に第 1〜6 章の実績を踏まえてこの表に書き足す。
+
+### B24 のステップ計画（Java のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：ライセンス、JUnit 6・Error Prone・Javalin 7 の要求する JDK、Tribuo を Java から使うときの依存。結果を本節の「確認した事実」に書き足す | 「未検証」の項目が無くなる |
+| 2 | ADR 005 を書く（ステップ 1 の結果にもとづく。章ごとの置き換えの範囲は ADR 002 を起点にする） | ADR 005 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/java/` の雛形：Gradle Wrapper 9.7.1、`jvmToolchain(21)`、デーモンの JDK 21、バージョンカタログ、`SetupTest` が 1 本通る | 手元と `nix develop .#java` の両方で `./gradlew test` が成功する |
+| 4 | 整形・静的解析・カバレッジ：Spotless・Error Prone・PMD・JaCoCo を `check` に組み込む。わざと違反を入れて `check` が失敗することを確かめてから戻す（F# 版でルールが無効だった教訓） | 違反を入れると `check` が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：Python 版・Kotlin 版と同じ TODO リストを TDD で進める。実データのテストは `Assumptions` でスキップする | データありで全テストが通り、データなしでは実データのテストがスキップされる。正解率が Kotlin 版と一致する |
+| 6 | 記事：第 1 章、Java 版トップ（`java/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/java-ci.yml`、`ops/scripts/apps.js` への Java の追加 | push 後に Java CI がグリーン。`apps:check:java` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Java）
+
+次の点を確認した（2026-09-19 承認）。
+
+- [x] Java 版の対比の軸（型・データの表現・ライブラリ）と、データフレームのライブラリを使わないこと
+- [x] ライブラリの第一候補（JUnit 6・AssertJ・Spotless・Error Prone・PMD・JaCoCo・Tribuo・Javalin 7）を ADR 005 で確定すること
+- [x] Gradle の設定を Kotlin DSL で書き、JDK・Gradle の版を Kotlin 版にそろえること
+- [x] B24 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |

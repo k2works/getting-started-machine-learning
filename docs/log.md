@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Update**: [執筆計画](/article/getting-start-ml/outline.md) に Java 版執筆計画と B24 のステップ計画を追加し、承認を記録。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に第 2 波（Java・C#・Scala・Go・Rust）の執筆計画と Bolt 計画（B24〜B49）を追加し、承認を記録。
 * **Creation**: [多言語統合解説](/article/getting-start-ml/integration/index.md)（第 1〜5 章）を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[執筆計画](/article/getting-start-ml/outline.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) に B23 の完了を反映。[ADR 004](/adr/004-fsharp-ml-libraries.md) に `PCA.compute` の癖を追記。
 * **Update**: F# 版 B21・B22 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B21・B22 で確かめたことを追記。F# 版の全 15 章がそろった。
