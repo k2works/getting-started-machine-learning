@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Creation**: [多言語統合解説](/article/getting-start-ml/integration/index.md)（第 1〜5 章）を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[執筆計画](/article/getting-start-ml/outline.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) に B23 の完了を反映。[ADR 004](/adr/004-fsharp-ml-libraries.md) に `PCA.compute` の癖を追記。
 * **Update**: F# 版 B21・B22 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、[ADR 004](/adr/004-fsharp-ml-libraries.md) に B21・B22 で確かめたことを追記。F# 版の全 15 章がそろった。
 * **Creation**: [F# 第 15 章](/article/getting-start-ml/fsharp/15-machine-learning-api-and-module-design.md) を新規作成。
 * **Creation**: [F# 第 14 章](/article/getting-start-ml/fsharp/14-k-means-clustering.md) を新規作成。

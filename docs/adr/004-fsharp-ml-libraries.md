@@ -136,4 +136,5 @@ Polyglot Notebooks と .NET Interactive は 2026 年に廃止され、リポジ�
 - Shift_JIS の CSV は、`Encoding.RegisterProvider CodePagesEncodingProvider.Instance` で登録してから読む（第 9 章）
 - System.Text.Json は F# のレコード・`option`・リスト・文字列がキーの `Map` を読み書きできるが、判別共用体と、組がキーの `Map` は扱えない（第 8 章）
 - Giraffe 8.3.0 と `Microsoft.AspNetCore.TestHost` 10.0.12 は .NET 10.0.1 の実行環境で動いた。TestHost のクライアントは同期の `Send` に対応しない（`NotSupportedException`）。System.Text.Json は既定で日本語をエスケープするので、`JavaScriptEncoder.Create(UnicodeRanges.All)` を指定した（第 15 章）
+- FSharp.Stats 0.6.0 の `PCA.compute` は自作の主成分分析と主成分・寄与率が一致したが、`VarianceOfComponent` は名前に反して分散ではなく標準偏差を返し、計算の途中の値を標準出力に書き出す。テストでは標準出力を差し替えるので、xUnit のテストの並行実行を `Collection` で分けた（第 13 章）
 - F# の匿名レコードはフィールドを名前の順に並べるので、JSON の項目の順を決めたいときは名前付きのレコードにする（第 15 章）

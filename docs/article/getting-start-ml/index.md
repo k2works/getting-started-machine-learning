@@ -67,6 +67,18 @@
 |------|--------|--------|
 | A | 総合演習（Bank） | [Python](python/appendix-a-bank-exercise.md) |
 
+## 多言語統合解説
+
+第 1 波の 4 言語で同じ 15 章を書いた結果を、横断的に比べます。どの版から読むか迷ったら、[第 5 章 学習ロードマップ](integration/05-learning-roadmap.md) を参照してください。
+
+| 章 | テーマ |
+|----|--------|
+| [第 1 章](integration/01-language-and-library-overview.md) | 言語とライブラリの概要 |
+| [第 2 章](integration/02-data-structure-comparison.md) | データ構造の比較 |
+| [第 3 章](integration/03-algorithm-implementation-comparison.md) | アルゴリズムの実装の比較 |
+| [第 4 章](integration/04-library-ecosystem-comparison.md) | ライブラリのエコシステムの比較 |
+| [第 5 章](integration/05-learning-roadmap.md) | 学習ロードマップ |
+
 ## 学習データ
 
 学習データは書籍『スッキリわかる Python による機械学習入門』（インプレス, 2020）の配布データを使います。配布データは書籍購入者のみ利用できるため、本リポジトリには含まれていません。[書籍サポートページ](https://sukkiri.jp/books/sukkiri_ml) から `sukkiri-ml-codes.zip` を入手し、`tmp/` に置いてから次を実行してください。
