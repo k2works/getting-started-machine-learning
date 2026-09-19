@@ -26,7 +26,7 @@
 | 章 | テーマ | Python | Kotlin | TypeScript | F# |
 |----|--------|--------|--------|------------|----|
 | 1 | 機械学習とはじめてのテスト | [Python](python/01-machine-learning-and-first-test.md) | [Kotlin](kotlin/01-machine-learning-and-first-test.md) | [TypeScript](typescript/01-machine-learning-and-first-test.md) | [F#](fsharp/01-machine-learning-and-first-test.md) |
-| 2 | データの前処理と三角測量 | [Python](python/02-data-preprocessing-and-triangulation.md) | [Kotlin](kotlin/02-data-preprocessing-and-triangulation.md) | [TypeScript](typescript/02-data-preprocessing-and-triangulation.md) | — |
+| 2 | データの前処理と三角測量 | [Python](python/02-data-preprocessing-and-triangulation.md) | [Kotlin](kotlin/02-data-preprocessing-and-triangulation.md) | [TypeScript](typescript/02-data-preprocessing-and-triangulation.md) | [F#](fsharp/02-data-preprocessing-and-triangulation.md) |
 | 3 | 決定木による分類と明白な実装 | [Python](python/03-decision-tree-and-obvious-implementation.md) | [Kotlin](kotlin/03-decision-tree-and-obvious-implementation.md) | [TypeScript](typescript/03-decision-tree-and-obvious-implementation.md) | — |
 
 ### 第 2 部: 開発環境と自動化

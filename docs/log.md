@@ -1,5 +1,8 @@
 # Docs Update Log
 
+## 2026-09-19
+* **Creation**: [F# 第 2 章](/article/getting-start-ml/fsharp/02-data-preprocessing-and-triangulation.md) を新規作成。
+
 ## 2026-09-18
 * **Creation**: [ADR 004](/adr/004-fsharp-ml-libraries.md) を新規作成。
 * **Update**: F# 版 B18 の完了に合わせて、[執筆計画](/article/getting-start-ml/outline.md)・[シリーズ索引](/article/getting-start-ml/index.md)・[執筆ワークフロー](/article/getting-start-ml/workflow.md) を更新し、F# 版トップを追加。
