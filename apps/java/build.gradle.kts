@@ -18,7 +18,12 @@ dependencies {
     implementation(libs.tribuo.regression.sgd)
     implementation(libs.tribuo.clustering.kmeans)
     implementation(libs.tribuo.math)
+    implementation(libs.javalin)
+    implementation(libs.jackson.databind)
+    // Tribuo・Javalin が使う SLF4J の警告と起動時のログを出さないための、何もしないログ実装
+    runtimeOnly(libs.slf4j.nop)
     testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.javalin.testtools)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)
     testRuntimeOnly(libs.junit.platform.launcher)
