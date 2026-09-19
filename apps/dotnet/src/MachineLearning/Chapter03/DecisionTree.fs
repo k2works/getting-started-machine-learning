@@ -61,6 +61,8 @@ let majority (labels: 'L list) : 'L =
     labels |> List.countBy id |> List.maxBy snd |> fst
 
 /// 深さの上限（None なら制限なし）まで、分け方を選んで再帰的に木を作る
+// 左右の部分木を作ってから Node にまとめるので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec fit (maxDepth: int option) (x: Map<string, float> list) (t: 'L list) : Tree<'L> =
     let split = if maxDepth = Some 0 then None else bestSplit x t
 
@@ -76,6 +78,7 @@ let rec fit (maxDepth: int option) (x: Map<string, float> list) (t: 'L list) : T
 
         Node(split, fitPart left, fitPart right)
 
+[<TailCall>]
 let rec predictOne (tree: Tree<'L>) (row: Map<string, float>) : 'L =
     match tree with
     | Leaf label -> label
@@ -88,6 +91,8 @@ let rec predictOne (tree: Tree<'L>) (row: Map<string, float>) : 'L =
 let predict (tree: Tree<'L>) (rows: Map<string, float> list) : 'L list = rows |> List.map (predictOne tree)
 
 /// 木を、条件ごとに字下げした行のリストにする
+// 左右の部分木の行を連結するので末尾再帰ではない。再帰の深さは木の深さまで
+// fsharplint:disable-next-line EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec formatTree (tree: Tree<'L>) : string list =
     let indent lines =
         lines |> List.map (fun line -> "  " + line)
