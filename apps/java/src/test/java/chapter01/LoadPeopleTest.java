@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class LoadPeopleTest {
-  private static final String HEADER = "﻿身長,体重,年代,派閥\n";
+  private static final String HEADER = "\uFEFF身長,体重,年代,派閥\n";
 
   @TempDir Path directory;
 
