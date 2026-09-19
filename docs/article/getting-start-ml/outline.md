@@ -916,6 +916,49 @@ B24（Java のウォーキングスケルトン）は 2026-09-19 に完了した
 - [x] Gradle の設定を Kotlin DSL で書き、JDK・Gradle の版を Kotlin 版にそろえること
 - [x] B24 のステップ 1〜8
 
+### B25 のステップ計画（第 2〜3 章）
+
+#### データの表し方（第 2 章以降のすべての章に効く判断）
+
+Kotlin 版は Kotlin DataFrame の表（列名で値を引く）でデータを持ち、決定木も列名で特徴量を引く。Java 版はデータフレームのライブラリを使わないので、次の形にする案とする。
+
+| 対象 | 表し方（案） | 理由 |
+|------|------------|------|
+| 読み込んだ行 | `record Row(Map<String, Double> values)`。欠損値は `null` の値で表し、読み出しは `OptionalDouble get(String column)` に限る | 第 7〜14 章では列の違う CSV を何種類も読むので、データセットごとに record を作るより、列名で引く形のほうが章をまたいで使い回せる。F# 版の `Map<string, float option>` と同じ考え方。`null` はクラスの外に出さず、`OptionalDouble` で「値が無い場合」を呼び出し側に見せる |
+| 補完した後の特徴量 | `record Features(List<String> columns, double[] values)`。欠損値を持てない | 補完するまでモデルに渡せないことを型で分ける。Kotlin 版の `Double?` と `Double` の区別に当たる。Tribuo の `ArrayExample`（特徴量名の配列と `double` の配列）にもそのまま渡せる |
+| 分割の結果 | `record TrainTestSplit<T>(List<Features> xTrain, List<Features> xTest, List<T> tTrain, List<T> tTest)` | Kotlin 版と同じ形。正解ラベルの型を型引数にして、第 7 章の数値の正解ラベルにも使う |
+| 決定木 | `sealed interface Tree permits Leaf, Node` と record の `Leaf`・`Node`。予測は `switch` のパターンマッチで書く | 網羅性をコンパイラが検査する。Kotlin 版の sealed interface と `when` に当たる |
+
+代替案は、iris 専用の record（`IrisRow(Double sepalLength, ...)`）を作る形。型は強くなるが、章ごとにデータセット専用の型と、列名で特徴量を選ぶ仕組みの両方が要るので採らない。
+
+#### 乱数と数値
+
+分割は `java.util.Random(seed)` と `Collections.shuffle` で行う。Kotlin 版の `kotlin.random.Random` とは乱数列が違うので、訓練データとテストデータに入る行は Kotlin 版と一致しない。件数（105 件と 45 件）は一致させ、正解率などの数値は Java 版の実測値を載せる。Tribuo との突き合わせは Java 版の中で完結させる。
+
+#### ステップ
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | 第 2 章の読み込み：`Row` と、BOM 付きで空欄を含む CSV の読み込み、列ごとの欠損値の数 | 架空の値の CSV で、BOM が列名に残らず、空欄が欠損値になるテストが通る |
+| 2 | 第 2 章の前処理：欠損値を除いた列ごとの平均値、補完して `Features` にする、特徴量と正解ラベルに分ける | 元の行を変更しないことを含めてテストが通る |
+| 3 | 第 2 章の分割：`splitTrainTest` を三角測量で進める（割合どおりの件数、重複の無さ、特徴量とラベルの対応、同じシードで同じ分け方、数値のラベル） | Kotlin 版と同じ 8 つの観点のテストが通る |
+| 4 | 第 2 章の実データ：iris.csv の欠損値の数（2・1・2・2）、105 件と 45 件への分割と補完、`Main` の表示 | データありで通り、データなしでスキップされる |
+| 5 | 第 3 章の決定木：ジニ不純度、最良の分割、`Tree` の構築と予測、深さの制限、学習前の予測のエラー、木の表示 | Kotlin 版と同じ観点のテストが通る |
+| 6 | 第 3 章の Tribuo：`tribuo-classification-tree` を依存に加え、`Features` を `ArrayExample` に変える橋渡し、CART との突き合わせ。一致しない場合の理由（同数の多数決・同じ不純度の分割候補）を ADR 002 の結果と照らしてテストに残す | 突き合わせのテストが通る。Kotlin 版と違う振る舞いが出たら ADR 005 に書く |
+| 7 | 第 3 章の実データ：深さごとの正解率と深さ 2 の木を表示する `Main` | 記事に載せる数値をテストで固定する |
+| 8 | 記事：第 2 章・第 3 章を書き、Java 版トップ・シリーズ索引・nav に登録する。途中段階の出力は、その段階を再現して実測する | 記事の数値・出力が実測と一致する。サイトのビルドでリンク切れが無い |
+| 9 | 仕上げ：学習データの行・BOM の文字・絶対パスの検査、OKF、執筆計画の B25 の完了、`docs/log.md`、push して Java CI とサイトの公開を確かめる | 検査に指摘が無く、CI がグリーン |
+
+第 2 章と第 3 章は、第 3 章が第 2 章の `Features` と分割に依存するので、並行させずに順に進める。
+
+### 承認が必要な事項（B25）
+
+次の点を確認した（2026-09-20 承認）。
+
+- [x] データの表し方（読み込んだ行を `Map<String, Double>` を包む `Row`、補完後を欠損値を持てない `Features`、決定木を sealed interface と record）
+- [x] 乱数に `java.util.Random` を使い、数値は Java 版の実測値を載せること
+- [x] B25 のステップ 1〜9
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
