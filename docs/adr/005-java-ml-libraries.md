@@ -61,6 +61,7 @@ ADR 002 の方針をそのまま使う。Java 版の各章で実装しながら�
 | 章 | 置き換え | 方針 |
 |----|---------|------|
 | 3 | Tribuo の CART（ジニ不純度） | 自作の決定木と予測を突き合わせる |
+| 9 | Tribuo の `MeanStdDevTransformation` は Java から呼んでも不偏標準偏差（件数 − 1 で割る）を使い、自作の値に √((n−1)/n) を掛けると一致する（ADR 002 と同じ）。Shift_JIS の `weather.csv` を UTF-8 として読むと、Java の `Files.readAllLines` は `MalformedInputException` を投げる（Kotlin DataFrame は置換文字に置き換えて読み進める）。正規方程式は Tribuo の `DenseMatrix` のコレスキー分解で解き、`choleskyFactorization()` は `Optional` を返す |
 | 7 | Tribuo の `SLMTrainer(true)`・`LARSTrainer` | 係数と決定係数を突き合わせる |
 | 8 | Tribuo の決定木 | クラスの重み付けは自作の木で示し、Tribuo との突き合わせは重み付けなしで行う |
 | 9 | Tribuo の `MeanStdDevTransformation` | 不偏標準偏差を使う違いを踏まえて自作の標準化と突き合わせる |
