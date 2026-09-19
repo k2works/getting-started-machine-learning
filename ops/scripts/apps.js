@@ -34,6 +34,14 @@ const APPS = [
     check: `${process.platform === 'win32' ? 'gradlew.bat' : './gradlew'} check`,
   },
   {
+    name: 'java',
+    nix: 'java',
+    dir: path.join('apps', 'java'),
+    tools: [{ cmd: 'java', version: 'java -version' }],
+    setup: `${process.platform === 'win32' ? 'gradlew.bat' : './gradlew'} testClasses`,
+    check: `${process.platform === 'win32' ? 'gradlew.bat' : './gradlew'} check`,
+  },
+  {
     name: 'fsharp',
     nix: 'dotnet',
     dir: path.join('apps', 'fsharp'),
@@ -169,7 +177,7 @@ export default function (gulp) {
 ${APPS.map((app) => `  ${app.name.padEnd(8)} setup: ${app.setup}\n           check: ${app.check}`).join('\n')}
 
 前提ツール: uv / Node.js（22・24 系）/ JDK 21 以上 / .NET SDK 10.0.101 以上
-ローカルのツールが見つからないかバージョンが合わない場合は、nix develop .#<python|node|kotlin|dotnet> の中で自動的に実行します。
+ローカルのツールが見つからないかバージョンが合わない場合は、nix develop .#<python|node|kotlin|java|dotnet> の中で自動的に実行します。
 `);
     done();
   });

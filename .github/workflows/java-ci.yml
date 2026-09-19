@@ -1,0 +1,53 @@
+name: Java CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/java/**"
+      - ".github/workflows/java-ci.yml"
+      - "ops/nix/environments/java/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/java/**"
+      - ".github/workflows/java-ci.yml"
+      - "ops/nix/environments/java/**"
+      - "flake.nix"
+      - "flake.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-java-${{ hashFiles('apps/java/**/*.gradle.kts', 'apps/java/gradle/libs.versions.toml', 'apps/java/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-java-
+
+      # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
+      - name: Run tests, formatting check, Error Prone and PMD
+        run: nix develop .#java --command bash -c "cd apps/java && ./gradlew check --console=plain"
+
+      # 実データのテストがスキップされるので、手元より低い値になる。下限は設けず表示だけする
+      - name: Show coverage
+        run: nix develop .#java --command bash -c "cd apps/java && ./gradlew jacocoTestReport --console=plain && awk -F, 'NR>1{m+=\$4;c+=\$5}END{printf \"Instruction coverage: %.1f%%\n\", 100*c/(m+c)}' build/reports/jacoco/test/jacocoTestReport.csv"
