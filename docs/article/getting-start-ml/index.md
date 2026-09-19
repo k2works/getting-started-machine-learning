@@ -27,32 +27,32 @@
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java |
 |----|--------|--------|--------|------------|----|------|
 | 1 | 機械学習とはじめてのテスト | [Python](python/01-machine-learning-and-first-test.md) | [Kotlin](kotlin/01-machine-learning-and-first-test.md) | [TypeScript](typescript/01-machine-learning-and-first-test.md) | [F#](fsharp/01-machine-learning-and-first-test.md) | [Java](java/01-machine-learning-and-first-test.md) |
-| 2 | データの前処理と三角測量 | [Python](python/02-data-preprocessing-and-triangulation.md) | [Kotlin](kotlin/02-data-preprocessing-and-triangulation.md) | [TypeScript](typescript/02-data-preprocessing-and-triangulation.md) | [F#](fsharp/02-data-preprocessing-and-triangulation.md) | — |
-| 3 | 決定木による分類と明白な実装 | [Python](python/03-decision-tree-and-obvious-implementation.md) | [Kotlin](kotlin/03-decision-tree-and-obvious-implementation.md) | [TypeScript](typescript/03-decision-tree-and-obvious-implementation.md) | [F#](fsharp/03-decision-tree-and-obvious-implementation.md) | — |
+| 2 | データの前処理と三角測量 | [Python](python/02-data-preprocessing-and-triangulation.md) | [Kotlin](kotlin/02-data-preprocessing-and-triangulation.md) | [TypeScript](typescript/02-data-preprocessing-and-triangulation.md) | [F#](fsharp/02-data-preprocessing-and-triangulation.md) | [Java](java/02-data-preprocessing-and-triangulation.md) |
+| 3 | 決定木による分類と明白な実装 | [Python](python/03-decision-tree-and-obvious-implementation.md) | [Kotlin](kotlin/03-decision-tree-and-obvious-implementation.md) | [TypeScript](typescript/03-decision-tree-and-obvious-implementation.md) | [F#](fsharp/03-decision-tree-and-obvious-implementation.md) | [Java](java/03-decision-tree-and-obvious-implementation.md) |
 
 ### 第 2 部: 開発環境と自動化
 
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java |
 |----|--------|--------|--------|------------|----|------|
-| 4 | バージョン管理とデータ管理 | [Python](python/04-version-control-and-data-management.md) | [Kotlin](kotlin/04-version-control-and-data-management.md) | [TypeScript](typescript/04-version-control-and-data-management.md) | [F#](fsharp/04-version-control-and-data-management.md) | — |
-| 5 | パッケージ管理と静的解析 | [Python](python/05-package-management-and-static-analysis.md) | [Kotlin](kotlin/05-package-management-and-static-analysis.md) | [TypeScript](typescript/05-package-management-and-static-analysis.md) | [F#](fsharp/05-package-management-and-static-analysis.md) | — |
-| 6 | タスクランナーと CI/CD | [Python](python/06-task-runner-and-ci-cd.md) | [Kotlin](kotlin/06-task-runner-and-ci-cd.md) | [TypeScript](typescript/06-task-runner-and-ci-cd.md) | [F#](fsharp/06-task-runner-and-ci-cd.md) | — |
+| 4 | バージョン管理とデータ管理 | [Python](python/04-version-control-and-data-management.md) | [Kotlin](kotlin/04-version-control-and-data-management.md) | [TypeScript](typescript/04-version-control-and-data-management.md) | [F#](fsharp/04-version-control-and-data-management.md) | [Java](java/04-version-control-and-data-management.md) |
+| 5 | パッケージ管理と静的解析 | [Python](python/05-package-management-and-static-analysis.md) | [Kotlin](kotlin/05-package-management-and-static-analysis.md) | [TypeScript](typescript/05-package-management-and-static-analysis.md) | [F#](fsharp/05-package-management-and-static-analysis.md) | [Java](java/05-package-management-and-static-analysis.md) |
+| 6 | タスクランナーと CI/CD | [Python](python/06-task-runner-and-ci-cd.md) | [Kotlin](kotlin/06-task-runner-and-ci-cd.md) | [TypeScript](typescript/06-task-runner-and-ci-cd.md) | [F#](fsharp/06-task-runner-and-ci-cd.md) | [Java](java/06-task-runner-and-ci-cd.md) |
 
 ### 第 3 部: 回帰と実践的な前処理
 
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java |
 |----|--------|--------|--------|------------|----|------|
-| 7 | 線形回帰による数値予測 | [Python](python/07-linear-regression.md) | [Kotlin](kotlin/07-linear-regression.md) | [TypeScript](typescript/07-linear-regression.md) | [F#](fsharp/07-linear-regression.md) | — |
-| 8 | 実践的な分類と前処理パイプライン | [Python](python/08-classification-and-preprocessing-pipeline.md) | [Kotlin](kotlin/08-classification-and-preprocessing-pipeline.md) | [TypeScript](typescript/08-classification-and-preprocessing-pipeline.md) | [F#](fsharp/08-classification-and-preprocessing-pipeline.md) | — |
-| 9 | 特徴量エンジニアリング | [Python](python/09-feature-engineering.md) | [Kotlin](kotlin/09-feature-engineering.md) | [TypeScript](typescript/09-feature-engineering.md) | [F#](fsharp/09-feature-engineering.md) | — |
+| 7 | 線形回帰による数値予測 | [Python](python/07-linear-regression.md) | [Kotlin](kotlin/07-linear-regression.md) | [TypeScript](typescript/07-linear-regression.md) | [F#](fsharp/07-linear-regression.md) | [Java](java/07-linear-regression.md) |
+| 8 | 実践的な分類と前処理パイプライン | [Python](python/08-classification-and-preprocessing-pipeline.md) | [Kotlin](kotlin/08-classification-and-preprocessing-pipeline.md) | [TypeScript](typescript/08-classification-and-preprocessing-pipeline.md) | [F#](fsharp/08-classification-and-preprocessing-pipeline.md) | [Java](java/08-classification-and-preprocessing-pipeline.md) |
+| 9 | 特徴量エンジニアリング | [Python](python/09-feature-engineering.md) | [Kotlin](kotlin/09-feature-engineering.md) | [TypeScript](typescript/09-feature-engineering.md) | [F#](fsharp/09-feature-engineering.md) | [Java](java/09-feature-engineering.md) |
 
 ### 第 4 部: モデルの改善と評価
 
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java |
 |----|--------|--------|--------|------------|----|------|
-| 10 | ロジスティック回帰とアンサンブル学習 | [Python](python/10-logistic-regression-and-ensemble.md) | [Kotlin](kotlin/10-logistic-regression-and-ensemble.md) | [TypeScript](typescript/10-logistic-regression-and-ensemble.md) | [F#](fsharp/10-logistic-regression-and-ensemble.md) | — |
-| 11 | 評価指標と交差検証 | [Python](python/11-evaluation-metrics-and-cross-validation.md) | [Kotlin](kotlin/11-evaluation-metrics-and-cross-validation.md) | [TypeScript](typescript/11-evaluation-metrics-and-cross-validation.md) | [F#](fsharp/11-evaluation-metrics-and-cross-validation.md) | — |
-| 12 | 正則化とモデル選択 | [Python](python/12-regularization-and-model-selection.md) | [Kotlin](kotlin/12-regularization-and-model-selection.md) | [TypeScript](typescript/12-regularization-and-model-selection.md) | [F#](fsharp/12-regularization-and-model-selection.md) | — |
+| 10 | ロジスティック回帰とアンサンブル学習 | [Python](python/10-logistic-regression-and-ensemble.md) | [Kotlin](kotlin/10-logistic-regression-and-ensemble.md) | [TypeScript](typescript/10-logistic-regression-and-ensemble.md) | [F#](fsharp/10-logistic-regression-and-ensemble.md) | [Java](java/10-logistic-regression-and-ensemble.md) |
+| 11 | 評価指標と交差検証 | [Python](python/11-evaluation-metrics-and-cross-validation.md) | [Kotlin](kotlin/11-evaluation-metrics-and-cross-validation.md) | [TypeScript](typescript/11-evaluation-metrics-and-cross-validation.md) | [F#](fsharp/11-evaluation-metrics-and-cross-validation.md) | [Java](java/11-evaluation-metrics-and-cross-validation.md) |
+| 12 | 正則化とモデル選択 | [Python](python/12-regularization-and-model-selection.md) | [Kotlin](kotlin/12-regularization-and-model-selection.md) | [TypeScript](typescript/12-regularization-and-model-selection.md) | [F#](fsharp/12-regularization-and-model-selection.md) | [Java](java/12-regularization-and-model-selection.md) |
 
 ### 第 5 部: 教師なし学習と実運用
 
