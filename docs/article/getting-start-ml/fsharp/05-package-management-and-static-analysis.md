@@ -557,6 +557,55 @@ ADR 004 を書いたときに診断ログで調べたところ、coverlet は既
 
 本リポジトリでは、カバレッジの下限を設けていません。CI には学習データを置けないので、CI で計測したカバレッジは手元より必ず低くなり、下限を決めても手元と CI で意味が変わってしまうためです。
 
+<details>
+<summary>この章の完成コード（Directory.Build.props）</summary>
+
+```xml
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- コンパイラの警告（パターンマッチの網羅漏れなど）をエラーにする -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- 依存関係の依存関係まで正確な版を packages.lock.json に記録する -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- FSharp.Core の版は Directory.Packages.props で固定する -->
+    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+    <!-- .NET SDK 同梱の FSharp.Core（library-packs）は nuget.org のものとハッシュが違い、
+         packages.lock.json の検証が環境によって失敗するので、nuget.org からだけ取る -->
+    <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+  </ItemGroup>
+</Project>
+```
+
+</details>
+
+<details>
+<summary>この章の完成コード（Directory.Packages.props）</summary>
+
+```xml
+<Project>
+  <PropertyGroup>
+    <!-- 依存ライブラリの版をこのファイルにまとめる（中央パッケージ管理） -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="coverlet.MTP" Version="10.0.1" />
+    <!-- .NET SDK 10.0.101 に同梱の版 -->
+    <PackageVersion Include="FSharp.Core" Version="10.0.101" />
+    <PackageVersion Include="FSharp.Data" Version="8.2.0" />
+    <PackageVersion Include="FSharp.Stats" Version="0.6.0" />
+    <PackageVersion Include="Microsoft.ML" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.ML.FastTree" Version="5.0.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+  </ItemGroup>
+</Project>
+```
+
+</details>
+
 ## 5.8 まとめ
 
 この章では、再現できるビルドと、実行せずに問題を見つける仕組みを整えました。

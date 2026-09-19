@@ -457,6 +457,39 @@ ad693ac1 feat(dotnet): 第 2 章 型プロバイダによる iris の読み込�
 
 `35cf8f8b` は、第 7 章以降で使うライブラリを先に追加したコミットです。ライブラリの追加は `packages.lock.json` の大きな差分を伴うので、章の実装とは別のコミットにしています。この章の学習用テストは、自分のコードの機能を増やすものではないので、`feat` ではなく `test` にしました。
 
+<details>
+<summary>この章の完成コード（tests/MachineLearning.Tests/Chapter04/RandomSequenceTest.fs）</summary>
+
+```fsharp
+/// System.Random のシード付きの乱数列を固定する学習用テスト。
+/// .NET を上げてこのテストが失敗したら、分割に入る行と記事の数値が変わる。
+module MachineLearning.Tests.Chapter04.RandomSequenceTest
+
+open System
+open Xunit
+open MachineLearning.Chapter02.Random
+
+[<Fact>]
+let ``シード 0 の乱数列は .NET 8・9・10 で同じ値になる`` () =
+    let random = Random 0
+
+    let values = [ random.Next(); random.Next(); random.Next() ]
+
+    Assert.Equal<int list>([ 1559595546; 1755192844; 1649316166 ], values)
+
+[<Fact>]
+let ``シード 0 で 0 から 9 を並べ替えた順は第 2 章で記録した順と同じ`` () =
+    Assert.Equal<int list>([ 0; 4; 5; 8; 2; 1; 3; 6; 9; 7 ], shuffle 0 [ 0..9 ])
+
+[<Fact>]
+let ``シードを渡さなければ乱数列は Random を作るたびに変わる`` () =
+    let draw (random: Random) = List.init 10 (fun _ -> random.Next())
+
+    Assert.NotEqual<int list>(draw (Random()), draw (Random()))
+```
+
+</details>
+
 ## 4.8 まとめ
 
 この章では、機械学習のプロジェクトでのバージョン管理を学びました。
