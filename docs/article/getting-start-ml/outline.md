@@ -845,7 +845,11 @@ Java は第 2 波の最初の言語で、Kotlin 版の実装を対比の相手�
 | Tribuo | 最新は 4.3.2 のまま（Maven Central の最終更新は 2025-04-08）。Kotlin 版で確かめた癖は ADR 002 にある | Maven Central |
 | そのほか | JUnit 6.1.3、AssertJ 3.27.7（4.0.0 はマイルストーン版のみ）、Spotless の Gradle プラグイン 8.10.2、google-java-format 1.36.1、Error Prone 2.50.0、PMD 7.27.0、Checkstyle 14.1.0、JaCoCo 0.8.15、Javalin 7.2.3 | Maven Central |
 
-各ライブラリのライセンス、JUnit 6・Error Prone が JDK 21 のツールチェーンで動くか、Javalin 7 の要求する JDK の版は未検証。B24 の ADR 005 で確かめてから確定する。
+| ライセンス | Tribuo・AssertJ・Error Prone・google-java-format・Spotless・Javalin は Apache License 2.0、JUnit と JaCoCo は EPL-2.0、PMD は BSD 系。いずれもライブラリとして使う範囲で本リポジトリに制約を課さない | Maven Central の POM |
+| 必要な JDK | JUnit 6.1.3・Javalin 7.2.3 はクラスファイルが Java 17（major 61）、Error Prone 2.50.0・google-java-format 1.36.1 は Java 21（major 65）、Tribuo 4.3.2・PMD 7.27.0 は Java 8（major 52）。JDK 21 のツールチェーンですべて動く | JAR のクラスファイルの版 |
+| Gradle プラグイン | Error Prone は `net.ltgt.errorprone` 5.1.1、Spotless は `com.diffplug.spotless` 8.10.2。PMD と JaCoCo は Gradle に組み込みのプラグインで `toolVersion` を指定する | Gradle Plugin Portal |
+
+Tribuo の各アルゴリズムの振る舞いは Kotlin 版で確かめた ADR 002 を起点にし、Java 版の各章で実装しながら ADR 005 に書き足す。
 
 ### ライブラリ方針（ADR 005 で確定する案）
 
