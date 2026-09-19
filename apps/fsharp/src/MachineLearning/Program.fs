@@ -13,6 +13,7 @@ let chapters: Map<string, (string -> unit) -> unit> =
             "chapter11", Chapter11.Main.run
             "chapter12", Chapter12.Main.run
             "chapter13", Chapter13.Main.run
+            "chapter14", Chapter14.Main.run
         ]
 
 [<EntryPoint>]
