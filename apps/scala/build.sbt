@@ -14,6 +14,7 @@ lazy val root = (project in file("."))
       "-Xfatal-warnings"
     ),
     libraryDependencies ++= Seq(
+      "org.tribuo" % "tribuo-classification-tree" % "4.3.2",
       "org.scalatest" %% "scalatest" % "3.2.20" % Test
     ),
     // 学習データの場所（未指定なら ../data/sukkiri-ml）をテストに渡す

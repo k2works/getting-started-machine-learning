@@ -4,7 +4,8 @@ package machinelearning
 object Main:
   private val chapters: Map[String, (String => Unit) => Unit] = Map(
     "chapter01" -> machinelearning.chapter01.Main.run,
-    "chapter02" -> machinelearning.chapter02.Main.run
+    "chapter02" -> machinelearning.chapter02.Main.run,
+    "chapter03" -> machinelearning.chapter03.Main.run
   )
 
   def main(args: Array[String]): Unit =
