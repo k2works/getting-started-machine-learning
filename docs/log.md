@@ -1,5 +1,8 @@
 # Docs Update Log
 
+## 2026-09-20
+* **Creation**: Go 版の第 2〜15 章を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[Go 版トップ](/article/getting-start-ml/go/index.md)・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B40〜B43 の完了を、[ADR 008](/adr/008-go-ml-libraries.md) に各章で確かめた gonum（`stat.ROC`・`stat.PC`・`stat.StdDev`）と `net/http`・`encoding/gob` の振る舞いを反映。ADR 008 を承認済み（stable）にした。
+
 ## 2026-09-19
 * **Creation**: Go 版の[トップ](/article/getting-start-ml/go/index.md)・[第 1 章](/article/getting-start-ml/go/01-machine-learning-and-first-test.md)・[ADR 008](/adr/008-go-ml-libraries.md) を新規作成し、シリーズ索引と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Go 版執筆計画と B39 の完了を反映。
 * **Creation**: Scala 版の全 15 章とトップを新規作成し、シリーズ索引・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B34〜B38 の完了を、[ADR 007](/adr/007-scala-ml-libraries.md) に各章で確かめた Tribuo・http4s の振る舞いを反映。
