@@ -42,6 +42,7 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | `switch` 式の網羅性（B30） | C# には sealed interface が無く、抽象レコードと sealed な派生で閉じても、`switch` 式から `_` の分岐を外すと CS8509（網羅されていない）の警告になり、`TreatWarningsAsErrors` でビルドが止まる。F# の判別共用体や Java の sealed interface のように網羅を証明できないので、最後の分岐を書く |
 | 値による比較（B30） | `Equals` を書いて `GetHashCode` を書かないと CS0659 でビルドが止まる（警告をエラーにしているため）。Java 版で Error Prone が止めた「record の成分に配列」に当たるルールは .NET アナライザー（`Recommended`）に無いので、値で比べられることをテストで担保する。`Row`・`Table` も record だが成分が辞書・リストなので参照で比べる。値で比べる必要があるのは `Features` だけ |
 | 文字列の分割（B30） | `string.Split(char)` は行末の空欄も保持する（`"0.1,0.2,0.3,,".Split(',')` は 5 要素）。Java の `split(",", -1)` のような上限の指定は要らない |
+| 第 9 章（B32） | Shift_JIS は `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` だけで読める（`System.Text.Encoding.CodePages` の追加は不要。`InvariantGlobalization: true` の影響も受けない）。Java の `MalformedInputException` と違い、.NET は文字コードが違っても例外を投げず黙って文字化けする。ML.NET の `NormalizeMeanVariance` は既定（`fixZero: true`）では平均を引かず、`fixZero: false` で自作の標準化（母標準偏差）と小数第 5 位まで一致する（ADR 004 と同じ）。コレクション式のスプレッド `..` は `[...]` の中でだけ使える |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 
