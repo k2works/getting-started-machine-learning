@@ -155,7 +155,7 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 | 1 | dotnet | F# | xUnit | ML.NET, FSharp.Stats（「F# 版執筆計画」を参照） | 判別共用体・パイプライン・型プロバイダ。Polyglot Notebooks による可視化を扱う |
 | 2 | java | Java | JUnit 5（Gradle） | Tribuo, Smile | 静的型付け OOP の代表。Kotlin 版の実装と対比する |
 | 2 | dotnet | C# | xUnit | ML.NET, Microsoft.Data.Analysis | |
-| 2 | scala | Scala | ScalaTest（sbt） | Smile | |
+| 2 | scala | Scala | ScalaTest（sbt） | Tribuo（「Scala 版執筆計画」を参照。Smile は Scala 3 版がすべて GPL-3.0 のため使わない） | |
 | 2 | rust | Rust | cargo test | linfa, ndarray, polars | 所有権と数値計算 |
 | 2 | go | Go | go test | gonum | ライブラリが限定的なので自作の比重が大きい |
 | 3 | ruby | Ruby | Minitest（Bundler） | Rumale, Numo | |
@@ -1141,6 +1141,78 @@ B29〜B33 は 2026-09-20 に完了し、C# 版の全 15 章がそろった。親
 - C# には F# の `Result` が無いので、第 15 章で `PredictionResult<T>` を抽象レコードと sealed な派生で自作した（Java 版は検査例外）。判別共用体の代わりに enum と抽象レコードを使い、`switch` 式は網羅を証明できないので最後の分岐が要る（CS8509）
 - ML.NET は C# 向けの API なので、F# 版が必要とした `[<CLIMutable>]` や DTO への詰め替えが要らない。一方で PCA は座標しか返さず、K-means に初期中心を渡せないなど、ライブラリ側の制約は F# 版と同じ
 - 実装の置き場所は、人の指示により `apps/dotnet/` ではなく `apps/csharp/` にした
+
+## Scala 版執筆計画
+
+Scala は第 2 波の 3 番目の言語で、JVM の Java 版・Kotlin 版と、関数型の F# 版の両方を対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。対比の軸は次の 3 つとする。
+
+- **型**: case class と enum（Scala 3）で、F# のレコードと判別共用体に当たるものを表す。`Option` は F# の `option` と同じ形。網羅していない `match` は警告になる（コンパイラの設定でエラーにできる）
+- **データの表現**: 不変のコレクション（`Map`・`Vector`）で表す。Java 版・C# 版が配列を包むクラスで苦労した「値で比べる」は、Scala の `Vector` なら既定でできる
+- **ライブラリ**: JVM の機械学習ライブラリ（Tribuo）を Scala から使う。Java 向けの API（可変なオブジェクト・配列）を Scala の不変なコレクションとどう橋渡しするかを題材にする
+
+### 確認した事実（2026-09-20 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| Nix 環境 | `ops/nix/environments/scala/shell.nix` は `scala_3`・`sbt`・`metals`・`scala-cli`。版は Scala 3.3.6（LTS）、sbt 1.12.0、metals 1.6.4、scala-cli 1.11.0 | `nix eval` |
+| ローカル環境 | `scala` コマンドは未導入。JDK は 25.0.2 | コマンドの確認 |
+| Smile のライセンス | Scala 3 向け（`smile-scala_3`）は 3.0.2 以降しか無く、3.0.2・4.x・5.x・6.x のいずれも GPL-3.0。LGPL-3.0 の 2.6.0 には Scala 3 版が無い | Maven Central の POM |
+| Tribuo | 4.3.2、Apache License 2.0。Kotlin 版（ADR 002）・Java 版（ADR 005）で癖を確認済み | Maven Central |
+| そのほかのライブラリ | ScalaTest 3.2.20（安定版。3.3.0 はマイルストーン版のみ）、MUnit 1.3.6、Breeze 2.1.0（Apache License 2.0）、http4s 0.23.37（1.0.0 はマイルストーン版のみ）、circe 0.14.16、sbt-scoverage 2.4.4 | Maven Central |
+
+ライセンス（ScalaTest・http4s・circe・sbt のプラグイン）、Tribuo を Scala から使うときの橋渡し、コンパイラの警告をエラーにする設定の影響は未検証。B34 の ADR 007 で確かめてから確定する。
+
+### ライブラリ方針（ADR 007 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| 言語・ビルド | Scala 3.3.6（LTS）、sbt 1.12.0 | Nix の環境と一致し、長期サポート版 | scala-cli、Gradle |
+| テスト | ScalaTest 3.2.20 | 「対象言語」の表のテスト基盤。安定版を使う | MUnit |
+| 整形 | scalafmt（sbt-scalafmt） | Scala の標準的な整形 | — |
+| 静的解析 | コンパイラの警告（`-Wunused:all`・`-Wvalue-discard` など）を `-Xfatal-warnings` でエラーにする | 追加の依存が要らない。ほかの言語版と同じく「警告をエラーにする」方針 | scalafix、WartRemover |
+| カバレッジ | sbt-scoverage 2.4.4 | sbt の標準的なカバレッジ | — |
+| データの表現 | case class と不変のコレクション（`Map`・`Vector`）。データフレームのライブラリは使わない | Java 版・C# 版と同じ考え方。`Vector` は値で比べられる | Spark の DataFrame（重い） |
+| 乱数 | `java.util.Random(seed)` と Fisher-Yates | Java 版と同じ乱数・同じ手順にすれば、分かれる行が Java 版と一致するはず（B34 で確かめる） | `scala.util.Random.shuffle` |
+| 機械学習 | Tribuo 4.3.2 | Apache License 2.0。Smile は Scala 3 版がすべて GPL-3.0 なので使わない | 自作のみ |
+| 行列 | 自作の小さな不変の型 | ほかの言語版と同じく、正規方程式の仕組みを見せる | Breeze 2.1.0 |
+| API | http4s 0.23.37 + circe 0.14.16 | 「言語ごとのバリエーション」で挙げた候補 | Play Framework |
+
+### 前提整備（Scala）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `nix develop .#scala` で Scala 3・sbt が使えることを CI で確かめる | 未着手 |
+| アプリ雛形 | `apps/scala/`（`build.sbt`・`project/build.properties`・`project/plugins.sbt`・`src/main/scala`・`src/test/scala`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは ScalaTest の `assume` でデータが無ければスキップする | 未着手 |
+| 静的解析 | scalafmt・コンパイラの警告をエラーにする設定・scoverage を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
+| ライブラリ選定 | ADR 007（Scala 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/scala-ci.yml`（Nix → `sbt scalafmtCheckAll test coverageReport`）。sbt と Coursier のキャッシュを使う | 未着手 |
+| タスク | `ops/scripts/apps.js` に `scala` を加え、`apps:check:scala` で手元の検査を実行できるようにする | 未着手 |
+
+### B34 のステップ計画（Scala のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：ライセンス（ScalaTest・http4s・circe・sbt のプラグイン）、Tribuo を Scala から呼べること、警告をエラーにする設定でどれだけ指摘が出るか。結果を本節の「確認した事実」に書き足す | 「未検証」の項目が無くなる |
+| 2 | ADR 007 を書く（章ごとの置き換えの範囲は ADR 002（Kotlin 版・Tribuo）を起点にする） | ADR 007 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/scala/` の雛形：sbt のプロジェクト、Scala 3.3.6、ScalaTest、最初のテストが 1 本通る | 手元（Nix）と `nix develop .#scala` で `sbt test` が成功する |
+| 4 | 整形・静的解析・カバレッジ：scalafmt・`-Xfatal-warnings`・scoverage を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・C# 版の教訓） | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストは `assume` でスキップする | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Scala 版トップ（`scala/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/scala-ci.yml`、`ops/scripts/apps.js` への `scala` の追加 | push 後に Scala CI がグリーン。`apps:check:scala` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Scala）
+
+次の点を確認した（2026-09-20 承認）。
+
+- [x] 機械学習のライブラリを Smile ではなく Tribuo にすること（Scala 3 向けの Smile はすべて GPL-3.0 で、LGPL の 2.6.0 に Scala 3 版が無いため。「対象言語」の表の候補を改める）
+- [x] Scala 版の対比の軸（型・データの表現・ライブラリ）と、データフレームのライブラリを使わずに case class と不変のコレクションで表すこと
+- [x] ライブラリの第一候補（Scala 3.3.6・sbt・ScalaTest・scalafmt・`-Xfatal-warnings`・scoverage・Tribuo・http4s + circe）を ADR 007 で確定すること
+- [x] 実装を `apps/scala/`、記事を `docs/article/getting-start-ml/scala/` に置くこと
+- [x] B34 のステップ 1〜8
 
 ## リスクと対応
 
