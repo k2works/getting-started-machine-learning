@@ -7333,6 +7333,21 @@
 <td>Shift_JIS は <code>Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)</code> だけで読める（<code>System.Text.Encoding.CodePages</code> の追加は不要。<code>InvariantGlobalization: true</code> の影響も受けない）。Java の <code>MalformedInputException</code> と違い、.NET は文字コードが違っても例外を投げず黙って文字化けする。ML.NET の <code>NormalizeMeanVariance</code> は既定（<code>fixZero: true</code>）では平均を引かず、<code>fixZero: false</code> で自作の標準化（母標準偏差）と小数第 5 位まで一致する（ADR 004 と同じ）。コレクション式のスプレッド <code>..</code> は <code>[...]</code> の中でだけ使える</td>
 <td></td>
 </tr>
+<tr>
+<td>第 7 章（B32）</td>
+<td><code>Ols</code> は Intel MKL が x64 専用なので arm64 では使えない（ADR 004 と同じ）。代わりに ML.NET の SDCA を使う。SDCA は特徴量の大きさに敏感で、正規化しないと決定係数が -0.5124 まで壊れ、<code>NormalizeMeanVariance</code> を前に置くと 0.7659 に戻る。既定はマルチスレッドなので <code>MLContext(seed: 0)</code> だけでは再現せず、<code>SdcaRegressionTrainer.Options.NumberOfThreads = 1</code> で固定する。自作の正規方程式の切片・係数・評価指標は F# 版と表示の桁まで一致した（SDCA は反復解法なので決定係数だけわずかに違う）。決め打ちの値を返す仮実装は CA1822（static にできる）でビルドが止まるので、C# 版の TDD では仮実装の書き方に制約がある</td>
+<td></td>
+</tr>
+<tr>
+<td>第 8 章（B32）</td>
+<td>System.Text.Json の <code>[JsonPolymorphic]</code>・<code>[JsonDerivedType]</code> で、インターフェースと抽象レコードをそのまま保存・復元できる（F# 版の DTO への詰め替えも、Java 版の <code>ObjectInputFilter</code> に当たる対策も要らない）。読み込みを厳しくするには <code>RespectRequiredConstructorParameters = true</code>。ML.NET の 2 値分類は <code>FastTree(exampleWeightColumnName: "Weight", ...)</code> でクラスの重みを行の重みとして表せ、C# では <code>[&lt;CLIMutable&gt;]</code> に当たる橋渡しが要らない。<code>Microsoft.ML.ITransformer</code> と章の <code>ITransformer</code> が重なるので別名が要る。自作の数値は深さ 1〜10 で F# 版と完全一致し、ML.NET との一致件数だけ深さ 8〜10 で 1 件違う</td>
+<td></td>
+</tr>
+<tr>
+<td>第 10 章（B32）</td>
+<td><code>IEstimator&lt;out TTransformer&gt;</code> は共変なので、F# 版に必要だったアップキャストが要らない。<code>FastForest</code> の既定 <code>minimumExampleCountPerLeaf = 10</code> は訓練データを分け切らない（1 にすると分け切る）。L-BFGS の L1・L2 の既定値 1 を 0 にすると、自作の勾配降下法と正解率が完全に一致する（ADR 004 と同じ）。同じ乱数・同じ分割でも特徴量の並び順が森の結果を変えるので、言語間の突き合わせでは列の順もそろえる（F# 版は <code>Map</code> のキー順、C# 版は CSV の列順）。アナライザーの CA1859 が private メソッドの戻り値を具体的な型にするよう求める</td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <p>ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。</p>
