@@ -21,6 +21,7 @@ lazy val root = (project in file("."))
       "org.http4s" %% "http4s-circe" % "0.23.37",
       "io.circe" %% "circe-generic" % "0.14.16",
       "io.circe" %% "circe-parser" % "0.14.16",
+      "org.tribuo" % "tribuo-clustering-kmeans" % "4.3.2",
       "org.scalatest" %% "scalatest" % "3.2.20" % Test
     ),
     // 学習データの場所（未指定なら ../data/sukkiri-ml）をテストに渡す。
