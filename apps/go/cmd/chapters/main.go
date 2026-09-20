@@ -8,10 +8,12 @@ import (
 	"sort"
 
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter01"
+	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter02"
 )
 
 var chapters = map[string]func(io.Writer) error{
 	"chapter01": chapter01.Run,
+	"chapter02": chapter02.Run,
 }
 
 func main() {

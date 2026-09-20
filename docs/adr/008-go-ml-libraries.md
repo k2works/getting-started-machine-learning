@@ -40,6 +40,7 @@ B39 のステップ 1 で、Go module proxy・モジュールのキャッシュ�
 | 章 | 確かめたこと |
 |----|------------|
 | 1 | わざと崩したファイルで、`gofmt -l` がファイル名を、`go vet` が「declared and not used」を、`golangci-lint run` が同じ指摘を typecheck として報告した。`go test ./...` は Nix の Go 1.25.5 でも手元の 1.26.5 でも動く（`go.mod` の `go` 指令は 1.25） |
+| 2 | Go の `math/rand` は、Java・Scala の `java.util.Random` とも .NET の `Random` とも乱数列が違う。同じ Fisher-Yates・同じシード 0 でも並びが違い（Go は `[6 8 2 3 7 5 9 1 0 4]`、Java は `[4 8 9 6 3 5 2 1 7 0]`）、分かれる行も訓練データの平均値もほかの言語版と一致しない。件数（105 件と 45 件）は一致する。`Features` はスライスを持つので `==` で比べられず、テストでは `reflect.DeepEqual` を使う。`rand.New(rand.NewSource(seed))` は `gosec` の指摘（G404）を受けるので、再現のための擬似乱数である理由をコメントに書いて `//nolint:gosec` で抑える |
 
 ## 決定
 
