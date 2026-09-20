@@ -1,0 +1,75 @@
+name: C# CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/csharp/**"
+      - ".github/workflows/csharp-ci.yml"
+      - "ops/nix/environments/dotnet/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/csharp/**"
+      - ".github/workflows/csharp-ci.yml"
+      - "ops/nix/environments/dotnet/**"
+      - "flake.nix"
+      - "flake.lock"
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      # dotnet restore が再利用するダウンロード済みのパッケージ（~/.nuget/packages）を保存する
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-csharp-${{ hashFiles('apps/csharp/**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-csharp-
+
+      - name: Show the .NET SDK version
+        run: nix develop .#dotnet --command bash -c "cd apps/csharp && dotnet --version"
+
+      # packages.lock.json と食い違う依存があれば失敗させる
+      - name: Restore packages
+        run: nix develop .#dotnet --command bash -c "cd apps/csharp && dotnet restore --locked-mode"
+
+      - name: Check formatting
+        run: >-
+          nix develop .#dotnet --command bash -c
+          "cd apps/csharp && dotnet format MachineLearning.sln --verify-no-changes --no-restore"
+
+      # .NET アナライザーとコードスタイル（IDE0055）の指摘は TreatWarningsAsErrors でビルドが失敗する
+      - name: Build with analyzers
+        run: nix develop .#dotnet --command bash -c "cd apps/csharp && dotnet build --no-restore"
+
+      # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
+      - name: Run tests with coverage
+        run: >-
+          nix develop .#dotnet --command bash -c
+          "cd apps/csharp && dotnet test --no-restore --no-build --coverlet --coverlet-include '[MachineLearning]*'
+          --coverlet-output-format cobertura --results-directory TestResults"
+
+      # 実データのテストがスキップされるので、手元より低い値になる。下限は設けず表示だけする
+      - name: Show coverage
+        run: grep -o -m 1 'line-rate="[0-9.]*"' apps/csharp/TestResults/*.cobertura.*xml
