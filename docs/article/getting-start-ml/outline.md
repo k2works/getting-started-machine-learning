@@ -1075,6 +1075,48 @@ B29（C# のウォーキングスケルトン）は 2026-09-20 に完了した�
 - [x] 実装を `apps/csharp/`（2026-09-20 に `apps/dotnet/` から変更。人の指示による）、記事を `docs/article/getting-start-ml/csharp/` に置き、.NET SDK の版を F# 版にそろえること
 - [x] B29 のステップ 1〜8
 
+### B30 のステップ計画（第 2〜3 章）
+
+#### データの表し方（第 2 章以降のすべての章に効く判断）
+
+F# 版は型プロバイダ（`CsvProvider`）で読み、特徴量を `Map<string, float option>` で持つ。C# 版は型プロバイダが無いので、Java 版と同じ考え方で、セルの文字列を列名で引く自作の表にする。
+
+| 対象 | 表し方（案） | 理由 |
+|------|------------|------|
+| 読み込んだ行 | `record Row(IReadOnlyDictionary<string, string> Cells)`。`double? Number(string column)`（空欄なら null）と `string Text(string column)` で読み出す | Java 版と同じ形。C# の `double?`（null 許容値型）が F# の `float option` に当たることを示せる。無い列は列名を示す例外にする |
+| 表 | `record Table(IReadOnlyList<string> Columns, IReadOnlyList<Row> Rows)`。`Load(path)` と `CountMissing()` を持つ | 列の順を保つ。`Dictionary` は順を保証しないので、列の順は `Columns` で持つ |
+| 補完した後の特徴量 | `sealed class Features`（列名の並びと `double[]`）。値で比べる `Equals`・`GetHashCode` を書く | record は配列の成分を参照で比べるので、Java 版と同じくクラスにする。C# ではアナライザーが record の配列を止めないぶん、自分で気づく必要があることを記事の題材にする |
+| 分割の結果 | `record TrainTestSplit<TX, TT>(IReadOnlyList<TX> XTrain, IReadOnlyList<TX> XTest, IReadOnlyList<TT> TTrain, IReadOnlyList<TT> TTest)` | F# 版の型と同じ形 |
+| 決定木 | `abstract record Tree` と `sealed record Leaf`・`sealed record Node`。予測は `switch` 式のパターンマッチ | C# には sealed interface が無いので、抽象レコードと sealed な派生で閉じる。網羅していない `switch` 式は CS8509 の警告になり、`TreatWarningsAsErrors` によってエラーになることを実測して示す |
+
+#### 乱数と数値
+
+分割は F# 版と同じ `System.Random(seed)` と Fisher–Yates のシャッフル（後ろから `Next(i + 1)` で交換）にする。同じ .NET の乱数なので、訓練データとテストデータに入る行は F# 版と一致するはず。これを第 2 章のテストで確かめ、一致すれば第 3 章の正解率も F# 版と同じ値になる（Java 版は `Collections.shuffle` なので一致しない）。一致しなければ、その事実と理由を記事に書く。
+
+#### ステップ
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | 第 2 章の読み込み：`Row`・`Table`、BOM 付きで空欄を含む CSV、列ごとの欠損値の数 | 架空の値の CSV でテストが通る。`double?` で空欄を表せている |
+| 2 | 第 2 章の前処理：欠損値を除いた列ごとの平均値、補完して `Features` にする、特徴量と正解ラベルに分ける | 元の行を変更しないことを含めてテストが通る。`Features` の値による比較のテストがある |
+| 3 | 第 2 章の分割：`Shuffle`（Fisher–Yates）と `SplitTrainTest` を三角測量で進める | 割合どおりの件数・重複の無さ・対応の保持・同じシードで同じ分け方・数値のラベルのテストが通る |
+| 4 | 第 2 章の実データ：iris.csv の欠損値の数（2・1・2・2）、105 件と 45 件への分割と補完、章の実行の表示。F# 版と行が一致するかを確かめる | データありで通り、データなしでスキップされる。F# 版との一致の有無を記録する |
+| 5 | 第 3 章の決定木：ジニ不純度、最良の分割、木の構築と予測、深さの制限、学習前の予測のエラー、木の表示 | F# 版・Java 版と同じ観点のテストが通る |
+| 6 | 第 3 章の ML.NET：`Microsoft.ML` と `Microsoft.ML.FastTree` を依存に加え、`Features` を ML.NET の入力に変える橋渡し、`FastTree` を `OneVersusAll` で多クラスにして突き合わせ（ADR 004 の結果を C# で確かめる） | 突き合わせのテストが通る。F# 版と違う振る舞いがあれば ADR 006 に書く |
+| 7 | 第 3 章の実データ：深さごとの正解率と深さ 2 の木を表示する章の実行 | 記事に載せる数値をテストで固定する |
+| 8 | 記事：第 2 章・第 3 章を書き、C# 版トップ・シリーズ索引・nav に登録する。途中段階の出力は再現して実測する | 記事の数値・出力が実測と一致する。サイトのビルドでリンク切れが無い |
+| 9 | 仕上げ：学習データの行・BOM の文字・絶対パスの検査、OKF、執筆計画の B30 の完了、`docs/log.md`、push して C# CI とサイトの公開を確かめる | 検査に指摘が無く、CI がグリーン |
+
+第 3 章は第 2 章の `Features` と分割に依存するので、順に進める。第 2〜3 章は親が実装し、記事はサブエージェントに任せる（Java 版の B25 と同じ進め方）。
+
+### 承認が必要な事項（B30）
+
+次の点を確認した（2026-09-20 承認）。
+
+- [x] データの表し方（セルの文字列を持つ `Row` と `Table`、欠損値を持てない `Features` をクラスにすること、決定木を抽象レコードと sealed な派生で表すこと）
+- [x] 分割を F# 版と同じ `System.Random` + Fisher–Yates にし、F# 版と行が一致するかを確かめること
+- [x] B30 のステップ 1〜9
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
