@@ -35,8 +35,8 @@ Go は、機械学習のライブラリが成熟していない環境の代表�
 
 | ライブラリ | 用途 | 初出 |
 |-----------|------|------|
-| [gonum](https://www.gonum.org/) | 行列（`mat`）・線形回帰・共分散行列・主成分分析（`stat`） | 第 7 章 |
-| 標準の [`net/http`](https://pkg.go.dev/net/http) | 予測 API | 第 15 章 |
+| [gonum](https://www.gonum.org/) | 行列（`mat`）・線形回帰・共分散行列・主成分分析（`stat`） | [第 7 章](07-linear-regression.md) |
+| 標準の [`net/http`](https://pkg.go.dev/net/http) | 予測 API | [第 15 章](15-machine-learning-api-and-module-design.md) |
 
 選定の理由と、章ごとにライブラリへ置き換えられる範囲は [ADR 008](../../../adr/008-go-ml-libraries.md) を参照してください。
 
@@ -59,40 +59,40 @@ go run ./cmd/chapters chapter01
 | 章 | テーマ |
 |----|--------|
 | [第 1 章](01-machine-learning-and-first-test.md) | 機械学習とはじめてのテスト |
-| 第 2 章 | データの前処理と三角測量 |
-| 第 3 章 | 決定木による分類と明白な実装 |
+| [第 2 章](02-data-preprocessing-and-triangulation.md) | データの前処理と三角測量 |
+| [第 3 章](03-decision-tree-and-obvious-implementation.md) | 決定木による分類と明白な実装 |
 
 ### 第 2 部: 開発環境と自動化
 
 | 章 | テーマ |
 |----|--------|
-| 第 4 章 | バージョン管理とデータ管理 |
-| 第 5 章 | パッケージ管理と静的解析 |
-| 第 6 章 | タスクランナーと CI/CD |
+| [第 4 章](04-version-control-and-data-management.md) | バージョン管理とデータ管理 |
+| [第 5 章](05-package-management-and-static-analysis.md) | パッケージ管理と静的解析 |
+| [第 6 章](06-task-runner-and-ci-cd.md) | タスクランナーと CI/CD |
 
 ### 第 3 部: 回帰と実践的な前処理
 
 | 章 | テーマ |
 |----|--------|
-| 第 7 章 | 線形回帰による数値予測 |
-| 第 8 章 | 実践的な分類と前処理パイプライン |
-| 第 9 章 | 特徴量エンジニアリング |
+| [第 7 章](07-linear-regression.md) | 線形回帰による数値予測 |
+| [第 8 章](08-classification-and-preprocessing-pipeline.md) | 実践的な分類と前処理パイプライン |
+| [第 9 章](09-feature-engineering.md) | 特徴量エンジニアリング |
 
 ### 第 4 部: モデルの改善と評価
 
 | 章 | テーマ |
 |----|--------|
-| 第 10 章 | ロジスティック回帰とアンサンブル学習 |
-| 第 11 章 | 評価指標と交差検証 |
-| 第 12 章 | 正則化とモデル選択 |
+| [第 10 章](10-logistic-regression-and-ensemble.md) | ロジスティック回帰とアンサンブル学習 |
+| [第 11 章](11-evaluation-metrics-and-cross-validation.md) | 評価指標と交差検証 |
+| [第 12 章](12-regularization-and-model-selection.md) | 正則化とモデル選択 |
 
 ### 第 5 部: 教師なし学習と実運用
 
 | 章 | テーマ |
 |----|--------|
-| 第 13 章 | 主成分分析による次元削減 |
-| 第 14 章 | K-means によるクラスタリング |
-| 第 15 章 | 機械学習 API とモジュール設計 |
+| [第 13 章](13-principal-component-analysis.md) | 主成分分析による次元削減 |
+| [第 14 章](14-k-means-clustering.md) | K-means によるクラスタリング |
+| [第 15 章](15-machine-learning-api-and-module-design.md) | 機械学習 API とモジュール設計 |
 
 ### 付録
 
