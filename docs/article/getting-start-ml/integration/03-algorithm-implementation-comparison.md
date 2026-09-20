@@ -1,7 +1,7 @@
 ---
 type: Article
 title: "第 3 章: アルゴリズムの実装の比較"
-description: "同じアルゴリズムを 4 言語でどう書いたかを比べる。決定木の木の型（dataclass・sealed interface・判別可能なユニオン・判別共用体）と場合分けの漏れの見つけ方、線形回帰の行列、モデルと評価関数の共通の型、交差検証の遅延評価、K-means の繰り返し、失敗の表し方と API の入力の検証を整理する。"
+description: "同じアルゴリズムを 9 言語でどう書いたかを比べる。決定木の木の型（dataclass・sealed interface・判別可能なユニオン・判別共用体・enum・非公開メソッドの interface）と場合分けの漏れの見つけ方、線形回帰の行列、モデルと評価関数の共通の型、交差検証の遅延評価、K-means の繰り返し、失敗の表し方と API の入力の検証を整理する。"
 tags: [article,getting-start-ml,integration]
 status: draft
 generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:12:01Z }

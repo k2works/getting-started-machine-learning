@@ -1,7 +1,7 @@
 ---
 type: Article
 title: "第 2 章: データ構造の比較"
-description: "4 言語のデータの表し方（pandas・Kotlin DataFrame・型付きレコードの配列・Map と型プロバイダ）と欠損値の表し方（NaN・null・number | null・option）を比べる。同じ手順で分割しても乱数生成器が違うので、第 3 章の決定木の正解率が言語ごとに変わることと、シードだけでは再現できないものを整理する。"
+description: "9 言語のデータの表し方（データフレーム・レコード・構造体と Map）と欠損値の表し方（NaN・null・Option・多値返却）を比べる。同じ手順で分割しても乱数生成器が違うので、第 3 章の決定木の正解率が乱数生成器ごとに変わることと、シードだけでは再現できないものを整理する。"
 tags: [article,getting-start-ml,integration]
 status: draft
 generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:07:04Z }

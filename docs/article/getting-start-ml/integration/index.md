@@ -31,9 +31,9 @@
 
 | 章 | タイトル | 内容 |
 |----|---------|------|
-| 1 | [言語とライブラリの概要](01-language-and-library-overview.md) | 4 言語の道具立て（実行環境・テスト・静的解析・ライブラリ・API・Notebook）と選定の理由 |
+| 1 | [言語とライブラリの概要](01-language-and-library-overview.md) | 9 言語の道具立て（実行環境・テスト・静的解析・ライブラリ・API・Notebook）と選定の理由 |
 | 2 | [データ構造の比較](02-data-structure-comparison.md) | データフレーム・レコード・`Map` によるデータの表し方、欠損値、分割と乱数、言語によって数値が変わる理由 |
-| 3 | [アルゴリズムの実装の比較](03-algorithm-implementation-comparison.md) | 決定木・評価と交差検証・エラーの表し方・API の層構成を 4 言語でどう書いたか |
+| 3 | [アルゴリズムの実装の比較](03-algorithm-implementation-comparison.md) | 決定木・評価と交差検証・エラーの表し方・API の層構成を 9 言語でどう書いたか |
 | 4 | [ライブラリのエコシステムの比較](04-library-ecosystem-comparison.md) | 章ごとのライブラリへの置き換えの可否と、突き合わせで見つかったライブラリの癖 |
 | 5 | [学習ロードマップ](05-learning-roadmap.md) | 目的別の読み方と、版をまたいだ読み進め方 |
 

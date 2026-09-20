@@ -11,15 +11,19 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:14:54Z }
 
 ## 5.1 どの版から読むか
 
-4 つの言語版は、同じ題材・同じ TODO リストで書いています。どの版から読んでも、機械学習と TDD の内容は同じです。違いは、言語とライブラリで何を学べるかです。
+9 つの言語版は、同じ題材・同じ TODO リストで書いています。どの版から読んでも、機械学習と TDD の内容は同じです。違いは、言語とライブラリで何を学べるかです。
 
 | 目的 | おすすめの版 | 理由 |
 |------|------------|------|
 | 機械学習を仕事で使いたい | [Python](../python/index.md) | 参照実装。pandas・scikit-learn・FastAPI という事実上の標準の道具で、多くの章で自作とライブラリの結果が一致するところまで確かめられる。付録 A の総合演習がある |
 | 型のある言語で機械学習を書きたい（JVM） | [Kotlin](../kotlin/index.md) | データフレームと静的型付けを両立する。ライブラリ（Tribuo）との違いを学習用テストで突き止める過程が多い |
-| ライブラリが少ない環境で自作する力をつけたい | [TypeScript](../typescript/index.md) | データフレームも乱数生成器も自作する。型チェックとテストの役割分担がよく分かる |
-| 型で誤りを防ぐ設計を学びたい | [F#](../fsharp/index.md) | 判別共用体・`option`・`Result`・網羅性の検査で、ありえない状態を型で作れないようにする |
+| ライブラリが少ない環境で自作する力をつけたい | [TypeScript](../typescript/index.md) か [Go](../go/index.md) | データフレームも乱数生成器も自作する。Go 版は決定木・ランダムフォレスト・K-means・ロジスティック回帰がすべて自作 |
+| 型で誤りを防ぐ設計を学びたい | [F#](../fsharp/index.md) か [Rust](../rust/index.md) | 判別共用体・`option`／`Option`・`Result`・網羅性の検査で、ありえない状態を型で作れないようにする |
 | Web 開発者で、機械学習を API として組み込みたい | TypeScript か Python の第 15 章から逆にたどる | 第 15 章の API は第 7・8 章のモデルを使う。必要な章に戻りながら読める |
+| 業務で使う JVM の言語で書きたい | [Java](../java/index.md) か [Scala](../scala/index.md) | どちらも Tribuo を使う。Java は record と sealed interface、Scala は case class と enum で同じ木を表す。**数値が完全に一致するので、書き方の違いだけを読み比べられる** |
+| .NET で書きたい | [C#](../csharp/index.md) か [F#](../fsharp/index.md) | どちらも ML.NET を使う。C# は命令型、F# は関数型。こちらも数値が完全に一致する |
+| 所有権とゼロコスト抽象化を学びたい | [Rust](../rust/index.md) | どこで複製するか、誰がデータを所有するかを毎回決める。並行性を型（`Send`・`Sync`）で保証する |
+| 明示的で小さい言語が好み | [Go](../go/index.md) | 例外も判別共用体もジェネリクスの制約も最小限。標準ライブラリだけで API まで書ける |
 
 迷ったら、Python 版から読み始めてください。Python 版は、本シリーズの章の節構成を決めた版で、ほかの版は Python 版の同じ章を参照しながら書いています。
 
@@ -47,18 +51,20 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:14:54Z }
 
 | 章 | 読み比べると見えること | 参照 |
 |----|---------------------|------|
-| 第 2 章 | データフレーム（Python・Kotlin）と、型でデータを表す（TypeScript・F#）違い。乱数生成器の自作（TypeScript） | 本解説の [第 2 章](02-data-structure-comparison.md) |
-| 第 3 章 | 木の型と網羅性の検査。ライブラリと 1 件だけ予測が違う原因の突き止め方（Kotlin・TypeScript） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
-| 第 5 章 | パッケージ管理と静的解析の道具の違い。F# 版では、静的解析が何も検査していなかったことに気付く過程 | 本解説の [第 1 章](01-language-and-library-overview.md) |
+| 第 2 章 | データフレーム（Python・Kotlin）と、型でデータを表す（ほかの 7 言語）違い。乱数生成器の自作（TypeScript）。「値が無い」の表し方（`Option`・null 許容・多値返却） | 本解説の [第 2 章](02-data-structure-comparison.md) |
+| 第 3 章 | 木の型と網羅性の検査（4 段階に分かれる）。ライブラリと 1 件だけ予測が違う原因の突き止め方（Kotlin・TypeScript・Rust） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
+| 第 5 章 | パッケージ管理と静的解析の道具の違い。F# 版では、静的解析が何も検査していなかったことに気付く過程。Rust 版では、クレートの版が型を分けること | 本解説の [第 1 章](01-language-and-library-overview.md) |
 | 第 9 章 | 標準偏差の割り方（件数か件数 − 1 か）、Shift_JIS の文字化けの現れ方 | 本解説の [第 2 章](02-data-structure-comparison.md)・[第 4 章](04-library-ecosystem-comparison.md) |
-| 第 11 章 | 評価関数を関数として渡す設計と、交差検証の遅延評価 | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
+| 第 11 章 | 評価関数を関数として渡す設計と、交差検証の遅延評価（遅延の列がある 6 言語と、無い 3 言語） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
 | 第 12 章 | 罰則の尺度がライブラリごとに違うこと | 本解説の [第 4 章](04-library-ecosystem-comparison.md) |
-| 第 15 章 | 失敗の表し方（例外・`Result`）と入力の検証、依存の向き | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
+| 第 15 章 | 失敗の表し方（例外・検査例外・`Result`・`Either`・番兵のエラー）と入力の検証、依存の向き。Go だけが標準ライブラリで API を書ける | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
 
-読み比べの順は、次の 2 つがおすすめです。
+読み比べの順は、次の 4 つがおすすめです。
 
-- **Python → TypeScript**: ライブラリがそろった環境と、そろっていない環境の差が分かります。「ライブラリが何をしてくれていたか」が、自作することで見えてきます
-- **Python → F#**: 同じ処理を、実行時のテストで確かめる書き方と、型で防ぐ書き方で比べられます
+- **Python → TypeScript（または Go）**: ライブラリがそろった環境と、そろっていない環境の差が分かります。「ライブラリが何をしてくれていたか」が、自作することで見えてきます
+- **Python → F#（または Rust）**: 同じ処理を、実行時のテストで確かめる書き方と、型で防ぐ書き方で比べられます
+- **Java → Scala**: 同じ JVM・同じ Tribuo・**同じ数値**で、命令型と式指向の書き方だけが違います。言語の違いだけを取り出して読めます
+- **C# → F#**: 同じ .NET・同じ ML.NET・同じ数値で、命令型と関数型を比べられます
 
 ## 5.4 環境を用意する
 
@@ -70,26 +76,32 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:14:54Z }
 | Kotlin | `apps/kotlin/` | `npx gulp apps:setup:kotlin` | `npx gulp apps:check:kotlin` |
 | TypeScript | `apps/node/` | `npx gulp apps:setup:node` | `npx gulp apps:check:node` |
 | F# | `apps/fsharp/` | `npx gulp apps:setup:fsharp` | `npx gulp apps:check:fsharp` |
+| Java | `apps/java/` | `npx gulp apps:setup:java` | `npx gulp apps:check:java` |
+| C# | `apps/csharp/` | `npx gulp apps:setup:csharp` | `npx gulp apps:check:csharp` |
+| Scala | `apps/scala/` | `npx gulp apps:setup:scala` | `npx gulp apps:check:scala` |
+| Go | `apps/go/` | `npx gulp apps:setup:go` | `npx gulp apps:check:go` |
+| Rust | `apps/rust/` | `npx gulp apps:setup:rust` | `npx gulp apps:check:rust` |
 
-ツールが見つからないか版が合わない場合、タスクは Nix が導入されていれば対応する Nix の環境（`nix develop .#python`・`.#kotlin`・`.#node`・`.#dotnet`）の中で実行します。
+ツールが見つからないか版が合わない場合、タスクは Nix が導入されていれば対応する Nix の環境（`nix develop .#python`・`.#kotlin`・`.#node`・`.#dotnet`・`.#java`・`.#scala`・`.#go`・`.#rust`）の中で実行します。
 
 学習データは、書籍の配布データを使います。ライセンス上の理由でリポジトリには含めていないので、配布 ZIP（`sukkiri-ml-codes.zip`）を入手して `tmp/` に置き、`npx gulp data:setup` で `apps/data/sukkiri-ml/` に配置してください（[シリーズの概要](../index.md) の「学習データ」を参照）。学習データが無い環境でも、自作のテストデータを使うテストは通り、実データを使うテストだけがスキップされます。手順の詳細は、各版の第 1 章の「題材とデータ」を参照してください。
 
 ## 5.5 これからの版
 
-本シリーズは、言語を 3 つの波に分けて追加します。第 1 波の 4 言語は全章を書き終えました。
+本シリーズは、言語を 3 つの波に分けて追加します。第 1 波・第 2 波の 9 言語は全章を書き終えました。
 
 | 波 | 言語 | 状況 |
 |----|------|------|
 | 第 1 波 | Python・Kotlin・TypeScript・F# | 完了 |
-| 第 2 波 | Java・C#・Scala・Rust・Go | 未着手 |
+| 第 2 波 | Java・C#・Scala・Go・Rust | 完了 |
 | 第 3 波 | Ruby・PHP・Elixir・Clojure・Haskell | 未着手 |
 
-新しい版を追加したら、本解説の各表に行と列を加えて更新します。
+新しい版を追加したら、本解説の各表に行と列を加えて更新します。第 2 波を加えたときは、表が横に広がりすぎたので、波ごとに分けるか、乱数生成器などの「まとまり」で縦持ちに組み替えました。
 
 ## 5.6 まとめ
 
-1. **迷ったら Python 版から** — 参照実装で、ライブラリとの突き合わせが最も多い。目的に応じて Kotlin・TypeScript・F# を選ぶ
+1. **迷ったら Python 版から** — 参照実装で、ライブラリとの突き合わせが最も多い。目的に応じて残りの 8 言語から選ぶ
 2. **第 1 部から読む** — 第 2・3 章は後の章で再利用する。第 2 部は後回しにしてもよい
 3. **版をまたいで読み比べる** — 第 2・3・9・11・12・15 章は、言語による違いが特に大きい
-4. **テストを失敗させてから実装する** — 記事の順に Red・Green・Refactor を回すと、TDD の手触りがつかめる
+4. **同じ実行環境の 2 言語を読み比べる** — Java と Scala（JVM・Tribuo）、C# と F#（.NET・ML.NET）は数値が完全に一致するので、書き方の違いだけを取り出して読める
+5. **テストを失敗させてから実装する** — 記事の順に Red・Green・Refactor を回すと、TDD の手触りがつかめる

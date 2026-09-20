@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-21
+* **Update**: [多言語統合解説](/article/getting-start-ml/integration/index.md) の索引と全 5 章を 9 言語に拡張（B49）。乱数の節を「9 言語で 7 通り、同じ乱数生成器なら数値も一致する」構造に書き直し、「決定的でないライブラリ」の節を新設。[執筆計画](/article/getting-start-ml/outline.md) に B49 の完了を記録し、第 2 波のすべての Bolt（B24〜B49）が完了した。
 * **Creation**: Rust 版の第 2〜15 章を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[Rust 版トップ](/article/getting-start-ml/rust/index.md)・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B45〜B48 の完了を、[ADR 009](/adr/009-rust-ml-libraries.md) に各章で確かめた linfa（決定木の既定値・非決定性・標準化・正則化の強さ・PCA・K-means の RNG）と axum の振る舞いを反映。ADR 009 を承認済み（stable）にした。第 2 波（Java・C#・Scala・Go・Rust）が完了し、シリーズは 9 言語になった。
 * **Update**: mkdocs で LaTeX の数式を表示できるようにした（`pymdownx.arithmatex` の generic モードと MathJax 3）。
 
