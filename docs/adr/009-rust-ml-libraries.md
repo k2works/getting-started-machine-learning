@@ -3,7 +3,7 @@ type: ADR
 title: "009 Rust 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定"
 description: "Rust 版のライブラリに Cargo 標準のテスト・rustfmt・clippy・linfa 0.8.1・ndarray 0.16・axum を採用し、クレートの版をそろえる方針と自作する範囲を決める。"
 tags: [adr,getting-start-ml,rust]
-status: draft
+status: stable
 generated: { by: claude-code/claude-opus-5, at: 2026-09-20T13:10:00Z }
 ---
 
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-20T13:10:00Z }
 ## ステータス
 
 2026-09-20 提案されました
+
+2026-09-21 承認されました（第 1〜15 章の執筆で確かめました）
 
 ## コンテキスト
 
@@ -53,6 +55,11 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | 8 | **linfa-trees は非決定的なことがある。** Survived.csv では同じデータ・同じ深さでも実行ごとにテストの正解率が 0.788〜0.810 で揺れる（ダミー変数で同じ不純度の分割候補が並ぶため。iris では揺れない）。出力を固定するテストの対象にできないので、`run` の出力から linfa の行を外し、範囲で確かめるテストにした。**自作のほうが再現性が高いという逆転が起きている。** serde は trait object を保存できない（`Deserialize` が実装されていないというコンパイルエラーになる）ので、学習済みの前処理は `enum` で表す |
 | 9 | **linfa-preprocessing の `LinearScaler::standard()` は母標準偏差（n で割る）で確定した。** 架空の値でも実データ（Boston の RM 列 30 件）でも自作と 1e-12 以内で一致する。scikit-learn と同じで、Tribuo・gonum（標本標準偏差）とは違う。encoding_rs の `decode` は 3 つ組（`Cow<str>`・使った符号化・`had_errors`）を返し、Shift_JIS を UTF-8 として読むと `had_errors == true`、`String::from_utf8` は `Err` になる。linfa に 1 列だけ渡す API は無いので、1 列の `Array2<f64>` と `Array1<()>` で `DatasetBase::from` を使う |
 | 10 | **linfa-logistic の `MultiLogisticRegression` は既定で L2 の強さ `alpha` が 1.0。** 既定のままだと自作（正則化なし）と予測が 4 件ずれる。`alpha` を 1e-8 にするとテストデータ 45 件の予測が完全に一致する。繰り返しは既定の 100 回（L-BFGS）で収束しており、Tribuo の既定 5 エポックのような不足は起きない。**`String` のラベルをそのまま渡せる**（第 3 章の決定木のような番号付けが要らない）。学習済みモデルのメソッド名は `classes()`（`labels()` ではない）。ランダムフォレストは linfa 0.8.1 に無いので自作が最終実装 |
+| 11 | linfa の `confusion_matrix`・`roc`・`area_under_curve`・`cross_validate_single` を自作と突き合わせられる。ROC には `linfa::dataset::Pr` 型の確率と `&[bool]` の正解を渡す |
+| 12 | linfa-elasticnet の `ElasticNet::ridge()`・`lasso()` と突き合わせられる。目的関数の流儀（平均で割るかどうか）が違うので、alpha の値はそのまま比べられない |
+| 13 | linfa-reduction の `Pca` は `explained_variance_ratio()` で寄与率、`components()` で固有ベクトルを返す。符号の向きはそろわないので、自作と比べるときはそろえる。乱数を使わないので、寄与率はほかの言語版と一致する |
+| 14 | **linfa-clustering に渡す RNG は rand 0.8 系（`rand_xoshiro` 0.6 の `Xoshiro256Plus`）でなければならない。** rand 0.9 以降の `SmallRng` を `KMeans::params_with_rng` に渡すと「two types coming from two different versions of the same crate」で落ちる。linfa は k-means++ で初期中心を選ぶので、クラスタ数が多いと自作（ランダムな初期化）より SSE が小さいことが多いが、絶対ではない（実データのクラスタ数 9 では自作のほうが小さかった）。SSE は linfa が返さないので、中心を受け取って自作と同じ式で測り直す |
+| 15 | axum 0.8 の `Json` 抽出器は JSON として読めないと既定で 400 を返すので、422 に統一するには生の `Request` から自分で `extract` する。ハンドラーで共有する状態は `Arc` で包み、置き場の trait に `+ Send + Sync` を課す（満たさない型はコンパイルが通らない）。`(StatusCode, Json<T>)` のタプルがそのまま応答になる。各章の `run` は同期の関数なので、`tokio::runtime::Runtime::new()` と `block_on` で非同期の世界に入る |
 
 ### linfa の決定木（`linfa-trees` 0.8.1）の既定値と自作との違い
 

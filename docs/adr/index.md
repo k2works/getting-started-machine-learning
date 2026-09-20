@@ -14,6 +14,6 @@
 | [006](006-csharp-ml-libraries.md) | C# 版のライブラリに xUnit v3・coverlet.MTP・dotnet format・.NET アナライザー・ML.NET・ASP.NET Core Minimal API を採用し、章ごとの置き換え範囲を決める | 提案中 |
 | [007](007-scala-ml-libraries.md) | Scala 版のライブラリに sbt・ScalaTest・scalafmt・scoverage・Tribuo・http4s + circe を採用し、GPL-3.0 の Smile を使わない | 提案中 |
 | [008](008-go-ml-libraries.md) | Go 版のライブラリに標準の testing・gofmt・go vet・golangci-lint・gonum・net/http を採用し、gonum に無いアルゴリズムを自作する | 承認済み |
-| [009](009-rust-ml-libraries.md) | Rust 版のライブラリに Cargo 標準のテスト・rustfmt・clippy・linfa 0.8.1・ndarray 0.16・axum を採用し、クレートの版をそろえる | 提案中 |
+| [009](009-rust-ml-libraries.md) | Rust 版のライブラリに Cargo 標準のテスト・rustfmt・clippy・linfa 0.8.1・ndarray 0.16・axum を採用し、クレートの版をそろえる | 承認済み |
 
 ADR の作成には `creating-adr` スキルを使用してください。

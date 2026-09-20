@@ -1,5 +1,9 @@
 # Docs Update Log
 
+## 2026-09-21
+* **Creation**: Rust 版の第 2〜15 章を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[Rust 版トップ](/article/getting-start-ml/rust/index.md)・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B45〜B48 の完了を、[ADR 009](/adr/009-rust-ml-libraries.md) に各章で確かめた linfa（決定木の既定値・非決定性・標準化・正則化の強さ・PCA・K-means の RNG）と axum の振る舞いを反映。ADR 009 を承認済み（stable）にした。第 2 波（Java・C#・Scala・Go・Rust）が完了し、シリーズは 9 言語になった。
+* **Update**: mkdocs で LaTeX の数式を表示できるようにした（`pymdownx.arithmatex` の generic モードと MathJax 3）。
+
 ## 2026-09-20
 * **Creation**: Rust 版の[トップ](/article/getting-start-ml/rust/index.md)・[第 1 章](/article/getting-start-ml/rust/01-machine-learning-and-first-test.md)・[ADR 009](/adr/009-rust-ml-libraries.md) を新規作成し、シリーズ索引と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Rust 版執筆計画と B44 の完了を反映。linfa 0.8.1 の対応範囲を確かめた結果、Rust 版の対比の軸を Java 版・C# 版（ライブラリが揃った静的型付け言語）に差し替えた。
 * **Creation**: Go 版の第 2〜15 章を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[Go 版トップ](/article/getting-start-ml/go/index.md)・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B40〜B43 の完了を、[ADR 008](/adr/008-go-ml-libraries.md) に各章で確かめた gonum（`stat.ROC`・`stat.PC`・`stat.StdDev`）と `net/http`・`encoding/gob` の振る舞いを反映。ADR 008 を承認済み（stable）にした。

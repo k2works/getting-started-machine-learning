@@ -811,7 +811,7 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 | B29〜B33（完了） | C# | B24〜B28 と同じ区切り（ADR 006、`apps/csharp/`） | C# 版の全章完了 |
 | B34〜B38（完了） | Scala | 同上（ADR 007、`apps/scala/`） | Scala 版の全章完了 |
 | B39〜B43 | Go | 同上（ADR 008、`apps/go/`） | Go 版の全章完了（2026-09-20 完了） |
-| B44〜B48 | Rust | 同上（ADR 009、`apps/rust/`） | Rust 版の全章完了 |
+| B44〜B48 | Rust | 同上（ADR 009、`apps/rust/`） | Rust 版の全章完了（2026-09-21 完了） |
 | B49 | 統合解説 | `integration/` の各章と索引に第 2 波の 5 言語を加える | 統合解説の各表で 9 言語の行・列がそろっている |
 
 目安は 1 言語 1〜1.5 日、第 2 波全体で 6〜8 日とする。各言語の完了時に、実績をもとに次の言語の見積もりを見直す。第 3 波の Bolt 計画は第 2 波の完了時に作る。
@@ -1457,6 +1457,23 @@ B44（Rust のウォーキングスケルトン）は 2026-09-20 に完了した
 | linfa への受け渡し | `Dataset::new(Array2<f64>, Array1<L>)`。ndarray 0.16・rand 0.8 系にそろえる | 版を混ぜると「同じ名前の別の型」になる |
 
 乱数は `rand` 0.8 の `StdRng::seed_from_u64(seed)` と Fisher-Yates を使う。`StdRng::seed_from_u64(0)` の並びは `[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]` で、Java 版・Go 版とは違う。各章で数値がほかの言語版と一致するかを確かめ、一致しない場合は理由を記事に書く。
+
+#### B45〜B48 の完了記録（2026-09-21）
+
+Rust 版の全 15 章が完成した（B44〜B48）。実装は `apps/rust/src/{chapter01〜15}`、記事は `docs/article/getting-start-ml/rust/`、検査は `npx gulp apps:check:rust`（`cargo fmt --check`・`cargo clippy --all-targets -- -D warnings`・`cargo test`・`cargo llvm-cov`）。
+
+| 決めたこと | 結果 |
+| :--- | :--- |
+| 依存 | linfa 0.8.1 系（trees・linear・logistic・preprocessing・elasticnet・reduction・clustering）、ndarray 0.16、rand 0.8＋rand_xoshiro 0.6、csv、encoding_rs、serde・serde_json、axum・tokio。**すべて linfa が依存する版にそろえる**（混ぜると「同じ名前の別の型」になる） |
+| ライブラリと突き合わせた章 | 第 3・7・9・10・11・12・13・14 章。linfa に無い**ランダムフォレスト（第 10 章）・欠損値の補完とダミー変数化（第 8 章）**だけが自作の最終実装 |
+| 数値の一致 | 第 13 章（主成分分析）は乱数を使わないので寄与率がほかの言語版と一致する。`rand` を使う章は一致しない（件数だけ一致） |
+| 想定外だったこと | **linfa-trees は Survived.csv のようなデータで非決定的**で、実行ごとに正解率が揺れる（自作のほうが再現性が高い）。**`rand` 0.8 の `StdRng` は「再現可能と考えるべきではない」とドキュメントが明言**しており、Rust 版の再現性は `Cargo.lock` の固定に依存する |
+| 第 15 章 | axum 0.8＋tokio。`Json` 抽出器の既定の 400 を 422 に置き換え、状態は `Arc` で共有し、置き場の trait に `+ Send + Sync` を課した |
+| 進め方 | 第 11〜14 章を担当したサブエージェントが利用上限で停止したため、実装と第 11〜13 章の記事はコミット済みのものを回収し、**第 14 章の記事は親が書いた** |
+
+各章で確かめたライブラリの癖は [ADR 009](../../adr/009-rust-ml-libraries.md) の「各章で確かめた結果」に記録した。
+
+**第 2 波（Java・C#・Scala・Go・Rust）が完了した。** シリーズは 9 言語になった。残るは B49（多言語統合解説に第 2 波の 5 言語を加える）。
 
 ### 承認が必要な事項（Rust）
 
