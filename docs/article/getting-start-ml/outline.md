@@ -1266,7 +1266,10 @@ Go は第 2 波の 4 番目の言語で、TypeScript 版（ライブラリが限
 | GoLearn | 最新が 2022-12-28 のコミット（タグ無し）で、3 年以上更新されていない | Go module proxy |
 | テスト | 標準の `testing` パッケージ。表駆動テストが慣習。testify（MIT）は最新 v1.12.1 | 標準ライブラリ、Go module proxy |
 
-gonum の各関数の使い勝手（`LinearRegression` は単回帰だけか、`PC` から寄与率を取れるか）、`golangci-lint` の既定の指摘の量、`go vet` との重なりは未検証。B39 の ADR 008 で確かめてから確定する。
+| gonum の関数（B39） | `stat.LinearRegression` は単回帰だけ（切片と傾きを返す）。重回帰は `mat` で正規方程式を解くか `optimize` を使う。`stat.PC` は `PrincipalComponents` で成功可否を返し、`VarsTo` で分散、`VectorsTo` で固有ベクトルの行列を取れる（寄与率は分散から自分で求める） | 使い捨てのプロジェクトで実行 |
+| 静的解析（B39） | わざと崩したファイルで、`gofmt -l` がファイル名を、`go vet` が「declared and not used」を、`golangci-lint run` が同じ指摘を typecheck として報告した。`go vet` と `golangci-lint` の既定は重なる部分があるので、CI では両方を走らせるかを B39 で決める | 同上 |
+
+gonum に無いアルゴリズム（決定木・ランダムフォレスト・K-means・ロジスティック回帰）は、ほかの言語版の自作の実装を Go に書き直して最終実装とする。
 
 ### ライブラリ方針（ADR 008 で確定する案）
 
