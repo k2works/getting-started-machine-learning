@@ -43,6 +43,9 @@ B34 のステップ 1 で、Maven Central の POM と使い捨ての sbt プロ�
 | 1 | `-Wvalue-discard` は「戻り値の型が `Unit` の定義の中で、非 Unit の値を捨てたとき」に働く。テストの本体で `assume(...)` を書くだけでは働かないが、`Unit` を返すヘルパーの中では働く。`assume` を使うヘルパーは `Assertion` を返し、呼び出し側で `: Unit` と書くのがこの設定での定型。`-Wunused:all` は使っていない import・private の値を捕まえるが、公開メソッドの使っていない引数は指摘しない（Java 版の Error Prone の `UnusedMethod` のようには仮実装を止めない） |
 | 2 | 分割を Java 版と同じ `java.util.Random` + Fisher-Yates にすると、並べ替えの結果が Java 版と一致する（シード 0 で `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`）。iris.csv の訓練データの平均値（がく片長さ 0.4215384615384616 など）とテストデータの先頭のラベルも Java 版と一致した。`Features` の値を `Vector` で持つと、case class の等価判定がそのまま値の比較になる（Java・C# は配列を包む工夫が要る） |
 | 3 | Tribuo の `ArrayExample[Label]` は型引数を明示すれば Scala からそのまま作れる。`MutableDataset` は `ListDataSource` に `asJava` した事例のリストを渡す。決定木は Scala 3 の `enum` で閉じ、`match` の網羅性はコンパイラが検査する（Java の sealed interface・C# の抽象レコードに当たる）。iris.csv・テスト 0.3・シード 0 で、深さごとの正解率と Tribuo との一致（どの深さでも全件一致）が Java 版と同じになった |
+| 7 | 回帰には `tribuo-regression-slm` の追加が要る（`tribuo-regression-core`・`tribuo-math` は推移的に入る）。`SLMTrainer(true)`・`LARSTrainer()` の予測は自作の正規方程式と 1e-9 以内で一致し、`SLMTrainer(false)`・`LinearSGDTrainer` は一致しない（ADR 002・005 と同じ）。`SparseLinearModel` の重みは正規化した空間の値で、`getFeatureIDMap.getID(name)` で引く。`SLMTrainer` は学習のたびに標準出力へ進捗を書く。Scala 固有として、重みを見るには `asInstanceOf[SparseLinearModel]` が要り、複数のトレーナーを 1 つの `Vector` に入れるときは型を明示する。自作の予測値は Java 版と最後の桁まで一致した（Kotlin 版とは 1 桁違う） |
+| 9 | `MeanStdDevTransformation` は不偏標準偏差を使い、自作との比は √((n−1)/n)（ADR 002・005 と値まで同じ）。Java 向けの API は Scala からそのまま呼べ、橋渡しは `toArray`・`java.util.Optional` の `.toScala`・`.toVector` の 3 か所だけ。Shift_JIS のファイルを UTF-8 として読むと、JVM なので Java 版と同じく `MalformedInputException` になる。`tribuo-math` と `org.tribuo.transform` は `tribuo-classification-tree` から推移的に入る |
+| 10 | 特徴量の重要度は「木ごとに正規化してから平均し、最後にもう一度正規化する」手順にそろえると Java 版と一致する。最初に「全体を合わせてから正規化」と書いたときは値がずれた |
 
 ## 決定
 
