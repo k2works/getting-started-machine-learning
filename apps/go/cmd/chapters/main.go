@@ -14,6 +14,7 @@ import (
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter08"
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter09"
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter10"
+	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter11"
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter13"
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter14"
 	"github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter15"
@@ -27,6 +28,7 @@ var chapters = map[string]func(io.Writer) error{
 	"chapter08": chapter08.Run,
 	"chapter09": chapter09.Run,
 	"chapter10": chapter10.Run,
+	"chapter11": chapter11.Run,
 	"chapter13": chapter13.Run,
 	"chapter14": chapter14.Run,
 	"chapter15": chapter15.Run,
