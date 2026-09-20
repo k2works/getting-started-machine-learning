@@ -43,6 +43,7 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | 値による比較（B30） | `Equals` を書いて `GetHashCode` を書かないと CS0659 でビルドが止まる（警告をエラーにしているため）。Java 版で Error Prone が止めた「record の成分に配列」に当たるルールは .NET アナライザー（`Recommended`）に無いので、値で比べられることをテストで担保する。`Row`・`Table` も record だが成分が辞書・リストなので参照で比べる。値で比べる必要があるのは `Features` だけ |
 | 文字列の分割（B30） | `string.Split(char)` は行末の空欄も保持する（`"0.1,0.2,0.3,,".Split(',')` は 5 要素）。Java の `split(",", -1)` のような上限の指定は要らない |
 | 第 9 章（B32） | Shift_JIS は `Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)` だけで読める（`System.Text.Encoding.CodePages` の追加は不要。`InvariantGlobalization: true` の影響も受けない）。Java の `MalformedInputException` と違い、.NET は文字コードが違っても例外を投げず黙って文字化けする。ML.NET の `NormalizeMeanVariance` は既定（`fixZero: true`）では平均を引かず、`fixZero: false` で自作の標準化（母標準偏差）と小数第 5 位まで一致する（ADR 004 と同じ）。コレクション式のスプレッド `..` は `[...]` の中でだけ使える |
+| 第 7 章（B32） | `Ols` は Intel MKL が x64 専用なので arm64 では使えない（ADR 004 と同じ）。代わりに ML.NET の SDCA を使う。SDCA は特徴量の大きさに敏感で、正規化しないと決定係数が -0.5124 まで壊れ、`NormalizeMeanVariance` を前に置くと 0.7659 に戻る。既定はマルチスレッドなので `MLContext(seed: 0)` だけでは再現せず、`SdcaRegressionTrainer.Options.NumberOfThreads = 1` で固定する。自作の正規方程式の切片・係数・評価指標は F# 版と表示の桁まで一致した（SDCA は反復解法なので決定係数だけわずかに違う）。決め打ちの値を返す仮実装は CA1822（static にできる）でビルドが止まるので、C# 版の TDD では仮実装の書き方に制約がある |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 
