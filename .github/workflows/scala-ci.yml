@@ -1,0 +1,56 @@
+name: Scala CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/scala/**"
+      - ".github/workflows/scala-ci.yml"
+      - "ops/nix/environments/scala/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/scala/**"
+      - ".github/workflows/scala-ci.yml"
+      - "ops/nix/environments/scala/**"
+      - "flake.nix"
+      - "flake.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      # sbt が取得する依存（Coursier のキャッシュと sbt 自身のキャッシュ）を保存する
+      - name: Cache sbt and Coursier
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/coursier
+            ~/.sbt
+          key: ${{ runner.os }}-sbt-${{ hashFiles('apps/scala/build.sbt', 'apps/scala/project/build.properties', 'apps/scala/project/plugins.sbt') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
+      - name: Check formatting
+        run: nix develop .#scala --command bash -c "cd apps/scala && sbt -batch --no-colors scalafmtCheckAll"
+
+      # 学習データは再配布できないため CI には配置しない。実データのテストはスキップされる
+      # 警告をエラーにする設定（-Xfatal-warnings）はコンパイルで効く
+      - name: Run tests with coverage
+        run: >-
+          nix develop .#scala --command bash -c
+          "cd apps/scala && sbt -batch --no-colors 'coverage; test; coverageReport'"

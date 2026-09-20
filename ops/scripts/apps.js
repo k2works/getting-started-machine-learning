@@ -42,6 +42,15 @@ const APPS = [
     check: `${process.platform === 'win32' ? 'gradlew.bat' : './gradlew'} check`,
   },
   {
+    name: 'scala',
+    nix: 'scala',
+    dir: path.join('apps', 'scala'),
+    tools: [{ cmd: 'sbt', version: 'sbt --script-version' }],
+    setup: 'sbt -batch --no-colors update',
+    // CI（.github/workflows/scala-ci.yml）と同じ順に、整形・コンパイル・テストを検査する
+    check: "sbt -batch --no-colors 'scalafmtCheckAll; test'",
+  },
+  {
     name: 'csharp',
     nix: 'dotnet',
     dir: path.join('apps', 'csharp'),
