@@ -492,7 +492,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 ここで、本シリーズを通しての「BOM の落とし穴」に決着が付きます。
 
-Python 版・Kotlin 版・Java 版・C# 版・Go 版では、BOM 付きの CSV を素直に読むと、先頭の列名が `"﻿身長"` になり、「身長」で引けませんでした。言語によって `encoding='utf-8-sig'`・`UTF8Encoding`・自前の `TrimPrefix` で対処してきた部分です。
+Python 版・Kotlin 版・Java 版・C# 版・Go 版では、BOM 付きの CSV を素直に読むと、先頭の列名が `"\uFEFF身長"` になり、「身長」で引けませんでした。言語によって `encoding='utf-8-sig'`・`UTF8Encoding`・自前の `TrimPrefix` で対処してきた部分です。
 
 Rust の csv クレートは**自分で BOM を取り除きます**。確かめました。
 

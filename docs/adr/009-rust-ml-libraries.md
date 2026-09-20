@@ -33,7 +33,7 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | BLAS | 不要。linfa-linalg（純 Rust）で `cargo build` が通る | 同上 |
 | 乱数 | **linfa は rand 0.8 系**（`linfa` が rand 0.8、`linfa-clustering` が rand_xoshiro 0.6）。rand 0.9・0.10 の RNG を `KMeans::params_with_rng` に渡すと「two types coming from two different versions of the same crate are different types」で落ちる | 同上 |
 | 乱数の並び | `StdRng::seed_from_u64(0)` と Fisher-Yates で `[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]`。Java（`[4 8 9 6 3 5 2 1 7 0]`）とも Go（`[6 8 2 3 7 5 9 1 0 4]`）とも違う | 使い捨てのプロジェクトで実行 |
-| CSV | csv 1.4。**BOM を自動で取り除く**（`"﻿身長"` を読むと `"身長"` になる） | ヘッダーのバイト列を表示 |
+| CSV | csv 1.4。**BOM を自動で取り除く**（`"\uFEFF身長"` を読むと `"身長"` になる） | ヘッダーのバイト列を表示 |
 | Shift_JIS | encoding_rs 0.8 の `SHIFT_JIS.decode` で読める。誤って UTF-8 として読むと `String::from_utf8` が `Err` になる | 同上 |
 | API | axum 0.8.9 と tokio 1.53.1 で `Router` を作り、ポートを開けることを確認 | 同上 |
 | 直列化 | serde 1.0・serde_json 1.0。`#[derive(Serialize, Deserialize)]` で構造体をそのまま JSON にできる | 同上 |
