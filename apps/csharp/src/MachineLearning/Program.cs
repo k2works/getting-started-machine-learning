@@ -15,6 +15,7 @@ public static class Program
         ["chapter11"] = Chapter11.Program.Run,
         ["chapter12"] = Chapter12.Program.Run,
         ["chapter13"] = Chapter13.Program.Run,
+        ["chapter14"] = Chapter14.Program.Run,
     };
 
     public static int Main(string[] args)
