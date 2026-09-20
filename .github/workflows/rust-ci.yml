@@ -1,0 +1,54 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/rust/**'
+      - 'ops/nix/environments/rust/**'
+      - '.github/workflows/rust-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/rust/**'
+      - 'ops/nix/environments/rust/**'
+      - '.github/workflows/rust-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/rust/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # rustfmt は整形の差分をファイル名と行番号つきで出す
+      - name: Check formatting
+        run: |
+          nix develop .#rust --command bash -c 'cd apps/rust && cargo fmt --check'
+
+      # clippy の警告はすべてエラーにする
+      - name: Clippy
+        run: |
+          nix develop .#rust --command bash -c 'cd apps/rust && cargo clippy --all-targets -- -D warnings'
+
+      # 実データのテストは学習データが無ければスキップされる
+      - name: Test
+        run: |
+          nix develop .#rust --command bash -c 'cd apps/rust && cargo test'
+
+      - name: Coverage
+        run: |
+          nix develop .#rust --command bash -c 'cd apps/rust && cargo llvm-cov --summary-only'

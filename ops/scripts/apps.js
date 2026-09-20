@@ -51,6 +51,16 @@ const APPS = [
     check: 'test -z "$(gofmt -l .)" || (gofmt -l . && exit 1) && go vet ./... && golangci-lint run && go test ./... -cover',
   },
   {
+    name: 'rust',
+    nix: 'rust',
+    dir: path.join('apps', 'rust'),
+    tools: [{ cmd: 'cargo', version: 'cargo --version' }],
+    setup: 'cargo fetch',
+    // CI（.github/workflows/rust-ci.yml）と同じ順に、整形・lint・テスト・カバレッジを検査する
+    check:
+      'cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test && cargo llvm-cov --summary-only',
+  },
+  {
     name: 'scala',
     nix: 'scala',
     dir: path.join('apps', 'scala'),
