@@ -49,6 +49,8 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | 2 | 欠損値は `Result<Option<f64>>` で表せる（Go 版の「値と ok とエラー」の 3 値より素直）。`f64` を持つ型には `Eq` が付かないので `PartialEq` だけを derive する。`rand` は linfa に合わせて 0.8 系に固定する。`StdRng::seed_from_u64(0)` の Fisher-Yates は `[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]` で、Java 版・Go 版と分かれる行も訓練データの平均値も一致しない（件数 105 件・45 件は一致する） |
 | 3 | 決定木は `enum Tree { Leaf, Node }` と `Box` で表せ、`match` の網羅性をコンパイラが検査する（Go 版の既定の分岐が要らない）。**`max_by_key` は同点のとき最後の要素を返す**ので、「同数なら先に現れたほう」にするには厳密な不等号で書く（実際に 2 件のテストが落ちて気づいた）。`f64` は `Ord` ではないので `sort_by` に `partial_cmp` を使う。linfa にラベルを渡すには整数への符号化が要る |
 | 4〜6 | **`rand` 0.8.8 の `StdRng` は「再現可能と考えるべきではない」とドキュメントが明言している**（実体は ChaCha12。再現が要るなら `rand_chacha` を直接使えとある）。Rust 版の数値の再現性は `Cargo.lock` をコミットしていることに依存する。`rustfmt` は CRLF を指摘しない（`newline_style = Auto`。Go 版の `gofmt` は指摘する）ので `.gitattributes` に `apps/rust/** text=auto eol=lf` を足した。カバレッジのリージョン数は rustc の版で変わる（1.91.1 で 1758、1.97.1 で 1714）ので、CI と手元の数字を比べない。テストは 47 件で、データなしでも全部 `ok` と出る（スキップの表示が無い）ため、`--nocapture` の `eprintln!` かカバレッジの差（データあり 85.67%、なし 73.66%）で判別する。clippy の実測の指摘は `needless_bool`・`ptr_arg`・`needless_range_loop`・`partialeq_to_none` など |
+| 7 | ndarray には連立方程式を解く関数が無い（`ndarray-linalg` は LAPACK を要求する）ので、正規方程式は掃き出し法を自作した。**linfa-linear の `LinearRegression::default()` は素の最小二乗**で、自作の切片・係数と実データでも 1e-6 以内で一致した（Tribuo のようにトレーナーを選ぶ手間が無い） |
+| 8 | **linfa-trees は非決定的なことがある。** Survived.csv では同じデータ・同じ深さでも実行ごとにテストの正解率が 0.788〜0.810 で揺れる（ダミー変数で同じ不純度の分割候補が並ぶため。iris では揺れない）。出力を固定するテストの対象にできないので、`run` の出力から linfa の行を外し、範囲で確かめるテストにした。**自作のほうが再現性が高いという逆転が起きている。** serde は trait object を保存できない（`Deserialize` が実装されていないというコンパイルエラーになる）ので、学習済みの前処理は `enum` で表す |
 
 ### linfa の決定木（`linfa-trees` 0.8.1）の既定値と自作との違い
 
@@ -80,7 +82,7 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | 乱数 | `rand` の `StdRng::seed_from_u64` と Fisher-Yates、`rand_xoshiro`（linfa に渡す用） | rand 0.8、rand_xoshiro 0.6（`Cargo.lock` で固定） | MIT OR Apache-2.0 | 第 2 章 |
 | 行列 | `ndarray` | **0.16**（0.17 にしない） | MIT OR Apache-2.0 | 第 7 章 |
 | 機械学習 | linfa（trees・linear・logistic・clustering・reduction・preprocessing・elasticnet） | 0.8.1 | MIT OR Apache-2.0 | 第 3 章 |
-| 直列化 | `serde`・`serde_json` | 1.0 | MIT OR Apache-2.0 | 第 8 章 |
+| 直列化 | `serde`・`serde_json`（trait object は保存できないので、学習済みの前処理は `enum` で表す） | 1.0 | MIT OR Apache-2.0 | 第 8 章 |
 | API | `axum` と `tokio` | axum 0.8、tokio 1 | MIT | 第 15 章 |
 
 - **polars は使わない。** ほかの言語版と同じく、構造体と `HashMap` でデータを表す。データフレームのライブラリを使わないのはシリーズ全体の方針
@@ -96,7 +98,7 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 |----|---------|------|
 | 3 | linfa-trees の `DecisionTree` | 自作のジニ不純度の決定木と突き合わせる。`max_depth` の指定と特徴量重要度も比べる |
 | 7 | ndarray と linfa-linear の `LinearRegression` | 正規方程式を ndarray で解いてから、linfa の重回帰と突き合わせる |
-| 8 | linfa-trees（分類）。前処理は自作 | 欠損値の補完・ダミー変数化は linfa-preprocessing に無いので自作。分類器だけ突き合わせる |
+| 8 | linfa-trees（分類）。前処理は自作 | 欠損値の補完・ダミー変数化は linfa-preprocessing に無いので自作。分類器の突き合わせは、linfa 側が非決定的なので範囲で確かめる |
 | 9 | linfa-preprocessing の `LinearScaler::standard()` | 自作の標準化と突き合わせる（母標準偏差で一致するはず。実測で確かめる） |
 | 10 | linfa-logistic の `LogisticRegression` | ロジスティック回帰は突き合わせる。ランダムフォレストは linfa に無いので自作のみ |
 | 11 | linfa の `confusion_matrix`・`roc`・`cross_validate_single` | 自作の評価指標・ROC・交差検証と突き合わせる |
