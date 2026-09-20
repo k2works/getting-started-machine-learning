@@ -810,7 +810,7 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 | B28（完了） | Java | 第 15 章 | Java 版の全章完了。Python 版と節構成がそろっている |
 | B29〜B33（完了） | C# | B24〜B28 と同じ区切り（ADR 006、`apps/csharp/`） | C# 版の全章完了 |
 | B34〜B38（完了） | Scala | 同上（ADR 007、`apps/scala/`） | Scala 版の全章完了 |
-| B39〜B43 | Go | 同上（ADR 008、`apps/go/`） | Go 版の全章完了 |
+| B39〜B43 | Go | 同上（ADR 008、`apps/go/`） | Go 版の全章完了（2026-09-20 完了） |
 | B44〜B48 | Rust | 同上（ADR 009、`apps/rust/`） | Rust 版の全章完了 |
 | B49 | 統合解説 | `integration/` の各章と索引に第 2 波の 5 言語を加える | 統合解説の各表で 9 言語の行・列がそろっている |
 
@@ -1353,6 +1353,22 @@ B39（Go のウォーキングスケルトン）は 2026-09-20 に完了した�
 | 決定木 | `type Tree interface { isTree() }` と `Leaf`・`Node` の構造体、予測は型スイッチ | Go に判別共用体・sealed interface は無い。非公開のメソッドを持たせて、このパッケージの外で実装を足せないようにする。網羅性はコンパイラが検査しないので、既定の分岐でエラーを返す |
 
 乱数は `math/rand` の `rand.New(rand.NewSource(seed))` と Fisher-Yates を使う。Java 版・Scala 版とは乱数の実装が違うので、分かれる行は一致しない見込み。各章で数値がほかの言語版と一致するかを確かめ、一致しない場合は理由を記事に書く。
+
+#### B40〜B43 の完了記録（2026-09-20）
+
+Go 版の全 15 章が完成した（B39〜B43）。実装は `apps/go/internal/chapter01〜15`、記事は `docs/article/getting-start-ml/go/`、検査は `npx gulp apps:check:go`（`gofmt -l`・`go vet`・`golangci-lint run`・`go test ./... -cover`）で 0 issues。
+
+| 決めたこと | 結果 |
+| :--- | :--- |
+| 依存 | gonum v0.17.0（BSD 3 条項）と `golang.org/x/text` v0.40.0（Shift_JIS の CSV、第 9 章）だけ。GoLearn は不採用のまま |
+| ライブラリと突き合わせた章 | 第 7 章（`stat.LinearRegression`）・第 9 章（`stat.Mean`・`stat.StdDev`）・第 11 章（`stat.ROC` と `integrate.Trapezoidal`）・第 13 章（`stat.PC`）。第 3・8・10・12・14 章は自作が最終実装で、置き換えの節は省略した |
+| 数値の一致 | 第 13 章（主成分分析）は乱数を使わないので Java 版と完全一致した。`math/rand` を使う章はほかの言語版と一致しない（件数だけ一致する）。第 3 章の深さ 2 の正解率は 45 件中 43 件で Java 版と同じだが、分割の境界は違う |
+| 第 15 章 | Web フレームワークを入れず標準の `net/http`（Go 1.22 のルーティング）で作った。JSON の読み書き・入力の検証・エラーの変換・応答の書き出しは自作 |
+| ほかの言語版への波及 | Go の整形検査で崩れたファイル名が出るように `.github/workflows/go-ci.yml` と `ops/scripts/apps.js` を直した。`.gitattributes` に `apps/go/** text=auto eol=lf` を足した |
+
+各章で確かめたライブラリの癖は [ADR 008](../../adr/008-go-ml-libraries.md) の「各章で確かめた結果」に記録した。
+
+残るは Rust 版（第 2 波の最後）。
 
 ## リスクと対応
 
