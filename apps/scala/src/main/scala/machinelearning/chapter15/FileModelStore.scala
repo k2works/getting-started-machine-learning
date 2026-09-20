@@ -31,9 +31,9 @@ class FileModelStore(modelDirectory: Path) extends ModelStore:
         .toVector
         .map(_.split("\t", 2) match
           case Array(name, value) => name -> value.toDouble
-          case other              => throw IllegalArgumentException(s"読み取れない行です: ${other.mkString}")
-        )
-      val intercept = entries.collectFirst { case ("intercept", value) => value }
+          case other => throw IllegalArgumentException(s"読み取れない行です: ${other.mkString}"))
+      val intercept = entries
+        .collectFirst { case ("intercept", value) => value }
         .getOrElse(throw IllegalArgumentException("切片がありません"))
       val model = LinearModel(intercept, entries.filterNot(_._1 == "intercept"))
       movie => model.predictOne(toFeatures(model, movie))
@@ -42,7 +42,8 @@ class FileModelStore(modelDirectory: Path) extends ModelStore:
   override def loadSurvivalModel(): Either[PredictionError, Passenger => Boolean] =
     load(SurvivalModelName, survivalModelFile) { file =>
       val pipeline = ModelFiles.load(file)
-      passenger => pipeline.predict(Table(SurvivedData.FeatureColumns, Vector(toRow(passenger)))).head == 1
+      passenger =>
+        pipeline.predict(Table(SurvivedData.FeatureColumns, Vector(toRow(passenger)))).head == 1
     }
 
   private def salesModelFile: Path = modelDirectory.resolve(s"$SalesModelName.model")

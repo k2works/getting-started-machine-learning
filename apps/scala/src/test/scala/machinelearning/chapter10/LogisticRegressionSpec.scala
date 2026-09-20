@@ -49,7 +49,7 @@ class LogisticRegressionSpec extends AnyFunSuite:
   }
 
   test("学習する前に予測するとエラーになる") {
-    assertThrows[IllegalArgumentException](LogisticRegression().predict(Samples.threeSpeciesX))
+    assertThrows[IllegalStateException](LogisticRegression().predict(Samples.threeSpeciesX))
   }
 
 class RandomForestSpec extends AnyFunSuite:
@@ -90,7 +90,7 @@ class RandomForestSpec extends AnyFunSuite:
   }
 
   test("学習する前に予測するとエラーになる") {
-    assertThrows[IllegalArgumentException](RandomForest.of(5, 1, 0).predict(Samples.threeSpeciesX))
+    assertThrows[IllegalStateException](RandomForest.of(5, 1, 0).predict(Samples.threeSpeciesX))
   }
 
 class FeatureImportanceSpec extends AnyFunSuite:

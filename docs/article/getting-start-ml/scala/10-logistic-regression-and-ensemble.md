@@ -229,7 +229,7 @@ object LogisticRegression:
   }
 
   test("学習する前に予測するとエラーになる") {
-    assertThrows[IllegalArgumentException](LogisticRegression().predict(Samples.threeSpeciesX))
+    assertThrows[IllegalStateException](LogisticRegression().predict(Samples.threeSpeciesX))
   }
 ```
 
@@ -279,7 +279,7 @@ class LogisticRegression(learningRate: Double = 1.0, epochs: Int = 5000) extends
 - `classes = t.distinct.sorted` で、品種を名前の順に並べます。Java 版の `t.stream().distinct().sorted().toList()` と同じです
 - 誤差の計算では、Java 版が `clone()` した配列の要素を書き換えたところを、`probability.updated(target, probability(target) - 1.0)`（その位置だけ差し替えた新しい `Vector`）で書いています。正解の品種を 1、それ以外を 0 とした表（one-hot 表現）を作らず、**正解の品種の確率からだけ 1 を引く** のは Python 版・Kotlin 版と同じ手です
 - 損失の記録は `(0 until epochs).toVector.map { … }` の戻り値です。Java 版は `ArrayList` に `add` して最後に `List.copyOf` で固めましたが、Scala では繰り返しの結果がそのまま不変の `Vector` になります。`losses` はその `Vector` を返すだけで、呼び出し側が書き換える余地がありません
-- 学習前の予測は `require` で止めます。Java 版・Kotlin 版は第 3 章と同じ `IllegalStateException` にしましたが、Scala の `require` が投げるのは `IllegalArgumentException` です。第 3 章の `DecisionTree` は `getOrElse(throw IllegalStateException(…))` と書いているので、この章のモデルとは例外の型が揃っていません。メッセージは同じにしてあります
+- 学習前の予測は `IllegalStateException` で止めます。`require` を使うと `IllegalArgumentException` になり、第 3 章の `DecisionTree`（`getOrElse(throw IllegalStateException(…))`）と型がずれるので、`if … then throw` と書いて型をそろえました。「まだ学習していない」のは引数の誤りではなく状態の誤りなので、`IllegalStateException` のほうが意味に合います
 
 重みと切片の更新は、`Vector` の入れ替えで書きます。
 

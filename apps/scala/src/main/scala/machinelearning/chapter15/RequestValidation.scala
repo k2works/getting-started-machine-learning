@@ -2,8 +2,7 @@ package machinelearning.chapter15
 
 import io.circe.{Json, parser}
 
-/** プレゼンテーション層。HTTP の本文（JSON）を検証して、ドメイン層の型にする。
-  * 不正な項目が複数あれば、理由をすべて集めて返す。
+/** プレゼンテーション層。HTTP の本文（JSON）を検証して、ドメイン層の型にする。 不正な項目が複数あれば、理由をすべて集めて返す。
   */
 object RequestValidation:
   /** 検証の結果。正しければ値を、不正なら理由の一覧を持つ。 */
@@ -62,7 +61,7 @@ object RequestValidation:
 
   private def parseWith[A](body: String)(validate: Json => Validation[A]): Validation[A] =
     parser.parse(body) match
-      case Left(_)     => Left(Vector("JSON の形式が正しくありません"))
+      case Left(_) => Left(Vector("JSON の形式が正しくありません"))
       case Right(json) =>
         if json.isObject then validate(json) else Left(Vector("JSON のオブジェクトにしてください"))
 
@@ -98,7 +97,9 @@ object RequestValidation:
 
   private def choose[A](name: String, value: Json, choices: Map[String, A]): Validation[A] =
     val raw = value.asString.getOrElse(value.noSpaces)
-    choices.get(raw).toRight(Vector(s"$name は ${choices.keys.toSeq.sorted.mkString("、")} のどれかにしてください"))
+    choices
+      .get(raw)
+      .toRight(Vector(s"$name は ${choices.keys.toSeq.sorted.mkString("、")} のどれかにしてください"))
 
   /** 省略できる項目。無ければ None。 */
   private def optional[A](json: Json, name: String)(

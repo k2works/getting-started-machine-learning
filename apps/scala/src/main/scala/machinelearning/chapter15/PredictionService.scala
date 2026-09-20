@@ -1,7 +1,6 @@
 package machinelearning.chapter15
 
-/** アプリケーション層。置き場からモデルを読み込んで予測するユースケースと、ヘルスチェック。
-  * ドメイン層だけを知る。
+/** アプリケーション層。置き場からモデルを読み込んで予測するユースケースと、ヘルスチェック。 ドメイン層だけを知る。
   */
 class PredictionService(store: ModelStore):
   def predictSales(movie: Movie): Either[PredictionError, SalesPrediction] =

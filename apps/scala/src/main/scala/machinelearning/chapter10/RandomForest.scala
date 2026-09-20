@@ -32,7 +32,7 @@ class RandomForest(nEstimators: Int, maxFeatures: Int, maxDepth: Option[Int], se
     this
 
   override def predict(x: Vector[Features]): Vector[String] =
-    require(fittedTrees.nonEmpty, "fit で学習してから predict を呼んでください")
+    if fittedTrees.isEmpty then throw IllegalStateException("fit で学習してから predict を呼んでください")
     RandomForest.majorityVote(
       fittedTrees.map(tree => tree.model.predict(RandomForest.selectColumns(x, tree.columns)))
     )

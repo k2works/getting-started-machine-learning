@@ -36,7 +36,7 @@ class LogisticRegression(learningRate: Double = 1.0, epochs: Int = 5000) extends
     this
 
   override def predict(x: Vector[Features]): Vector[String] =
-    require(classes.nonEmpty, "fit で学習してから predict を呼んでください")
+    if classes.isEmpty then throw IllegalStateException("fit で学習してから predict を呼んでください")
     x.map(features => classes(argMax(LogisticRegression.softmax(scores(features.values)))))
 
   /** 特徴量ごとのスコア（切片 + 重み × 値）。 */
