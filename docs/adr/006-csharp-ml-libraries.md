@@ -37,6 +37,7 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | 検査が効いているか（B29） | わざと違反を入れたファイルで、ビルドが CS0219（使っていない変数）・CA1822（static にできる）・IDE0055（コードスタイル）をエラーにし、`dotnet format --verify-no-changes` が `WHITESPACE` を指摘した |
 | カバレッジ（B29） | `--coverlet --coverlet-include '[MachineLearning]*' --coverlet-output-format cobertura` で cobertura の XML が出る（F# 版の CI と同じオプション） |
 | BOM の扱い（B29） | .NET の `File.ReadAllLines`・`ReadAllText` は BOM 付きの UTF-8 を読むと BOM を取り除く（先頭セルは `身長`）。Python 版・Kotlin 版・Java 版で起きた「列名に BOM が残る」落とし穴は C# では起きないので、列名から BOM を消す処理は書かない |
+| 分割の一致（B30） | 分割を F# 版と同じ `System.Random(seed)` + Fisher-Yates（後ろから `Next(i + 1)` で交換）にすると、訓練データとテストデータに入る行が F# 版と一致する。iris.csv・テスト 0.3・シード 0 で、訓練データの平均値（がく片長さ 0.424808、がく片幅 0.462286、花弁長さ 0.479135、花弁幅 0.432404）とテストデータの先頭 5 件のラベルが一致した。Java 版は `Collections.shuffle` なので一致しない | C# 版と、F# 版の手順を写したスクリプトの両方で実測 |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 

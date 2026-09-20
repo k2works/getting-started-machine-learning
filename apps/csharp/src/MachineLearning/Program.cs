@@ -6,6 +6,7 @@ public static class Program
     private static readonly Dictionary<string, Action<TextWriter>> Chapters = new(StringComparer.Ordinal)
     {
         ["chapter01"] = Chapter01.Program.Run,
+        ["chapter02"] = Chapter02.Program.Run,
     };
 
     public static int Main(string[] args)
