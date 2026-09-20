@@ -34,7 +34,7 @@ object DecisionTrees:
           right = sorted.drop(i).map(_._2)
           impurity = (left.size * gini(left) + right.size * gini(right)) / sorted.size
         yield Split(feature, (sorted(i - 1)._1 + sorted(i)._1) / 2, impurity)
-      // minByOption は最初の最小値を返すので、同じ不純度なら列の順で前の分割になる
+      // reduceOption は、次の候補の不純度が「小さいときだけ」置き換えるので、同じ不純度なら列の順で前の分割が残る
       candidates.reduceOption((best, next) => if next.impurity < best.impurity then next else best)
 
   /** 深さの上限まで分割を繰り返して木を作る。maxDepth が None なら上限なし。 */
