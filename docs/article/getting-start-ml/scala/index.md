@@ -57,8 +57,40 @@ sbt "run chapter01"
 | 章 | テーマ |
 |----|--------|
 | [第 1 章](01-machine-learning-and-first-test.md) | 機械学習とはじめてのテスト |
+| [第 2 章](02-data-preprocessing-and-triangulation.md) | データの前処理と三角測量 |
+| [第 3 章](03-decision-tree-and-obvious-implementation.md) | 決定木による分類と明白な実装 |
 
-第 2 章以降は順次追加します。章立ては [Python 版](../python/index.md) と同じ 5 部 15 章です。
+### 第 2 部: 開発環境と自動化
+
+| 章 | テーマ |
+|----|--------|
+| [第 4 章](04-version-control-and-data-management.md) | バージョン管理とデータ管理 |
+| [第 5 章](05-package-management-and-static-analysis.md) | パッケージ管理と静的解析 |
+| [第 6 章](06-task-runner-and-ci-cd.md) | タスクランナーと CI/CD |
+
+### 第 3 部: 回帰と実践的な前処理
+
+| 章 | テーマ |
+|----|--------|
+| [第 7 章](07-linear-regression.md) | 線形回帰による数値予測 |
+| [第 8 章](08-classification-and-preprocessing-pipeline.md) | 実践的な分類と前処理パイプライン |
+| [第 9 章](09-feature-engineering.md) | 特徴量エンジニアリング |
+
+### 第 4 部: モデルの改善と評価
+
+| 章 | テーマ |
+|----|--------|
+| [第 10 章](10-logistic-regression-and-ensemble.md) | ロジスティック回帰とアンサンブル学習 |
+| [第 11 章](11-evaluation-metrics-and-cross-validation.md) | 評価指標と交差検証 |
+| [第 12 章](12-regularization-and-model-selection.md) | 正則化とモデル選択 |
+
+### 第 5 部: 教師なし学習と実運用
+
+| 章 | テーマ |
+|----|--------|
+| 第 13 章 | 主成分分析による次元削減 |
+| 第 14 章 | K-means によるクラスタリング |
+| 第 15 章 | 機械学習 API とモジュール設計 |
 
 ### 付録
 
