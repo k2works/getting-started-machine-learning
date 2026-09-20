@@ -65,7 +65,7 @@ func Run(out io.Writer) error {
 		return err
 	}
 
-	if _, err := fmt.Fprintf(out, "\n深さ %d の決定木:\n%s", treeDepthToShow, formatted); err != nil {
+	if _, err := fmt.Fprintf(out, "\n深さ %d の決定木:\n%s\n", treeDepthToShow, formatted); err != nil {
 		return fmt.Errorf("表示できません: %w", err)
 	}
 
