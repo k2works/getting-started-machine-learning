@@ -1010,11 +1010,20 @@ dotnet test
 
 第 2 章までのテストは 39 件（第 1 章の 15 件と第 2 章の 24 件）です。データが無い環境では、実データのテスト 7 件（第 1 章の 3 件と第 2 章の 4 件）がスキップされます。
 
+```bash
+ML_DATA_DIR=/nonexistent dotnet run --project tests/MachineLearning.Tests/MachineLearning.Tests.csproj
+```
+
 ```text
 skipped 実データの列ごとの欠損値の数を数える (0ms)
-  学習データ iris.csv が配置されていない（gulp data:setup）
+skipped 訓練データの平均値は F# 版と同じになる（同じ乱数と同じ分け方） (0ms)
 skipped 実データを 105 件と 45 件に分けて欠損値を補完する (0ms)
-  学習データ iris.csv が配置されていない（gulp data:setup）
+skipped 実行すると前処理の結果を表示する (0ms)
+
+  total: 39
+  failed: 0
+  succeeded: 32
+  skipped: 7
 ```
 
 **TODO リスト**:
