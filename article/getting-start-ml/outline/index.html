@@ -2504,13 +2504,74 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#b30-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B30 のステップ計画（第 2〜3 章）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="B30 のステップ計画（第 2〜3 章）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データの表し方（第 2 章以降のすべての章に効く判断）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乱数と数値
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        承認が必要な事項（B30）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_23" class="md-nav__link">
+  <a href="#_25" class="md-nav__link">
     <span class="md-ellipsis">
       
         リスクと対応
@@ -2521,7 +2582,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_24" class="md-nav__link">
+  <a href="#_26" class="md-nav__link">
     <span class="md-ellipsis">
       
         承認が必要な事項
@@ -11116,7 +11177,113 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 実装を <code>apps/csharp/</code>（2026-09-20 に <code>apps/dotnet/</code> から変更。人の指示による）、記事を <code>docs/article/getting-start-ml/csharp/</code> に置き、.NET SDK の版を F# 版にそろえること</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B29 のステップ 1〜8</li>
 </ul>
-<h2 id="_23">リスクと対応<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h2>
+<h3 id="b30-23">B30 のステップ計画（第 2〜3 章）<a class="headerlink" href="#b30-23" title="Permanent link">&para;</a></h3>
+<h4 id="2_4">データの表し方（第 2 章以降のすべての章に効く判断）<a class="headerlink" href="#2_4" title="Permanent link">&para;</a></h4>
+<p>F# 版は型プロバイダ（<code>CsvProvider</code>）で読み、特徴量を <code>Map&lt;string, float option&gt;</code> で持つ。C# 版は型プロバイダが無いので、Java 版と同じ考え方で、セルの文字列を列名で引く自作の表にする。</p>
+<table>
+<thead>
+<tr>
+<th>対象</th>
+<th>表し方（案）</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>読み込んだ行</td>
+<td><code>record Row(IReadOnlyDictionary&lt;string, string&gt; Cells)</code>。<code>double? Number(string column)</code>（空欄なら null）と <code>string Text(string column)</code> で読み出す</td>
+<td>Java 版と同じ形。C# の <code>double?</code>（null 許容値型）が F# の <code>float option</code> に当たることを示せる。無い列は列名を示す例外にする</td>
+</tr>
+<tr>
+<td>表</td>
+<td><code>record Table(IReadOnlyList&lt;string&gt; Columns, IReadOnlyList&lt;Row&gt; Rows)</code>。<code>Load(path)</code> と <code>CountMissing()</code> を持つ</td>
+<td>列の順を保つ。<code>Dictionary</code> は順を保証しないので、列の順は <code>Columns</code> で持つ</td>
+</tr>
+<tr>
+<td>補完した後の特徴量</td>
+<td><code>sealed class Features</code>（列名の並びと <code>double[]</code>）。値で比べる <code>Equals</code>・<code>GetHashCode</code> を書く</td>
+<td>record は配列の成分を参照で比べるので、Java 版と同じくクラスにする。C# ではアナライザーが record の配列を止めないぶん、自分で気づく必要があることを記事の題材にする</td>
+</tr>
+<tr>
+<td>分割の結果</td>
+<td><code>record TrainTestSplit&lt;TX, TT&gt;(IReadOnlyList&lt;TX&gt; XTrain, IReadOnlyList&lt;TX&gt; XTest, IReadOnlyList&lt;TT&gt; TTrain, IReadOnlyList&lt;TT&gt; TTest)</code></td>
+<td>F# 版の型と同じ形</td>
+</tr>
+<tr>
+<td>決定木</td>
+<td><code>abstract record Tree</code> と <code>sealed record Leaf</code>・<code>sealed record Node</code>。予測は <code>switch</code> 式のパターンマッチ</td>
+<td>C# には sealed interface が無いので、抽象レコードと sealed な派生で閉じる。網羅していない <code>switch</code> 式は CS8509 の警告になり、<code>TreatWarningsAsErrors</code> によってエラーになることを実測して示す</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_23">乱数と数値<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h4>
+<p>分割は F# 版と同じ <code>System.Random(seed)</code> と Fisher–Yates のシャッフル（後ろから <code>Next(i + 1)</code> で交換）にする。同じ .NET の乱数なので、訓練データとテストデータに入る行は F# 版と一致するはず。これを第 2 章のテストで確かめ、一致すれば第 3 章の正解率も F# 版と同じ値になる（Java 版は <code>Collections.shuffle</code> なので一致しない）。一致しなければ、その事実と理由を記事に書く。</p>
+<h4 id="_24">ステップ<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ステップ</th>
+<th>内容</th>
+<th>完了条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>第 2 章の読み込み：<code>Row</code>・<code>Table</code>、BOM 付きで空欄を含む CSV、列ごとの欠損値の数</td>
+<td>架空の値の CSV でテストが通る。<code>double?</code> で空欄を表せている</td>
+</tr>
+<tr>
+<td>2</td>
+<td>第 2 章の前処理：欠損値を除いた列ごとの平均値、補完して <code>Features</code> にする、特徴量と正解ラベルに分ける</td>
+<td>元の行を変更しないことを含めてテストが通る。<code>Features</code> の値による比較のテストがある</td>
+</tr>
+<tr>
+<td>3</td>
+<td>第 2 章の分割：<code>Shuffle</code>（Fisher–Yates）と <code>SplitTrainTest</code> を三角測量で進める</td>
+<td>割合どおりの件数・重複の無さ・対応の保持・同じシードで同じ分け方・数値のラベルのテストが通る</td>
+</tr>
+<tr>
+<td>4</td>
+<td>第 2 章の実データ：iris.csv の欠損値の数（2・1・2・2）、105 件と 45 件への分割と補完、章の実行の表示。F# 版と行が一致するかを確かめる</td>
+<td>データありで通り、データなしでスキップされる。F# 版との一致の有無を記録する</td>
+</tr>
+<tr>
+<td>5</td>
+<td>第 3 章の決定木：ジニ不純度、最良の分割、木の構築と予測、深さの制限、学習前の予測のエラー、木の表示</td>
+<td>F# 版・Java 版と同じ観点のテストが通る</td>
+</tr>
+<tr>
+<td>6</td>
+<td>第 3 章の ML.NET：<code>Microsoft.ML</code> と <code>Microsoft.ML.FastTree</code> を依存に加え、<code>Features</code> を ML.NET の入力に変える橋渡し、<code>FastTree</code> を <code>OneVersusAll</code> で多クラスにして突き合わせ（ADR 004 の結果を C# で確かめる）</td>
+<td>突き合わせのテストが通る。F# 版と違う振る舞いがあれば ADR 006 に書く</td>
+</tr>
+<tr>
+<td>7</td>
+<td>第 3 章の実データ：深さごとの正解率と深さ 2 の木を表示する章の実行</td>
+<td>記事に載せる数値をテストで固定する</td>
+</tr>
+<tr>
+<td>8</td>
+<td>記事：第 2 章・第 3 章を書き、C# 版トップ・シリーズ索引・nav に登録する。途中段階の出力は再現して実測する</td>
+<td>記事の数値・出力が実測と一致する。サイトのビルドでリンク切れが無い</td>
+</tr>
+<tr>
+<td>9</td>
+<td>仕上げ：学習データの行・BOM の文字・絶対パスの検査、OKF、執筆計画の B30 の完了、<code>docs/log.md</code>、push して C# CI とサイトの公開を確かめる</td>
+<td>検査に指摘が無く、CI がグリーン</td>
+</tr>
+</tbody>
+</table>
+<p>第 3 章は第 2 章の <code>Features</code> と分割に依存するので、順に進める。第 2〜3 章は親が実装し、記事はサブエージェントに任せる（Java 版の B25 と同じ進め方）。</p>
+<h3 id="b30">承認が必要な事項（B30）<a class="headerlink" href="#b30" title="Permanent link">&para;</a></h3>
+<p>次の点を確認した（2026-09-20 承認）。</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> データの表し方（セルの文字列を持つ <code>Row</code> と <code>Table</code>、欠損値を持てない <code>Features</code> をクラスにすること、決定木を抽象レコードと sealed な派生で表すこと）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 分割を F# 版と同じ <code>System.Random</code> + Fisher–Yates にし、F# 版と行が一致するかを確かめること</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B30 のステップ 1〜9</li>
+</ul>
+<h2 id="_25">リスクと対応<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -11173,7 +11340,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 </tr>
 </tbody>
 </table>
-<h2 id="_24">承認が必要な事項<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h2>
+<h2 id="_26">承認が必要な事項<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h2>
 <p>本計画の承認とあわせて、次の点を確認した（2026-09-17 承認）。</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 5 部 15 章＋付録の章構成と、書かないと決めた内容</li>
