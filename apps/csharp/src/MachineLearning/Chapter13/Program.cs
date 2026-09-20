@@ -1,6 +1,7 @@
 namespace MachineLearning.Chapter13;
 
 using System.Globalization;
+using MachineLearning.Chapter07;
 using MachineLearning.Dataset;
 
 /// <summary>ボストンの住宅価格のデータを主成分分析し、寄与率と主成分への影響が大きい列を表示する。</summary>
@@ -35,7 +36,22 @@ public static class Program
                 $"第 {i + 1} 主成分で影響の大きい列: "
                 + string.Join(", ", loadings.Select(pair => $"{pair.Key} {Format(pair.Value, 3)}")));
         }
+
+        var mine = Pca.Transform(Pca.Fit(ComponentsToExplain, table.X), table.X);
+        var library = MlNetPca.Project(ComponentsToExplain, false, 0, table.X);
+        output.WriteLine(
+            $"ML.NET の射影と一致した件数（第 {ComponentsToExplain} 主成分まで、符号を除く、許容誤差 {Tolerance}）: "
+            + $"{CountAgreed(mine, library)}/{mine.RowCount}");
     }
+
+    /// <summary>ML.NET の射影と一致したとみなす差の上限。ML.NET は float32 で計算する。</summary>
+    private const double Tolerance = 1e-3;
+
+    /// <summary>自作と ML.NET の主成分の座標が、符号を除いて一致した件数。</summary>
+    private static int CountAgreed(Matrix mine, Matrix library) =>
+        Enumerable.Range(0, mine.RowCount).Count(row =>
+            Enumerable.Range(0, mine.ColumnCount).All(pc =>
+                Math.Abs(Math.Abs(mine[row, pc]) - Math.Abs(library[row, pc])) <= Tolerance));
 
     private static string Format(double value, int digits) =>
         value.ToString($"F{digits}", CultureInfo.InvariantCulture);

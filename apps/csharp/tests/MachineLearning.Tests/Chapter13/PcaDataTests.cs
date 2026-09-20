@@ -51,7 +51,9 @@ public class PcaDataTests
                 "寄与率: PC1 0.4110, PC2 0.1448, PC3 0.1019, PC4 0.0645, PC5 0.0623, PC6 0.0581",
                 "累積寄与率が 0.8 に届く主成分の数: 6（累積寄与率 0.8427）",
                 "第 1 主成分で影響の大きい列: INDUS 0.359, NOX 0.350, TAX 0.328",
-                "第 2 主成分で影響の大きい列: PRICE 0.444, CRIME_low 0.423, RM 0.405") + Environment.NewLine,
+                "第 2 主成分で影響の大きい列: PRICE 0.444, CRIME_low 0.423, RM 0.405",
+                "ML.NET の射影と一致した件数（第 2 主成分まで、符号を除く、許容誤差 0.001）: 100/100")
+            + Environment.NewLine,
             output.ToString());
     }
 
