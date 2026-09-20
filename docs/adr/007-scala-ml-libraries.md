@@ -84,6 +84,8 @@ ADR 002（Kotlin 版）の方針をそのまま使う。Tribuo は同じ 4.3.2 �
 | 13 | なし | PCA のモジュールが無いので、Tribuo の固有値分解を使った自作を最終実装とする |
 | 14 | Tribuo の `KMeansTrainer` | 初期中心を渡せないので、SSE の大きさを比べる |
 
+| 15 | 予測 API には `http4s-ember-server`・`http4s-dsl`・`http4s-circe`・`circe-generic`・`circe-parser` の追加が要る。`UnprocessableEntity` は 0.23.31 で非推奨になっており、`-Xfatal-warnings` があるので `UnprocessableContent` に直す必要がある。Scala には `Either` があるので、F# 版の `Result` と同じ形でドメインを書ける（Java 版は検査例外、C# 版は自作の型）。統合テストは `HttpRoutes` を直接呼べるので、テスト用のサーバーを立てなくてよい |
+
 ### 検討した代替案
 
 | 代替案 | 採用しなかった理由 |
