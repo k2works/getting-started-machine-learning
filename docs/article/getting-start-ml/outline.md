@@ -1430,6 +1430,34 @@ B44（Rust のウォーキングスケルトン）は 2026-09-20 に完了した
 - **cargo-llvm-cov は rustup の llvm-tools-preview を探す。** Nix の環境には無いので、`LLVM_COV`・`LLVM_PROFDATA` に nixpkgs の LLVM を教える 2 行を `ops/nix/environments/rust/shell.nix` に足した
 - Cargo のテストはパッケージのルートで走るので、既定の相対パス `../data/sukkiri-ml` が届く（Go 版はパッケージのディレクトリで走るため `ML_DATA_DIR` が要った）
 
+### B45〜B48 の進め方（2026-09-20、目標「Rust 執筆完成」による）
+
+2026-09-20 に人から「Rust 執筆完成」を目標として受け取ったので、B44 の完了後から B48 までを続けて進める。割り当ては Go 版（B40〜B43）と同じ形にする。
+
+| 範囲 | 担当 | 前提 |
+| :--- | :--- | :--- |
+| 第 2〜3 章の実装 | 親 | — |
+| 第 2〜3 章の記事 | サブエージェント | 第 2〜3 章の実装 |
+| 第 4〜6 章（実装と記事） | サブエージェント | 第 1〜3 章 |
+| 第 7〜8 章（実装と記事） | サブエージェント | 第 1〜3 章 |
+| 第 9〜10 章（実装と記事） | サブエージェント | 第 1〜3 章 |
+| 第 11〜12 章・第 13〜14 章（実装と記事） | サブエージェント | 第 7 章・第 9 章の取り込み後 |
+| 第 15 章 | 親 | 第 7・8 章 |
+| 索引・nav・執筆計画・ログ・ADR 009 の統合 | 親 | 各章の取り込み |
+
+#### データの表し方と決定木（第 2 章以降のすべての章に効く判断）
+
+| 対象 | 表し方 | 理由 |
+| :--- | :--- | :--- |
+| 読み込んだ行 | `struct Row { cells: HashMap<String, String> }`。`number(column) -> Result<Option<f64>>`（空欄なら `None`）と `text(column) -> Result<&str>` で読み出す | Rust には `Option` があるので、Go 版の「値と ok」より素直に書ける |
+| 表 | `struct Table { columns: Vec<String>, rows: Vec<Row> }` | 列の順を保つ |
+| 補完した後の特徴量 | `struct Features { columns: Vec<String>, values: Vec<f64> }`。`#[derive(PartialEq)]` でそのまま比べられる | 欠損値を持てない型として分ける。Go 版の `reflect.DeepEqual` は要らない |
+| 分割の結果 | `struct TrainTestSplit<X, T> { x_train, x_test: Vec<X>, t_train, t_test: Vec<T> }` | ジェネリクス。正解ラベルが文字列でも数値でも使える |
+| 決定木 | `enum Tree { Leaf { label: String }, Node { split: Split, left: Box<Tree>, right: Box<Tree> } }` | Rust には判別共用体があるので、Go 版のようなインターフェースの工夫は要らない。`match` の網羅性はコンパイラが検査する。再帰する型なので `Box` で包む |
+| linfa への受け渡し | `Dataset::new(Array2<f64>, Array1<L>)`。ndarray 0.16・rand 0.8 系にそろえる | 版を混ぜると「同じ名前の別の型」になる |
+
+乱数は `rand` 0.8 の `StdRng::seed_from_u64(seed)` と Fisher-Yates を使う。`StdRng::seed_from_u64(0)` の並びは `[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]` で、Java 版・Go 版とは違う。各章で数値がほかの言語版と一致するかを確かめ、一致しない場合は理由を記事に書く。
+
 ### 承認が必要な事項（Rust）
 
 次の点を確認した（2026-09-20 承認）。
