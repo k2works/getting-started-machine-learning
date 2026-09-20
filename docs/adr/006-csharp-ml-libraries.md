@@ -33,6 +33,8 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | `dotnet format` | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると崩れた整形を `WHITESPACE` として指摘する | 同上 |
 | `dotnet test`（手元の macOS） | サーバーモードで起動したテストを 0 件と判定して終了コード 5 で終わる。F# 版（`apps/fsharp/`）でも同じなので C# 版の設定の問題ではない。CI（Linux）では F# 版が `dotnet test` で成功している | 手元・Nix の SDK 10.0.101 で実行し、F# 版と比較 |
 | テストの実行（B29） | 手元は `dotnet run --project tests/MachineLearning.Tests/MachineLearning.Tests.csproj`、CI は `dotnet test` を使う。テストプロジェクトには `OutputType` Exe・`IsTestProject`・`<Using Include="Xunit" />` が要る | 実行して確認 |
+| 検査が効いているか（B29） | わざと違反を入れたファイルで、ビルドが CS0219（使っていない変数）・CA1822（static にできる）・IDE0055（コードスタイル）をエラーにし、`dotnet format --verify-no-changes` が `WHITESPACE` を指摘した |
+| カバレッジ（B29） | `--coverlet --coverlet-include '[MachineLearning]*' --coverlet-output-format cobertura` で cobertura の XML が出る（F# 版の CI と同じオプション） |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 
