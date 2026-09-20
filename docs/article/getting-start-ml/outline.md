@@ -809,7 +809,7 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 | B27（完了） | Java | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
 | B28（完了） | Java | 第 15 章 | Java 版の全章完了。Python 版と節構成がそろっている |
 | B29〜B33（完了） | C# | B24〜B28 と同じ区切り（ADR 006、`apps/csharp/`） | C# 版の全章完了 |
-| B34〜B38 | Scala | 同上（ADR 007、`apps/scala/`） | Scala 版の全章完了 |
+| B34〜B38（完了） | Scala | 同上（ADR 007、`apps/scala/`） | Scala 版の全章完了 |
 | B39〜B43 | Go | 同上（ADR 008、`apps/go/`） | Go 版の全章完了 |
 | B44〜B48 | Rust | 同上（ADR 009、`apps/rust/`） | Rust 版の全章完了 |
 | B49 | 統合解説 | `integration/` の各章と索引に第 2 波の 5 言語を加える | 統合解説の各表で 9 言語の行・列がそろっている |
@@ -1236,6 +1236,17 @@ Tribuo の各アルゴリズムの振る舞いは、Kotlin 版（ADR 002）・Ja
 | 索引・nav・執筆計画・ログ・ADR 007 の統合 | 親 | 各章の取り込み |
 
 分割は Java 版と同じ乱数・同じ手順なので、各章の数値が Java 版と一致するかを確かめ、一致しない場合は理由を記事に書く。サブエージェントは `build.sbt`・`project/`・`.scalafmt.conf`・`mkdocs.yml`・索引・Scala 版トップ・執筆計画・`docs/log.md`・ADR を変更せず、依存の追加や ADR に書くべき結果は報告に書く。
+
+### Scala 版の完了（2026-09-20）
+
+B34〜B38 は 2026-09-20 に完了し、Scala 版の全 15 章がそろった。親が第 1〜3 章・第 10 章・第 15 章の実装を書き、記事と第 4〜9 章・第 11〜14 章は worktree のサブエージェントで並行して進めた。テストは 306 件で、学習データが無い環境では 35 件がスキップ（ScalaTest の canceled）になる。
+
+- 機械学習のライブラリは、Scala 3 向けの Smile がすべて GPL-3.0 だったため Tribuo に改めた（人の承認による）。JVM の 3 言語（Kotlin・Java・Scala）が同じ Tribuo を使う形になった
+- 分割を Java 版と同じ `java.util.Random` + Fisher-Yates にしたので、訓練データとテストデータに入る行が Java 版と一致する。その結果、第 2・3・7・9・10・11・12・13・14・15 章のすべての数値が Java 版と一致した（第 15 章の API が返す興行収入は小数点以下まで同じ）
+- `Features` の値を `Vector` で持つと、case class の等価判定がそのまま値の比較になる。Java 版・C# 版で必要だった「配列を包んで equals を書く」工夫が要らない
+- `Either` があるので、第 15 章のドメインは F# 版の `Result` と同じ形で書けた（Java 版は検査例外、C# 版は自作の型）
+- 第 8 章では、Java のシリアライズが Scala の不変コレクションと `ObjectInputFilter` の組み合わせで使えないことが分かり、タブ区切りのテキストで保存する形にした
+- 検査は `-Wunused:all`・`-Wvalue-discard`・`-Xfatal-warnings`・scalafmt・scoverage。`-Wvalue-discard` は戻り値の型が `Unit` の定義の中でだけ働く
 
 ## リスクと対応
 
