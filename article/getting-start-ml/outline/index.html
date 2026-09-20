@@ -1265,6 +1265,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/006-csharp-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    006 C# 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2391,6 +2426,78 @@
     <span class="md-ellipsis">
       
         Java 版の完了（2026-09-20）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C# 版執筆計画
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="C# 版執筆計画">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        確認した事実（2026-09-20 時点）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ライブラリ方針（ADR 006 で確定する案）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提整備（C#）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b29-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B29 のステップ計画（C# のウォーキングスケルトン）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        承認が必要な事項（C#）
       
     </span>
   </a>
@@ -10659,6 +10766,226 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <li>分割に <code>java.util.Random</code> を使うので、訓練データとテストデータの行は Kotlin 版と一致しない。その結果、第 9 章の交互作用の項・第 12 章のリッジ回帰・第 8 章のクラスの重み付けの結論が Kotlin 版と分かれた章がある。記事ではそれを、分割しだいで結論が変わる例として扱った</li>
 <li>第 15 章の統合テストが、6 つのサブエージェントが同時に Gradle を動かしていた間に 1 回だけ 503 のはずが 400 で失敗した。その後の単独実行 3 回と全体の <code>check</code> 5 回では再現せず、原因は分かっていない</li>
 <li><code>verifyNoBomCharacter</code> タスクを <code>check</code> に加え、ソースに BOM の文字がそのまま入ると失敗するようにした。Kotlin CI のキャッシュのキーの接頭辞を <code>gradle-kotlin-</code> にして、Java CI と分けた</li>
+</ul>
+<h2 id="c">C# 版執筆計画<a class="headerlink" href="#c" title="Permanent link">&para;</a></h2>
+<p>C# は第 2 波の 2 番目の言語で、F# 版の実装を対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。F# 版と同じ .NET・ML.NET・xUnit v3 を使うので、違いは言語の書き方と API の見え方に絞られる。対比の軸は次の 3 つとする。</p>
+<ul>
+<li><strong>型</strong>: F# の判別共用体とパターンマッチに対し、C# は record と sealed interface、<code>switch</code> 式のパターンマッチで表す。網羅性の検査の効き方（C# は既定では警告）を比べる。欠損値は F# の <code>option</code> に対し null 許容参照型（NRT）で表す</li>
+<li><strong>データの表現</strong>: F# の型プロバイダ（<code>CsvProvider</code>）に対し、C# は record のリストと LINQ で表す。Java 版と同じく、列名で引く自作の表を使うかは B29 で決める</li>
+<li><strong>ライブラリ</strong>: ML.NET は C# 向けの API（<code>IDataView</code>・可変なクラス・属性による列の対応づけ）なので、F# 版が書いた「型の橋渡し」が C# では不要になる箇所を示す</li>
+</ul>
+<h3 id="2026-09-20">確認した事実（2026-09-20 時点）<a class="headerlink" href="#2026-09-20" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>確認内容</th>
+<th>確認方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ローカル環境</td>
+<td>.NET SDK は 8.0.416・9.0.308・10.0.100。F# 版の <code>global.json</code> は 10.0.101 を <code>rollForward: latestPatch</code> で指定しているので、手元の 10.0.100 では解決できない（F# 版は Nix の 10.0.101 で動かしている）</td>
+<td><code>dotnet --list-sdks</code>、<code>global.json</code></td>
+</tr>
+<tr>
+<td>Nix 環境</td>
+<td><code>nix develop .#dotnet</code> の .NET SDK は 10.0.101。Java 版と同じく CI もこの環境で動かす</td>
+<td><code>dotnet --version</code></td>
+</tr>
+<tr>
+<td>F# 版の構成</td>
+<td>ソリューション、<code>Directory.Build.props</code>（<code>TargetFramework</code> net10.0、<code>TreatWarningsAsErrors</code>、<code>RestorePackagesWithLockFile</code>）、<code>Directory.Packages.props</code>（中央パッケージ管理）、<code>.config/dotnet-tools.json</code>（fantomas・dotnet-fsharplint）、<code>.editorconfig</code></td>
+<td>ファイルを読んだ</td>
+</tr>
+<tr>
+<td>ライブラリの最新版</td>
+<td>Microsoft.ML 5.0.0、Microsoft.Data.Analysis 0.23.0（0.24.0 はプレビュー）、xunit.v3 4.0.1、coverlet.MTP 10.0.1、Roslynator.Analyzers 5.0.0、SonarAnalyzer.CSharp 10.34.0.3385、Microsoft.CodeAnalysis.NetAnalyzers 10.0.401、StyleCop.Analyzers は安定版が 1.1.118 で 1.2.0 はベータ</td>
+<td>NuGet</td>
+</tr>
+<tr>
+<td>実装の置き場所</td>
+<td><code>apps/dotnet/</code> は空になっていた（F# 版を <code>apps/fsharp/</code> に移した後に残っていたビルドの中間ファイル）。C# 版は <code>apps/csharp/</code> に置く（2026-09-20、人の指示による。F# 版の <code>apps/fsharp/</code> と対になる）</td>
+<td>ファイルを確認</td>
+</tr>
+</tbody>
+</table>
+<p>| ライセンス | Microsoft.ML 5.0.0・Microsoft.Data.Analysis 0.23.0・coverlet.MTP 10.0.1 は MIT、xunit.v3 4.0.1 は Apache-2.0 | NuGet のカタログ |
+| Microsoft.Data.Analysis の保守（B29） | 安定版の最新 0.23.0 は 2025-11-11 の公開で、以後はプレビュー（0.24.0-preview）だけ。1.0 に達していない | NuGet のカタログ |
+| <code>global.json</code> の版（B29） | <code>version</code> を 10.0.100・<code>rollForward</code> を <code>latestPatch</code> にすると、手元（10.0.100）でも Nix（10.0.101）でも解決できた。F# 版は 10.0.101 固定なので手元では解決できない | 使い捨てのプロジェクトで <code>dotnet --version</code> |
+| アナライザーの水準（B29） | <code>AnalysisMode</code> を <code>All</code> にすると、公開メソッドの引数の null 検査（CA1062）まで求められて記事のコードが読みにくくなる。<code>Recommended</code> では CA1304・CA1311（カルチャの指定）・CA1822（static にできる）などが出る。<code>TreatWarningsAsErrors</code> により、コンパイラの警告（CS0219 など）もエラーになる | 使い捨てのプロジェクトでビルド |
+| <code>dotnet format</code>（B29） | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると <code>WHITESPACE</code> の指摘が出る。<code>.editorconfig</code> を置いて規則を明示する | 同上 |
+| <code>dotnet test</code>（B29） | 手元の macOS では、<code>dotnet test</code> が Microsoft.Testing.Platform のサーバーモード（<code>--server dotnettestcli</code>）で起動したテストを 0 件と判定して終了コード 5 で終わる。同じことが F# 版（<code>apps/fsharp/</code>）でも起きるので、C# 版の設定の問題ではない。CI（Linux）では F# 版が <code>dotnet test</code> で成功している。手元では <code>dotnet run --project tests/...</code> で実行し、CI は <code>dotnet test</code> のままにする | 手元と Nix（SDK 10.0.101）の両方で実行、F# 版と比較 |</p>
+<p>ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章で確かめる。</p>
+<h3 id="adr-006">ライブラリ方針（ADR 006 で確定する案）<a class="headerlink" href="#adr-006" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>第一候補</th>
+<th>理由</th>
+<th>代替案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>言語・実行環境</td>
+<td>C#（.NET SDK、<code>net10.0</code>）。<code>global.json</code> は 10.0.100 + <code>rollForward: latestPatch</code> にして、手元と Nix の両方で動くようにする</td>
+<td>F# 版と同じ環境にそろえる</td>
+<td>.NET 8</td>
+</tr>
+<tr>
+<td>テスト・カバレッジ</td>
+<td>xUnit v3（Microsoft.Testing.Platform）+ coverlet.MTP</td>
+<td>F# 版と同じ</td>
+<td>NUnit、MSTest</td>
+</tr>
+<tr>
+<td>整形</td>
+<td><code>dotnet format</code>（SDK 同梱）と <code>.editorconfig</code></td>
+<td>追加の依存が要らない</td>
+<td>CSharpier</td>
+</tr>
+<tr>
+<td>静的解析</td>
+<td>.NET アナライザー（<code>AnalysisMode: Recommended</code>）+ 警告をエラーにする（<code>TreatWarningsAsErrors</code>）。追加のアナライザーは使わない（B29 で判断）</td>
+<td>SDK 同梱で、C# の標準的な解析</td>
+<td>Roslynator、SonarAnalyzer.CSharp、StyleCop（安定版が 1.1.118 で古い）</td>
+</tr>
+<tr>
+<td>データの表現</td>
+<td>record のリストと LINQ。列名で引く表が要るかは B29 で決める</td>
+<td>Java 版と同じ考え方で、ライブラリを増やさない</td>
+<td>Microsoft.Data.Analysis の <code>DataFrame</code>（0.x）</td>
+</tr>
+<tr>
+<td>乱数</td>
+<td><code>System.Random(seed)</code></td>
+<td>F# 版と同じ。分割の結果も F# 版と一致するはず（B29 で確かめる）</td>
+<td>自作</td>
+</tr>
+<tr>
+<td>機械学習</td>
+<td>ML.NET（Microsoft.ML・Microsoft.ML.FastTree）</td>
+<td>.NET の標準的な機械学習ライブラリ。F# 版で癖を確かめてある（ADR 004）</td>
+<td>自作のみ</td>
+</tr>
+<tr>
+<td>API</td>
+<td>ASP.NET Core Minimal API と <code>Microsoft.AspNetCore.Mvc.Testing</code>（または <code>TestHost</code>）</td>
+<td>「言語ごとのバリエーション」で挙げた候補</td>
+<td>Giraffe（F# 版）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="c_1">前提整備（C#）<a class="headerlink" href="#c_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nix 環境</td>
+<td><code>nix develop .#dotnet</code> で .NET SDK 10.0.101 が使えることを CI で確かめる（F# 版と共用）</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>アプリ雛形</td>
+<td><code>apps/csharp/</code>（ソリューション、C# のライブラリとテストのプロジェクト、<code>Directory.Build.props</code>・<code>Directory.Packages.props</code>・<code>global.json</code>・<code>.editorconfig</code>・<code>.gitignore</code>）にテストが 1 本通る最小構成</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>学習データ</td>
+<td><code>ML_DATA_DIR</code>（既定 <code>../data/sukkiri-ml</code>）で参照する。実データのテストは xUnit v3 の <code>Assert.SkipUnless</code> でデータが無ければスキップする</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>静的解析</td>
+<td><code>dotnet format --verify-no-changes</code>・アナライザー・<code>TreatWarningsAsErrors</code> を検査に組み込み、わざと違反を入れて失敗することを確かめる</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>ライブラリ選定</td>
+<td>ADR 006（C# 版のライブラリ）を作成する</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>CI</td>
+<td><code>.github/workflows/csharp-ci.yml</code>（Nix → <code>dotnet restore --locked-mode</code> → 整形の確認・ビルド・テスト・カバレッジの表示）。NuGet のキャッシュを使う</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>タスク</td>
+<td><code>ops/scripts/apps.js</code> に <code>csharp</code>（<code>apps/csharp/</code>）を加え、<code>apps:check:csharp</code> で手元の検査を実行できるようにする</td>
+<td>未着手</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b29-c">B29 のステップ計画（C# のウォーキングスケルトン）<a class="headerlink" href="#b29-c" title="Permanent link">&para;</a></h3>
+<p>各ステップは TDD で進め、ステップごとにコミットする。</p>
+<table>
+<thead>
+<tr>
+<th>ステップ</th>
+<th>内容</th>
+<th>完了条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ライブラリの事実確認：ライセンス、Microsoft.Data.Analysis の保守状況、アナライザーの選定（SDK 同梱だけで足りるか）、<code>global.json</code> の版をどうするか（手元の 10.0.100 と Nix の 10.0.101 の差の扱い）。結果を本節の「確認した事実」に書き足す</td>
+<td>「未検証」の項目が無くなる</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ADR 006 を書く（章ごとの置き換えの範囲は ADR 004（F# 版）を起点にする）</td>
+<td>ADR 006 が <code>docs/adr/</code> と索引・nav にある</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>apps/csharp/</code> の雛形：ソリューション、ライブラリとテストのプロジェクト、中央パッケージ管理、<code>packages.lock.json</code>、最初のテストが 1 本通る</td>
+<td>手元と <code>nix develop .#dotnet</code> の両方で <code>dotnet test</code> が成功する</td>
+</tr>
+<tr>
+<td>4</td>
+<td>整形・静的解析・カバレッジ：<code>dotnet format</code>・アナライザー・<code>TreatWarningsAsErrors</code>・coverlet を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・F# 版の教訓）</td>
+<td>違反を入れると検査が失敗し、戻すと成功する</td>
+</tr>
+<tr>
+<td>5</td>
+<td>第 1 章の実装：Python 版・Java 版と同じ TODO リストを TDD で進める。実データのテストは <code>Assert.SkipUnless</code> でスキップする</td>
+<td>データありで全テストが通り、データなしではスキップされる。正解率が F# 版・Java 版と一致する</td>
+</tr>
+<tr>
+<td>6</td>
+<td>記事：第 1 章、C# 版トップ（<code>csharp/index.md</code>）、シリーズ索引の言語一覧、<code>mkdocs.yml</code> の nav</td>
+<td>ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する</td>
+</tr>
+<tr>
+<td>7</td>
+<td>CI とタスク：<code>.github/workflows/csharp-ci.yml</code>、<code>ops/scripts/apps.js</code> への <code>csharp</code> の追加</td>
+<td>push 後に C# CI がグリーン。<code>apps:check:csharp</code> が手元で成功する</td>
+</tr>
+<tr>
+<td>8</td>
+<td>仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、<code>docs/log.md</code> の更新</td>
+<td>検査に指摘が無く、<code>okf:check</code> が ERROR 0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="c_2">承認が必要な事項（C#）<a class="headerlink" href="#c_2" title="Permanent link">&para;</a></h3>
+<p>次の点を確認した（2026-09-20 承認）。</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> C# 版の対比の軸（型・データの表現・ライブラリ）と、データフレームのライブラリ（Microsoft.Data.Analysis）を使わずに record と LINQ で表すこと</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> ライブラリの第一候補（xUnit v3・coverlet.MTP・<code>dotnet format</code>・.NET アナライザー・ML.NET・ASP.NET Core Minimal API）を ADR 006 で確定すること</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 実装を <code>apps/csharp/</code>（2026-09-20 に <code>apps/dotnet/</code> から変更。人の指示による）、記事を <code>docs/article/getting-start-ml/csharp/</code> に置き、.NET SDK の版を F# 版にそろえること</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B29 のステップ 1〜8</li>
 </ul>
 <h2 id="_23">リスクと対応<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h2>
 <table>
