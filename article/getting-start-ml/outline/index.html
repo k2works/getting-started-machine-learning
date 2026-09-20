@@ -1335,6 +1335,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/008-go-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    008 Go 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2710,6 +2745,78 @@
     <span class="md-ellipsis">
       
         Scala 版の完了（2026-09-20）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go 版執筆計画
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Go 版執筆計画">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-20_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        確認した事実（2026-09-20 時点）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-008" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ライブラリ方針（ADR 008 で確定する案）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提整備（Go）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b39-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B39 のステップ計画（Go のウォーキングスケルトン）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        承認が必要な事項（Go）
       
     </span>
   </a>
@@ -9808,7 +9915,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <td>go</td>
 <td>Go</td>
 <td>go test</td>
-<td>gonum</td>
+<td>gonum（「Go 版執筆計画」を参照。決定木・K-means は自作）</td>
 <td>ライブラリが限定的なので自作の比重が大きい</td>
 </tr>
 <tr>
@@ -12889,6 +12996,229 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <li><code>Either</code> があるので、第 15 章のドメインは F# 版の <code>Result</code> と同じ形で書けた（Java 版は検査例外、C# 版は自作の型）</li>
 <li>第 8 章では、Java のシリアライズが Scala の不変コレクションと <code>ObjectInputFilter</code> の組み合わせで使えないことが分かり、タブ区切りのテキストで保存する形にした</li>
 <li>検査は <code>-Wunused:all</code>・<code>-Wvalue-discard</code>・<code>-Xfatal-warnings</code>・scalafmt・scoverage。<code>-Wvalue-discard</code> は戻り値の型が <code>Unit</code> の定義の中でだけ働く</li>
+</ul>
+<h2 id="go">Go 版執筆計画<a class="headerlink" href="#go" title="Permanent link">&para;</a></h2>
+<p>Go は第 2 波の 4 番目の言語で、TypeScript 版（ライブラリが限られる環境での自作）を進め方の対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。対比の軸は次の 3 つとする。</p>
+<ul>
+<li><strong>型</strong>: 構造体とインターフェースで表す。ジェネリクス（Go 1.18 以降）を分割や評価の関数で使う。判別共用体・sealed interface に当たるものが無いので、決定木は「葉と節を 1 つの構造体で表す」「インターフェースと型スイッチで表す」のどちらかを選び、その判断を記事に書く</li>
+<li><strong>エラーの扱い</strong>: 例外が無く、<code>error</code> を戻り値で返す。ほかの言語版が例外・<code>Result</code>・<code>Either</code> で表したものを、Go では多値返却でどう表すかを示す</li>
+<li><strong>ライブラリ</strong>: gonum には線形回帰・共分散行列・PCA はあるが、決定木・ランダムフォレスト・K-means は無い。自作の比重が大きくなる点を TypeScript 版（ml.js が未成熟）と対比する</li>
+</ul>
+<h3 id="2026-09-20_2">確認した事実（2026-09-20 時点）<a class="headerlink" href="#2026-09-20_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>確認内容</th>
+<th>確認方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nix 環境</td>
+<td><code>ops/nix/environments/go/shell.nix</code> は <code>go</code>・<code>gopls</code>・<code>gotools</code>・<code>delve</code>・<code>golangci-lint</code>。版は Go 1.25.5、golangci-lint 2.8.0、gopls 0.21.0</td>
+<td><code>nix eval</code>、<code>nix develop .#go</code></td>
+</tr>
+<tr>
+<td>ローカル環境</td>
+<td>Go 1.26.5（Nix の 1.25.5 と違う。<code>go.mod</code> の <code>go</code> 指令は 1.25 にして、どちらでも動くようにする）</td>
+<td><code>go version</code></td>
+</tr>
+<tr>
+<td>gonum</td>
+<td>最新は v0.17.0（2025-12-29）、BSD 3 条項。<code>stat</code> に <code>LinearRegression</code>・<code>CovarianceMatrix</code>・<code>PC</code>（主成分分析）・<code>ROC</code> がある。決定木・ランダムフォレスト・K-means・ロジスティック回帰は無い（<code>stat</code> の一覧で確認）。行列は <code>mat</code> パッケージ</td>
+<td>Go module proxy とモジュールキャッシュ</td>
+</tr>
+<tr>
+<td>GoLearn</td>
+<td>最新が 2022-12-28 のコミット（タグ無し）で、3 年以上更新されていない</td>
+<td>Go module proxy</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>標準の <code>testing</code> パッケージ。表駆動テストが慣習。testify（MIT）は最新 v1.12.1</td>
+<td>標準ライブラリ、Go module proxy</td>
+</tr>
+</tbody>
+</table>
+<p>| gonum の関数（B39） | <code>stat.LinearRegression</code> は単回帰だけ（切片と傾きを返す）。重回帰は <code>mat</code> で正規方程式を解くか <code>optimize</code> を使う。<code>stat.PC</code> は <code>PrincipalComponents</code> で成功可否を返し、<code>VarsTo</code> で分散、<code>VectorsTo</code> で固有ベクトルの行列を取れる（寄与率は分散から自分で求める） | 使い捨てのプロジェクトで実行 |
+| 静的解析（B39） | わざと崩したファイルで、<code>gofmt -l</code> がファイル名を、<code>go vet</code> が「declared and not used」を、<code>golangci-lint run</code> が同じ指摘を typecheck として報告した。<code>go vet</code> と <code>golangci-lint</code> の既定は重なる部分があるので、CI では両方を走らせるかを B39 で決める | 同上 |</p>
+<p>gonum に無いアルゴリズム（決定木・ランダムフォレスト・K-means・ロジスティック回帰）は、ほかの言語版の自作の実装を Go に書き直して最終実装とする。</p>
+<h3 id="adr-008">ライブラリ方針（ADR 008 で確定する案）<a class="headerlink" href="#adr-008" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>第一候補</th>
+<th>理由</th>
+<th>代替案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>言語・ビルド</td>
+<td>Go 1.25（<code>go.mod</code> の <code>go</code> 指令）。ビルドは <code>go build</code>、依存は Go Modules</td>
+<td>Nix の版に合わせ、手元の 1.26 でも動く</td>
+<td>—</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>標準の <code>testing</code> と表駆動テスト</td>
+<td>Go の標準的な書き方。依存を増やさない</td>
+<td>testify</td>
+</tr>
+<tr>
+<td>整形</td>
+<td><code>gofmt</code>（<code>gofmt -l</code> で検査）</td>
+<td>標準</td>
+<td>gofumpt</td>
+</tr>
+<tr>
+<td>静的解析</td>
+<td><code>go vet</code> と <code>golangci-lint</code>（既定の検査器）</td>
+<td>Nix の環境に入っている</td>
+<td>staticcheck 単体</td>
+</tr>
+<tr>
+<td>カバレッジ</td>
+<td><code>go test -cover</code>（<code>-coverprofile</code> で詳細）</td>
+<td>標準</td>
+<td>—</td>
+</tr>
+<tr>
+<td>データの表現</td>
+<td>構造体と <code>map[string]string</code>（セルの文字列）。データフレームのライブラリは使わない</td>
+<td>ほかの言語版と同じ考え方</td>
+<td>gota（保守が緩やか）</td>
+</tr>
+<tr>
+<td>乱数</td>
+<td><code>math/rand</code> の <code>rand.New(rand.NewSource(seed))</code> と Fisher-Yates</td>
+<td>シードを指定できる。Java 版と一致するかは B39 で確かめる（一致しない見込み）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>機械学習</td>
+<td>gonum v0.17.0（線形回帰・共分散行列・PCA）。決定木・ランダムフォレスト・K-means・ロジスティック回帰は自作を最終実装にする</td>
+<td>BSD 3 条項で、Go で標準的な数値計算ライブラリ。GoLearn は更新が止まっている</td>
+<td>GoLearn（採らない）</td>
+</tr>
+<tr>
+<td>API</td>
+<td>標準の <code>net/http</code>（Go 1.22 以降のルーティング）</td>
+<td>「言語ごとのバリエーション」で挙げた候補。依存を増やさない</td>
+<td>Echo、Gin</td>
+</tr>
+</tbody>
+</table>
+<h3 id="go_1">前提整備（Go）<a class="headerlink" href="#go_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nix 環境</td>
+<td><code>nix develop .#go</code> で Go・golangci-lint が使えることを CI で確かめる</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>アプリ雛形</td>
+<td><code>apps/go/</code>（<code>go.mod</code>・<code>cmd/</code>・<code>internal/</code>・<code>.gitignore</code>）にテストが 1 本通る最小構成</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>学習データ</td>
+<td><code>ML_DATA_DIR</code>（既定 <code>../data/sukkiri-ml</code>）で参照する。実データのテストは <code>t.Skip</code> でデータが無ければスキップする</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>静的解析</td>
+<td><code>gofmt -l</code>・<code>go vet</code>・<code>golangci-lint run</code> を検査に組み込み、わざと違反を入れて失敗することを確かめる</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>ライブラリ選定</td>
+<td>ADR 008（Go 版のライブラリ）を作成する</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>CI</td>
+<td><code>.github/workflows/go-ci.yml</code>（Nix → <code>gofmt -l</code> → <code>go vet</code> → <code>golangci-lint run</code> → <code>go test -cover</code>）。モジュールのキャッシュを使う</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>タスク</td>
+<td><code>ops/scripts/apps.js</code> に <code>go</code> を加え、<code>apps:check:go</code> で手元の検査を実行できるようにする</td>
+<td>未着手</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b39-go">B39 のステップ計画（Go のウォーキングスケルトン）<a class="headerlink" href="#b39-go" title="Permanent link">&para;</a></h3>
+<p>各ステップは TDD で進め、ステップごとにコミットする。</p>
+<table>
+<thead>
+<tr>
+<th>ステップ</th>
+<th>内容</th>
+<th>完了条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ライブラリの事実確認：gonum の <code>LinearRegression</code>・<code>PC</code> で何ができるか（単回帰か重回帰か、寄与率を取れるか）、<code>golangci-lint</code> の既定の指摘、<code>go vet</code> との重なり、ライセンス。結果を本節の「確認した事実」に書き足す</td>
+<td>「未検証」の項目が無くなる</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ADR 008 を書く（章ごとの置き換えの範囲は、gonum に無いものを自作と決める）</td>
+<td>ADR 008 が <code>docs/adr/</code> と索引・nav にある</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>apps/go/</code> の雛形：<code>go.mod</code>、<code>internal/</code> のパッケージ構成、最初のテストが 1 本通る</td>
+<td>手元と <code>nix develop .#go</code> の両方で <code>go test ./...</code> が成功する</td>
+</tr>
+<tr>
+<td>4</td>
+<td>整形・静的解析・カバレッジ：<code>gofmt -l</code>・<code>go vet</code>・<code>golangci-lint run</code>・<code>go test -cover</code> を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・C# 版・Scala 版の教訓）</td>
+<td>違反を入れると検査が失敗し、戻すと成功する</td>
+</tr>
+<tr>
+<td>5</td>
+<td>第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストは <code>t.Skip</code> でスキップする。エラーは <code>error</code> の戻り値で返す</td>
+<td>データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する</td>
+</tr>
+<tr>
+<td>6</td>
+<td>記事：第 1 章、Go 版トップ（<code>go/index.md</code>）、シリーズ索引の言語一覧、<code>mkdocs.yml</code> の nav</td>
+<td>ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する</td>
+</tr>
+<tr>
+<td>7</td>
+<td>CI とタスク：<code>.github/workflows/go-ci.yml</code>、<code>ops/scripts/apps.js</code> への <code>go</code> の追加</td>
+<td>push 後に Go CI がグリーン。<code>apps:check:go</code> が手元で成功する</td>
+</tr>
+<tr>
+<td>8</td>
+<td>仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、<code>docs/log.md</code> の更新</td>
+<td>検査に指摘が無く、<code>okf:check</code> が ERROR 0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="go_2">承認が必要な事項（Go）<a class="headerlink" href="#go_2" title="Permanent link">&para;</a></h3>
+<p>次の点を確認した（2026-09-20 承認）。</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Go 版の対比の軸（型・エラーの扱い・ライブラリ）と、データフレームのライブラリを使わずに構造体と map で表すこと</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 機械学習は gonum（線形回帰・共分散行列・PCA）だけを使い、決定木・ランダムフォレスト・K-means・ロジスティック回帰は自作を最終実装とすること（GoLearn は更新が止まっているので使わない）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> ライブラリの第一候補（標準の testing・gofmt・go vet・golangci-lint・gonum・net/http）を ADR 008 で確定すること</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 実装を <code>apps/go/</code>、記事を <code>docs/article/getting-start-ml/go/</code> に置くこと</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B39 のステップ 1〜8</li>
 </ul>
 <h2 id="_25">リスクと対応<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h2>
 <table>
