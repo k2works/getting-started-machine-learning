@@ -48,7 +48,7 @@ const APPS = [
     tools: [{ cmd: 'go', version: 'go version' }],
     setup: 'go mod download',
     // CI（.github/workflows/go-ci.yml）と同じ順に、整形・vet・lint・テストを検査する
-    check: 'test -z "$(gofmt -l .)" && go vet ./... && golangci-lint run && go test ./... -cover',
+    check: 'test -z "$(gofmt -l .)" || (gofmt -l . && exit 1) && go vet ./... && golangci-lint run && go test ./... -cover',
   },
   {
     name: 'scala',
