@@ -31,6 +31,8 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | アナライザーの水準 | `AnalysisMode: All` は公開メソッドの引数の null 検査（CA1062）まで求める。`Recommended` では CA1304・CA1311（カルチャの指定）・CA1822（static にできる）などが出る | 使い捨てのプロジェクトでビルド |
 | 警告をエラーにする | `TreatWarningsAsErrors` により、コンパイラの警告（使っていない変数の CS0219 など）もエラーになる | 同上 |
 | `dotnet format` | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると崩れた整形を `WHITESPACE` として指摘する | 同上 |
+| `dotnet test`（手元の macOS） | サーバーモードで起動したテストを 0 件と判定して終了コード 5 で終わる。F# 版（`apps/fsharp/`）でも同じなので C# 版の設定の問題ではない。CI（Linux）では F# 版が `dotnet test` で成功している | 手元・Nix の SDK 10.0.101 で実行し、F# 版と比較 |
+| テストの実行（B29） | 手元は `dotnet run --project tests/MachineLearning.Tests/MachineLearning.Tests.csproj`、CI は `dotnet test` を使う。テストプロジェクトには `OutputType` Exe・`IsTestProject`・`<Using Include="Xunit" />` が要る | 実行して確認 |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 
@@ -87,7 +89,7 @@ ADR 004（F# 版）の方針をそのまま使う。C# 版の各章で実装し�
 
 ## コンプライアンス
 
-- `apps/dotnet/Directory.Packages.props` に上記のライブラリと版だけが記載されている
+- `apps/csharp/Directory.Packages.props` に上記のライブラリと版だけが記載されている
 - C# CI（`.github/workflows/csharp-ci.yml`）がグリーンである
 - わざと違反を入れると整形・静的解析の検査が失敗する（B29 で確かめる）
 

@@ -1009,13 +1009,14 @@ C# は第 2 波の 2 番目の言語で、F# 版の実装を対比の相手に�
 | Nix 環境 | `nix develop .#dotnet` の .NET SDK は 10.0.101。Java 版と同じく CI もこの環境で動かす | `dotnet --version` |
 | F# 版の構成 | ソリューション、`Directory.Build.props`（`TargetFramework` net10.0、`TreatWarningsAsErrors`、`RestorePackagesWithLockFile`）、`Directory.Packages.props`（中央パッケージ管理）、`.config/dotnet-tools.json`（fantomas・dotnet-fsharplint）、`.editorconfig` | ファイルを読んだ |
 | ライブラリの最新版 | Microsoft.ML 5.0.0、Microsoft.Data.Analysis 0.23.0（0.24.0 はプレビュー）、xunit.v3 4.0.1、coverlet.MTP 10.0.1、Roslynator.Analyzers 5.0.0、SonarAnalyzer.CSharp 10.34.0.3385、Microsoft.CodeAnalysis.NetAnalyzers 10.0.401、StyleCop.Analyzers は安定版が 1.1.118 で 1.2.0 はベータ | NuGet |
-| 実装の置き場所 | `apps/dotnet/` は空になった（F# 版を `apps/fsharp/` に移した後に残っていたビルドの中間ファイルは、Git の管理外のまま消えた） | ファイルを確認 |
+| 実装の置き場所 | `apps/dotnet/` は空になっていた（F# 版を `apps/fsharp/` に移した後に残っていたビルドの中間ファイル）。C# 版は `apps/csharp/` に置く（2026-09-20、人の指示による。F# 版の `apps/fsharp/` と対になる） | ファイルを確認 |
 
 | ライセンス | Microsoft.ML 5.0.0・Microsoft.Data.Analysis 0.23.0・coverlet.MTP 10.0.1 は MIT、xunit.v3 4.0.1 は Apache-2.0 | NuGet のカタログ |
 | Microsoft.Data.Analysis の保守（B29） | 安定版の最新 0.23.0 は 2025-11-11 の公開で、以後はプレビュー（0.24.0-preview）だけ。1.0 に達していない | NuGet のカタログ |
 | `global.json` の版（B29） | `version` を 10.0.100・`rollForward` を `latestPatch` にすると、手元（10.0.100）でも Nix（10.0.101）でも解決できた。F# 版は 10.0.101 固定なので手元では解決できない | 使い捨てのプロジェクトで `dotnet --version` |
 | アナライザーの水準（B29） | `AnalysisMode` を `All` にすると、公開メソッドの引数の null 検査（CA1062）まで求められて記事のコードが読みにくくなる。`Recommended` では CA1304・CA1311（カルチャの指定）・CA1822（static にできる）などが出る。`TreatWarningsAsErrors` により、コンパイラの警告（CS0219 など）もエラーになる | 使い捨てのプロジェクトでビルド |
 | `dotnet format`（B29） | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると `WHITESPACE` の指摘が出る。`.editorconfig` を置いて規則を明示する | 同上 |
+| `dotnet test`（B29） | 手元の macOS では、`dotnet test` が Microsoft.Testing.Platform のサーバーモード（`--server dotnettestcli`）で起動したテストを 0 件と判定して終了コード 5 で終わる。同じことが F# 版（`apps/fsharp/`）でも起きるので、C# 版の設定の問題ではない。CI（Linux）では F# 版が `dotnet test` で成功している。手元では `dotnet run --project tests/...` で実行し、CI は `dotnet test` のままにする | 手元と Nix（SDK 10.0.101）の両方で実行、F# 版と比較 |
 
 ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章で確かめる。
 
@@ -1037,12 +1038,12 @@ ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章
 | 項目 | 内容 | 状態 |
 |------|------|------|
 | Nix 環境 | `nix develop .#dotnet` で .NET SDK 10.0.101 が使えることを CI で確かめる（F# 版と共用） | 未着手 |
-| アプリ雛形 | `apps/dotnet/`（ソリューション、C# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props`・`global.json`・`.editorconfig`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
+| アプリ雛形 | `apps/csharp/`（ソリューション、C# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props`・`global.json`・`.editorconfig`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
 | 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは xUnit v3 の `Assert.SkipUnless` でデータが無ければスキップする | 未着手 |
 | 静的解析 | `dotnet format --verify-no-changes`・アナライザー・`TreatWarningsAsErrors` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
 | ライブラリ選定 | ADR 006（C# 版のライブラリ）を作成する | 未着手 |
 | CI | `.github/workflows/csharp-ci.yml`（Nix → `dotnet restore --locked-mode` → 整形の確認・ビルド・テスト・カバレッジの表示）。NuGet のキャッシュを使う | 未着手 |
-| タスク | `ops/scripts/apps.js` に `csharp` を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 未着手 |
+| タスク | `ops/scripts/apps.js` に `csharp`（`apps/csharp/`）を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 未着手 |
 
 ### B29 のステップ計画（C# のウォーキングスケルトン）
 
@@ -1052,7 +1053,7 @@ ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章
 |---------|------|---------|
 | 1 | ライブラリの事実確認：ライセンス、Microsoft.Data.Analysis の保守状況、アナライザーの選定（SDK 同梱だけで足りるか）、`global.json` の版をどうするか（手元の 10.0.100 と Nix の 10.0.101 の差の扱い）。結果を本節の「確認した事実」に書き足す | 「未検証」の項目が無くなる |
 | 2 | ADR 006 を書く（章ごとの置き換えの範囲は ADR 004（F# 版）を起点にする） | ADR 006 が `docs/adr/` と索引・nav にある |
-| 3 | `apps/dotnet/` の雛形：ソリューション、ライブラリとテストのプロジェクト、中央パッケージ管理、`packages.lock.json`、最初のテストが 1 本通る | 手元と `nix develop .#dotnet` の両方で `dotnet test` が成功する |
+| 3 | `apps/csharp/` の雛形：ソリューション、ライブラリとテストのプロジェクト、中央パッケージ管理、`packages.lock.json`、最初のテストが 1 本通る | 手元と `nix develop .#dotnet` の両方で `dotnet test` が成功する |
 | 4 | 整形・静的解析・カバレッジ：`dotnet format`・アナライザー・`TreatWarningsAsErrors`・coverlet を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・F# 版の教訓） | 違反を入れると検査が失敗し、戻すと成功する |
 | 5 | 第 1 章の実装：Python 版・Java 版と同じ TODO リストを TDD で進める。実データのテストは `Assert.SkipUnless` でスキップする | データありで全テストが通り、データなしではスキップされる。正解率が F# 版・Java 版と一致する |
 | 6 | 記事：第 1 章、C# 版トップ（`csharp/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
@@ -1065,7 +1066,7 @@ ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章
 
 - [x] C# 版の対比の軸（型・データの表現・ライブラリ）と、データフレームのライブラリ（Microsoft.Data.Analysis）を使わずに record と LINQ で表すこと
 - [x] ライブラリの第一候補（xUnit v3・coverlet.MTP・`dotnet format`・.NET アナライザー・ML.NET・ASP.NET Core Minimal API）を ADR 006 で確定すること
-- [x] 実装を `apps/dotnet/`、記事を `docs/article/getting-start-ml/csharp/` に置き、.NET SDK の版を F# 版にそろえること
+- [x] 実装を `apps/csharp/`（2026-09-20 に `apps/dotnet/` から変更。人の指示による）、記事を `docs/article/getting-start-ml/csharp/` に置き、.NET SDK の版を F# 版にそろえること
 - [x] B29 のステップ 1〜8
 
 ## リスクと対応
