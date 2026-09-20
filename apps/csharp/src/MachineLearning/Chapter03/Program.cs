@@ -3,8 +3,8 @@ namespace MachineLearning.Chapter03;
 using System.Globalization;
 using MachineLearning.Chapter01;
 using MachineLearning.Chapter02;
-using Features = MachineLearning.Chapter02.Features;
 using MachineLearning.Dataset;
+using Features = MachineLearning.Chapter02.Features;
 
 /// <summary>深さごとの正解率、ML.NET との予測の一致数、深さ 2 の決定木を表示する。</summary>
 public static class Program
