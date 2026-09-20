@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-19
+* **Creation**: Go 版の[トップ](/article/getting-start-ml/go/index.md)・[第 1 章](/article/getting-start-ml/go/01-machine-learning-and-first-test.md)・[ADR 008](/adr/008-go-ml-libraries.md) を新規作成し、シリーズ索引と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Go 版執筆計画と B39 の完了を反映。
 * **Creation**: Scala 版の全 15 章とトップを新規作成し、シリーズ索引・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B34〜B38 の完了を、[ADR 007](/adr/007-scala-ml-libraries.md) に各章で確かめた Tribuo・http4s の振る舞いを反映。
 * **Creation**: C# 版の第 2〜15 章を新規作成し、シリーズ索引・C# 版トップ・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B29〜B33 の完了を、[ADR 006](/adr/006-csharp-ml-libraries.md) に各章で確かめた ML.NET・ASP.NET Core の振る舞いを反映。
 * **Creation**: C# 版の[トップ](/article/getting-start-ml/csharp/index.md)・[第 1 章](/article/getting-start-ml/csharp/01-machine-learning-and-first-test.md)・[ADR 006](/adr/006-csharp-ml-libraries.md) を新規作成し、シリーズ索引と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に C# 版執筆計画と B29 の完了を反映。
