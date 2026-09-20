@@ -332,7 +332,7 @@ go test ./internal/chapter01/
 ```
 
 ```text
-github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter01: no non-test Go files in /Users/.../apps/go/internal/chapter01
+github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter01: no non-test Go files in apps/go/internal/chapter01
 FAIL	github.com/k2works/getting-started-machine-learning/apps/go/internal/chapter01 [build failed]
 ```
 

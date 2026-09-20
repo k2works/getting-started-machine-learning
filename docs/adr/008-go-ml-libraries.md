@@ -32,7 +32,7 @@ B39 のステップ 1 で、Go module proxy・モジュールのキャッシュ�
 | `stat.PC` | `PrincipalComponents` が成功可否を返し、`VarsTo` で分散、`VectorsTo` で固有ベクトルの行列を取れる。寄与率は分散から自分で求める | 同上 |
 | GoLearn | 最新が 2022-12-28 のコミット（タグ無し）で、3 年以上更新されていない | Go module proxy |
 | 静的解析 | わざと崩したファイルで、`gofmt -l` がファイル名を、`go vet` が「declared and not used」を、`golangci-lint run` が同じ指摘を typecheck として報告した | 使い捨てのプロジェクト |
-| Nix 環境 | Go 1.25.5、golangci-lint 2.8.0、gopls 0.21.0。手元は Go 1.26.5 | `nix eval`、`go version` |
+| Nix 環境 | Go 1.25.5、golangci-lint 2.7.2（`nix eval` が示す nixpkgs の最新は 2.8.0 だが、`flake.lock` で固定された環境に入るのは 2.7.2）、gopls 0.21.0。手元は Go 1.26.5 | `nix eval`、`go version` |
 | testify | 最新 v1.12.1（2026-08-17）、MIT | Go module proxy |
 
 ### 各章で確かめた結果
@@ -48,7 +48,7 @@ B39 のステップ 1 で、Go module proxy・モジュールのキャッシュ�
 | 言語・ビルド | Go（`go.mod` の `go` 指令は 1.25）、Go Modules | 1.25 | — | 第 1 章 |
 | テスト | 標準の `testing`（表駆動テスト） | Go と同じ | — | 第 1 章 |
 | 整形 | `gofmt`（`gofmt -l` で検査） | Go と同じ | — | 第 1 章（記事での解説は第 5 章） |
-| 静的解析 | `go vet` と `golangci-lint`（既定の検査器） | 2.8.0 | — | 第 1 章（記事での解説は第 5 章） |
+| 静的解析 | `go vet` と `golangci-lint`（既定の検査器は errcheck・govet・ineffassign・staticcheck・unused。マジックナンバーの `mnd` は既定で無効） | 2.7.2 | — | 第 1 章（記事での解説は第 5 章） |
 | カバレッジ | `go test -cover` | Go と同じ | — | 第 1 章（記事での解説は第 5 章） |
 | データの表現 | 構造体と `map[string]string`（セルの文字列）。データフレームのライブラリを使わない | — | — | 第 1 章 |
 | 乱数 | `math/rand` の `rand.New(rand.NewSource(seed))` と Fisher-Yates | Go と同じ | — | 第 2 章 |

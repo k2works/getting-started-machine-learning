@@ -1188,9 +1188,9 @@ Tribuo の各アルゴリズムの振る舞いは、Kotlin 版（ADR 002）・Ja
 | 項目 | 内容 | 状態 |
 |------|------|------|
 | Nix 環境 | `nix develop .#scala` で Scala 3・sbt が使えることを CI で確かめる | 未着手 |
-| アプリ雛形 | `apps/scala/`（`build.sbt`・`project/build.properties`・`project/plugins.sbt`・`src/main/scala`・`src/test/scala`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
+| アプリ雛形 | `apps/scala/`（`build.sbt`・`project/build.properties`・`project/plugins.sbt`・`src/main/scala`・`src/test/scala`・`.gitignore`）にテストが 1 本通る最小構成 | 完了（`go.mod` の `go` 指令は 1.25。Nix の 1.25.5 でも手元の 1.26.5 でも動く） |
 | 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは ScalaTest の `assume` でデータが無ければスキップする | 未着手 |
-| 静的解析 | scalafmt・コンパイラの警告をエラーにする設定・scoverage を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
+| 静的解析 | scalafmt・コンパイラの警告をエラーにする設定・scoverage を検査に組み込み、わざと違反を入れて失敗することを確かめる | 完了（gofmt・go vet・golangci-lint の 3 つで失敗を確認） |
 | ライブラリ選定 | ADR 007（Scala 版のライブラリ）を作成する | 未着手 |
 | CI | `.github/workflows/scala-ci.yml`（Nix → `sbt scalafmtCheckAll test coverageReport`）。sbt と Coursier のキャッシュを使う | 未着手 |
 | タスク | `ops/scripts/apps.js` に `scala` を加え、`apps:check:scala` で手元の検査を実行できるようにする | 未着手 |
@@ -1260,7 +1260,7 @@ Go は第 2 波の 4 番目の言語で、TypeScript 版（ライブラリが限
 
 | 項目 | 確認内容 | 確認方法 |
 |------|---------|---------|
-| Nix 環境 | `ops/nix/environments/go/shell.nix` は `go`・`gopls`・`gotools`・`delve`・`golangci-lint`。版は Go 1.25.5、golangci-lint 2.8.0、gopls 0.21.0 | `nix eval`、`nix develop .#go` |
+| Nix 環境 | `ops/nix/environments/go/shell.nix` は `go`・`gopls`・`gotools`・`delve`・`golangci-lint`。実際に入る版は Go 1.25.5・golangci-lint 2.7.2・gopls 0.21.0（`nix eval` は nixpkgs の最新 2.8.0 を示すが、`flake.lock` で固定された環境は 2.7.2） | `nix eval`、`nix develop .#go` |
 | ローカル環境 | Go 1.26.5（Nix の 1.25.5 と違う。`go.mod` の `go` 指令は 1.25 にして、どちらでも動くようにする） | `go version` |
 | gonum | 最新は v0.17.0（2025-12-29）、BSD 3 条項。`stat` に `LinearRegression`・`CovarianceMatrix`・`PC`（主成分分析）・`ROC` がある。決定木・ランダムフォレスト・K-means・ロジスティック回帰は無い（`stat` の一覧で確認）。行列は `mat` パッケージ | Go module proxy とモジュールキャッシュ |
 | GoLearn | 最新が 2022-12-28 のコミット（タグ無し）で、3 年以上更新されていない | Go module proxy |
@@ -1289,13 +1289,13 @@ gonum に無いアルゴリズム（決定木・ランダムフォレスト・K-
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| Nix 環境 | `nix develop .#go` で Go・golangci-lint が使えることを CI で確かめる | 未着手 |
-| アプリ雛形 | `apps/go/`（`go.mod`・`cmd/`・`internal/`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
-| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは `t.Skip` でデータが無ければスキップする | 未着手 |
-| 静的解析 | `gofmt -l`・`go vet`・`golangci-lint run` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
-| ライブラリ選定 | ADR 008（Go 版のライブラリ）を作成する | 未着手 |
-| CI | `.github/workflows/go-ci.yml`（Nix → `gofmt -l` → `go vet` → `golangci-lint run` → `go test -cover`）。モジュールのキャッシュを使う | 未着手 |
-| タスク | `ops/scripts/apps.js` に `go` を加え、`apps:check:go` で手元の検査を実行できるようにする | 未着手 |
+| Nix 環境 | `nix develop .#go` で Go・golangci-lint が使えることを CI で確かめる | 完了（Go CI で確認） |
+| アプリ雛形 | `apps/go/`（`go.mod`・`cmd/`・`internal/`・`.gitignore`）にテストが 1 本通る最小構成 | 完了（`go.mod` の `go` 指令は 1.25。Nix の 1.25.5 でも手元の 1.26.5 でも動く） |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは `t.Skip` でデータが無ければスキップする | 完了 |
+| 静的解析 | `gofmt -l`・`go vet`・`golangci-lint run` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 完了（gofmt・go vet・golangci-lint の 3 つで失敗を確認） |
+| ライブラリ選定 | ADR 008（Go 版のライブラリ）を作成する | 完了（ADR 008） |
+| CI | `.github/workflows/go-ci.yml`（Nix → `gofmt -l` → `go vet` → `golangci-lint run` → `go test -cover`）。モジュールのキャッシュを使う | 完了（B39。キャッシュは `~/go/pkg/mod` と `~/.cache/go-build`） |
+| タスク | `ops/scripts/apps.js` に `go` を加え、`apps:check:go` で手元の検査を実行できるようにする | 完了 |
 
 ### B39 のステップ計画（Go のウォーキングスケルトン）
 
@@ -1311,6 +1311,12 @@ gonum に無いアルゴリズム（決定木・ランダムフォレスト・K-
 | 6 | 記事：第 1 章、Go 版トップ（`go/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
 | 7 | CI とタスク：`.github/workflows/go-ci.yml`、`ops/scripts/apps.js` への `go` の追加 | push 後に Go CI がグリーン。`apps:check:go` が手元で成功する |
 | 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+B39（Go のウォーキングスケルトン）は 2026-09-20 に完了した。`go.mod` の `go` 指令を 1.25 にしたので、Nix（1.25.5）でも手元（1.26.5）でも動く。整形（gofmt）・静的解析（go vet・golangci-lint）・カバレッジ（go test -cover）は、わざと違反を入れて失敗することを確かめてから第 1 章に入った。第 1 章の正解率は 0.7368 で、ほかの言語版と一致した。
+
+- 例外が無いので、読み込みや正解率の計算は `error` を戻り値で返す形にした。BOM を取り除かないと「列がありません: 身長」という分かりやすいエラーになる（Java 版の NullPointerException より読める）
+- `golangci-lint` の版は、`nix eval` が示す nixpkgs の最新（2.8.0）ではなく、`flake.lock` で固定された 2.7.2 が環境に入る。記事を書いたサブエージェントの指摘で気づき、ADR 008 と本計画を実測値に直した
+- 仮実装の段階では、使っていない定数を `golangci-lint` の `unused` が指摘する（Java 版の Error Prone と同じ役割）
 
 ### 承認が必要な事項（Go）
 
