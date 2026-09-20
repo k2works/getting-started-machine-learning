@@ -7826,6 +7826,11 @@
 <td>使い捨てのプロジェクトと <code>apps/scala</code></td>
 </tr>
 <tr>
+<td>scalafmt の設定（B35）</td>
+<td><code>.scalafmt.conf</code> は <code>version</code> と <code>runner.dialect</code> の両方が必要（どちらを欠いてもエラー）。<code>-Wvalue-discard</code> は戻り値の型が <code>Unit</code> の定義の中でだけ働き、文の位置で値を捨てた場合は <code>-Wnonunit-statement</code> を足さないと止まらない。本シリーズでは <code>-Wnonunit-statement</code> は使わず、意図して捨てるときは <code>val _ =</code> と書く</td>
+<td></td>
+</tr>
+<tr>
 <td>sbt の版（B34）</td>
 <td>sbt-scalafmt 2.6.2 は sbt 1.12.9 以上を求め、Nix の sbt 1.12.0 では「requires sbt 1.12.9+」で失敗する。<code>project/build.properties</code> に <code>sbt.version=1.12.9</code> と書くと、Nix の sbt のランチャーがその版を取得して動く</td>
 <td><code>apps/scala</code> で実行</td>
@@ -7861,6 +7866,10 @@
 <tr>
 <td>7</td>
 <td>回帰には <code>tribuo-regression-slm</code> の追加が要る（<code>tribuo-regression-core</code>・<code>tribuo-math</code> は推移的に入る）。<code>SLMTrainer(true)</code>・<code>LARSTrainer()</code> の予測は自作の正規方程式と 1e-9 以内で一致し、<code>SLMTrainer(false)</code>・<code>LinearSGDTrainer</code> は一致しない（ADR 002・005 と同じ）。<code>SparseLinearModel</code> の重みは正規化した空間の値で、<code>getFeatureIDMap.getID(name)</code> で引く。<code>SLMTrainer</code> は学習のたびに標準出力へ進捗を書く。Scala 固有として、重みを見るには <code>asInstanceOf[SparseLinearModel]</code> が要り、複数のトレーナーを 1 つの <code>Vector</code> に入れるときは型を明示する。自作の予測値は Java 版と最後の桁まで一致した（Kotlin 版とは 1 桁違う）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Java のシリアライズは Scala では使えない。<code>ObjectInputFilter</code> を設定すると JDK のフィールドの型検査が走り、Scala の不変コレクションの <code>DefaultSerializationProxy</code> が解決される前に <code>Vector</code> 型のフィールドへ代入されて <code>ClassCastException</code> になる（フィルタ無しなら読める）。そこで Scala 版はモデルをタブ区切りのテキストで保存し、版を <code>match</code> で検証して任意のクラスを復元しない形にした。Scala 3 のラムダは <code>Serializable</code> だが、クラス名が <code>X$$$Lambda/0x...</code> と不安定で許可リストに書けない。Tribuo の CART との不一致は第 3 章と同じ「同じ不純度の分割候補の選び方」由来で、前処理を挟んでも変わらない</td>
 </tr>
 <tr>
 <td>9</td>
@@ -8019,6 +8028,7 @@
 </tr>
 </tbody>
 </table>
+<p>| 15 | 予測 API には <code>http4s-ember-server</code>・<code>http4s-dsl</code>・<code>http4s-circe</code>・<code>circe-generic</code>・<code>circe-parser</code> の追加が要る。<code>UnprocessableEntity</code> は 0.23.31 で非推奨になっており、<code>-Xfatal-warnings</code> があるので <code>UnprocessableContent</code> に直す必要がある。Scala には <code>Either</code> があるので、F# 版の <code>Result</code> と同じ形でドメインを書ける（Java 版は検査例外、C# 版は自作の型）。統合テストは <code>HttpRoutes</code> を直接呼べるので、テスト用のサーバーを立てなくてよい |</p>
 <h3 id="_6">検討した代替案<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
