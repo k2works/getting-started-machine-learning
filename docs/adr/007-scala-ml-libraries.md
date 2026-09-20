@@ -36,6 +36,13 @@ B34 のステップ 1 で、Maven Central の POM と使い捨ての sbt プロ�
 | sbt の版（B34） | sbt-scalafmt 2.6.2 は sbt 1.12.9 以上を求め、Nix の sbt 1.12.0 では「requires sbt 1.12.9+」で失敗する。`project/build.properties` に `sbt.version=1.12.9` と書くと、Nix の sbt のランチャーがその版を取得して動く | `apps/scala` で実行 |
 | 標準ライブラリの版の表示 | Scala 3 でも `scala.util.Properties.versionNumberString` は 2.13.16 を返す（Scala 3 は 2.13 の標準ライブラリを使う） | 同上 |
 
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 1 | `-Wvalue-discard` があるので、ScalaTest の `assume` の戻り値を捨てられない。`: Unit` を付けるか、戻り値をそのまま返す書き方にする |
+| 2 | 分割を Java 版と同じ `java.util.Random` + Fisher-Yates にすると、並べ替えの結果が Java 版と一致する（シード 0 で `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`）。iris.csv の訓練データの平均値（がく片長さ 0.4215384615384616 など）とテストデータの先頭のラベルも Java 版と一致した。`Features` の値を `Vector` で持つと、case class の等価判定がそのまま値の比較になる（Java・C# は配列を包む工夫が要る） |
+
 ## 決定
 
 | 用途 | 採用 | バージョン | ライセンス | 初出 |
