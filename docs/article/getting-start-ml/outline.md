@@ -808,7 +808,7 @@ B21（第 7〜14 章と Notebook）と B22（第 15 章）は 2026-09-19 に完�
 | B26（完了） | Java | 第 4〜6 章 | ビルド・静的解析・カバレッジ・CI が記事どおりに動く |
 | B27（完了） | Java | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
 | B28（完了） | Java | 第 15 章 | Java 版の全章完了。Python 版と節構成がそろっている |
-| B29〜B33 | C# | B24〜B28 と同じ区切り（ADR 006、`apps/dotnet/`） | C# 版の全章完了 |
+| B29（完了）〜B33 | C# | B24〜B28 と同じ区切り（ADR 006、`apps/csharp/`） | C# 版の全章完了 |
 | B34〜B38 | Scala | 同上（ADR 007、`apps/scala/`） | Scala 版の全章完了 |
 | B39〜B43 | Go | 同上（ADR 008、`apps/go/`） | Go 版の全章完了 |
 | B44〜B48 | Rust | 同上（ADR 009、`apps/rust/`） | Rust 版の全章完了 |
@@ -1059,6 +1059,12 @@ ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章
 | 6 | 記事：第 1 章、C# 版トップ（`csharp/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
 | 7 | CI とタスク：`.github/workflows/csharp-ci.yml`、`ops/scripts/apps.js` への `csharp` の追加 | push 後に C# CI がグリーン。`apps:check:csharp` が手元で成功する |
 | 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+B29（C# のウォーキングスケルトン）は 2026-09-20 に完了した。`global.json` を 10.0.100 + `rollForward: latestPatch` にしたので、手元（10.0.100）でも Nix（10.0.101）でも動く（F# 版は 10.0.101 固定で手元では動かない）。整形（`dotnet format`）・アナライザー（CA・IDE・CS）・カバレッジ（coverlet）は、わざと違反を入れて失敗することを確かめてから第 1 章に入った。第 1 章の正解率は 0.7368 で、Python 版・Kotlin 版・Java 版・F# 版と一致した。
+
+- 実装の置き場所は、人の指示により `apps/dotnet/` から `apps/csharp/` に改めた（F# 版の `apps/fsharp/` と対になる）
+- .NET の `File.ReadAllLines` は BOM を取り除くので、ほかの言語版で起きた「列名に BOM が残る」落とし穴は C# では起きない。保険で入れていた除去の処理を外し、その振る舞いをテストで固定した
+- `dotnet test` は `apps/csharp` を作業ディレクトリにして実行する（`global.json` の `test.runner` は最も近い `global.json` から読まれる）。改名の直後に 0 件と判定されたのは、古い状態の .NET のビルドサーバーが残っていたためで、`dotnet build-server shutdown` で解消した。この経緯は ADR 006 に記録した
 
 ### 承認が必要な事項（C#）
 
