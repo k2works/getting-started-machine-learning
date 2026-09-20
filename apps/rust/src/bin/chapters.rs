@@ -1,6 +1,6 @@
 //! 章を選んで実行する。使い方: cargo run --bin chapters -- chapter01
 
-use getting_started_ml::{chapter01, chapter02, chapter03, chapter07};
+use getting_started_ml::{chapter01, chapter02, chapter03, chapter07, chapter08};
 use std::io::{self, Write};
 use std::process::ExitCode;
 
@@ -14,10 +14,11 @@ fn main() -> ExitCode {
         Some("chapter02") => chapter02::run(&mut out).map_err(|e| e.to_string()),
         Some("chapter03") => chapter03::run(&mut out).map_err(|e| e.to_string()),
         Some("chapter07") => chapter07::run(&mut out).map_err(|e| e.to_string()),
+        Some("chapter08") => chapter08::run(&mut out).map_err(|e| e.to_string()),
         _ => {
             let _ = writeln!(
                 io::stderr(),
-                "使い方: cargo run --bin chapters -- (chapter01 | chapter02 | chapter03 | chapter07)"
+                "使い方: cargo run --bin chapters -- (chapter01 | chapter02 | chapter03 | chapter07 | chapter08)"
             );
 
             return ExitCode::FAILURE;

@@ -5,4 +5,5 @@ pub mod chapter01;
 pub mod chapter02;
 pub mod chapter03;
 pub mod chapter07;
+pub mod chapter08;
 pub mod dataset;
