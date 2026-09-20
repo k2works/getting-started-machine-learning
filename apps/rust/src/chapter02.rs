@@ -31,6 +31,10 @@ pub enum Error {
     AllMissing(String),
     /// 補完する値が渡されていない。
     NoFillValue(String),
+    /// 学習する前に予測しようとした。
+    NotFitted,
+    /// ライブラリ（linfa・ndarray）が失敗した。
+    Library(String),
 }
 
 impl fmt::Display for Error {
@@ -45,6 +49,8 @@ impl fmt::Display for Error {
             Error::LengthMismatch { left, right } => write!(f, "件数が違います: {left} と {right}"),
             Error::AllMissing(column) => write!(f, "値がすべて空欄です: {column}"),
             Error::NoFillValue(column) => write!(f, "補完する値がありません: {column}"),
+            Error::NotFitted => write!(f, "学習してから予測してください"),
+            Error::Library(message) => write!(f, "ライブラリが失敗しました: {message}"),
         }
     }
 }
