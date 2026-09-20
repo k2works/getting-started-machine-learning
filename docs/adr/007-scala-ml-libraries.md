@@ -84,6 +84,8 @@ ADR 002（Kotlin 版）の方針をそのまま使う。Tribuo は同じ 4.3.2 �
 | 13 | なし | PCA のモジュールが無いので、Tribuo の固有値分解を使った自作を最終実装とする |
 | 14 | Tribuo の `KMeansTrainer` | 初期中心を渡せないので、SSE の大きさを比べる |
 
+| 11〜12 | `LabelEvaluation` は正例を一度も予測しなくても 0.0 を返す（NaN にならない）。`RegressionEvaluator` に MSE は無く、RMSE の 2 乗が自作と一致。`KFoldSplitter` の余りの配り方は自作と一致するが、乱数の実装が違うので行の割り当ては一致しない。`ElasticNetCDTrainer` は `l1Ratio = 0` を拒否し下限は 1e-12、`alpha` を件数で割ると自作のリッジ回帰と 1e-6 以内で一致する（ADR 002・005 と同じ）。係数を読むには `asInstanceOf[SparseLinearModel]` が要る |
+| 13〜14 | `DenseMatrix.eigenDecomposition` は Scala から呼んでも固有値を降順で返し、対称でない行列では空の Optional を返す。PCA は Tribuo に無いので自作が最終実装。`KMeansTrainer` に初期中心は渡せない（`Initialisation` は RANDOM と PLUSPLUS だけ）ので SSE で比べる。`tribuo-clustering-kmeans` の追加が要る。Java の静的メンバーは `classOf[KMeansTrainer]` から取る |
 | 15 | 予測 API には `http4s-ember-server`・`http4s-dsl`・`http4s-circe`・`circe-generic`・`circe-parser` の追加が要る。`UnprocessableEntity` は 0.23.31 で非推奨になっており、`-Xfatal-warnings` があるので `UnprocessableContent` に直す必要がある。Scala には `Either` があるので、F# 版の `Result` と同じ形でドメインを書ける（Java 版は検査例外、C# 版は自作の型）。統合テストは `HttpRoutes` を直接呼べるので、テスト用のサーバーを立てなくてよい |
 
 ### 検討した代替案
