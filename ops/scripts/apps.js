@@ -42,6 +42,15 @@ const APPS = [
     check: `${process.platform === 'win32' ? 'gradlew.bat' : './gradlew'} check`,
   },
   {
+    name: 'go',
+    nix: 'go',
+    dir: path.join('apps', 'go'),
+    tools: [{ cmd: 'go', version: 'go version' }],
+    setup: 'go mod download',
+    // CI（.github/workflows/go-ci.yml）と同じ順に、整形・vet・lint・テストを検査する
+    check: 'test -z "$(gofmt -l .)" && go vet ./... && golangci-lint run && go test ./... -cover',
+  },
+  {
     name: 'scala',
     nix: 'scala',
     dir: path.join('apps', 'scala'),
