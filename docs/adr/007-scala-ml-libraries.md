@@ -33,6 +33,7 @@ B34 のステップ 1 で、Maven Central の POM と使い捨ての sbt プロ�
 | Nix 環境 | Scala 3.3.6（LTS）、sbt 1.12.0、metals 1.6.4、scala-cli 1.11.0 | `nix eval` |
 | 警告をエラーにする | `-Wunused:all -Wvalue-discard -Xfatal-warnings` で、使っていない import（E198）と使っていない値がエラーになる | 使い捨ての sbt プロジェクト |
 | 整形とカバレッジ | `scalafmtCheckAll` は崩れた整形でエラーになる（`.scalafmt.conf` に `version` と `runner.dialect = scala3` が要る）。`coverage` → `test` → `coverageReport` でカバレッジが出る | 使い捨てのプロジェクトと `apps/scala` |
+| scalafmt の設定（B35） | `.scalafmt.conf` は `version` と `runner.dialect` の両方が必要（どちらを欠いてもエラー）。`-Wvalue-discard` は戻り値の型が `Unit` の定義の中でだけ働き、文の位置で値を捨てた場合は `-Wnonunit-statement` を足さないと止まらない。本シリーズでは `-Wnonunit-statement` は使わず、意図して捨てるときは `val _ =` と書く |
 | sbt の版（B34） | sbt-scalafmt 2.6.2 は sbt 1.12.9 以上を求め、Nix の sbt 1.12.0 では「requires sbt 1.12.9+」で失敗する。`project/build.properties` に `sbt.version=1.12.9` と書くと、Nix の sbt のランチャーがその版を取得して動く | `apps/scala` で実行 |
 | 標準ライブラリの版の表示 | Scala 3 でも `scala.util.Properties.versionNumberString` は 2.13.16 を返す（Scala 3 は 2.13 の標準ライブラリを使う） | 同上 |
 
