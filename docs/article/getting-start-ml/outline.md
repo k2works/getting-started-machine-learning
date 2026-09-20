@@ -1384,15 +1384,24 @@ Go 版の全 15 章が完成した（B39〜B43）。実装は `apps/go/internal/
 
 ### 確認した事実（B44 のステップ 1 で埋める）
 
+B44 のステップ 1（2026-09-20）で、使い捨ての Cargo プロジェクトによって次を確かめた。
+
 | 項目 | 結果 | 確認方法 |
 | :--- | :--- | :--- |
-| linfa の各クレートの版・ライセンス・保守状況 | 未検証 | crates.io、使い捨ての Cargo プロジェクト |
-| linfa にあるもの・無いもの（決定木・線形回帰・ロジスティック回帰・K-means・PCA・前処理） | 未検証 | 同上 |
-| ndarray と ndarray-linalg（BLAS バックエンドの要否） | 未検証 | 同上 |
-| csv・serde・rand（0.9 の API 変更）・axum | 未検証 | 同上 |
-| clippy の既定の lint と `cargo fmt --check` | 未検証 | わざと崩したファイル |
-| カバレッジ（`cargo-llvm-cov` が Nix 環境で使えるか） | 未検証 | `nix develop .#rust` |
-| Nix 環境の rustc・cargo の版 | 未検証 | `rustc --version` |
+| linfa の版とライセンス | 0.8.1、`MIT OR Apache-2.0`。各クレート（trees・linear・logistic・clustering・reduction・preprocessing・elasticnet）が同じ 0.8.1 でそろっている | crates.io、`Cargo.toml` の `license` |
+| linfa にあるもの | **ほぼ全部ある**。決定木（`DecisionTree`、特徴量重要度つき）・重回帰（`LinearRegression`）・ロジスティック回帰・K-means・主成分分析（`Pca`、寄与率つき）・リッジとラッソ（`ElasticNet`）・混同行列と適合率/再現率/F 値・ROC と AUC・交差検証（`cross_validate_single`） | 使い捨てのプロジェクトで全部実行 |
+| linfa に無いもの | ランダムフォレストは linfa 0.8.1 の公開 API に見当たらない（要再確認） | 同上 |
+| 行列 | ndarray。**linfa 0.8.1 が使うのは ndarray 0.16 で、ndarray の最新は 0.17**。0.17 を直接入れると「同じクレートの版違いは別の型」になり linfa に渡せない。0.16 に固定する | `cargo build` の型エラー |
+| BLAS | 不要。linfa-linalg（純 Rust）で `cargo build` が通る | 同上 |
+| 乱数 | **linfa は rand 0.8 系**（`linfa` が rand 0.8、`linfa-clustering` が rand_xoshiro 0.6）。rand 0.9・0.10 の `SmallRng` を `KMeans::params_with_rng` に渡すと「two types coming from two different versions of the same crate」で落ちる。rand 0.8 と rand_xoshiro 0.6 に固定する | 同上 |
+| 乱数の並び | `StdRng::seed_from_u64(0)` と Fisher-Yates で `[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]`。Java（`[4 8 9 6 3 5 2 1 7 0]`）とも Go（`[6 8 2 3 7 5 9 1 0 4]`）とも違う | 使い捨てのプロジェクトで実行 |
+| CSV | csv 1.4。**BOM を自動で取り除く**（`"\u{feff}身長"` を読んで `"身長"` になる）。ほかの言語版で毎回書いた BOM の除去が要らない | ヘッダーのバイト列を表示して確認 |
+| Shift_JIS | encoding_rs 0.8。`SHIFT_JIS.decode` で読める。誤って UTF-8 として読むと `String::from_utf8` が `Err` になる（Go の `japanese` デコーダが黙って U+FFFD に置換するのと対照的） | 同上 |
+| API | axum 0.8.9 と tokio 1.53.1。`Router` を作ってポートを開けることを確認 | 同上 |
+| 直列化 | serde 1.0 と serde_json 1.0。`#[derive(Serialize, Deserialize)]` で構造体をそのまま JSON にできる | 同上 |
+| 整形・静的解析 | `cargo fmt --check` は差分をファイル名と行番号つきで出す。clippy の既定で「unused variable」「the loop variable `i` is only used to index」「binary comparison to literal `Option::None`」を検出。`-D warnings` で警告がエラーになる | わざと崩したファイル |
+| カバレッジ | `flake.lock` の nixpkgs に cargo-llvm-cov 0.6.20 と cargo-tarpaulin 0.35.0 がある。`ops/nix/environments/rust/shell.nix` への追加が要る | `nix eval` |
+| Nix 環境 | rustc 1.91.1、cargo 1.91.0、rustfmt 1.8.0、clippy 0.1.91、rust-analyzer。edition は 2024 | `nix develop .#rust` |
 
 ### B44 のステップ計画（Rust のウォーキングスケルトン）
 
