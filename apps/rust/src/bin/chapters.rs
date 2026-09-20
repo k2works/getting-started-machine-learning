@@ -1,7 +1,8 @@
 //! 章を選んで実行する。使い方: cargo run --bin chapters -- chapter01
 
 use getting_started_ml::{
-    chapter01, chapter02, chapter03, chapter07, chapter08, chapter09, chapter10, chapter11, chapter12, chapter13, chapter14, chapter15,
+    chapter01, chapter02, chapter03, chapter07, chapter08, chapter09, chapter10, chapter11,
+    chapter12, chapter13, chapter14, chapter15,
 };
 use std::io::{self, Write};
 use std::process::ExitCode;

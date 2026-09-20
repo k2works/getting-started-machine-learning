@@ -280,6 +280,28 @@ mod tests {
         assert!(choose_initial_centers(&points(), 0, 0).is_err());
     }
 
+    /// 1 次元に 3 組並べた点。3 つに分けるなら SSE は 0.5 × 3 = 1.5 が最小。
+    fn three_pairs() -> Array2<f64> {
+        array![[0.0], [1.0], [10.0], [11.0], [20.0], [21.0]]
+    }
+
+    #[test]
+    fn 初期中心によっては局所解に止まる() {
+        // 左の組から 2 点・中央の組から 1 点を初期中心にすると、右の 4 点が 1 つにまとまる
+        let stuck = fit(&three_pairs(), &array![[0.0], [1.0], [10.0]], 300);
+        let best = fit(&three_pairs(), &array![[0.0], [10.0], [20.0]], 300);
+
+        assert!((best.sse - 1.5).abs() < 1e-12, "{best:?}");
+        assert!(stuck.sse > best.sse, "{stuck:?}");
+    }
+
+    #[test]
+    fn 何通りか試せば局所解から抜け出せる() {
+        let result = fit_with_restarts(&three_pairs(), 3, 0, DEFAULT_N_INIT).unwrap();
+
+        assert!((result.sse - 1.5).abs() < 1e-12, "{result:?}");
+    }
+
     #[test]
     fn 初期中心を何通りか試して誤差平方和が最小の結果を返す() {
         let result = fit_with_restarts(&points(), 2, 0, DEFAULT_N_INIT).unwrap();
