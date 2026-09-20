@@ -157,7 +157,7 @@ cp tmp/sukkiri-ml/datafiles/* apps/data/sukkiri-ml/
 | 2 | dotnet | C# | xUnit | ML.NET, Microsoft.Data.Analysis | |
 | 2 | scala | Scala | ScalaTest（sbt） | Tribuo（「Scala 版執筆計画」を参照。Smile は Scala 3 版がすべて GPL-3.0 のため使わない） | |
 | 2 | rust | Rust | cargo test | linfa, ndarray, polars | 所有権と数値計算 |
-| 2 | go | Go | go test | gonum | ライブラリが限定的なので自作の比重が大きい |
+| 2 | go | Go | go test | gonum（「Go 版執筆計画」を参照。決定木・K-means は自作） | ライブラリが限定的なので自作の比重が大きい |
 | 3 | ruby | Ruby | Minitest（Bundler） | Rumale, Numo | |
 | 3 | php | PHP | PHPUnit（Composer） | Rubix ML | |
 | 3 | elixir | Elixir | ExUnit（Mix） | Nx, Explorer, Scholar | |
@@ -1247,6 +1247,77 @@ B34〜B38 は 2026-09-20 に完了し、Scala 版の全 15 章がそろった。
 - `Either` があるので、第 15 章のドメインは F# 版の `Result` と同じ形で書けた（Java 版は検査例外、C# 版は自作の型）
 - 第 8 章では、Java のシリアライズが Scala の不変コレクションと `ObjectInputFilter` の組み合わせで使えないことが分かり、タブ区切りのテキストで保存する形にした
 - 検査は `-Wunused:all`・`-Wvalue-discard`・`-Xfatal-warnings`・scalafmt・scoverage。`-Wvalue-discard` は戻り値の型が `Unit` の定義の中でだけ働く
+
+## Go 版執筆計画
+
+Go は第 2 波の 4 番目の言語で、TypeScript 版（ライブラリが限られる環境での自作）を進め方の対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。対比の軸は次の 3 つとする。
+
+- **型**: 構造体とインターフェースで表す。ジェネリクス（Go 1.18 以降）を分割や評価の関数で使う。判別共用体・sealed interface に当たるものが無いので、決定木は「葉と節を 1 つの構造体で表す」「インターフェースと型スイッチで表す」のどちらかを選び、その判断を記事に書く
+- **エラーの扱い**: 例外が無く、`error` を戻り値で返す。ほかの言語版が例外・`Result`・`Either` で表したものを、Go では多値返却でどう表すかを示す
+- **ライブラリ**: gonum には線形回帰・共分散行列・PCA はあるが、決定木・ランダムフォレスト・K-means は無い。自作の比重が大きくなる点を TypeScript 版（ml.js が未成熟）と対比する
+
+### 確認した事実（2026-09-20 時点）
+
+| 項目 | 確認内容 | 確認方法 |
+|------|---------|---------|
+| Nix 環境 | `ops/nix/environments/go/shell.nix` は `go`・`gopls`・`gotools`・`delve`・`golangci-lint`。版は Go 1.25.5、golangci-lint 2.8.0、gopls 0.21.0 | `nix eval`、`nix develop .#go` |
+| ローカル環境 | Go 1.26.5（Nix の 1.25.5 と違う。`go.mod` の `go` 指令は 1.25 にして、どちらでも動くようにする） | `go version` |
+| gonum | 最新は v0.17.0（2025-12-29）、BSD 3 条項。`stat` に `LinearRegression`・`CovarianceMatrix`・`PC`（主成分分析）・`ROC` がある。決定木・ランダムフォレスト・K-means・ロジスティック回帰は無い（`stat` の一覧で確認）。行列は `mat` パッケージ | Go module proxy とモジュールキャッシュ |
+| GoLearn | 最新が 2022-12-28 のコミット（タグ無し）で、3 年以上更新されていない | Go module proxy |
+| テスト | 標準の `testing` パッケージ。表駆動テストが慣習。testify（MIT）は最新 v1.12.1 | 標準ライブラリ、Go module proxy |
+
+gonum の各関数の使い勝手（`LinearRegression` は単回帰だけか、`PC` から寄与率を取れるか）、`golangci-lint` の既定の指摘の量、`go vet` との重なりは未検証。B39 の ADR 008 で確かめてから確定する。
+
+### ライブラリ方針（ADR 008 で確定する案）
+
+| 用途 | 第一候補 | 理由 | 代替案 |
+|------|---------|------|--------|
+| 言語・ビルド | Go 1.25（`go.mod` の `go` 指令）。ビルドは `go build`、依存は Go Modules | Nix の版に合わせ、手元の 1.26 でも動く | — |
+| テスト | 標準の `testing` と表駆動テスト | Go の標準的な書き方。依存を増やさない | testify |
+| 整形 | `gofmt`（`gofmt -l` で検査） | 標準 | gofumpt |
+| 静的解析 | `go vet` と `golangci-lint`（既定の検査器） | Nix の環境に入っている | staticcheck 単体 |
+| カバレッジ | `go test -cover`（`-coverprofile` で詳細） | 標準 | — |
+| データの表現 | 構造体と `map[string]string`（セルの文字列）。データフレームのライブラリは使わない | ほかの言語版と同じ考え方 | gota（保守が緩やか） |
+| 乱数 | `math/rand` の `rand.New(rand.NewSource(seed))` と Fisher-Yates | シードを指定できる。Java 版と一致するかは B39 で確かめる（一致しない見込み） | — |
+| 機械学習 | gonum v0.17.0（線形回帰・共分散行列・PCA）。決定木・ランダムフォレスト・K-means・ロジスティック回帰は自作を最終実装にする | BSD 3 条項で、Go で標準的な数値計算ライブラリ。GoLearn は更新が止まっている | GoLearn（採らない） |
+| API | 標準の `net/http`（Go 1.22 以降のルーティング） | 「言語ごとのバリエーション」で挙げた候補。依存を増やさない | Echo、Gin |
+
+### 前提整備（Go）
+
+| 項目 | 内容 | 状態 |
+|------|------|------|
+| Nix 環境 | `nix develop .#go` で Go・golangci-lint が使えることを CI で確かめる | 未着手 |
+| アプリ雛形 | `apps/go/`（`go.mod`・`cmd/`・`internal/`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは `t.Skip` でデータが無ければスキップする | 未着手 |
+| 静的解析 | `gofmt -l`・`go vet`・`golangci-lint run` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
+| ライブラリ選定 | ADR 008（Go 版のライブラリ）を作成する | 未着手 |
+| CI | `.github/workflows/go-ci.yml`（Nix → `gofmt -l` → `go vet` → `golangci-lint run` → `go test -cover`）。モジュールのキャッシュを使う | 未着手 |
+| タスク | `ops/scripts/apps.js` に `go` を加え、`apps:check:go` で手元の検査を実行できるようにする | 未着手 |
+
+### B39 のステップ計画（Go のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：gonum の `LinearRegression`・`PC` で何ができるか（単回帰か重回帰か、寄与率を取れるか）、`golangci-lint` の既定の指摘、`go vet` との重なり、ライセンス。結果を本節の「確認した事実」に書き足す | 「未検証」の項目が無くなる |
+| 2 | ADR 008 を書く（章ごとの置き換えの範囲は、gonum に無いものを自作と決める） | ADR 008 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/go/` の雛形：`go.mod`、`internal/` のパッケージ構成、最初のテストが 1 本通る | 手元と `nix develop .#go` の両方で `go test ./...` が成功する |
+| 4 | 整形・静的解析・カバレッジ：`gofmt -l`・`go vet`・`golangci-lint run`・`go test -cover` を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・C# 版・Scala 版の教訓） | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストは `t.Skip` でスキップする。エラーは `error` の戻り値で返す | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Go 版トップ（`go/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/go-ci.yml`、`ops/scripts/apps.js` への `go` の追加 | push 後に Go CI がグリーン。`apps:check:go` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Go）
+
+次の点を確認した（2026-09-20 承認）。
+
+- [x] Go 版の対比の軸（型・エラーの扱い・ライブラリ）と、データフレームのライブラリを使わずに構造体と map で表すこと
+- [x] 機械学習は gonum（線形回帰・共分散行列・PCA）だけを使い、決定木・ランダムフォレスト・K-means・ロジスティック回帰は自作を最終実装とすること（GoLearn は更新が止まっているので使わない）
+- [x] ライブラリの第一候補（標準の testing・gofmt・go vet・golangci-lint・gonum・net/http）を ADR 008 で確定すること
+- [x] 実装を `apps/go/`、記事を `docs/article/getting-start-ml/go/` に置くこと
+- [x] B39 のステップ 1〜8
 
 ## リスクと対応
 
