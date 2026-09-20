@@ -51,6 +51,8 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | 4〜6 | **`rand` 0.8.8 の `StdRng` は「再現可能と考えるべきではない」とドキュメントが明言している**（実体は ChaCha12。再現が要るなら `rand_chacha` を直接使えとある）。Rust 版の数値の再現性は `Cargo.lock` をコミットしていることに依存する。`rustfmt` は CRLF を指摘しない（`newline_style = Auto`。Go 版の `gofmt` は指摘する）ので `.gitattributes` に `apps/rust/** text=auto eol=lf` を足した。カバレッジのリージョン数は rustc の版で変わる（1.91.1 で 1758、1.97.1 で 1714）ので、CI と手元の数字を比べない。テストは 47 件で、データなしでも全部 `ok` と出る（スキップの表示が無い）ため、`--nocapture` の `eprintln!` かカバレッジの差（データあり 85.67%、なし 73.66%）で判別する。clippy の実測の指摘は `needless_bool`・`ptr_arg`・`needless_range_loop`・`partialeq_to_none` など |
 | 7 | ndarray には連立方程式を解く関数が無い（`ndarray-linalg` は LAPACK を要求する）ので、正規方程式は掃き出し法を自作した。**linfa-linear の `LinearRegression::default()` は素の最小二乗**で、自作の切片・係数と実データでも 1e-6 以内で一致した（Tribuo のようにトレーナーを選ぶ手間が無い） |
 | 8 | **linfa-trees は非決定的なことがある。** Survived.csv では同じデータ・同じ深さでも実行ごとにテストの正解率が 0.788〜0.810 で揺れる（ダミー変数で同じ不純度の分割候補が並ぶため。iris では揺れない）。出力を固定するテストの対象にできないので、`run` の出力から linfa の行を外し、範囲で確かめるテストにした。**自作のほうが再現性が高いという逆転が起きている。** serde は trait object を保存できない（`Deserialize` が実装されていないというコンパイルエラーになる）ので、学習済みの前処理は `enum` で表す |
+| 9 | **linfa-preprocessing の `LinearScaler::standard()` は母標準偏差（n で割る）で確定した。** 架空の値でも実データ（Boston の RM 列 30 件）でも自作と 1e-12 以内で一致する。scikit-learn と同じで、Tribuo・gonum（標本標準偏差）とは違う。encoding_rs の `decode` は 3 つ組（`Cow<str>`・使った符号化・`had_errors`）を返し、Shift_JIS を UTF-8 として読むと `had_errors == true`、`String::from_utf8` は `Err` になる。linfa に 1 列だけ渡す API は無いので、1 列の `Array2<f64>` と `Array1<()>` で `DatasetBase::from` を使う |
+| 10 | **linfa-logistic の `MultiLogisticRegression` は既定で L2 の強さ `alpha` が 1.0。** 既定のままだと自作（正則化なし）と予測が 4 件ずれる。`alpha` を 1e-8 にするとテストデータ 45 件の予測が完全に一致する。繰り返しは既定の 100 回（L-BFGS）で収束しており、Tribuo の既定 5 エポックのような不足は起きない。**`String` のラベルをそのまま渡せる**（第 3 章の決定木のような番号付けが要らない）。学習済みモデルのメソッド名は `classes()`（`labels()` ではない）。ランダムフォレストは linfa 0.8.1 に無いので自作が最終実装 |
 
 ### linfa の決定木（`linfa-trees` 0.8.1）の既定値と自作との違い
 
@@ -99,8 +101,8 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | 3 | linfa-trees の `DecisionTree` | 自作のジニ不純度の決定木と突き合わせる。`max_depth` の指定と特徴量重要度も比べる |
 | 7 | ndarray と linfa-linear の `LinearRegression` | 正規方程式を ndarray で解いてから、linfa の重回帰と突き合わせる |
 | 8 | linfa-trees（分類）。前処理は自作 | 欠損値の補完・ダミー変数化は linfa-preprocessing に無いので自作。分類器の突き合わせは、linfa 側が非決定的なので範囲で確かめる |
-| 9 | linfa-preprocessing の `LinearScaler::standard()` | 自作の標準化と突き合わせる（母標準偏差で一致するはず。実測で確かめる） |
-| 10 | linfa-logistic の `LogisticRegression` | ロジスティック回帰は突き合わせる。ランダムフォレストは linfa に無いので自作のみ |
+| 9 | linfa-preprocessing の `LinearScaler::standard()` | 自作の標準化と突き合わせる（母標準偏差で一致することを実測で確かめた） |
+| 10 | linfa-logistic の `MultiLogisticRegression`（`alpha` を 1e-8 にする） | ロジスティック回帰は突き合わせる。既定の `alpha` は 1.0 なので、正則化なしの自作と比べるなら下げる。ランダムフォレストは linfa に無いので自作のみ |
 | 11 | linfa の `confusion_matrix`・`roc`・`cross_validate_single` | 自作の評価指標・ROC・交差検証と突き合わせる |
 | 12 | linfa-elasticnet の `ElasticNet::ridge()`・`lasso()` | 自作のリッジ・ラッソと突き合わせる（目的関数の流儀の違いに注意する） |
 | 13 | linfa-reduction の `Pca` | 自作の固有値分解と突き合わせる。寄与率は `explained_variance_ratio()` で取れる。符号はそろえる |
