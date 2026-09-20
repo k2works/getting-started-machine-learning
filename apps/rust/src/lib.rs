@@ -1,0 +1,5 @@
+//! 「機械学習から始めるプログラミング入門」Rust 版の実装。
+//! 章ごとにモジュールを分け、`cargo run --bin chapters -- chapter01` で実行する。
+
+pub mod chapter01;
+pub mod dataset;
