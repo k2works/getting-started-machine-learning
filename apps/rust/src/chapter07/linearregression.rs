@@ -1,6 +1,7 @@
 //! 正規方程式で線形回帰を学習する。
 
 use ndarray::{Array1, Array2};
+use serde::{Deserialize, Serialize};
 
 use super::matrix::solve;
 use crate::chapter02::{Error, Features, Result};
@@ -9,7 +10,8 @@ use crate::chapter02::{Error, Features, Result};
 ///
 /// Java 版は `LinkedHashMap` で列の順を保ったが、Rust の `HashMap` は順を保たないので、
 /// 列名と係数を同じ順のベクタで持って対応させる（`Features` と同じ持ち方）。
-#[derive(Debug, Clone, PartialEq)]
+/// 第 15 章で JSON として保存するので、serde の変換も derive する。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LinearModel {
     pub intercept: f64,
     pub columns: Vec<String>,
