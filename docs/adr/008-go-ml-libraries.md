@@ -35,6 +35,12 @@ B39 のステップ 1 で、Go module proxy・モジュールのキャッシュ�
 | Nix 環境 | Go 1.25.5、golangci-lint 2.8.0、gopls 0.21.0。手元は Go 1.26.5 | `nix eval`、`go version` |
 | testify | 最新 v1.12.1（2026-08-17）、MIT | Go module proxy |
 
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 1 | わざと崩したファイルで、`gofmt -l` がファイル名を、`go vet` が「declared and not used」を、`golangci-lint run` が同じ指摘を typecheck として報告した。`go test ./...` は Nix の Go 1.25.5 でも手元の 1.26.5 でも動く（`go.mod` の `go` 指令は 1.25） |
+
 ## 決定
 
 | 用途 | 採用 | バージョン | ライセンス | 初出 |
