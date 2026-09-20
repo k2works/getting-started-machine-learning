@@ -1160,7 +1160,13 @@ Scala は第 2 波の 3 番目の言語で、JVM の Java 版・Kotlin 版と、
 | Tribuo | 4.3.2、Apache License 2.0。Kotlin 版（ADR 002）・Java 版（ADR 005）で癖を確認済み | Maven Central |
 | そのほかのライブラリ | ScalaTest 3.2.20（安定版。3.3.0 はマイルストーン版のみ）、MUnit 1.3.6、Breeze 2.1.0（Apache License 2.0）、http4s 0.23.37（1.0.0 はマイルストーン版のみ）、circe 0.14.16、sbt-scoverage 2.4.4 | Maven Central |
 
-ライセンス（ScalaTest・http4s・circe・sbt のプラグイン）、Tribuo を Scala から使うときの橋渡し、コンパイラの警告をエラーにする設定の影響は未検証。B34 の ADR 007 で確かめてから確定する。
+| ライセンス（B34） | ScalaTest 3.2.20・http4s 0.23.37・circe 0.14.16・sbt-scoverage 2.4.4 はいずれも Apache License 2.0。sbt-scalafmt の最新は 2.6.2 | Maven Central の POM |
+| Tribuo を Scala から呼べるか（B34） | `nix develop .#scala` の sbt 1.12.0・Scala 3.3.6 で、`ArrayExample[Label](Label("setosa"), Array("a", "b"), Array(0.1, 0.2))` が動いた（型引数を明示する）。Java の可変な API をそのまま呼べる | 使い捨ての sbt プロジェクトで実行 |
+| 標準ライブラリの版の表示（B34） | Scala 3 でも `scala.util.Properties.versionNumberString` は 2.13.16 を返す（Scala 3 は 2.13 の標準ライブラリを使うため） | 同上 |
+| 警告をエラーにする（B34） | `-Wunused:all -Wvalue-discard -Xfatal-warnings` で、使っていない import（E198）と使っていない値がエラーになる | 同上 |
+| 整形とカバレッジ（B34） | `scalafmtCheckAll` は崩れた整形でエラーになる（`.scalafmt.conf` に `version` と `runner.dialect = scala3` が要る）。`coverage` → `compile` → `coverageReport` でカバレッジが出る | 同上 |
+
+Tribuo の各アルゴリズムの振る舞いは、Kotlin 版（ADR 002）・Java 版（ADR 005）で確かめた結果を起点にし、Scala 版の各章で確かめて ADR 007 に書き足す。
 
 ### ライブラリ方針（ADR 007 で確定する案）
 
