@@ -32,14 +32,15 @@ B34 のステップ 1 で、Maven Central の POM と使い捨ての sbt プロ�
 | 安定版 | ScalaTest は 3.2.20（3.3.0 はマイルストーン版のみ）、http4s は 0.23.37（1.0.0 はマイルストーン版のみ）、circe は 0.14.16、sbt-scalafmt は 2.6.2 | Maven Central |
 | Nix 環境 | Scala 3.3.6（LTS）、sbt 1.12.0、metals 1.6.4、scala-cli 1.11.0 | `nix eval` |
 | 警告をエラーにする | `-Wunused:all -Wvalue-discard -Xfatal-warnings` で、使っていない import（E198）と使っていない値がエラーになる | 使い捨ての sbt プロジェクト |
-| 整形とカバレッジ | `scalafmtCheckAll` は崩れた整形でエラーになる（`.scalafmt.conf` に `version` と `runner.dialect = scala3` が要る）。`coverage` → `compile` → `coverageReport` でカバレッジが出る | 同上 |
+| 整形とカバレッジ | `scalafmtCheckAll` は崩れた整形でエラーになる（`.scalafmt.conf` に `version` と `runner.dialect = scala3` が要る）。`coverage` → `test` → `coverageReport` でカバレッジが出る | 使い捨てのプロジェクトと `apps/scala` |
+| sbt の版（B34） | sbt-scalafmt 2.6.2 は sbt 1.12.9 以上を求め、Nix の sbt 1.12.0 では「requires sbt 1.12.9+」で失敗する。`project/build.properties` に `sbt.version=1.12.9` と書くと、Nix の sbt のランチャーがその版を取得して動く | `apps/scala` で実行 |
 | 標準ライブラリの版の表示 | Scala 3 でも `scala.util.Properties.versionNumberString` は 2.13.16 を返す（Scala 3 は 2.13 の標準ライブラリを使う） | 同上 |
 
 ## 決定
 
 | 用途 | 採用 | バージョン | ライセンス | 初出 |
 |------|------|-----------|-----------|------|
-| 言語・ビルド | Scala（LTS）、sbt | 3.3.6、1.12.0 | Apache License 2.0 | 第 1 章 |
+| 言語・ビルド | Scala（LTS）、sbt（`project/build.properties` で指定） | 3.3.6、1.12.9 | Apache License 2.0 | 第 1 章 |
 | テスト | ScalaTest | 3.2.20 | Apache License 2.0 | 第 1 章 |
 | 整形 | scalafmt（sbt-scalafmt） | 2.6.2 | Apache License 2.0 | 第 1 章（記事での解説は第 5 章） |
 | 静的解析 | コンパイラの警告（`-Wunused:all`・`-Wvalue-discard` など）を `-Xfatal-warnings` でエラーにする | Scala と同じ | — | 第 1 章（記事での解説は第 5 章） |
