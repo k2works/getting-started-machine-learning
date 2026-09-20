@@ -13,6 +13,7 @@ public static class Program
         ["chapter09"] = Chapter09.Program.Run,
         ["chapter10"] = Chapter10.Program.Run,
         ["chapter11"] = Chapter11.Program.Run,
+        ["chapter12"] = Chapter12.Program.Run,
     };
 
     public static int Main(string[] args)
