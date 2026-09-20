@@ -1378,9 +1378,12 @@ Go 版の全 15 章が完成した（B39〜B43）。実装は `apps/go/internal/
 
 | 軸 | 相手 | 見どころ |
 | :--- | :--- | :--- |
-| ライブラリが限られる環境での自作 | [Go 版](go/index.md)・[TypeScript 版](typescript/index.md) | linfa の対応範囲によっては自作の比重が大きくなる |
-| エラーを型で表す | [F# 版](fsharp/index.md)（`Result`）・[Scala 版](scala/index.md)（`Either`） | `Result<T, E>` と `?` 演算子。Go の `if err != nil` との違い |
+| ライブラリが揃った静的型付け言語 | [Java 版](java/index.md)（Tribuo）・[C# 版](csharp/index.md)（ML.NET） | linfa は決定木からリッジ／ラッソ・交差検証まで揃っている。自作 → linfa で突き合わせる流れをほぼ全章で書く |
+| エラーを型で表す | [F# 版](fsharp/index.md)（`Result`）・[Scala 版](scala/index.md)（`Either`）・[Go 版](go/index.md)（`error` の戻り値） | `Result<T, E>` と `?` 演算子。Go の `if err != nil` との違い |
 | 所有権と借用 | ほかのすべての言語版 | データを渡すときに複製するか借用するか。行列演算での効き方 |
+| クレートの版が型を分ける | ほかのすべての言語版 | ndarray 0.16/0.17、rand 0.8/0.9 を混ぜると「同じ名前の別の型」になる。Rust 固有の論点 |
+
+B44 のステップ 1 で linfa の対応範囲を確かめた結果、当初の見込み（Go 版・TypeScript 版と同じ「ライブラリが限られる環境」）は外れたので、対比の軸を差し替えた（2026-09-20 承認）。
 
 ### 確認した事実（B44 のステップ 1 で埋める）
 
