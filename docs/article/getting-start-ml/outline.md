@@ -1037,13 +1037,13 @@ ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章
 
 | 項目 | 内容 | 状態 |
 |------|------|------|
-| Nix 環境 | `nix develop .#dotnet` で .NET SDK 10.0.101 が使えることを CI で確かめる（F# 版と共用） | 未着手 |
-| アプリ雛形 | `apps/csharp/`（ソリューション、C# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props`・`global.json`・`.editorconfig`・`.gitignore`）にテストが 1 本通る最小構成 | 未着手 |
-| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは xUnit v3 の `Assert.SkipUnless` でデータが無ければスキップする | 未着手 |
-| 静的解析 | `dotnet format --verify-no-changes`・アナライザー・`TreatWarningsAsErrors` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 未着手 |
-| ライブラリ選定 | ADR 006（C# 版のライブラリ）を作成する | 未着手 |
-| CI | `.github/workflows/csharp-ci.yml`（Nix → `dotnet restore --locked-mode` → 整形の確認・ビルド・テスト・カバレッジの表示）。NuGet のキャッシュを使う | 未着手 |
-| タスク | `ops/scripts/apps.js` に `csharp`（`apps/csharp/`）を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 未着手 |
+| Nix 環境 | `nix develop .#dotnet` で .NET SDK 10.0.101 が使えることを CI で確かめる（F# 版と共用） | 完了（C# CI で確認） |
+| アプリ雛形 | `apps/csharp/`（ソリューション、C# のライブラリとテストのプロジェクト、`Directory.Build.props`・`Directory.Packages.props`・`global.json`・`.editorconfig`・`.gitignore`）にテストが 1 本通る最小構成 | 完了（`OutputType` Exe・`IsTestProject`・`<Using Include="Xunit" />` が要る） |
+| 学習データ | `ML_DATA_DIR`（既定 `../data/sukkiri-ml`）で参照する。実データのテストは xUnit v3 の `Assert.SkipUnless` でデータが無ければスキップする | 完了（既定の場所は `[CallerFilePath]` から求める） |
+| 静的解析 | `dotnet format --verify-no-changes`・アナライザー・`TreatWarningsAsErrors` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 完了（CS0219・CA1822・IDE0055・WHITESPACE の 4 つで失敗を確認） |
+| ライブラリ選定 | ADR 006（C# 版のライブラリ）を作成する | 完了（ADR 006） |
+| CI | `.github/workflows/csharp-ci.yml`（Nix → `dotnet restore --locked-mode` → 整形の確認・ビルド・テスト・カバレッジの表示）。NuGet のキャッシュを使う | 完了（B29。キャッシュのキーは `nuget-csharp-` で F# 版と分けた） |
+| タスク | `ops/scripts/apps.js` に `csharp`（`apps/csharp/`）を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 完了（手元はテストプロジェクトを `dotnet run` で実行する） |
 
 ### B29 のステップ計画（C# のウォーキングスケルトン）
 
