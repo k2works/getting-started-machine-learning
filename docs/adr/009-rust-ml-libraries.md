@@ -48,6 +48,7 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | 1 | csv クレートが BOM を自動で取り除くので、ほかの言語版で書いてきた BOM の除去が要らない。`#[cfg(test)] mod tests` で実装と同じファイルにテストを置ける。関数名に日本語を使えるが、**識別子に空白は入れられない**（`fn linfa の…` はコンパイルエラー）。標準のテストにスキップが無いので、実データのテストは早期に戻る形にし、走ったかはカバレッジの差（データあり 70.09%、なし 51.96%）で見る。Cargo のテストはパッケージのルートで走るので相対パスの `../data/sukkiri-ml` が届く |
 | 2 | 欠損値は `Result<Option<f64>>` で表せる（Go 版の「値と ok とエラー」の 3 値より素直）。`f64` を持つ型には `Eq` が付かないので `PartialEq` だけを derive する。`rand` は linfa に合わせて 0.8 系に固定する。`StdRng::seed_from_u64(0)` の Fisher-Yates は `[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]` で、Java 版・Go 版と分かれる行も訓練データの平均値も一致しない（件数 105 件・45 件は一致する） |
 | 3 | 決定木は `enum Tree { Leaf, Node }` と `Box` で表せ、`match` の網羅性をコンパイラが検査する（Go 版の既定の分岐が要らない）。**`max_by_key` は同点のとき最後の要素を返す**ので、「同数なら先に現れたほう」にするには厳密な不等号で書く（実際に 2 件のテストが落ちて気づいた）。`f64` は `Ord` ではないので `sort_by` に `partial_cmp` を使う。linfa にラベルを渡すには整数への符号化が要る |
+| 4〜6 | **`rand` 0.8.8 の `StdRng` は「再現可能と考えるべきではない」とドキュメントが明言している**（実体は ChaCha12。再現が要るなら `rand_chacha` を直接使えとある）。Rust 版の数値の再現性は `Cargo.lock` をコミットしていることに依存する。`rustfmt` は CRLF を指摘しない（`newline_style = Auto`。Go 版の `gofmt` は指摘する）ので `.gitattributes` に `apps/rust/** text=auto eol=lf` を足した。カバレッジのリージョン数は rustc の版で変わる（1.91.1 で 1758、1.97.1 で 1714）ので、CI と手元の数字を比べない。テストは 47 件で、データなしでも全部 `ok` と出る（スキップの表示が無い）ため、`--nocapture` の `eprintln!` かカバレッジの差（データあり 85.67%、なし 73.66%）で判別する。clippy の実測の指摘は `needless_bool`・`ptr_arg`・`needless_range_loop`・`partialeq_to_none` など |
 
 ### linfa の決定木（`linfa-trees` 0.8.1）の既定値と自作との違い
 
@@ -76,7 +77,7 @@ B44 のステップ 1 で、使い捨ての Cargo プロジェクトによって
 | データの表現 | 構造体と `HashMap<String, String>`（セルの文字列）。polars を使わない | — | — | 第 1 章 |
 | CSV | `csv` | 1.4 | Unlicense/MIT | 第 1 章 |
 | 文字コード | `encoding_rs`（Shift_JIS の CSV） | 0.8 | （BSD 3 条項 / Apache-2.0 / MIT） | 第 9 章 |
-| 乱数 | `rand` の `StdRng::seed_from_u64` と Fisher-Yates、`rand_xoshiro`（linfa に渡す用） | rand 0.8、rand_xoshiro 0.6 | MIT OR Apache-2.0 | 第 2 章 |
+| 乱数 | `rand` の `StdRng::seed_from_u64` と Fisher-Yates、`rand_xoshiro`（linfa に渡す用） | rand 0.8、rand_xoshiro 0.6（`Cargo.lock` で固定） | MIT OR Apache-2.0 | 第 2 章 |
 | 行列 | `ndarray` | **0.16**（0.17 にしない） | MIT OR Apache-2.0 | 第 7 章 |
 | 機械学習 | linfa（trees・linear・logistic・clustering・reduction・preprocessing・elasticnet） | 0.8.1 | MIT OR Apache-2.0 | 第 3 章 |
 | 直列化 | `serde`・`serde_json` | 1.0 | MIT OR Apache-2.0 | 第 8 章 |
