@@ -8,7 +8,7 @@
 
 ## 言語別解説
 
-言語は 3 つの波に分けて順に追加します。第 1 波の Python 版・Kotlin 版・TypeScript 版・F# 版は全章を執筆済みです。F# は当初第 2 波でしたが、第 1 波に移しました。第 2 波は Java 版の全章を執筆済みで、C# 版を執筆しています。
+言語は 3 つの波に分けて順に追加します。第 1 波の Python 版・Kotlin 版・TypeScript 版・F# 版は全章を執筆済みです。F# は当初第 2 波でしたが、第 1 波に移しました。第 2 波は Java 版・C# 版の全章を執筆済みです。
 
 | 波 | 言語 | 環境 | 特徴 | 状況 |
 |----|------|------|------|------|
@@ -17,7 +17,7 @@
 | 1 | [TypeScript](typescript/index.md) | Node.js | 静的型付け、機械学習ライブラリが限られる環境での自作 | 完了 |
 | 1 | [F#](fsharp/index.md) | .NET | 判別共用体・パイプライン・型プロバイダ、Polyglot Notebooks による探索と可視化 | 完了 |
 | 2 | [Java](java/index.md) | JVM | record・sealed interface・Stream API、Kotlin 版との対比 | 完了 |
-| 2 | [C#](csharp/index.md) | .NET | record・LINQ・ML.NET の IDataView、F# 版との対比 | 執筆中 |
+| 2 | [C#](csharp/index.md) | .NET | record・LINQ・ML.NET の IDataView、F# 版との対比 | 完了 |
 | 2 | Scala / Go / Rust | — | — | 未着手 |
 | 3 | Ruby / PHP / Elixir / Clojure / Haskell | — | — | 未着手 |
 
@@ -52,16 +52,16 @@
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java | C# |
 |----|--------|--------|--------|------------|----|------|----|
 | 10 | ロジスティック回帰とアンサンブル学習 | [Python](python/10-logistic-regression-and-ensemble.md) | [Kotlin](kotlin/10-logistic-regression-and-ensemble.md) | [TypeScript](typescript/10-logistic-regression-and-ensemble.md) | [F#](fsharp/10-logistic-regression-and-ensemble.md) | [Java](java/10-logistic-regression-and-ensemble.md) | [C#](csharp/10-logistic-regression-and-ensemble.md) |
-| 11 | 評価指標と交差検証 | [Python](python/11-evaluation-metrics-and-cross-validation.md) | [Kotlin](kotlin/11-evaluation-metrics-and-cross-validation.md) | [TypeScript](typescript/11-evaluation-metrics-and-cross-validation.md) | [F#](fsharp/11-evaluation-metrics-and-cross-validation.md) | [Java](java/11-evaluation-metrics-and-cross-validation.md) | — |
-| 12 | 正則化とモデル選択 | [Python](python/12-regularization-and-model-selection.md) | [Kotlin](kotlin/12-regularization-and-model-selection.md) | [TypeScript](typescript/12-regularization-and-model-selection.md) | [F#](fsharp/12-regularization-and-model-selection.md) | [Java](java/12-regularization-and-model-selection.md) | — |
+| 11 | 評価指標と交差検証 | [Python](python/11-evaluation-metrics-and-cross-validation.md) | [Kotlin](kotlin/11-evaluation-metrics-and-cross-validation.md) | [TypeScript](typescript/11-evaluation-metrics-and-cross-validation.md) | [F#](fsharp/11-evaluation-metrics-and-cross-validation.md) | [Java](java/11-evaluation-metrics-and-cross-validation.md) | [C#](csharp/11-evaluation-metrics-and-cross-validation.md) |
+| 12 | 正則化とモデル選択 | [Python](python/12-regularization-and-model-selection.md) | [Kotlin](kotlin/12-regularization-and-model-selection.md) | [TypeScript](typescript/12-regularization-and-model-selection.md) | [F#](fsharp/12-regularization-and-model-selection.md) | [Java](java/12-regularization-and-model-selection.md) | [C#](csharp/12-regularization-and-model-selection.md) |
 
 ### 第 5 部: 教師なし学習と実運用
 
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java | C# |
 |----|--------|--------|--------|------------|----|------|----|
-| 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) | [F#](fsharp/13-principal-component-analysis.md) | [Java](java/13-principal-component-analysis.md) | — |
-| 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | [TypeScript](typescript/14-k-means-clustering.md) | [F#](fsharp/14-k-means-clustering.md) | [Java](java/14-k-means-clustering.md) | — |
-| 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | [TypeScript](typescript/15-machine-learning-api-and-module-design.md) | [F#](fsharp/15-machine-learning-api-and-module-design.md) | [Java](java/15-machine-learning-api-and-module-design.md) | — |
+| 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) | [F#](fsharp/13-principal-component-analysis.md) | [Java](java/13-principal-component-analysis.md) | [C#](csharp/13-principal-component-analysis.md) |
+| 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | [TypeScript](typescript/14-k-means-clustering.md) | [F#](fsharp/14-k-means-clustering.md) | [Java](java/14-k-means-clustering.md) | [C#](csharp/14-k-means-clustering.md) |
+| 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | [TypeScript](typescript/15-machine-learning-api-and-module-design.md) | [F#](fsharp/15-machine-learning-api-and-module-design.md) | [Java](java/15-machine-learning-api-and-module-design.md) | [C#](csharp/15-machine-learning-api-and-module-design.md) |
 
 ### 付録
 

@@ -78,16 +78,16 @@ dotnet run --project src/MachineLearning -- chapter01
 | 章 | テーマ |
 |----|--------|
 | [第 10 章](10-logistic-regression-and-ensemble.md) | ロジスティック回帰とアンサンブル学習 |
-| 第 11 章 | 評価指標と交差検証 |
-| 第 12 章 | 正則化とモデル選択 |
+| [第 11 章](11-evaluation-metrics-and-cross-validation.md) | 評価指標と交差検証 |
+| [第 12 章](12-regularization-and-model-selection.md) | 正則化とモデル選択 |
 
 ### 第 5 部: 教師なし学習と実運用
 
 | 章 | テーマ |
 |----|--------|
-| 第 13 章 | 主成分分析による次元削減 |
-| 第 14 章 | K-means によるクラスタリング |
-| 第 15 章 | 機械学習 API とモジュール設計 |
+| [第 13 章](13-principal-component-analysis.md) | 主成分分析による次元削減 |
+| [第 14 章](14-k-means-clustering.md) | K-means によるクラスタリング |
+| [第 15 章](15-machine-learning-api-and-module-design.md) | 機械学習 API とモジュール設計 |
 
 ### 付録
 
