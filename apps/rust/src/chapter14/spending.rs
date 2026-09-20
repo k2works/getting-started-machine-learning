@@ -98,7 +98,8 @@ impl Spending {
             })
             .collect();
 
-        summaries.sort_by(|left, right| right.count.cmp(&left.count));
+        // 件数の多い順。`Reverse` で降順にする（clippy は `sort_by` より `sort_by_key` を勧める）
+        summaries.sort_by_key(|summary| std::cmp::Reverse(summary.count));
 
         Ok(summaries)
     }
