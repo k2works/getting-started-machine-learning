@@ -38,6 +38,8 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | カバレッジ（B29） | `--coverlet --coverlet-include '[MachineLearning]*' --coverlet-output-format cobertura` で cobertura の XML が出る（F# 版の CI と同じオプション） |
 | BOM の扱い（B29） | .NET の `File.ReadAllLines`・`ReadAllText` は BOM 付きの UTF-8 を読むと BOM を取り除く（先頭セルは `身長`）。Python 版・Kotlin 版・Java 版で起きた「列名に BOM が残る」落とし穴は C# では起きないので、列名から BOM を消す処理は書かない |
 | 分割の一致（B30） | 分割を F# 版と同じ `System.Random(seed)` + Fisher-Yates（後ろから `Next(i + 1)` で交換）にすると、訓練データとテストデータに入る行が F# 版と一致する。iris.csv・テスト 0.3・シード 0 で、訓練データの平均値（がく片長さ 0.424808、がく片幅 0.462286、花弁長さ 0.479135、花弁幅 0.432404）とテストデータの先頭 5 件のラベルが一致した。Java 版は `Collections.shuffle` なので一致しない | C# 版と、F# 版の手順を写したスクリプトの両方で実測 |
+| 第 3 章（B30） | ML.NET に単一の決定木（CART）の学習器が無いので、F# 版（ADR 004）と同じく木を 1 本だけ作る `FastTree` を `OneVersusAll` で多クラスにして突き合わせる。C# では ML.NET が求める「引数なしのコンストラクターと書き換えられるプロパティを持つクラス」をそのまま書けるので、F# 版の `[<CLIMutable>]` に当たる工夫が要らない。特徴量の数は実行時に決まるので `SchemaDefinition` でベクトルの長さを指定する点は同じ。iris.csv・テスト 0.3・シード 0 で、深さごとの正解率・ML.NET との一致数・深さ 2 の木の境界が F# 版とすべて一致した |
+| `switch` 式の網羅性（B30） | C# には sealed interface が無く、抽象レコードと sealed な派生で閉じても、`switch` 式から `_` の分岐を外すと CS8509（網羅されていない）の警告になり、`TreatWarningsAsErrors` でビルドが止まる。F# の判別共用体や Java の sealed interface のように網羅を証明できないので、最後の分岐を書く |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 

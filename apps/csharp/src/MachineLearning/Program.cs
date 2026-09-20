@@ -7,6 +7,7 @@ public static class Program
     {
         ["chapter01"] = Chapter01.Program.Run,
         ["chapter02"] = Chapter02.Program.Run,
+        ["chapter03"] = Chapter03.Program.Run,
     };
 
     public static int Main(string[] args)
