@@ -1370,6 +1370,57 @@ Go 版の全 15 章が完成した（B39〜B43）。実装は `apps/go/internal/
 
 残るは Rust 版（第 2 波の最後）。
 
+## Rust 版執筆計画
+
+第 2 波の最後の言語。実装は `apps/rust/`、記事は `docs/article/getting-start-ml/rust/`、ライブラリの選定は ADR 009 に記録する。
+
+### 対比の軸
+
+| 軸 | 相手 | 見どころ |
+| :--- | :--- | :--- |
+| ライブラリが限られる環境での自作 | [Go 版](go/index.md)・[TypeScript 版](typescript/index.md) | linfa の対応範囲によっては自作の比重が大きくなる |
+| エラーを型で表す | [F# 版](fsharp/index.md)（`Result`）・[Scala 版](scala/index.md)（`Either`） | `Result<T, E>` と `?` 演算子。Go の `if err != nil` との違い |
+| 所有権と借用 | ほかのすべての言語版 | データを渡すときに複製するか借用するか。行列演算での効き方 |
+
+### 確認した事実（B44 のステップ 1 で埋める）
+
+| 項目 | 結果 | 確認方法 |
+| :--- | :--- | :--- |
+| linfa の各クレートの版・ライセンス・保守状況 | 未検証 | crates.io、使い捨ての Cargo プロジェクト |
+| linfa にあるもの・無いもの（決定木・線形回帰・ロジスティック回帰・K-means・PCA・前処理） | 未検証 | 同上 |
+| ndarray と ndarray-linalg（BLAS バックエンドの要否） | 未検証 | 同上 |
+| csv・serde・rand（0.9 の API 変更）・axum | 未検証 | 同上 |
+| clippy の既定の lint と `cargo fmt --check` | 未検証 | わざと崩したファイル |
+| カバレッジ（`cargo-llvm-cov` が Nix 環境で使えるか） | 未検証 | `nix develop .#rust` |
+| Nix 環境の rustc・cargo の版 | 未検証 | `rustc --version` |
+
+### B44 のステップ計画（Rust のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：linfa の各クレート（trees・linear・logistic・clustering・reduction・preprocessing）の版・ライセンス・最終更新・対応アルゴリズム、ndarray と ndarray-linalg、csv・serde・rand・axum、clippy の既定の lint、カバレッジの取り方。使い捨ての Cargo プロジェクトで実際に動かす。結果を上の「確認した事実」に書き足す | 「未検証」の項目が無くなる |
+| 2 | ADR 009 を書く（章ごとの置き換えの範囲は、linfa に無いもの・保守が止まっているものを自作と決める） | ADR 009 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/rust/` の雛形：Cargo の構成、`src/chapterNN` のモジュール構成、最初のテストが 1 本通る | 手元と `nix develop .#rust` の両方で `cargo test` が成功する |
+| 4 | 整形・静的解析・カバレッジ：`cargo fmt --check`・`cargo clippy -- -D warnings`・テスト・カバレッジを検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストはデータが無ければスキップする。エラーは `Result` で返す | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Rust 版トップ（`rust/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/rust-ci.yml`、`ops/scripts/apps.js` への `rust` の追加（cargo のレジストリとビルドのキャッシュ） | push 後に Rust CI がグリーン。`apps:check:rust` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Rust）
+
+次の点を確認した（2026-09-20 承認）。
+
+- [x] Rust 版の対比の軸（Go 版・TypeScript 版＝自作の比重、F# 版・Scala 版＝エラーを型で表す、所有権と借用）
+- [x] polars を使わず、`csv` クレートと構造体・`HashMap<String, String>` でデータを表すこと
+- [x] 機械学習は linfa を第一候補とし、保守状況と対応範囲をステップ 1 で確かめてから ADR 009 で確定すること。linfa に無いもの・保守が止まっているものは自作を最終実装にすること
+- [x] カバレッジは `cargo-llvm-cov` が Nix 環境で使えるかを確かめ、使えなければ任意扱いにすること
+- [x] 第 15 章の API は axum（+ tokio）を使うこと（Go 版と違い、標準ライブラリだけでは HTTP サーバーを書けないため）
+- [x] 実装を `apps/rust/`、記事を `docs/article/getting-start-ml/rust/` に置くこと
+- [x] B44 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
