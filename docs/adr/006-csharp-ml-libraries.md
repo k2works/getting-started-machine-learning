@@ -35,6 +35,7 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | テストの実行（B29） | 手元は `dotnet run --project tests/MachineLearning.Tests/MachineLearning.Tests.csproj`、CI は `dotnet test` を使う。テストプロジェクトには `OutputType` Exe・`IsTestProject`・`<Using Include="Xunit" />` が要る | 実行して確認 |
 | 検査が効いているか（B29） | わざと違反を入れたファイルで、ビルドが CS0219（使っていない変数）・CA1822（static にできる）・IDE0055（コードスタイル）をエラーにし、`dotnet format --verify-no-changes` が `WHITESPACE` を指摘した |
 | カバレッジ（B29） | `--coverlet --coverlet-include '[MachineLearning]*' --coverlet-output-format cobertura` で cobertura の XML が出る（F# 版の CI と同じオプション） |
+| BOM の扱い（B29） | .NET の `File.ReadAllLines`・`ReadAllText` は BOM 付きの UTF-8 を読むと BOM を取り除く（先頭セルは `身長`）。Python 版・Kotlin 版・Java 版で起きた「列名に BOM が残る」落とし穴は C# では起きないので、列名から BOM を消す処理は書かない |
 
 ML.NET を C# から使うときの癖は、F# 版で確かめた ADR 004 を起点にし、C# 版の各章で確かめて本 ADR に書き足す。
 

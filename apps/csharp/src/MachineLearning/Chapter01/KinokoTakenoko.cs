@@ -3,16 +3,17 @@ namespace MachineLearning.Chapter01;
 /// <summary>きのこ派・たけのこ派の判定。</summary>
 public static class KinokoTakenoko
 {
-    private const string Bom = "\uFEFF";
-
     /// <summary>「20 代ならきのこ派」というルールの年代</summary>
     private const int KinokoAgeGroup = 20;
 
-    /// <summary>BOM 付きの UTF-8 の CSV を読み込み、列名で値を取り出して人物のリストにする。</summary>
+    /// <summary>
+    /// BOM 付きの UTF-8 の CSV を読み込み、列名で値を取り出して人物のリストにする。
+    /// .NET の File.ReadAllLines は BOM を取り除くので、列名から BOM を消す処理は要らない。
+    /// </summary>
     public static IReadOnlyList<Person> LoadPeople(string csvFile)
     {
         var lines = File.ReadAllLines(csvFile);
-        var header = lines[0].TrimStart(Bom[0]).Split(',');
+        var header = lines[0].Split(',');
         var index = header.Select((name, i) => (name, i)).ToDictionary(pair => pair.name, pair => pair.i);
         return [.. lines.Skip(1)
             .Where(line => !string.IsNullOrWhiteSpace(line))

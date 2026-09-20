@@ -25,6 +25,16 @@ public class LoadPeopleTests : IDisposable
         Assert.Equal([new Person(165, 58, 30, "きのこ")], people);
     }
 
+    [Fact(DisplayName = ".NET は BOM を取り除くので、列名に BOM は残らない")]
+    public void DotNetStripsBom()
+    {
+        var csvFile = this.WriteCsv("165,58,30,きのこ\n");
+
+        var header = File.ReadAllLines(csvFile)[0].Split(',');
+
+        Assert.Equal("身長", header[0]);
+    }
+
     [Fact(DisplayName = "複数行の CSV を読み込んで行の順に人物のリストを返す")]
     public void ReadsRowsInOrder()
     {
