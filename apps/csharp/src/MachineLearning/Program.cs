@@ -9,6 +9,7 @@ public static class Program
         ["chapter02"] = Chapter02.Program.Run,
         ["chapter03"] = Chapter03.Program.Run,
         ["chapter07"] = Chapter07.Program.Run,
+        ["chapter08"] = Chapter08.Program.Run,
         ["chapter09"] = Chapter09.Program.Run,
         ["chapter10"] = Chapter10.Program.Run,
     };
