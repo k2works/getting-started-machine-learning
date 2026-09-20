@@ -1300,6 +1300,41 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/007-scala-ml-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    007 Scala 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2581,6 +2616,78 @@
     <span class="md-ellipsis">
       
         C# 版の完了（2026-09-20）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scala" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scala 版執筆計画
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scala 版執筆計画">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-20_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        確認した事実（2026-09-20 時点）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-007" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ライブラリ方針（ADR 007 で確定する案）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scala_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提整備（Scala）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b34-scala" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B34 のステップ計画（Scala のウォーキングスケルトン）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scala_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        承認が必要な事項（Scala）
       
     </span>
   </a>
@@ -9050,7 +9157,7 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <td>scala</td>
 <td>Scala</td>
 <td>ScalaTest（sbt）</td>
-<td>Smile</td>
+<td>Tribuo（「Scala 版執筆計画」を参照。Smile は Scala 3 版がすべて GPL-3.0 のため使わない）</td>
 <td></td>
 </tr>
 <tr>
@@ -11851,6 +11958,238 @@ cp<span class="w"> </span>tmp/sukkiri-ml/datafiles/*<span class="w"> </span>apps
 <li>C# には F# の <code>Result</code> が無いので、第 15 章で <code>PredictionResult&lt;T&gt;</code> を抽象レコードと sealed な派生で自作した（Java 版は検査例外）。判別共用体の代わりに enum と抽象レコードを使い、<code>switch</code> 式は網羅を証明できないので最後の分岐が要る（CS8509）</li>
 <li>ML.NET は C# 向けの API なので、F# 版が必要とした <code>[&lt;CLIMutable&gt;]</code> や DTO への詰め替えが要らない。一方で PCA は座標しか返さず、K-means に初期中心を渡せないなど、ライブラリ側の制約は F# 版と同じ</li>
 <li>実装の置き場所は、人の指示により <code>apps/dotnet/</code> ではなく <code>apps/csharp/</code> にした</li>
+</ul>
+<h2 id="scala">Scala 版執筆計画<a class="headerlink" href="#scala" title="Permanent link">&para;</a></h2>
+<p>Scala は第 2 波の 3 番目の言語で、JVM の Java 版・Kotlin 版と、関数型の F# 版の両方を対比の相手にする。Python 版と同じ 5 部 15 章の節構成で書き、Notebook・可視化の節・付録 A は作らない（「第 2 波の執筆計画」の承認による）。対比の軸は次の 3 つとする。</p>
+<ul>
+<li><strong>型</strong>: case class と enum（Scala 3）で、F# のレコードと判別共用体に当たるものを表す。<code>Option</code> は F# の <code>option</code> と同じ形。網羅していない <code>match</code> は警告になる（コンパイラの設定でエラーにできる）</li>
+<li><strong>データの表現</strong>: 不変のコレクション（<code>Map</code>・<code>Vector</code>）で表す。Java 版・C# 版が配列を包むクラスで苦労した「値で比べる」は、Scala の <code>Vector</code> なら既定でできる</li>
+<li><strong>ライブラリ</strong>: JVM の機械学習ライブラリ（Tribuo）を Scala から使う。Java 向けの API（可変なオブジェクト・配列）を Scala の不変なコレクションとどう橋渡しするかを題材にする</li>
+</ul>
+<h3 id="2026-09-20_1">確認した事実（2026-09-20 時点）<a class="headerlink" href="#2026-09-20_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>確認内容</th>
+<th>確認方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nix 環境</td>
+<td><code>ops/nix/environments/scala/shell.nix</code> は <code>scala_3</code>・<code>sbt</code>・<code>metals</code>・<code>scala-cli</code>。版は Scala 3.3.6（LTS）、sbt 1.12.0、metals 1.6.4、scala-cli 1.11.0</td>
+<td><code>nix eval</code></td>
+</tr>
+<tr>
+<td>ローカル環境</td>
+<td><code>scala</code> コマンドは未導入。JDK は 25.0.2</td>
+<td>コマンドの確認</td>
+</tr>
+<tr>
+<td>Smile のライセンス</td>
+<td>Scala 3 向け（<code>smile-scala_3</code>）は 3.0.2 以降しか無く、3.0.2・4.x・5.x・6.x のいずれも GPL-3.0。LGPL-3.0 の 2.6.0 には Scala 3 版が無い</td>
+<td>Maven Central の POM</td>
+</tr>
+<tr>
+<td>Tribuo</td>
+<td>4.3.2、Apache License 2.0。Kotlin 版（ADR 002）・Java 版（ADR 005）で癖を確認済み</td>
+<td>Maven Central</td>
+</tr>
+<tr>
+<td>そのほかのライブラリ</td>
+<td>ScalaTest 3.2.20（安定版。3.3.0 はマイルストーン版のみ）、MUnit 1.3.6、Breeze 2.1.0（Apache License 2.0）、http4s 0.23.37（1.0.0 はマイルストーン版のみ）、circe 0.14.16、sbt-scoverage 2.4.4</td>
+<td>Maven Central</td>
+</tr>
+</tbody>
+</table>
+<p>| ライセンス（B34） | ScalaTest 3.2.20・http4s 0.23.37・circe 0.14.16・sbt-scoverage 2.4.4 はいずれも Apache License 2.0。sbt-scalafmt の最新は 2.6.2 | Maven Central の POM |
+| Tribuo を Scala から呼べるか（B34） | <code>nix develop .#scala</code> の sbt 1.12.0・Scala 3.3.6 で、<code>ArrayExample[Label](Label("setosa"), Array("a", "b"), Array(0.1, 0.2))</code> が動いた（型引数を明示する）。Java の可変な API をそのまま呼べる | 使い捨ての sbt プロジェクトで実行 |
+| 標準ライブラリの版の表示（B34） | Scala 3 でも <code>scala.util.Properties.versionNumberString</code> は 2.13.16 を返す（Scala 3 は 2.13 の標準ライブラリを使うため） | 同上 |
+| 警告をエラーにする（B34） | <code>-Wunused:all -Wvalue-discard -Xfatal-warnings</code> で、使っていない import（E198）と使っていない値がエラーになる | 同上 |
+| 整形とカバレッジ（B34） | <code>scalafmtCheckAll</code> は崩れた整形でエラーになる（<code>.scalafmt.conf</code> に <code>version</code> と <code>runner.dialect = scala3</code> が要る）。<code>coverage</code> → <code>compile</code> → <code>coverageReport</code> でカバレッジが出る | 同上 |</p>
+<p>Tribuo の各アルゴリズムの振る舞いは、Kotlin 版（ADR 002）・Java 版（ADR 005）で確かめた結果を起点にし、Scala 版の各章で確かめて ADR 007 に書き足す。</p>
+<h3 id="adr-007">ライブラリ方針（ADR 007 で確定する案）<a class="headerlink" href="#adr-007" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>第一候補</th>
+<th>理由</th>
+<th>代替案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>言語・ビルド</td>
+<td>Scala 3.3.6（LTS）、sbt 1.12.0</td>
+<td>Nix の環境と一致し、長期サポート版</td>
+<td>scala-cli、Gradle</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>ScalaTest 3.2.20</td>
+<td>「対象言語」の表のテスト基盤。安定版を使う</td>
+<td>MUnit</td>
+</tr>
+<tr>
+<td>整形</td>
+<td>scalafmt（sbt-scalafmt）</td>
+<td>Scala の標準的な整形</td>
+<td>—</td>
+</tr>
+<tr>
+<td>静的解析</td>
+<td>コンパイラの警告（<code>-Wunused:all</code>・<code>-Wvalue-discard</code> など）を <code>-Xfatal-warnings</code> でエラーにする</td>
+<td>追加の依存が要らない。ほかの言語版と同じく「警告をエラーにする」方針</td>
+<td>scalafix、WartRemover</td>
+</tr>
+<tr>
+<td>カバレッジ</td>
+<td>sbt-scoverage 2.4.4</td>
+<td>sbt の標準的なカバレッジ</td>
+<td>—</td>
+</tr>
+<tr>
+<td>データの表現</td>
+<td>case class と不変のコレクション（<code>Map</code>・<code>Vector</code>）。データフレームのライブラリは使わない</td>
+<td>Java 版・C# 版と同じ考え方。<code>Vector</code> は値で比べられる</td>
+<td>Spark の DataFrame（重い）</td>
+</tr>
+<tr>
+<td>乱数</td>
+<td><code>java.util.Random(seed)</code> と Fisher-Yates</td>
+<td>Java 版と同じ乱数・同じ手順にすれば、分かれる行が Java 版と一致するはず（B34 で確かめる）</td>
+<td><code>scala.util.Random.shuffle</code></td>
+</tr>
+<tr>
+<td>機械学習</td>
+<td>Tribuo 4.3.2</td>
+<td>Apache License 2.0。Smile は Scala 3 版がすべて GPL-3.0 なので使わない</td>
+<td>自作のみ</td>
+</tr>
+<tr>
+<td>行列</td>
+<td>自作の小さな不変の型</td>
+<td>ほかの言語版と同じく、正規方程式の仕組みを見せる</td>
+<td>Breeze 2.1.0</td>
+</tr>
+<tr>
+<td>API</td>
+<td>http4s 0.23.37 + circe 0.14.16</td>
+<td>「言語ごとのバリエーション」で挙げた候補</td>
+<td>Play Framework</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scala_1">前提整備（Scala）<a class="headerlink" href="#scala_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nix 環境</td>
+<td><code>nix develop .#scala</code> で Scala 3・sbt が使えることを CI で確かめる</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>アプリ雛形</td>
+<td><code>apps/scala/</code>（<code>build.sbt</code>・<code>project/build.properties</code>・<code>project/plugins.sbt</code>・<code>src/main/scala</code>・<code>src/test/scala</code>・<code>.gitignore</code>）にテストが 1 本通る最小構成</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>学習データ</td>
+<td><code>ML_DATA_DIR</code>（既定 <code>../data/sukkiri-ml</code>）で参照する。実データのテストは ScalaTest の <code>assume</code> でデータが無ければスキップする</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>静的解析</td>
+<td>scalafmt・コンパイラの警告をエラーにする設定・scoverage を検査に組み込み、わざと違反を入れて失敗することを確かめる</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>ライブラリ選定</td>
+<td>ADR 007（Scala 版のライブラリ）を作成する</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>CI</td>
+<td><code>.github/workflows/scala-ci.yml</code>（Nix → <code>sbt scalafmtCheckAll test coverageReport</code>）。sbt と Coursier のキャッシュを使う</td>
+<td>未着手</td>
+</tr>
+<tr>
+<td>タスク</td>
+<td><code>ops/scripts/apps.js</code> に <code>scala</code> を加え、<code>apps:check:scala</code> で手元の検査を実行できるようにする</td>
+<td>未着手</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b34-scala">B34 のステップ計画（Scala のウォーキングスケルトン）<a class="headerlink" href="#b34-scala" title="Permanent link">&para;</a></h3>
+<p>各ステップは TDD で進め、ステップごとにコミットする。</p>
+<table>
+<thead>
+<tr>
+<th>ステップ</th>
+<th>内容</th>
+<th>完了条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ライブラリの事実確認：ライセンス（ScalaTest・http4s・circe・sbt のプラグイン）、Tribuo を Scala から呼べること、警告をエラーにする設定でどれだけ指摘が出るか。結果を本節の「確認した事実」に書き足す</td>
+<td>「未検証」の項目が無くなる</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ADR 007 を書く（章ごとの置き換えの範囲は ADR 002（Kotlin 版・Tribuo）を起点にする）</td>
+<td>ADR 007 が <code>docs/adr/</code> と索引・nav にある</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>apps/scala/</code> の雛形：sbt のプロジェクト、Scala 3.3.6、ScalaTest、最初のテストが 1 本通る</td>
+<td>手元（Nix）と <code>nix develop .#scala</code> で <code>sbt test</code> が成功する</td>
+</tr>
+<tr>
+<td>4</td>
+<td>整形・静的解析・カバレッジ：scalafmt・<code>-Xfatal-warnings</code>・scoverage を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す（Java 版・C# 版の教訓）</td>
+<td>違反を入れると検査が失敗し、戻すと成功する</td>
+</tr>
+<tr>
+<td>5</td>
+<td>第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストは <code>assume</code> でスキップする</td>
+<td>データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する</td>
+</tr>
+<tr>
+<td>6</td>
+<td>記事：第 1 章、Scala 版トップ（<code>scala/index.md</code>）、シリーズ索引の言語一覧、<code>mkdocs.yml</code> の nav</td>
+<td>ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する</td>
+</tr>
+<tr>
+<td>7</td>
+<td>CI とタスク：<code>.github/workflows/scala-ci.yml</code>、<code>ops/scripts/apps.js</code> への <code>scala</code> の追加</td>
+<td>push 後に Scala CI がグリーン。<code>apps:check:scala</code> が手元で成功する</td>
+</tr>
+<tr>
+<td>8</td>
+<td>仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の前提整備の状態と Bolt の完了、<code>docs/log.md</code> の更新</td>
+<td>検査に指摘が無く、<code>okf:check</code> が ERROR 0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scala_2">承認が必要な事項（Scala）<a class="headerlink" href="#scala_2" title="Permanent link">&para;</a></h3>
+<p>次の点を確認した（2026-09-20 承認）。</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 機械学習のライブラリを Smile ではなく Tribuo にすること（Scala 3 向けの Smile はすべて GPL-3.0 で、LGPL の 2.6.0 に Scala 3 版が無いため。「対象言語」の表の候補を改める）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Scala 版の対比の軸（型・データの表現・ライブラリ）と、データフレームのライブラリを使わずに case class と不変のコレクションで表すこと</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> ライブラリの第一候補（Scala 3.3.6・sbt・ScalaTest・scalafmt・<code>-Xfatal-warnings</code>・scoverage・Tribuo・http4s + circe）を ADR 007 で確定すること</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 実装を <code>apps/scala/</code>、記事を <code>docs/article/getting-start-ml/scala/</code> に置くこと</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> B34 のステップ 1〜8</li>
 </ul>
 <h2 id="_25">リスクと対応<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h2>
 <table>
