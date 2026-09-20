@@ -43,6 +43,10 @@ object PredictionApi:
           )
         )
       )
+
+    // 知らない経路。ほかの言語版と同じく JSON で返す（.orNotFound の既定は平文）
+    case _ =>
+      NotFound(Json.obj("detail" -> "見つかりません".asJson))
   }
 
   /** 本文を検証し、正しければ予測する。不正なら 422、モデルが無ければ 503 を返す。 */
