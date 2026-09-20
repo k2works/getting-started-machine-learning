@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="4 言語のデータの表し方（pandas・Kotlin DataFrame・型付きレコードの配列・Map と型プロバイダ）と欠損値の表し方（NaN・null・number | null・option）を比べる。同じ手順で分割しても乱数生成器が違うので、第 3 章の決定木の正解率が言語ごとに変わることと、シードだけでは再現できないものを整理する。">
+        <meta name="description" content="9 言語のデータの表し方（データフレーム・レコード・構造体と Map）と欠損値の表し方（NaN・null・Option・多値返却）を比べる。同じ手順で分割しても乱数生成器が違うので、第 3 章の決定木の正解率が乱数生成器ごとに変わることと、シードだけでは再現できないものを整理する。">
       
       
         <meta name="author" content="Project Team">
@@ -7425,10 +7425,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2_2" class="md-nav__link">
+  <a href="#7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        データフレームを使わなかった 2 言語
+        データフレームを使わなかった 7 言語
       
     </span>
   </a>
@@ -9697,7 +9697,7 @@
 
 <h1 id="2">第 2 章: データ構造の比較<a class="headerlink" href="#2" title="Permanent link">&para;</a></h1>
 <h2 id="21">2.1 データの表し方<a class="headerlink" href="#21" title="Permanent link">&para;</a></h2>
-<p>機械学習のコードの大半は、表形式のデータを読み、列を選び、欠損値を埋め、行を分ける処理です。4 言語は、この表を別々の形で表しました。</p>
+<p>機械学習のコードの大半は、表形式のデータを読み、列を選び、欠損値を埋め、行を分ける処理です。9 言語は、この表を別々の形で表しました。</p>
 <table>
 <thead>
 <tr>
@@ -9732,19 +9732,55 @@
 <td>読み込みは型プロバイダの行の型、以降は <code>Map</code></td>
 <td><code>Map</code> のキー（列名の文字列）</td>
 </tr>
+<tr>
+<td>Java</td>
+<td>record のリストと <code>Table</code>（列の一覧と行）</td>
+<td><code>Row</code>（<code>Map&lt;String, String&gt;</code> を包む）</td>
+<td>列名の文字列</td>
+</tr>
+<tr>
+<td>C#</td>
+<td>record のリストと <code>Table</code></td>
+<td><code>Row</code>（<code>IReadOnlyDictionary&lt;string, string&gt;</code> を包む）</td>
+<td>列名の文字列</td>
+</tr>
+<tr>
+<td>Scala</td>
+<td>case class と不変のコレクション</td>
+<td><code>Row</code>（<code>Map[String, String]</code>）</td>
+<td>列名の文字列</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>構造体と <code>map[string]string</code></td>
+<td><code>Row</code>（非公開の <code>cells</code>）</td>
+<td>列名の文字列</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td>構造体と <code>HashMap&lt;String, String&gt;</code></td>
+<td><code>Row</code>（非公開の <code>cells</code>）</td>
+<td>列名の文字列</td>
+</tr>
 </tbody>
 </table>
+<p>第 2 波の 5 言語は、第 1 波の TypeScript 版・F# 版と同じく<strong>データフレームを使わない</strong>道を採りました。どれも「セルは文字列で持ち、読み出すときに数値へ変換する」形です。CSV のセルは本来ただの文字列で、空欄かどうか・数値として読めるかどうかは読み出す側の関心なので、この形にすると欠損値の扱いを 1 か所にまとめられます。</p>
 <h3 id="2_1">データフレームを使った 2 言語<a class="headerlink" href="#2_1" title="Permanent link">&para;</a></h3>
 <p>Python と Kotlin は、データフレームのライブラリを使いました。列ごとの集計（平均・欠損値の数）や、列の追加・削除が 1 行で書けるので、第 2 章の前処理は短く書けます。一方で、列の名前は文字列なので、列名の書き間違いは実行するまで分かりません。</p>
-<h3 id="2_2">データフレームを使わなかった 2 言語<a class="headerlink" href="#2_2" title="Permanent link">&para;</a></h3>
-<p>TypeScript と F# は、データフレームを使わずに、言語の型でデータを表しました。</p>
+<h3 id="7">データフレームを使わなかった 7 言語<a class="headerlink" href="#7" title="Permanent link">&para;</a></h3>
+<p>TypeScript と F#、そして第 2 波の 5 言語は、データフレームを使わずに、言語の型でデータを表しました。</p>
 <ul>
 <li><strong>TypeScript</strong> は、列名の配列を <code>as const</code> で型にし、1 行を <code>Record&lt;Feature, number | null&gt;</code> で表しました。存在しない列名を書くと型チェックで誤りになります。ただし、型は実行時に消えるので、CSV の中身が本当にその形かは、読み込みの学習用テストで確かめました（TypeScript 版第 2 章）</li>
-<li><strong>F#</strong> は、FSharp.Data の <strong>型プロバイダ</strong> で、架空の値のサンプルから CSV の型をコンパイル時に作りました。列名を書き間違えるとコンパイルエラーになります。ただし、特徴量は <code>Map&lt;string, float&gt;</code> に移し替えています。欠損値の補完や決定木の分割を「どの列にも同じ処理」として書くには、列を名前で選べる形のほうが扱いやすいためです（F# 版第 2 章）</li>
+<li>
+<p><strong>F#</strong> は、FSharp.Data の <strong>型プロバイダ</strong> で、架空の値のサンプルから CSV の型をコンパイル時に作りました。列名を書き間違えるとコンパイルエラーになります。ただし、特徴量は <code>Map&lt;string, float&gt;</code> に移し替えています。欠損値の補完や決定木の分割を「どの列にも同じ処理」として書くには、列を名前で選べる形のほうが扱いやすいためです（F# 版第 2 章）</p>
+</li>
+<li>
+<p><strong>第 2 波の 5 言語</strong> は、<code>Table</code>（列の一覧と行）と <code>Row</code>（列名からセルの文字列）という同じ形にそろえました。列の選び方は文字列なので、列名の書き間違いは実行するまで分かりません。そのかわり、「どの列にも同じ処理」を書きやすく、第 8 章の前処理パイプライン（欠損値の補完・ダミー変数化）が素直に書けました</p>
+</li>
 </ul>
 <p>TypeScript と F# は、どちらも「読み込みの入り口では型で形を確かめ、その先は汎用の形で扱う」分担になりました。F# では、列の多い CSV（第 9 章の Boston）は型プロバイダではなく、型を持たない <code>CsvFile</code> で読んでいます。すべての列を型に書くより、列の一覧を実行時に受け取ってまとめて処理するほうが向いていたためです。</p>
 <h2 id="22">2.2 欠損値の表し方<a class="headerlink" href="#22" title="Permanent link">&para;</a></h2>
-<p>iris の特徴量の 4 列には、合わせて 7 件の空欄があります。4 言語は、空欄を次のように表しました。</p>
+<p>iris の特徴量の 4 列には、合わせて 7 件の空欄があります。9 言語は、空欄を次のように表しました。</p>
 <table>
 <thead>
 <tr>
@@ -9779,18 +9815,49 @@
 <td><code>float</code>（<code>Map&lt;string, float&gt;</code>）</td>
 <td>コンパイル（補完前のデータを渡すと誤り）</td>
 </tr>
+<tr>
+<td>Java</td>
+<td>空文字列のセル、読み出しは <code>OptionalDouble</code></td>
+<td><code>Features</code>（欠損値を持てない）</td>
+<td>コンパイル（<code>Row</code> を渡すと誤り）</td>
+</tr>
+<tr>
+<td>C#</td>
+<td>空文字列のセル、読み出しは <code>double?</code></td>
+<td><code>Features</code></td>
+<td>コンパイル</td>
+</tr>
+<tr>
+<td>Scala</td>
+<td>空文字列のセル、読み出しは <code>Option[Double]</code></td>
+<td><code>Features</code></td>
+<td>コンパイル</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>空文字列のセル、読み出しは <code>(float64, bool, error)</code></td>
+<td><code>Features</code></td>
+<td>コンパイル（ただし「値と ok」は無視できる）</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td>空文字列のセル、読み出しは <code>Result&lt;Option&lt;f64&gt;&gt;</code></td>
+<td><code>Features</code></td>
+<td>コンパイル</td>
+</tr>
 </tbody>
 </table>
+<p><strong>「値が無い」をどう表すか</strong>は、言語の道具立てがそのまま出た部分です。<code>Option</code> 系（F#・Scala・Rust）と null 許容（Kotlin・TypeScript・C#）と <code>OptionalDouble</code>（Java）は同じことを別の形で書いており、Go だけが<strong>多値返却</strong>（値・見つかったか・エラー）になりました。Go 版では 3 つの戻り値のうち「ok」を読み飛ばしてもコンパイルが通るので、型による強制は 9 言語でいちばん弱くなっています。</p>
 <ul>
 <li>TypeScript と F# は、補完の前と後を <strong>別の型</strong> にしました。第 3 章の決定木は補完後の型しか受け取らないので、補完を忘れたデータを渡すと、テストを実行する前に誤りになります</li>
 <li>F# 版の第 2 章では、補完後の「欠損値の数」を表示するために <code>NaN</code> の数を数えています。<code>float</code> の型には <code>None</code> が入らないので、型が欠損値の無いことを保証しているためです</li>
 <li>F# 版では、型プロバイダに推論を任せると、空欄のある列は <code>string</code>、小数の列は <code>decimal</code> と推論されました。<code>Schema</code> で <code>float option</code> を指定して、空欄を <code>None</code> として読んでいます（F# 版第 2 章）</li>
 <li>F# 版の第 8 章では、乗客のレコードに年齢と乗船港の型を型引数で持たせ（<code>PassengerOf&lt;'Age, 'Embarked&gt;</code>）、補完の前（<code>float option</code>・<code>string option</code>）と後（<code>float</code>・<code>string</code>）を別の型にしました</li>
 </ul>
-<p>欠損値の扱いは、「型で防ぐ」言語と「テストで確かめる」言語に分かれました。どちらの場合も、補完に使う平均値は <strong>訓練データだけ</strong> から求める（データリークを防ぐ）という手順は 4 言語で同じです。</p>
+<p>欠損値の扱いは、「型で防ぐ」言語と「テストで確かめる」言語に分かれました。第 2 波の 5 言語はすべて前者で、<strong>補完の前（<code>Row</code>）と後（<code>Features</code>）を別の型にする</strong>という TypeScript 版・F# 版の設計をそのまま引き継いでいます。どちらの場合も、補完に使う平均値は <strong>訓練データだけ</strong> から求める（データリークを防ぐ）という手順は 9 言語で同じです。</p>
 <h2 id="23">2.3 分割と乱数<a class="headerlink" href="#23" title="Permanent link">&para;</a></h2>
 <h3 id="_1">同じ手順、違う乱数生成器<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
-<p>4 言語とも、「シードで行の順番を並べ替え、テストデータの件数（割合を掛けて切り上げ）を除いた先頭を訓練データにする」という同じ手順で分けています。違うのは、並べ替えに使う乱数生成器です。</p>
+<p>9 言語とも、「シードで行の順番を並べ替え、テストデータの件数（割合を掛けて切り上げ）を除いた先頭を訓練データにする」という同じ手順で分けています。違うのは、並べ替えに使う乱数生成器です。</p>
 <table>
 <thead>
 <tr>
@@ -9820,11 +9887,70 @@
 <td>.NET の <code>System.Random(seed)</code></td>
 <td>自作の Fisher–Yates のシャッフル</td>
 </tr>
+<tr>
+<td>Java</td>
+<td><code>java.util.Random(seed)</code></td>
+<td>自作の Fisher–Yates のシャッフル</td>
+</tr>
+<tr>
+<td>C#</td>
+<td>.NET の <code>System.Random(seed)</code></td>
+<td>自作の Fisher–Yates のシャッフル</td>
+</tr>
+<tr>
+<td>Scala</td>
+<td><code>java.util.Random(seed)</code></td>
+<td>自作の Fisher–Yates のシャッフル</td>
+</tr>
+<tr>
+<td>Go</td>
+<td><code>math/rand</code> の <code>rand.New(rand.NewSource(seed))</code></td>
+<td>自作の Fisher–Yates のシャッフル</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td><code>rand</code> 0.8 の <code>StdRng::seed_from_u64(seed)</code></td>
+<td>自作の Fisher–Yates のシャッフル</td>
+</tr>
 </tbody>
 </table>
-<p>件数（iris なら訓練データ 105 件・テストデータ 45 件）は 4 言語で一致しますが、<strong>どの行がテストデータに入るか</strong> は一致しません。Python 版の第 2 章では、同じシードでも scikit-learn の <code>train_test_split</code> とは分け方が違うことも確かめました。</p>
+<p>件数（iris なら訓練データ 105 件・テストデータ 45 件）は 9 言語で一致しますが、<strong>どの行がテストデータに入るか</strong> は一致しません。Python 版の第 2 章では、同じシードでも scikit-learn の <code>train_test_split</code> とは分け方が違うことも確かめました。</p>
+<p><strong>同じ乱数生成器を使う言語どうしは一致します。</strong> 0〜9 を同じ Fisher–Yates・同じシード 0 で並べ替えると、次のようになります。</p>
+<table>
+<thead>
+<tr>
+<th>乱数生成器</th>
+<th>言語</th>
+<th><code>shuffle(0..10, 0)</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>java.util.Random</code></td>
+<td>Java・Scala</td>
+<td><code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code></td>
+</tr>
+<tr>
+<td>.NET の <code>System.Random</code></td>
+<td>C#・F#</td>
+<td>（両者で一致。値は各版の第 2 章を参照）</td>
+</tr>
+<tr>
+<td>Go の <code>math/rand</code></td>
+<td>Go</td>
+<td><code>[6, 8, 2, 3, 7, 5, 9, 1, 0, 4]</code></td>
+</tr>
+<tr>
+<td>Rust の <code>rand</code> 0.8 の <code>StdRng</code></td>
+<td>Rust</td>
+<td><code>[9, 3, 6, 4, 8, 1, 5, 2, 0, 7]</code></td>
+</tr>
+</tbody>
+</table>
+<p>JVM の 2 言語（Java・Scala）と .NET の 2 言語（C#・F#）は、<strong>言語が違っても実行環境の乱数生成器が同じなので、数値が完全に一致します</strong>。9 言語で 7 通りの結果になりました。「言語ごとに違う」のではなく「<strong>乱数生成器ごとに違う</strong>」というのが正確な言い方です。</p>
 <h3 id="3">第 3 章の決定木の正解率<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
-<p>分け方の違いは、そのまま正解率の違いになります。第 3 章の iris の決定木（深さの上限ごと）の正解率を 4 言語で並べます。</p>
+<p>分け方の違いは、そのまま正解率の違いになります。第 3 章の iris の決定木（深さの上限ごと）の正解率を、乱数生成器のまとまりごとに並べます。</p>
+<p><strong>第 1 波</strong></p>
 <table>
 <thead>
 <tr>
@@ -9835,8 +9961,6 @@
 <th>Kotlin テスト</th>
 <th>TypeScript 訓練</th>
 <th>TypeScript テスト</th>
-<th>F# 訓練</th>
-<th>F# テスト</th>
 </tr>
 </thead>
 <tbody>
@@ -9848,8 +9972,6 @@
 <td>0.6444</td>
 <td>0.6952</td>
 <td>0.6000</td>
-<td>0.6952</td>
-<td>0.6000</td>
 </tr>
 <tr>
 <td>2</td>
@@ -9859,8 +9981,6 @@
 <td>0.9333</td>
 <td>0.9238</td>
 <td>0.9778</td>
-<td>0.9619</td>
-<td>0.8889</td>
 </tr>
 <tr>
 <td>3</td>
@@ -9870,8 +9990,6 @@
 <td>0.9333</td>
 <td>0.9429</td>
 <td>0.9556</td>
-<td>0.9714</td>
-<td>0.8889</td>
 </tr>
 <tr>
 <td>4</td>
@@ -9881,8 +9999,6 @@
 <td>0.8889</td>
 <td>0.9524</td>
 <td>0.9556</td>
-<td>0.9810</td>
-<td>0.9111</td>
 </tr>
 <tr>
 <td>5</td>
@@ -9891,8 +10007,6 @@
 <td>0.9810</td>
 <td>0.8889</td>
 <td>0.9810</td>
-<td>0.9111</td>
-<td>1.0000</td>
 <td>0.9111</td>
 </tr>
 <tr>
@@ -9903,15 +10017,127 @@
 <td>0.8444</td>
 <td>1.0000</td>
 <td>0.9333</td>
+</tr>
+</tbody>
+</table>
+<p><strong>JVM の 2 言語（<code>java.util.Random</code>）と .NET の 2 言語（<code>System.Random</code>）</strong></p>
+<table>
+<thead>
+<tr>
+<th>深さ</th>
+<th>Java・Scala 訓練</th>
+<th>Java・Scala テスト</th>
+<th>C#・F# 訓練</th>
+<th>C#・F# テスト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.6762</td>
+<td>0.6444</td>
+<td>0.6952</td>
+<td>0.6000</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.9333</td>
+<td>0.9556</td>
+<td>0.9619</td>
+<td>0.8889</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0.9524</td>
+<td>0.9556</td>
+<td>0.9714</td>
+<td>0.8889</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.9619</td>
+<td>0.9556</td>
+<td>0.9810</td>
+<td>0.9111</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.9810</td>
+<td>0.9333</td>
+<td>1.0000</td>
+<td>0.9111</td>
+</tr>
+<tr>
+<td>制限なし</td>
+<td>1.0000</td>
+<td>0.9333</td>
+<td>1.0000</td>
+<td>0.9111</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Go と Rust</strong></p>
+<table>
+<thead>
+<tr>
+<th>深さ</th>
+<th>Go 訓練</th>
+<th>Go テスト</th>
+<th>Rust 訓練</th>
+<th>Rust テスト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.6857</td>
+<td>0.6222</td>
+<td>0.7143</td>
+<td>0.5556</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.9333</td>
+<td>0.9556</td>
+<td>0.9524</td>
+<td>0.9111</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0.9429</td>
+<td>0.9556</td>
+<td>0.9619</td>
+<td>0.9111</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.9524</td>
+<td>0.9778</td>
+<td>0.9714</td>
+<td>0.9111</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.9714</td>
+<td>0.9778</td>
+<td>0.9810</td>
+<td>0.9111</td>
+</tr>
+<tr>
+<td>制限なし</td>
+<td>1.0000</td>
+<td>1.0000</td>
 <td>1.0000</td>
 <td>0.9111</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>深さ 2 のテストデータの正解率は、0.8889（F#）から 0.9778（TypeScript）まで、45 件中 40〜44 件の幅で違います。1 件の違いが 0.0222 の差になるので、1 回の分割の正解率でモデルやアルゴリズムの優劣を決めるのは危険です（各版の第 11 章で交差検証を扱います）</li>
-<li>それでも、読み取れる傾向は 4 言語で同じです。深さを増やすと訓練データの正解率は 1.0 に近づき、テストデータの正解率は頭打ちになります（過学習）</li>
-<li>深さ 2 の木は、4 言語とも花弁幅だけで 3 品種を分けました。境界の値は、Python が 0.2950、ほかの 3 言語が 0.2750 で、訓練データに入った行の違いがここにも表れています</li>
+<li><strong>Java 版と Scala 版、C# 版と F# 版は、6 行すべてが一致します。</strong> 言語も、木を表す型（sealed interface と enum）も、書き方もまるで違うのに、同じ乱数生成器で同じ手順を踏めば同じ結果になる。アルゴリズムが正しく写せている証拠にもなりました</li>
+<li>深さ 2 のテストデータの正解率は、0.8889（C#・F#）から 0.9778（TypeScript）まで、45 件中 40〜44 件の幅で違います。1 件の違いが 0.0222 の差になるので、1 回の分割の正解率でモデルやアルゴリズムの優劣を決めるのは危険です（各版の第 11 章で交差検証を扱います）</li>
+<li><strong>Go 版は「制限なし」でテストデータの正解率が 1.0000 になりました。</strong> 45 件を全部当てています。これはアルゴリズムが優れているのではなく、たまたま分けやすい 45 件がテストデータに入っただけです。逆に Rust 版は深さ 2 以降どの深さでも 0.9111 で動きません</li>
+<li>それでも、読み取れる傾向は 9 言語で同じです。深さを増やすと訓練データの正解率は 1.0 に近づき、テストデータの正解率は頭打ちになります（過学習）</li>
+<li>深さ 2 の木は、9 言語とも<strong>花弁幅だけ</strong>で 3 品種を分けました。最初の境界の値は、Python・Java・Scala・Go・Rust が 0.2950、Kotlin・TypeScript・F#・C# が 0.2750 です。訓練データに入った行の違いがここにも表れています</li>
 </ul>
 <h3 id="_2">シードだけでは再現できないもの<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>各版の第 4 章では、シードを固定しても数値が再現できなくなる要因を調べました。</p>
@@ -9940,13 +10166,35 @@
 <td>32 ビットの整数演算だけで書かれ、結果は ECMAScript の仕様で決まる。参照実装の値をテストで固定した。ただし <code>Math.exp</code> などの数学関数は最後の桁まで保証されない</td>
 </tr>
 <tr>
-<td>F#</td>
+<td>F#・C#</td>
 <td>.NET の <code>System.Random</code> の実装</td>
 <td>シード付きの乱数列が .NET 8.0.22・9.0.11・10.0.1 で同じだったことを学習用テストで確かめた。ただし公式ドキュメントは版をまたいだ一致を約束していない</td>
 </tr>
+<tr>
+<td>Java・Scala</td>
+<td><code>java.util.Random</code> の実装</td>
+<td><code>java.util.Random</code> は、アルゴリズム（線形合同法）が仕様として文書化されている数少ない例。JDK の版が変わっても同じ乱数列になることが約束されている</td>
+</tr>
+<tr>
+<td>Go</td>
+<td><code>math/rand</code> の実装</td>
+<td>ドキュメントに版をまたぐ保証の記述が無い。手元の Go 1.25.5 と 1.26.5 で同じ並びになることを確かめた</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td><code>rand</code> クレートの版</td>
+<td><strong><code>StdRng</code> のドキュメントは「再現可能と考えるべきではない」と明言している</strong>（実体は ChaCha12。再現が要るなら <code>rand_chacha</code> を直接使えとある）。<code>Cargo.lock</code> で rand 0.8.8 に固定して再現している</td>
+</tr>
 </tbody>
 </table>
-<p>乱数生成器を自作した TypeScript だけが、アルゴリズムをリポジトリのコードとして固定できました。ほかの 3 言語は、言語やランタイムの版を固定し、乱数列が変わればテストが失敗して気付けるようにしています。記事に載せた数値は、どの言語も「シードと版を固定した実装を、実データで動かした結果」です。</p>
+<p><strong>再現性の保証は、言語によって 4 段階に分かれました。</strong></p>
+<ol>
+<li><strong>仕様として保証されている</strong> — Java・Scala（<code>java.util.Random</code> はアルゴリズムが文書化されている）</li>
+<li><strong>自分のコードなので保証できる</strong> — TypeScript（mulberry32 を自作した）</li>
+<li><strong>保証は無いが、実測で確かめた</strong> — Python・Kotlin・F#・C#・Go</li>
+<li><strong>保証されないと明言されている</strong> — Rust（<code>Cargo.lock</code> の固定だけが頼り）</li>
+</ol>
+<p>乱数生成器を自作した TypeScript だけが、アルゴリズムをリポジトリのコードとして固定できました。ほかの 8 言語は、言語やランタイムの版を固定し、乱数列が変わればテストが失敗して気付けるようにしています。記事に載せた数値は、どの言語も「シードと版を固定した実装を、実データで動かした結果」です。</p>
 <h2 id="24">2.4 表の結合とカテゴリ値<a class="headerlink" href="#24" title="Permanent link">&para;</a></h2>
 <p>第 9 章では、自転車の利用者数（<code>bike.tsv</code>）と天気の対応表（Shift_JIS の <code>weather.csv</code>）を結合しました。</p>
 <table>
@@ -9983,19 +10231,44 @@
 <td><code>CodePagesEncodingProvider</code> を登録してから <code>StreamReader</code> で読む</td>
 <td>文字化けすることを学習用テストで確かめた</td>
 </tr>
+<tr>
+<td>Java・Scala</td>
+<td>対応表を <code>Map</code> にして引く</td>
+<td><code>InputStreamReader</code> に <code>Charset.forName("Shift_JIS")</code> を渡す</td>
+<td>例外にならず、文字化けした</td>
+</tr>
+<tr>
+<td>C#</td>
+<td>対応表を辞書にして引く</td>
+<td><code>CodePagesEncodingProvider</code> を登録してから読む</td>
+<td>例外にならず、文字化けした</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>対応表を <code>map</code> にして引く</td>
+<td><code>golang.org/x/text/encoding/japanese</code>（標準ライブラリでは読めない）</td>
+<td><strong>例外にならず、U+FFFD に置き換わる</strong>（デコーダが黙って置換する）</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td>対応表を <code>HashMap</code> にして引く</td>
+<td><code>encoding_rs</code> の <code>SHIFT_JIS.decode</code></td>
+<td><code>String::from_utf8</code> が <code>Err</code> を返す。<code>decode</code> は <code>had_errors</code> で知らせる</td>
+</tr>
 </tbody>
 </table>
-<p>文字コードの指定を忘れたときの振る舞いは、言語で分かれました。Python（pandas）は例外で知らせますが、Kotlin と TypeScript は例外を出さずに文字化けした値を返しました。黙って化ける環境では、テストで期待する文字列（「晴れ」）と比べて初めて気付けます。4 言語とも、Shift_JIS で書いた小さなフィクスチャを読むテストで確かめています。</p>
-<p>天気ごとの平均利用者数（晴れ 4876.8・曇り 4052.7・雨 1803.3）は、分割に関係しないので 4 言語で一致します。データフレームを使わない TypeScript と F# は、どちらも「対応表を <code>Map</code> にして引く」形で結合を書きました。</p>
-<p>カテゴリ値（第 8・9 章の性別・乗船港・<code>CRIME</code>）は、4 言語ともダミー変数（0 と 1 の列）にしました。</p>
+<p>文字コードの指定を忘れたときの振る舞いは、言語で分かれました。Python（pandas）と Rust（<code>String::from_utf8</code>）は失敗として知らせますが、Kotlin・TypeScript・Java・Scala・C#・Go は例外を出さずに文字化けした値を返します。黙って化ける環境では、テストで期待する文字列（「晴れ」）と比べて初めて気付けます。9 言語とも、Shift_JIS で書いた小さなフィクスチャを読むテストで確かめています。</p>
+<p><strong>BOM の扱いも同じ構図です。</strong> 学習データの CSV は BOM 付きなので、素直に読むと先頭の列名が <code>"\uFEFF身長"</code> になり、「身長」で引けません。Python は <code>encoding="utf-8-sig"</code>、ほかの言語は自分で取り除く処理を書きました。<strong>例外は Rust だけで、csv クレートが BOM を自動で取り除きます</strong>（<a href="../../../../adr/009-rust-ml-libraries/">ADR 009</a>）。「どの層が面倒を見てくれるか」はライブラリごとに違うので、他人のライブラリの親切に頼るときはテストで確かめてから頼るのが安全です。</p>
+<p>天気ごとの平均利用者数（晴れ 4876.8・曇り 4052.7・雨 1803.3）は、分割に関係しないので 9 言語で一致します。データフレームを使わない 7 言語は、どれも「対応表を <code>Map</code>（辞書）にして引く」形で結合を書きました。</p>
+<p>カテゴリ値（第 8・9 章の性別・乗船港・<code>CRIME</code>）は、9 言語ともダミー変数（0 と 1 の列）にしました。ダミー変数化の関数は、機械学習ライブラリに含まれていないことが多く（Tribuo・gonum・linfa にはありません）、ほとんどの言語で自作が最終実装になっています。</p>
 <h2 id="25">2.5 まとめ<a class="headerlink" href="#25" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>データフレームか、言語の型か</strong> — Python と Kotlin はデータフレームで短く書き、TypeScript と F# は言語の型で列と欠損値を表した。後者は、読み込みの入り口で型で形を確かめ、その先は汎用の形（レコード・<code>Map</code>）で扱った</li>
-<li><strong>欠損値は型で防ぐか、テストで確かめるか</strong> — TypeScript と F# は補完の前後を別の型にし、補完漏れを型チェック・コンパイルで見つけられるようにした</li>
-<li><strong>同じ手順、違う数値</strong> — 4 言語とも同じ手順で分けたが、乱数生成器が違うので正解率は言語ごとに違う。傾向（過学習）は同じだった</li>
-<li><strong>再現性はシードだけでは決まらない</strong> — 乱数生成器の実装と版を固定し、乱数列が変わったらテストで気付けるようにした</li>
+<li><strong>データフレームか、言語の型か</strong> — データフレームを使ったのは Python と Kotlin だけで、ほかの 7 言語は言語の型（レコード・構造体・<code>Map</code>）で列と欠損値を表した。後者は、読み込みの入り口で型で形を確かめ、その先は汎用の形で扱う分担になった</li>
+<li><strong>欠損値は型で防ぐか、テストで確かめるか</strong> — TypeScript・F# と第 2 波の 5 言語は補完の前後を別の型にし、補完漏れを型チェック・コンパイルで見つけられるようにした。「値が無い」の表し方は <code>Option</code>・null 許容・多値返却に分かれ、Go の多値返却だけは読み飛ばせてしまう</li>
+<li><strong>違うのは言語ではなく乱数生成器</strong> — 9 言語で 7 通りの結果になった。JVM の 2 言語（Java・Scala）と .NET の 2 言語（C#・F#）は、言語も書き方も違うのに正解率が 6 行すべて一致する。傾向（過学習）はどの言語でも同じだった</li>
+<li><strong>再現性はシードだけでは決まらない</strong> — 保証のされ方は 4 段階に分かれた。仕様として保証されているのは Java・Scala だけで、Rust は「再現可能と考えるべきではない」と明言されている。どの言語も版を固定し、乱数列が変わったらテストで気付けるようにした</li>
 </ol>
-<p>次の章では、同じアルゴリズムを 4 言語でどう書いたかを比べます。</p>
+<p>次の章では、同じアルゴリズムを 9 言語でどう書いたかを比べます。</p>
 
 
 
