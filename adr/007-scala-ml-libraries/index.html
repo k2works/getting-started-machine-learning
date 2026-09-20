@@ -7848,7 +7848,7 @@
 <tbody>
 <tr>
 <td>1</td>
-<td><code>-Wvalue-discard</code> があるので、ScalaTest の <code>assume</code> の戻り値を捨てられない。<code>: Unit</code> を付けるか、戻り値をそのまま返す書き方にする</td>
+<td><code>-Wvalue-discard</code> は「戻り値の型が <code>Unit</code> の定義の中で、非 Unit の値を捨てたとき」に働く。テストの本体で <code>assume(...)</code> を書くだけでは働かないが、<code>Unit</code> を返すヘルパーの中では働く。<code>assume</code> を使うヘルパーは <code>Assertion</code> を返し、呼び出し側で <code>: Unit</code> と書くのがこの設定での定型。<code>-Wunused:all</code> は使っていない import・private の値を捕まえるが、公開メソッドの使っていない引数は指摘しない（Java 版の Error Prone の <code>UnusedMethod</code> のようには仮実装を止めない）</td>
 </tr>
 <tr>
 <td>2</td>
@@ -7857,6 +7857,18 @@
 <tr>
 <td>3</td>
 <td>Tribuo の <code>ArrayExample[Label]</code> は型引数を明示すれば Scala からそのまま作れる。<code>MutableDataset</code> は <code>ListDataSource</code> に <code>asJava</code> した事例のリストを渡す。決定木は Scala 3 の <code>enum</code> で閉じ、<code>match</code> の網羅性はコンパイラが検査する（Java の sealed interface・C# の抽象レコードに当たる）。iris.csv・テスト 0.3・シード 0 で、深さごとの正解率と Tribuo との一致（どの深さでも全件一致）が Java 版と同じになった</td>
+</tr>
+<tr>
+<td>7</td>
+<td>回帰には <code>tribuo-regression-slm</code> の追加が要る（<code>tribuo-regression-core</code>・<code>tribuo-math</code> は推移的に入る）。<code>SLMTrainer(true)</code>・<code>LARSTrainer()</code> の予測は自作の正規方程式と 1e-9 以内で一致し、<code>SLMTrainer(false)</code>・<code>LinearSGDTrainer</code> は一致しない（ADR 002・005 と同じ）。<code>SparseLinearModel</code> の重みは正規化した空間の値で、<code>getFeatureIDMap.getID(name)</code> で引く。<code>SLMTrainer</code> は学習のたびに標準出力へ進捗を書く。Scala 固有として、重みを見るには <code>asInstanceOf[SparseLinearModel]</code> が要り、複数のトレーナーを 1 つの <code>Vector</code> に入れるときは型を明示する。自作の予測値は Java 版と最後の桁まで一致した（Kotlin 版とは 1 桁違う）</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>MeanStdDevTransformation</code> は不偏標準偏差を使い、自作との比は √((n−1)/n)（ADR 002・005 と値まで同じ）。Java 向けの API は Scala からそのまま呼べ、橋渡しは <code>toArray</code>・<code>java.util.Optional</code> の <code>.toScala</code>・<code>.toVector</code> の 3 か所だけ。Shift_JIS のファイルを UTF-8 として読むと、JVM なので Java 版と同じく <code>MalformedInputException</code> になる。<code>tribuo-math</code> と <code>org.tribuo.transform</code> は <code>tribuo-classification-tree</code> から推移的に入る</td>
+</tr>
+<tr>
+<td>10</td>
+<td>特徴量の重要度は「木ごとに正規化してから平均し、最後にもう一度正規化する」手順にそろえると Java 版と一致する。最初に「全体を合わせてから正規化」と書いたときは値がずれた</td>
 </tr>
 </tbody>
 </table>
