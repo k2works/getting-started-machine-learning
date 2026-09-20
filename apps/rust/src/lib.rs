@@ -2,4 +2,5 @@
 //! 章ごとにモジュールを分け、`cargo run --bin chapters -- chapter01` で実行する。
 
 pub mod chapter01;
+pub mod chapter02;
 pub mod dataset;
