@@ -31,8 +31,9 @@ B29 のステップ 1 で、NuGet のカタログと使い捨てのプロジェ�
 | アナライザーの水準 | `AnalysisMode: All` は公開メソッドの引数の null 検査（CA1062）まで求める。`Recommended` では CA1304・CA1311（カルチャの指定）・CA1822（static にできる）などが出る | 使い捨てのプロジェクトでビルド |
 | 警告をエラーにする | `TreatWarningsAsErrors` により、コンパイラの警告（使っていない変数の CS0219 など）もエラーになる | 同上 |
 | `dotnet format` | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると崩れた整形を `WHITESPACE` として指摘する | 同上 |
-| `dotnet test`（手元の macOS） | サーバーモードで起動したテストを 0 件と判定して終了コード 5 で終わる。F# 版（`apps/fsharp/`）でも同じなので C# 版の設定の問題ではない。CI（Linux）では F# 版が `dotnet test` で成功している | 手元・Nix の SDK 10.0.101 で実行し、F# 版と比較 |
-| テストの実行（B29） | 手元は `dotnet run --project tests/MachineLearning.Tests/MachineLearning.Tests.csproj`、CI は `dotnet test` を使う。テストプロジェクトには `OutputType` Exe・`IsTestProject`・`<Using Include="Xunit" />` が要る | 実行して確認 |
+| `dotnet test` | `apps/csharp` を作業ディレクトリにして実行する。`global.json` の `test.runner`（Microsoft.Testing.Platform）は、作業ディレクトリから上に探した最も近い `global.json` から読まれるので、リポジトリのルートから実行すると古い VSTest の経路に落ちる。.NET 10 の `dotnet test` はパスを位置引数で受け取らず、`--solution`・`--project` を使う | 手元（10.0.100）と Nix（10.0.101）で実行 |
+| 0 件と判定された件（B29） | 改名（`apps/dotnet` → `apps/csharp`）の後、古い状態を抱えた .NET のビルドサーバーが残っていると、`dotnet test` がテストを 0 件と判定して終了コード 5 で終わることがあった。`dotnet build-server shutdown` の後は、C# 版（15 件）も F# 版（313 件）も成功する | 手元で再現と解消を確認 |
+| テストプロジェクトの設定（B29） | `OutputType` Exe・`IsTestProject`・`<Using Include="Xunit" />` が要る | 実行して確認 |
 | 検査が効いているか（B29） | わざと違反を入れたファイルで、ビルドが CS0219（使っていない変数）・CA1822（static にできる）・IDE0055（コードスタイル）をエラーにし、`dotnet format --verify-no-changes` が `WHITESPACE` を指摘した |
 | カバレッジ（B29） | `--coverlet --coverlet-include '[MachineLearning]*' --coverlet-output-format cobertura` で cobertura の XML が出る（F# 版の CI と同じオプション） |
 | BOM の扱い（B29） | .NET の `File.ReadAllLines`・`ReadAllText` は BOM 付きの UTF-8 を読むと BOM を取り除く（先頭セルは `身長`）。Python 版・Kotlin 版・Java 版で起きた「列名に BOM が残る」落とし穴は C# では起きないので、列名から BOM を消す処理は書かない |

@@ -47,8 +47,8 @@ const APPS = [
     dir: path.join('apps', 'csharp'),
     tools: [{ cmd: 'dotnet', version: 'dotnet --version' }],
     setup: 'dotnet restore --locked-mode && dotnet build --no-restore',
-    // 手元の macOS では dotnet test が 0 件と判定されるので、テストは実行可能なテストプロジェクトを直接動かす（ADR 006）
-    check: 'dotnet format MachineLearning.sln --verify-no-changes --no-restore && dotnet build --no-restore && dotnet run --project tests/MachineLearning.Tests/MachineLearning.Tests.csproj',
+    // CI（.github/workflows/csharp-ci.yml）と同じ順に、整形・アナライザー・テストを検査する
+    check: 'dotnet format MachineLearning.sln --verify-no-changes --no-restore && dotnet build --no-restore && dotnet test --no-restore --no-build',
   },
   {
     name: 'fsharp',

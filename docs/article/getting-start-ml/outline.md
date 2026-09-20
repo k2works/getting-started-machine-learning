@@ -1016,7 +1016,7 @@ C# は第 2 波の 2 番目の言語で、F# 版の実装を対比の相手に�
 | `global.json` の版（B29） | `version` を 10.0.100・`rollForward` を `latestPatch` にすると、手元（10.0.100）でも Nix（10.0.101）でも解決できた。F# 版は 10.0.101 固定なので手元では解決できない | 使い捨てのプロジェクトで `dotnet --version` |
 | アナライザーの水準（B29） | `AnalysisMode` を `All` にすると、公開メソッドの引数の null 検査（CA1062）まで求められて記事のコードが読みにくくなる。`Recommended` では CA1304・CA1311（カルチャの指定）・CA1822（static にできる）などが出る。`TreatWarningsAsErrors` により、コンパイラの警告（CS0219 など）もエラーになる | 使い捨てのプロジェクトでビルド |
 | `dotnet format`（B29） | 対象のソリューションにプロジェクトが登録されていないと、何も検査せずに成功する。登録すると `WHITESPACE` の指摘が出る。`.editorconfig` を置いて規則を明示する | 同上 |
-| `dotnet test`（B29） | 手元の macOS では、`dotnet test` が Microsoft.Testing.Platform のサーバーモード（`--server dotnettestcli`）で起動したテストを 0 件と判定して終了コード 5 で終わる。同じことが F# 版（`apps/fsharp/`）でも起きるので、C# 版の設定の問題ではない。CI（Linux）では F# 版が `dotnet test` で成功している。手元では `dotnet run --project tests/...` で実行し、CI は `dotnet test` のままにする | 手元と Nix（SDK 10.0.101）の両方で実行、F# 版と比較 |
+| `dotnet test`（B29） | `apps/csharp` を作業ディレクトリにして実行する。`global.json` の `test.runner` は最も近い `global.json` から読まれるので、リポジトリのルートから実行すると古い VSTest の経路に落ちる。改名（`apps/dotnet` → `apps/csharp`）の後、古い状態のビルドサーバーが残っていると 0 件と判定されることがあり、`dotnet build-server shutdown` で解消した | 手元（10.0.100）と Nix（10.0.101）で実行、F# 版（313 件）とも比較 |
 
 ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章で確かめる。
 
@@ -1043,7 +1043,7 @@ ML.NET を C# から使うときの癖は、F# 版の ADR 004 を起点に各章
 | 静的解析 | `dotnet format --verify-no-changes`・アナライザー・`TreatWarningsAsErrors` を検査に組み込み、わざと違反を入れて失敗することを確かめる | 完了（CS0219・CA1822・IDE0055・WHITESPACE の 4 つで失敗を確認） |
 | ライブラリ選定 | ADR 006（C# 版のライブラリ）を作成する | 完了（ADR 006） |
 | CI | `.github/workflows/csharp-ci.yml`（Nix → `dotnet restore --locked-mode` → 整形の確認・ビルド・テスト・カバレッジの表示）。NuGet のキャッシュを使う | 完了（B29。キャッシュのキーは `nuget-csharp-` で F# 版と分けた） |
-| タスク | `ops/scripts/apps.js` に `csharp`（`apps/csharp/`）を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 完了（手元はテストプロジェクトを `dotnet run` で実行する） |
+| タスク | `ops/scripts/apps.js` に `csharp`（`apps/csharp/`）を加え、`apps:check:csharp` で手元の検査を実行できるようにする | 完了 |
 
 ### B29 のステップ計画（C# のウォーキングスケルトン）
 
