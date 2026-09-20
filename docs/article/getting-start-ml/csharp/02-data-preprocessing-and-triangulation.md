@@ -109,7 +109,7 @@ using MachineLearning.Chapter02;
 
 public class TableTests : IDisposable
 {
-    private const string Header = "﻿がく片長さ,がく片幅,花弁長さ,花弁幅,種類\n";
+    private const string Header = "\uFEFFがく片長さ,がく片幅,花弁長さ,花弁幅,種類\n";
 
     private readonly string directory = Directory.CreateTempSubdirectory("ml-csharp-").FullName;
 
