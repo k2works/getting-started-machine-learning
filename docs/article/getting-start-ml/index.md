@@ -60,8 +60,8 @@
 
 | 章 | テーマ | Python | Kotlin | TypeScript | F# | Java | C# | Scala |
 |----|--------|--------|--------|------------|----|------|----|-------|
-| 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) | [F#](fsharp/13-principal-component-analysis.md) | [Java](java/13-principal-component-analysis.md) | [C#](csharp/13-principal-component-analysis.md) | — |
-| 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | [TypeScript](typescript/14-k-means-clustering.md) | [F#](fsharp/14-k-means-clustering.md) | [Java](java/14-k-means-clustering.md) | [C#](csharp/14-k-means-clustering.md) | — |
+| 13 | 主成分分析による次元削減 | [Python](python/13-principal-component-analysis.md) | [Kotlin](kotlin/13-principal-component-analysis.md) | [TypeScript](typescript/13-principal-component-analysis.md) | [F#](fsharp/13-principal-component-analysis.md) | [Java](java/13-principal-component-analysis.md) | [C#](csharp/13-principal-component-analysis.md) | [Scala](scala/13-principal-component-analysis.md) |
+| 14 | K-means によるクラスタリング | [Python](python/14-k-means-clustering.md) | [Kotlin](kotlin/14-k-means-clustering.md) | [TypeScript](typescript/14-k-means-clustering.md) | [F#](fsharp/14-k-means-clustering.md) | [Java](java/14-k-means-clustering.md) | [C#](csharp/14-k-means-clustering.md) | [Scala](scala/14-k-means-clustering.md) |
 | 15 | 機械学習 API とモジュール設計 | [Python](python/15-machine-learning-api-and-module-design.md) | [Kotlin](kotlin/15-machine-learning-api-and-module-design.md) | [TypeScript](typescript/15-machine-learning-api-and-module-design.md) | [F#](fsharp/15-machine-learning-api-and-module-design.md) | [Java](java/15-machine-learning-api-and-module-design.md) | [C#](csharp/15-machine-learning-api-and-module-design.md) | — |
 
 ### 付録
