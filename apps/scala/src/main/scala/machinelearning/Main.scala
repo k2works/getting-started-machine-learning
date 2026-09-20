@@ -11,6 +11,7 @@ object Main:
     "chapter09" -> machinelearning.chapter09.Main.run,
     "chapter10" -> machinelearning.chapter10.Main.run,
     "chapter11" -> machinelearning.chapter11.Main.run,
+    "chapter12" -> machinelearning.chapter12.Main.run,
     "chapter15" -> machinelearning.chapter15.Main.run
   )
 
