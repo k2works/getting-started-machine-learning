@@ -15,6 +15,7 @@ lazy val root = (project in file("."))
     ),
     libraryDependencies ++= Seq(
       "org.tribuo" % "tribuo-classification-tree" % "4.3.2",
+      "org.tribuo" % "tribuo-regression-slm" % "4.3.2",
       "org.scalatest" %% "scalatest" % "3.2.20" % Test
     ),
     // 学習データの場所（未指定なら ../data/sukkiri-ml）をテストに渡す
