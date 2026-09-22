@@ -11,6 +11,9 @@ packages.mkShell {
   ]);
   shellHook = ''
     ${baseShell.shellHook}
+    # solargraph の依存の gem が RUBYLIB に並ぶと、bundle exec が Gemfile.lock と違う版
+    # （rubocop の parser など）を先に読み込む。solargraph は RUBYLIB が無くても動くので外す
+    unset RUBYLIB
     echo "Ruby development environment activated"
     echo "  - Ruby: $(ruby --version | head -n 1)"
     echo "  - Bundler: $(bundle --version)"

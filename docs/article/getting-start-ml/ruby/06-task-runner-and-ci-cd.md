@@ -401,7 +401,17 @@ nix develop .#ruby --command bash -c 'unset RUBYLIB; cd apps/ruby && bundle exec
 
 この状態で `bundle exec rake check` を実行しても、RuboCop の指摘は 0 件、テストもすべて通りました。第 3 章までのコードでは、混ざった版でも lock の版でも結果は変わりませんでした。結果が同じだったので、それまで誰も気付かなかったのです。
 
-CI も同じ `nix develop .#ruby` を使うので、同じ状態で検査しているはずです（CI のログでは `rubocop -V` をまだ確かめていません）。執筆時点では、環境定義の側はまだ直していません。直すなら、Nix の環境定義の `shellHook` で `RUBYLIB` を外すか、Solargraph を Ruby 版の環境から外すかのどちらかです。
+CI も同じ `nix develop .#ruby` を使うので、同じ状態で検査していたはずです。そこで、Nix の環境定義（`ops/nix/environments/ruby/shell.nix`）の `shellHook` で `RUBYLIB` を外しました。Solargraph の実行ファイルは Nix が生成したラッパーで、自分の gem の場所を `GEM_PATH` で見つけるので、`RUBYLIB` が無くても動きます。
+
+```nix
+  shellHook = ''
+    ${baseShell.shellHook}
+    # solargraph の依存の gem が RUBYLIB に並ぶと、bundle exec が Gemfile.lock と違う版
+    # （rubocop の parser など）を先に読み込む。solargraph は RUBYLIB が無くても動くので外す
+    unset RUBYLIB
+```
+
+直した後は、`unset RUBYLIB` を付けなくても `bundle exec rubocop -V` が lock の版（Parser 3.3.12.0、Prism 1.9.0、rubocop-ast 1.50.0）を表示します。
 
 ### この経緯から学べること
 
