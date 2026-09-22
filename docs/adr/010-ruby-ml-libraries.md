@@ -3,7 +3,7 @@ type: ADR
 title: "010 Ruby 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定"
 description: "Ruby 版のライブラリに Bundler・Minitest・RuboCop・SimpleCov・Rumale 2.2・numo-narray-alt・Sinatra を採用し、Nix の Ruby 3.3 を前提にする方針と自作する範囲を決める。"
 tags: [adr,getting-start-ml,ruby]
-status: draft
+status: stable
 generated: { by: claude-code/claude-opus-5, at: 2026-09-22T00:00:00Z }
 ---
 
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-22T00:00:00Z }
 ## ステータス
 
 2026-09-22 提案されました
+
+2026-09-22 承認されました（第 1〜15 章の執筆で確かめました）
 
 ## コンテキスト
 
@@ -49,6 +51,11 @@ B50 のステップ 1 で、使い捨ての Bundler プロジェクトを `nix d
 | 8 | Rumale に欠損値の補完は無く、`OneHotEncoder` は整数のカテゴリだけを受け取り、先頭のカテゴリを落とせない。決定木にクラスの重みも無い。前処理と重み付きの決定木は自作が最終実装。`Marshal` は `Data`・配列を鍵にした `Hash`・第 3 章の木をそのまま保存できる（無名クラスは保存できない）。RuboCop の `Security/MarshalLoad` は理由を書いて 1 行だけ無効にした。`Data` は属性の差し替えを防ぐだけで、属性が指すオブジェクトは変えられる（同じパイプラインを 2 回学習すると 1 回目のモデルが上書きされた。`dup` で直した） |
 | 9 | **Rumale の `StandardScaler` は n−1 で割る標本標準偏差**（Numo の `stddev`）。scikit-learn・linfa（n で割る）とは √((n−1)/n) 倍ずれる。`PolynomialFeatures` は先頭の定数項を除けば自作と一致する。csv gem は文字コード名を打ち間違えても警告を出して読み進める。Numo に連立方程式を解く関数は無い（`numo-linalg` が要る）ので、正規方程式は自作 |
 | 10 | ロジスティック回帰の既定値は `reg_param: 1.0`・`tol: 1e-4` で切片も正則化する。`reg_param: 0.0`・`tol: 1e-8` で自作と予測が完全に一致する。ランダムフォレストは節ごとに `max_features`（既定は √特徴量数）の列を調べる（自作は木ごと）。**Rumale のモデルは `random_seed` を省くと既定値が `srand` になり、モデルを作るだけでプロセス全体の乱数の種が入れ替わる**ので、必ずシードを渡す。RuboCop の `Style/Sample` に従って `shuffle(random:).first(n)` を `sample(n, random:)` に直すと、同じシードでも選ばれる列が変わる |
+| 11 | Rumale の `Precision`・`Recall`・`FScore`（既定は `average: "binary"`）は `y_true` の最大のラベルを陽性とみなし、`confusion_matrix` は行が正解・列が予測でラベルの昇順に並ぶ。4 つの指標と `ROCAUC` は自作と 1e-12 以内で一致した。`KFold` の `shuffle: true` は第 2 章の `shuffle` と同じ `Random.new(seed)` と `Array#shuffle` なので、891 件の 5 分割が行単位で自作と一致した。`KFold` もシードを省くと `srand` する（`shuffle: false` でもシードを渡す）。`CrossValidation` に RMSE は無いので、`MeanSquaredError` の平方根をとる |
+| 12 | `Numo::Linalg` が無いと、`Ridge` は L-BFGS で「二乗誤差 ÷ n ＋ reg_param・(‖w‖² ＋ b²)」を最小化する（自作の α は `reg_param = α / n` に当たる）。`solver: "svd"` を渡しても黙って L-BFGS で解く（ソースによると SVD の経路は n で割らない）。`Lasso` は「½‖誤差‖² ＋ reg_param・(‖w‖₁ ＋ \|b\|)」で、α はそのまま渡せる。**`Ridge` も `Lasso` も切片を正則化する**ので、自分で中心化して `fit_bias: false` を渡し、平均から切片を作り直すと、`tol: 1e-10` でリッジは 1.38e-5 以内、ラッソは完全に一致した |
+| 13 | `Numo::Linalg` が無いと、PCA の `solver: "auto"` は固定小数点法（`fpt`）を選ぶ。`solver: "evd"` は警告を 1 行出して `fpt` に落ちる。既定の `max_iter: 100`・`tol: 1e-4` では、固有値の近い PC4・PC5 の主成分が最大 1.3 ずれる（寄与率の差は 4.4e-4）。`max_iter: 10_000`・`tol: 1e-12` で主成分の差は 6.3e-5 まで縮む。寄与率は自作（ヤコビ法の固有値分解）で、乱数を使わないのでほかの言語版と表示の桁まで一致した。Numo の列の取り出しはビューなので、`dup` を外すと例外なしに値が間違う |
+| 14 | `KMeans` の既定は `init: "k-means++"`・`max_iter: 50`・`tol: 1e-4`。SSE（inertia）も `n_init` も無く、学習後に持つのは `cluster_centers` だけなので、SSE は自作と同じ式で測り直す。クラスタ数 1 の SSE 2640.00 は自作・Rumale・Rust 版で一致した。RuboCop の `Style/Sample` に従うと選ばれる点が変わるので、第 14 章の初期中心は `shuffle` のまま残した |
+| 15 | Sinatra 4.1 から開発環境で Host ヘッダーを検査し、rack-test の既定の Host `example.org` は 403 になる（`host_authorization` の `permitted_hosts: []` で切る）。開発環境の `show_exceptions` は例外のメッセージを含む HTML を返すので無効にし、ルートの `rescue` で 503 と 500 に分けた。Sinatra はメソッド違いでも 404 を返すので、`not_found` で 405 と `Allow` を返す。rack-test は 1 つのテストの中で `app` を 1 度しか作らない。Rust の trait に当たる置き場の約束は、本物と偽物の両方に include する共通のテストのモジュールで表した。Puma は `Rackup::Handler.get("puma")` で起動する |
 
 ## 決定
 
@@ -65,14 +72,14 @@ B50 のステップ 1 で、使い捨ての Bundler プロジェクトを `nix d
 | 行列 | `numo-narray-alt`（Rumale の依存として入る。本家の `numo-narray` は入れない） | 0.11 | BSD-3-Clause | 第 7 章 |
 | 機械学習 | Rumale | 2.2 | BSD-3-Clause | 第 3 章 |
 | 直列化 | `Marshal`（学習済みモデル）、`json`（API の入出力） | Ruby と同じ | — | 第 8 章 |
-| API | Sinatra（`Sinatra::Base`）と Puma、rackup | Sinatra 4.2、Puma 8.0 | MIT / BSD-3-Clause | 第 15 章 |
+| API | Sinatra（`Sinatra::Base`）と Puma、rackup、統合テストは rack-test | Sinatra 4.2、Puma 8.0、rack-test 2.2 | MIT / BSD-3-Clause | 第 15 章 |
 
 - **Nix の Ruby 3.3 を前提にする。** 手元の macOS の Ruby 2.6 では動かさない。記事の環境構築の節は `nix develop .#ruby` を前提に書く
 - **型注釈（RBS・Steep）は使わない。** Ruby 版の対比の軸の 1 つが「実行時に型を検査しない言語で、型の誤りをテストで捕まえる」ことなので、使わない理由を記事に書く
 - **`numo-narray` を直接入れない。** Rumale 2.x が依存するのはフォークの `numo-narray-alt` で、両方を入れると衝突する。本家の保守が 2022 年で止まっていることとあわせて第 7 章で扱う
 - **CSV はファイルから読む。** `CSV.read`／`CSV.foreach` は BOM を取り除くので、ほかの言語版で書いてきた BOM の除去が要らない。文字列から読むときは `encoding: "bom|utf-8"` を使う
 - **各章は「自作してから Rumale と突き合わせる」構成にする。** Python 版（scikit-learn）と同じ流れ
-- **Rumale に無いものだけを自作の最終実装とする。** 現時点では PCA の寄与率（第 13 章）が該当する。欠損値の補完・ダミー変数化（第 8 章）の有無は、その章で確かめる
+- **Rumale に無いものだけを自作の最終実装とする。** PCA の寄与率と固有値分解（第 13 章）・欠損値の補完とダミー変数化とクラスの重み（第 8・9 章）・正規方程式（第 7・9 章。Numo に連立方程式を解く関数が無い）が該当する
 
 ### 章ごとのライブラリへの置き換え方針
 
