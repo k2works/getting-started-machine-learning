@@ -1619,17 +1619,21 @@ Rumale の対応範囲はステップ 1 で確かめ、見込みが外れたら 
 
 ### 確認した事実（B50 のステップ 1 で埋める）
 
+B50 のステップ 1（2026-09-22）で、使い捨ての Bundler プロジェクトを `nix develop .#ruby` の中で動かして次を確かめた。
+
 | 項目 | 結果 | 確認方法 |
 | :--- | :--- | :--- |
-| Nix 環境 | 未検証（Ruby・Bundler の版。solargraph は `rubyPackages_3_3`） | `nix develop .#ruby` |
-| Rumale | 未検証（版・ライセンス・最終更新・決定木／ランダムフォレスト／線形回帰／ロジスティック回帰／リッジ・ラッソ／PCA／K-means／評価指標／交差検証の有無） | 使い捨ての Bundler プロジェクトで実行 |
-| 行列 | 未検証（Numo::NArray の保守状況と、ネイティブ拡張が Nix で入るか） | 同上 |
-| 乱数 | 未検証（`Random.new(0)` と `shuffle(random:)` の並び。ほかの言語版との違い） | 同上 |
-| CSV | 未検証（`csv` が標準の gem から外れた版での扱い、`bom|utf-8` による BOM の除去、Shift_JIS の読み込み） | 同上 |
-| API | 未検証（第 15 章。Sinatra か WEBrick か Rack だけで書くか） | 同上 |
-| 直列化 | 未検証（`Marshal` と JSON） | 同上 |
-| 整形・静的解析 | 未検証（RuboCop の既定のルールが効くか） | わざと崩したファイル |
-| テスト・カバレッジ | 未検証（Minitest か RSpec か、SimpleCov） | 同上 |
+| Nix 環境 | Ruby 3.3.10、Bundler 2.7.2、RubyGems 3.7.2。手元の `ruby` は macOS の 2.6.10 で対象外 | `nix develop .#ruby` |
+| Rumale | 2.2.0（2026-07-05）、BSD-3-Clause。`rumale-tree`・`rumale-ensemble`・`rumale-linear_model` などの gem に分かれ、すべて 2.2.0 でそろう | rubygems.org の API、`bundle list` |
+| Rumale にあるもの | **ほぼ全部ある**。決定木（特徴量重要度つき）・ランダムフォレスト・線形回帰・ロジスティック回帰・リッジ・ラッソ・K-means・PCA・標準化・混同行列（`EvaluationMeasure.confusion_matrix`）・適合率／再現率／F 値（`Precision`・`Recall`・`FScore`）・ROC AUC（`ROCAUC`）・交差検証（`CrossValidation` と `KFold`） | 使い捨てのプロジェクトで全部実行 |
+| Rumale に無いもの | **PCA の寄与率**（`explained_variance_ratio` にあたるものが無い。持っているのは `components` と `mean` だけ）。第 13 章では寄与率を自作する | `instance_methods` と `instance_variables` |
+| 行列 | Rumale 2.x は **`numo-narray-alt`（0.11.2、2026-08-12）** に依存する。本家の `numo-narray` は 0.9.2.1（2022-08-20）で止まっており、両方を入れると衝突の警告が出る。`numo-narray` は直接入れない。ネイティブ拡張は Nix の中でビルドできた | `bundle install` の警告、`Gemfile.lock` |
+| 乱数 | `(0..9).to_a.shuffle(random: Random.new(0))` は `[2, 8, 4, 9, 1, 6, 7, 3, 0, 5]`。Python（MT19937）とも Rust とも違う並び | 使い捨てのプロジェクトで実行 |
+| CSV | csv 3.3.6（Ruby 3.4 から標準の gem から外れるので `Gemfile` に書く）。**`CSV.read`（ファイルを開く）は BOM を取り除く**が、`CSV.parse(File.read(...))`（文字列を渡す）は先頭の見出しに BOM が残る。文字列を渡すときは `encoding: "bom\|utf-8"` で読む。Shift_JIS は `encoding: "Shift_JIS:UTF-8"` で読め、指定しないと `CSV::InvalidEncodingError` になる | ヘッダーを表示して確認 |
+| API | Sinatra 4.2.1 と Puma 8.0.2、`rackup`。`Sinatra::Base` のモジュール形式でアプリを作れる | 同上 |
+| 直列化 | `Marshal.dump`／`Marshal.load` で学習済みの決定木を保存・復元して同じ予測が出る | 同上 |
+| 整形・静的解析 | RuboCop 1.91.0。既定の設定で「未使用の変数」「`nil` との比較」「frozen string literal のコメントが無い」など 6 件を検出する。`.rubocop.yml` に `NewCops: enable` を書かないと、新しいルールごとの警告が大量に出る | わざと崩したファイル |
+| テスト・カバレッジ | Minitest 6.0.6（`skip` がある）、SimpleCov 1.3.0。SimpleCov の最低カバレッジの設定はステップ 4 で確かめる | `bundle list` |
 
 ### B50 のステップ計画（Ruby のウォーキングスケルトン）
 
