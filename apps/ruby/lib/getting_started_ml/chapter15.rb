@@ -46,6 +46,7 @@ module GettingStartedMl
 
       service.health.each { |model| out.puts "モデル #{model.name}: #{model.ready}" }
       out.puts "http://localhost:#{PORT} で待ち受けます"
+      out.flush
       serve(Api.new(service:))
     end
 
