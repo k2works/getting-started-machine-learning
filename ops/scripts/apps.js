@@ -61,6 +61,16 @@ const APPS = [
       'cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test && cargo llvm-cov --summary-only',
   },
   {
+    name: 'ruby',
+    nix: 'ruby',
+    dir: path.join('apps', 'ruby'),
+    // macOS に付属する Ruby 2.6 では動かないので、3.3 未満なら Nix の環境で実行する
+    tools: [{ cmd: 'ruby', version: `ruby -e 'exit(Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.3"))'` }],
+    setup: 'bundle install',
+    // CI（.github/workflows/ruby-ci.yml）と同じく、RuboCop とテスト（SimpleCov つき）を検査する
+    check: 'bundle exec rake check',
+  },
+  {
     name: 'scala',
     nix: 'scala',
     dir: path.join('apps', 'scala'),

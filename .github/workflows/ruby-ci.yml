@@ -1,0 +1,47 @@
+name: Ruby CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/ruby/**'
+      - 'ops/nix/environments/ruby/**'
+      - '.github/workflows/ruby-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/ruby/**'
+      - 'ops/nix/environments/ruby/**'
+      - '.github/workflows/ruby-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # gem は apps/ruby/.bundle/config の BUNDLE_PATH（vendor/bundle）に入る
+      - name: Cache gems
+        uses: actions/cache@v4
+        with:
+          path: apps/ruby/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('apps/ruby/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install gems
+        run: |
+          nix develop .#ruby --command bash -c 'cd apps/ruby && bundle install'
+
+      # RuboCop の指摘はすべてエラーにする
+      - name: RuboCop
+        run: |
+          nix develop .#ruby --command bash -c 'cd apps/ruby && bundle exec rake rubocop'
+
+      # 実データのテストは学習データが無ければスキップされる。カバレッジは SimpleCov が表示する
+      - name: Test
+        run: |
+          nix develop .#ruby --command bash -c 'cd apps/ruby && bundle exec rake test'
