@@ -1,0 +1,7 @@
+# frozen_string_literal: true
+
+# 「機械学習から始めるプログラミング入門」Ruby 版の実装。
+module GettingStartedMl
+end
+
+require_relative "getting_started_ml/dataset"
