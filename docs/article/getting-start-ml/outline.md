@@ -363,7 +363,7 @@ apps/
 | U3 TypeScript | 第 1〜15 章、`apps/node/`、CI | U0、U1（章の節構成） |
 | U4 F# | 第 1〜15 章、`apps/fsharp/`（Polyglot Notebooks を含む）、CI | U0、U1（章の節構成・可視化の節構成） |
 | U5〜U9 第 2 波 | Java・C#・Scala・Rust・Go の各言語（「第 2 波の執筆計画」を参照） | U0、U1、第 1 波の対比の相手（Java は U2、C# は U4 など） |
-| U10〜U14 第 3 波 | Ruby・PHP・Elixir・Clojure・Haskell の各言語 | U0、U1 |
+| U10〜U14 第 3 波 | Ruby・PHP・Elixir・Clojure・Haskell の各言語（「第 3 波の執筆計画」を参照） | U0、U1 |
 | U15 多言語統合解説 | `integration/` | 第 1 波の 4 言語完了後に着手し、波ごとに更新 |
 
 ### Bolt 計画（第 1 波）
@@ -1501,6 +1501,107 @@ Rust 版の全 15 章が完成した（B44〜B48）。実装は `apps/rust/src/{
 - [x] 第 15 章の API は axum（+ tokio）を使うこと（Go 版と違い、標準ライブラリだけでは HTTP サーバーを書けないため）
 - [x] 実装を `apps/rust/`、記事を `docs/article/getting-start-ml/rust/` に置くこと
 - [x] B44 のステップ 1〜8
+
+## 第 3 波の執筆計画
+
+第 3 波は Ruby・PHP・Elixir・Clojure・Haskell の 5 言語（U10〜U14）を対象にする。第 1 波・第 2 波で固めた型（5 部 15 章の節構成、記事の体裁、`ML_DATA_DIR` とデータが無いときのスキップ、言語ごとの ADR、言語ごとの CI）をそのまま使う。本節は 2026-09-22 に承認した。各言語の「確認した事実」「ライブラリ方針」「前提整備」「章別執筆計画」は、その言語のウォーキングスケルトンの中で書き足す。
+
+### 第 2 波の実績
+
+| 言語 | Bolt | 期間 | 進め方と詰まった点 |
+|------|------|------|------------------|
+| Java | B24〜B28 | 2026-09-19〜20 | Kotlin 版の実装を書き直す形で進めた |
+| C# | B29〜B33 | 2026-09-20 | `global.json` を `rollForward: latestPatch` にして、手元と Nix の SDK の版の違いを吸収した |
+| Scala | B34〜B38 | 2026-09-20 | JVM と Smile を使った。親が第 1〜3・10・15 章を書き、残りをサブエージェントで並行して進めた |
+| Go | B39〜B43 | 2026-09-20 | `go.mod` の `go` 指令を Nix の版に合わせた |
+| Rust | B44〜B48 | 2026-09-20〜21 | linfa の対応範囲が見込みより広く、対比の軸を差し替えた。第 11〜14 章のサブエージェントが利用上限で止まり、親が引き継いだ |
+| 統合解説 | B49 | 2026-09-21 | 9 言語に拡張した |
+
+実績から次のことが分かった。
+
+- 第 2 波は 5 言語と統合解説を約 3 日で終えた。見込み（6〜8 日）より速かった。既存の言語版を対比の相手にでき、ウォーキングスケルトンの型が固まっていたためである
+- ライブラリの対応範囲の見込みは外れることがある（Rust）。対比の軸は、ステップ 1 で確かめてから確定する
+- 手元と Nix で処理系の版が違うことを前提にし、版の指定は両方で動く書き方にする
+- 同じ実行環境の言語は数値が一致する（Java と Scala、C# と F#）。統合解説では、これを読み比べの軸として使える
+
+### 言語の順番
+
+参照実装（Python 版）に近く、既存の言語版を対比の相手として使える言語から順に書く。型の検査が最も厳しく、ライブラリが最も少ない見込みの Haskell は最後にする。
+
+| 順 | 言語 | Unit | 対比の相手 | 理由 |
+|----|------|------|-----------|------|
+| 1 | Ruby | U10 | Python 版 | 動的型付けで、書き方が Python 版に近い。Rumale（scikit-learn に似た API）と Numo::NArray で置き換えを確かめられる見込み |
+| 2 | Clojure | U13 | Scala 版・Java 版 | JVM で動くので、Smile を Scala 版と共有できる見込み。数値が Scala 版・Java 版と一致するかを確かめられる |
+| 3 | Elixir | U12 | F# 版・Scala 版 | 関数型の言語。Nx・Scholar・Explorer は Python の NumPy・scikit-learn・pandas にあたる |
+| 4 | PHP | U11 | TypeScript 版 | Web 系の言語で ML ライブラリが限られ、TypeScript 版と進め方が近い見込み（Rubix ML・PHP-ML は保守状況を確かめる必要がある） |
+| 5 | Haskell | U14 | Rust 版・F# 版 | 純粋関数型で、型でエラーを表す。ML ライブラリが少なく、自作の比重が最も大きい見込みなので最後にする |
+
+### 共通の方針（案）
+
+| 項目 | 方針 |
+|------|------|
+| 実装の置き場所 | `apps/ruby/`・`apps/php/`・`apps/elixir/`・`apps/clojure/`・`apps/haskell/`。ディレクトリ名は Nix の環境名に合わせる |
+| 記事の置き場所 | `docs/article/getting-start-ml/{ruby,php,elixir,clojure,haskell}/` |
+| Notebook と可視化の節 | 第 2 波と同じく作らず、可視化は Python 版・Kotlin 版へ案内する（Elixir の Livebook も使わない） |
+| 付録 A | 作らず、Python 版の付録 A へ案内する |
+| ライブラリ | 言語ごとに ADR（010 Ruby、011 Clojure、012 Elixir、013 PHP、014 Haskell。書く順に番号を振る）を作る。ウォーキングスケルトンの中で版・ライセンス・保守状況・アルゴリズムの有無を確かめてから確定する。ライブラリに無いもの・保守が止まっているものは、自作を最終実装にする |
+| 処理系 | 検査と CI は Nix の環境で行う。手元の `ruby` は macOS の 2.6 で古く、`clojure`・`ghc` は手元に無いので、記事の環境構築の節は Nix を前提に書く |
+| CI | 言語ごとに `.github/workflows/{ruby,php,elixir,clojure,haskell}-ci.yml` を追加する（Nix → ビルド・整形の確認・静的解析・テスト・カバレッジの表示） |
+| タスク | `ops/scripts/apps.js` に 5 言語を加え、`apps:check:<言語>` で手元の検査を実行できるようにする |
+| 数値 | 記事に載せる数値は、その言語版の実装で実測した値だけにする |
+| 統合解説 | 第 3 波の 5 言語の完了後にまとめて更新する（B75） |
+
+### 確認すべき事実
+
+次の点は未確認であり、各言語のウォーキングスケルトンのステップ 1 で確かめる。
+
+| 言語 | 確認すること |
+|------|------------|
+| Ruby | Nix の `ruby` の版（環境は `rubyPackages_3_3` の solargraph を使っている）。Rumale の最新版と対応範囲（決定木・ランダムフォレスト・PCA・K-means）、Numo::NArray の保守状況。整形・静的解析（RuboCop）とカバレッジ（SimpleCov） |
+| Clojure | Clojure CLI（`deps.edn`）と Leiningen のどちらを使うか。Smile を Scala 版と同じ版で使えるか（Smile の版ごとのライセンスは ADR 007 を参照）。tech.ml.dataset・tablecloth・scicloj.ml の保守状況。静的解析（clj-kondo）とカバレッジ（cloverage） |
+| Elixir | Nx・Scholar・Explorer の版と対応範囲（Scholar に決定木・ランダムフォレストがあるか）。Explorer が Nix 環境で Rust のネイティブ拡張を取得できるか。整形（`mix format`）・静的解析（Credo）・カバレッジ |
+| PHP | Nix の `php` の版（環境は `php83Packages.composer` を使う）。Rubix ML・PHP-ML の保守状況と対応範囲。静的解析（PHPStan）・整形（PHP-CS-Fixer）とカバレッジ（Xdebug か PCOV が Nix で使えるか） |
+| Haskell | Nix の GHC の版と、cabal と stack のどちらを使うか。hmatrix（BLAS・LAPACK への依存）が Nix で動くか。CSV（cassava）と ML ライブラリの有無。静的解析（HLint）・整形（ormolu か fourmolu）・カバレッジ（hpc） |
+
+### Bolt 計画（第 3 波）
+
+第 2 波と同じく、1 言語を 5 Bolt で進める。言語をまたいだ並行作業はせず、1 言語ずつ完了させる。言語の中では、第 2〜3 章・第 4〜6 章・第 7〜14 章の各章を worktree のサブエージェントで並行して進める。サブエージェントは章ごとに小さくコミットし、利用上限で止まっても親が引き継げるようにする。
+
+| Bolt | 言語 | 内容 | 完了条件 |
+|------|------|------|---------|
+| B50 ウォーキングスケルトン | Ruby | Nix の `ruby` 環境の確認、`apps/ruby/` の雛形、ADR 010、第 1 章の実装と記事、Ruby 版のトップページ、nav、Ruby CI | 第 1 章のテストが CI でグリーン。記事がサイトで表示される。静的解析のルールが有効になっている（わざと違反を入れて失敗することを確かめる） |
+| B51 | Ruby | 第 2〜3 章 | 自作の決定木とライブラリの結果を並べて載せられる |
+| B52 | Ruby | 第 4〜6 章 | ビルド・静的解析・カバレッジ・CI が記事どおりに動く |
+| B53 | Ruby | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
+| B54 | Ruby | 第 15 章 | Ruby 版の全章完了。Python 版と節構成がそろっている |
+| B55〜B59 | Clojure | B50〜B54 と同じ区切り（ADR 011、`apps/clojure/`） | Clojure 版の全章完了 |
+| B60〜B64 | Elixir | 同上（ADR 012、`apps/elixir/`） | Elixir 版の全章完了 |
+| B65〜B69 | PHP | 同上（ADR 013、`apps/php/`） | PHP 版の全章完了 |
+| B70〜B74 | Haskell | 同上（ADR 014、`apps/haskell/`） | Haskell 版の全章完了 |
+| B75 | 統合解説 | `integration/` の各章と索引に第 3 波の 5 言語を加える | 統合解説の各表で 14 言語の行・列がそろっている |
+
+目安は第 2 波の実績をもとに 1 言語 0.5〜1 日とし、Haskell は自作の比重が大きいので 1〜1.5 日とする。第 3 波全体では 4〜6 日とする。各言語の完了時に、実績をもとに次の言語の見積もりを見直す。
+
+### リスク（第 3 波）
+
+| リスク | 影響 | 対応 |
+|--------|------|------|
+| ライブラリの保守が止まっている（PHP-ML、Numo など） | 読者の環境で動かない、脆弱性が放置される | ステップ 1 で最終リリース日と未対応の Issue を確かめ、止まっていれば自作を最終実装にして、ADR に理由を記録する |
+| ネイティブ拡張が Nix で動かない（Explorer・hmatrix・Numo） | CI と手元で環境がずれる | ウォーキングスケルトンで Nix の CI を先に通してから第 2 章に入る |
+| Haskell の自作の比重が大きい | 1 言語の所要時間が延びる | 最後の言語にし、第 2 波の Go 版・Rust 版の自作の実装を対比の相手として使う |
+| Clojure と Scala の数値の一致を前提にしてしまう | 一致しない場合に記事の説明が崩れる | 一致は仮説として扱い、実測してから記事と統合解説に書く |
+
+### 承認が必要な事項（第 3 波）
+
+次の点を確認した（2026-09-22 承認）。
+
+- [x] 言語の順番を Ruby → Clojure → Elixir → PHP → Haskell とすること
+- [x] 第 3 波では Notebook（Livebook を含む）・可視化の節・付録 A を作らず、Python 版・Kotlin 版へ案内すること
+- [x] 検査と CI は Nix の環境で行い、記事の環境構築の節を Nix 前提で書くこと
+- [x] ADR の番号を書く順（010 Ruby、011 Clojure、012 Elixir、013 PHP、014 Haskell）に振ること
+- [x] 1 言語を 5 Bolt とし、Bolt 番号を B50〜B75 とすること
+- [x] 統合解説の更新を第 3 波の完了後にまとめて行うこと（B75）
+- [x] B50（Ruby のウォーキングスケルトン）の範囲
 
 ## リスクと対応
 
