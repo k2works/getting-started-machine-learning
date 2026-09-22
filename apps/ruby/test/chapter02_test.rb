@@ -97,6 +97,13 @@ class Chapter02Test < Minitest::Test
     refute_equal C.shuffle(items, 0), C.shuffle(items, 1)
   end
 
+  def test_並べ替えの並びはほかの言語版と違う
+    items = (0..9).to_a
+
+    # Rust 版は [9 3 6 4 8 1 5 2 0 7]、Java 版は [4 8 9 6 3 5 2 1 7 0]、Go 版は [6 8 2 3 7 5 9 1 0 4]
+    assert_equal [2, 8, 4, 9, 1, 6, 7, 3, 0, 5], C.shuffle(items, 0)
+  end
+
   def test_並べ替えても要素は変わらず元の配列も変わらない
     items = (0..9).to_a
 
