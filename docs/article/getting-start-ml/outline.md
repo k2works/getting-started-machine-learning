@@ -1613,7 +1613,7 @@ Rust 版の全 15 章が完成した（B44〜B48）。実装は `apps/rust/src/{
 | :--- | :--- | :--- |
 | 動的型付けのスクリプト言語 | [Python 版](python/index.md) | 同じ動的型付けで書き方が近い。ブロックと `Enumerable`（`map`・`select`・`each_slice`）による書き方の違い |
 | scikit-learn に似た API | [Python 版](python/index.md)（scikit-learn） | Rumale の `fit`・`predict` が scikit-learn とどこまで同じか。自作 → Rumale で突き合わせる |
-| 実行時に型を検査しない | [TypeScript 版](node/index.md)・[Kotlin 版](kotlin/index.md) | 型の誤りをテストで捕まえる。RBS・Steep は使わず、使わない理由を記事に書く |
+| 実行時に型を検査しない | [TypeScript 版](typescript/index.md)・[Kotlin 版](kotlin/index.md) | 型の誤りをテストで捕まえる。RBS・Steep は使わず、使わない理由を記事に書く |
 
 Rumale の対応範囲はステップ 1 で確かめ、見込みが外れたら Rust 版と同じく承認を得て軸を差し替える。
 
@@ -1649,6 +1649,15 @@ B50 のステップ 1（2026-09-22）で、使い捨ての Bundler プロジェ�
 | 6 | 記事：第 1 章、Ruby 版トップ（`ruby/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
 | 7 | CI とタスク：`.github/workflows/ruby-ci.yml`（Nix → RuboCop → テスト → カバレッジ。gem のキャッシュ）、`ops/scripts/apps.js` への `ruby` の追加 | push 後に Ruby CI がグリーン。`apps:check:ruby` が手元で成功する |
 | 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+B50（Ruby のウォーキングスケルトン）は 2026-09-22 に完了した。第 1 章の正解率は 0.7368 で、ほかの言語版と一致した。
+
+- **Rumale はほぼ全部そろっていた。** 無いのは PCA の寄与率だけで、Python 版と同じ「自作してからライブラリと突き合わせる」流れを書ける
+- **Rumale 2.x は `numo-narray-alt` に依存する。** 本家の `numo-narray` は 2022 年で止まっており、一緒に入れると衝突する
+- **`CSV.read`／`CSV.foreach` はファイルを開くときに BOM を取り除く。** 文字列を `CSV.parse` に渡すと BOM が残る。読み方しだいで結果が変わることを第 1 章で扱った
+- **`module_function` のモジュールをテストに `include` すると、章の `run` が `Minitest::Test#run` を上書きする。** `NoMethodError` で全テストが落ちた。動的言語ではメソッド名の衝突を実行するまで検出できない例として、記事の見どころにした
+- 手元の `ruby` は macOS の 2.6 なので、`apps:check:ruby` は「Ruby 3.3 以上か」を確かめ、満たさなければ Nix の環境で実行する
+- テストは 13 件（データなしでは 1 件がスキップ）、行カバレッジは 88.88%（40/45）
 
 ### 承認が必要な事項（Ruby）
 

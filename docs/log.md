@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-22
+* **Creation**: Ruby 版の[トップ](/article/getting-start-ml/ruby/index.md)・[第 1 章](/article/getting-start-ml/ruby/01-machine-learning-and-first-test.md)・[ADR 010](/adr/010-ruby-ml-libraries.md) を新規作成し、シリーズ索引と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Ruby 版執筆計画・確認した事実・B50 の完了を反映。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に第 3 波（Ruby・PHP・Elixir・Clojure・Haskell）の執筆計画を追加し承認。第 2 波の実績、言語の順番（Ruby → Clojure → Elixir → PHP → Haskell）、共通の方針、確認すべき事実、Bolt 計画（B50〜B75）、第 3 波のリスクを定義。
 
 ## 2026-09-21

@@ -50,7 +50,7 @@ class Chapter01Test < Minitest::Test
   def test_BOM_付きの_CSV_を列名で読み込む
     Dir.mktmpdir do |dir|
       path = File.join(dir, "people.csv")
-      File.write(path, "﻿身長,体重,年代,派閥\n170,60,20,きのこ\n")
+      File.write(path, "\uFEFF身長,体重,年代,派閥\n170,60,20,きのこ\n")
 
       assert_equal [C::Person.new(height: 170, weight: 60, age_group: 20, faction: C::KINOKO)], C.load_people(path)
     end
