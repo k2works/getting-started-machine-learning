@@ -111,4 +111,12 @@ class Chapter09Test < Minitest::Test
 
     assert_equal "列がありません: RM^2", error.message
   end
+
+  def test_Rumale_の多項式特徴量と同じ値になる
+    ours = C.expand([row(2.0, 3.0)], %w[RM LSTAT]).first.values
+    theirs = Rumale::Preprocessing::PolynomialFeatures.new(degree: 2).fit_transform(Numo::DFloat[[2.0, 3.0]])
+
+    # Rumale は先頭に定数項（1）の列を置き、そのあとは scikit-learn と同じ順に並べる
+    assert_equal [1.0, *ours], theirs.to_a.first
+  end
 end
