@@ -1603,6 +1603,59 @@ Rust 版の全 15 章が完成した（B44〜B48）。実装は `apps/rust/src/{
 - [x] 統合解説の更新を第 3 波の完了後にまとめて行うこと（B75）
 - [x] B50（Ruby のウォーキングスケルトン）の範囲
 
+## Ruby 版執筆計画
+
+第 3 波の最初の言語。実装は `apps/ruby/`、記事は `docs/article/getting-start-ml/ruby/`、ライブラリの選定は ADR 010 に記録する。
+
+### 対比の軸
+
+| 軸 | 相手 | 見どころ |
+| :--- | :--- | :--- |
+| 動的型付けのスクリプト言語 | [Python 版](python/index.md) | 同じ動的型付けで書き方が近い。ブロックと `Enumerable`（`map`・`select`・`each_slice`）による書き方の違い |
+| scikit-learn に似た API | [Python 版](python/index.md)（scikit-learn） | Rumale の `fit`・`predict` が scikit-learn とどこまで同じか。自作 → Rumale で突き合わせる |
+| 実行時に型を検査しない | [TypeScript 版](node/index.md)・[Kotlin 版](kotlin/index.md) | 型の誤りをテストで捕まえる。RBS・Steep は使わず、使わない理由を記事に書く |
+
+Rumale の対応範囲はステップ 1 で確かめ、見込みが外れたら Rust 版と同じく承認を得て軸を差し替える。
+
+### 確認した事実（B50 のステップ 1 で埋める）
+
+| 項目 | 結果 | 確認方法 |
+| :--- | :--- | :--- |
+| Nix 環境 | 未検証（Ruby・Bundler の版。solargraph は `rubyPackages_3_3`） | `nix develop .#ruby` |
+| Rumale | 未検証（版・ライセンス・最終更新・決定木／ランダムフォレスト／線形回帰／ロジスティック回帰／リッジ・ラッソ／PCA／K-means／評価指標／交差検証の有無） | 使い捨ての Bundler プロジェクトで実行 |
+| 行列 | 未検証（Numo::NArray の保守状況と、ネイティブ拡張が Nix で入るか） | 同上 |
+| 乱数 | 未検証（`Random.new(0)` と `shuffle(random:)` の並び。ほかの言語版との違い） | 同上 |
+| CSV | 未検証（`csv` が標準の gem から外れた版での扱い、`bom|utf-8` による BOM の除去、Shift_JIS の読み込み） | 同上 |
+| API | 未検証（第 15 章。Sinatra か WEBrick か Rack だけで書くか） | 同上 |
+| 直列化 | 未検証（`Marshal` と JSON） | 同上 |
+| 整形・静的解析 | 未検証（RuboCop の既定のルールが効くか） | わざと崩したファイル |
+| テスト・カバレッジ | 未検証（Minitest か RSpec か、SimpleCov） | 同上 |
+
+### B50 のステップ計画（Ruby のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：上の表の各項目を、スクラッチパッドの使い捨ての Bundler プロジェクトで実際に動かして確かめ、「確認した事実」に書き足す | 「未検証」の項目が無くなる |
+| 2 | ADR 010 を書く（章ごとの置き換えの範囲。Rumale に無いもの・保守が止まっているものは自作とする） | ADR 010 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/ruby/` の雛形：`Gemfile`・`Gemfile.lock`・`.ruby-version`・`lib/`・`test/`・`Rakefile`・`.gitignore`、最初のテストが 1 本通る | `nix develop .#ruby` でテストが成功する（手元の Ruby 2.6 は対象外と記事に書く） |
+| 4 | 整形・静的解析・カバレッジ：RuboCop・テスト・SimpleCov を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストはデータが無ければスキップする（Minitest の `skip`） | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Ruby 版トップ（`ruby/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/ruby-ci.yml`（Nix → RuboCop → テスト → カバレッジ。gem のキャッシュ）、`ops/scripts/apps.js` への `ruby` の追加 | push 後に Ruby CI がグリーン。`apps:check:ruby` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Ruby）
+
+次の点を確認した（2026-09-22 承認）。
+
+- [x] Ruby 版の対比の軸（Python 版＝動的型付けと scikit-learn に似た API、TypeScript 版・Kotlin 版＝型の検査の有無）
+- [x] 機械学習は Rumale を第一候補とし、ステップ 1 で確かめてから ADR 010 で確定すること
+- [x] 型注釈（RBS・Steep）は使わないこと
+- [x] 実装を `apps/ruby/`、記事を `docs/article/getting-start-ml/ruby/` に置くこと
+- [x] B50 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
