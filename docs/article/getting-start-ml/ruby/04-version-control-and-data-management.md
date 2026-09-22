@@ -231,19 +231,31 @@ lib/getting_started_ml/zzcrlf.rb:1:1: C: Layout/EndOfLine: Carriage return chara
 
 つまり、**Windows では CRLF を、それ以外では LF を求めます**。Windows の Git が CRLF に変えてチェックアウトしても、Windows の RuboCop はそれを正しいと見なすので、検査はどちらの OS でも通ります。その代わり、同じファイルが OS によって違うバイト列になります。
 
-Rust 版・Go 版などは、ルートの `.gitattributes` で `apps/<言語>/** text=auto eol=lf` と書き、改行コードを LF に固定しています。執筆時点では Ruby 版の行はまだありません。
+Rust 版・Go 版などは、ルートの `.gitattributes` で `apps/<言語>/** text=auto eol=lf` と書き、改行コードを LF に固定しています。Ruby 版も同じ行を足しました。
+
+```text
+apps/ruby/** text=auto eol=lf
+```
+
+`.gitattributes` だけを変えると、Windows では「LF でチェックアウトしたのに、RuboCop が CRLF を求める」食い違いが起きます。そこで、RuboCop の `Layout/EndOfLine` も LF にそろえました。
+
+```yaml
+# 改行は LF にそろえる（.gitattributes の apps/ruby/** eol=lf と合わせる）。
+Layout/EndOfLine:
+  EnforcedStyle: lf
+```
 
 ```bash
 git ls-files --eol apps/ruby/Gemfile apps/ruby/Gemfile.lock apps/ruby/lib/getting_started_ml/dataset.rb
 ```
 
 ```text
-i/lf    w/lf    attr/                 	apps/ruby/Gemfile
-i/lf    w/lf    attr/                 	apps/ruby/Gemfile.lock
-i/lf    w/lf    attr/                 	apps/ruby/lib/getting_started_ml/dataset.rb
+i/lf    w/lf    attr/text=auto eol=lf 	apps/ruby/Gemfile
+i/lf    w/lf    attr/text=auto eol=lf 	apps/ruby/Gemfile.lock
+i/lf    w/lf    attr/text=auto eol=lf 	apps/ruby/lib/getting_started_ml/dataset.rb
 ```
 
-`i/` がリポジトリの中の改行コード、`w/` が作業ディレクトリの改行コード、`attr/` が当てはまった属性です。`attr/` が空なので、Windows では `core.autocrlf` の設定しだいで CRLF になります。LF に固定するなら、`.gitattributes` に行を足すのと同時に、RuboCop の `Layout/EndOfLine` を `EnforcedStyle: lf` にする必要があります。片方だけにすると、Windows で「LF でチェックアウトしたのに RuboCop が CRLF を求める」食い違いが起きます。
+`i/` がリポジトリの中の改行コード、`w/` が作業ディレクトリの改行コード、`attr/` が当てはまった属性です。
 
 ## 4.5 データの入手手順をコードにする
 
@@ -471,7 +483,7 @@ stop
 1. **Conventional Commits** — type と scope で、変更の種類と対象が分かるコミットメッセージを書く。理由は本文に書く
 2. **コミットしないものを決める** — 再配布できない学習データ、再生成できる `vendor/`・`coverage/`・モデルを `.gitignore` で除外する
 3. **`.bundle/config` と `Gemfile.lock` はコミットする** — gem の置き場所はプロジェクトの取り決め、lock は読者が同じ数値を再現するための記録。lock には CI の Linux のプラットフォームも入れる
-4. **改行コード** — RuboCop の `Layout/EndOfLine` は既定で OS ごとの改行（Windows は CRLF、それ以外は LF）を求める。LF に固定するなら `.gitattributes` と RuboCop の設定を一緒に変える
+4. **改行コード** — RuboCop の `Layout/EndOfLine` は既定で OS ごとの改行（Windows は CRLF、それ以外は LF）を求める。`.gitattributes` と RuboCop の設定を一緒に LF に固定する
 5. **入手手順をコードにする** — データを置く場所と確認方法を Gulp タスクにし、プログラムからは `Dataset.dir` で場所を解決する。`rake test` は `apps/ruby` で走るので、既定の相対パスが届く
 6. **Minitest の `skip`** — データが無ければスキップし、件数が結果の行に出る。理由は `--verbose` で見る
 7. **乱数の並びは処理系が決める** — `Random` と `Array#shuffle` は Ruby 本体の機能なので、`Gemfile.lock` ではなく Ruby の版が並びを固定する。並びそのものをテストで固定しておく

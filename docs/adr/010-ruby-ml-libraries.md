@@ -37,6 +37,19 @@ B50 のステップ 1 で、使い捨ての Bundler プロジェクトを `nix d
 | 整形・静的解析 | RuboCop 1.91.0。既定で「未使用の変数」「`nil` との比較」など 6 件を検出。`NewCops: enable` を書かないと、新しいルールごとの警告が大量に出る | わざと崩したファイル |
 | テスト・カバレッジ | Minitest 6.0.6（`skip` がある）、SimpleCov 1.3.0 | `bundle list` |
 
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 1 | `CSV.foreach`／`CSV.read` はファイルを開くときに BOM を取り除く。`module_function` のモジュールをテストのクラスに `include` すると、章の `run` がプライベートなインスタンスメソッドとして入り、`Minitest::Test#run` を上書きして全テストが `NoMethodError` で落ちる。テストでは `include` せずにモジュールの関数として呼ぶ |
+| 2 | `Array#shuffle(random: Random.new(0))` の並びは `[2, 8, 4, 9, 1, 6, 7, 3, 0, 5]`。乱数の並びを決めるのは Ruby 本体なので、固定しているのは `Gemfile.lock` ではなく Ruby の版（2.6.10 と 3.3.10 で同じ並び）。件数 105 件・45 件はほかの言語版と一致し、訓練データの平均値は一致しない |
+| 3 | `tally` は出現順を保ち、`max_by` は同点のとき最初の要素を返す（Rust の `max_by_key` は最後）。`sort_by` は安定ではないので、元の位置を 2 つ目の鍵にする。Rumale の決定木は節ごとに特徴量を `Array#sample` でランダムな順に並べるので、同じ不純度の分割が並ぶと自作と違う分割を選ぶ（深さ 1〜5 は予測が一致、制限なしで 1 件分かれる）。予測時の比較は自作と同じ `<=` |
+| 4〜6 | **Nix の環境で `RUBYLIB` に Solargraph の依存の gem が並び、`bundle exec` が `Gemfile.lock` より古い parser・prism・rubocop-ast を読み込んでいた**（検査は通るので気付けない。`rubocop -V` の表示で気付いた）。環境定義の `shellHook` で `unset RUBYLIB` して直した。RuboCop 1.91 は `NewCops: enable` を書かないと 163 個の cop について警告が出る。`Gemfile.lock` には `bundle lock --add-platform x86_64-linux` で CI 用の Linux を加えた |
+| 7 | **`Rumale::LinearModel::LinearRegression` は `Numo::Linalg` が読み込まれていないと L-BFGS（`tol` 1e-4）で解き、`solver: "svd"` を指定しても黙って L-BFGS に落ちる。** 既定のままでは切片 0.0044（自作は 6035.99）、テストの決定係数 −1.246 になり、例外も警告も出ない。`tol: 1e-10` で自作との差は 3.5e-5 以内になる。Numo の `work[i, true]` はビューを返すので、行の入れ替えで `dup` を忘れると黙って同じ行になる |
+| 8 | Rumale に欠損値の補完は無く、`OneHotEncoder` は整数のカテゴリだけを受け取り、先頭のカテゴリを落とせない。決定木にクラスの重みも無い。前処理と重み付きの決定木は自作が最終実装。`Marshal` は `Data`・配列を鍵にした `Hash`・第 3 章の木をそのまま保存できる（無名クラスは保存できない）。RuboCop の `Security/MarshalLoad` は理由を書いて 1 行だけ無効にした。`Data` は属性の差し替えを防ぐだけで、属性が指すオブジェクトは変えられる（同じパイプラインを 2 回学習すると 1 回目のモデルが上書きされた。`dup` で直した） |
+| 9 | **Rumale の `StandardScaler` は n−1 で割る標本標準偏差**（Numo の `stddev`）。scikit-learn・linfa（n で割る）とは √((n−1)/n) 倍ずれる。`PolynomialFeatures` は先頭の定数項を除けば自作と一致する。csv gem は文字コード名を打ち間違えても警告を出して読み進める。Numo に連立方程式を解く関数は無い（`numo-linalg` が要る）ので、正規方程式は自作 |
+| 10 | ロジスティック回帰の既定値は `reg_param: 1.0`・`tol: 1e-4` で切片も正則化する。`reg_param: 0.0`・`tol: 1e-8` で自作と予測が完全に一致する。ランダムフォレストは節ごとに `max_features`（既定は √特徴量数）の列を調べる（自作は木ごと）。**Rumale のモデルは `random_seed` を省くと既定値が `srand` になり、モデルを作るだけでプロセス全体の乱数の種が入れ替わる**ので、必ずシードを渡す。RuboCop の `Style/Sample` に従って `shuffle(random:).first(n)` を `sample(n, random:)` に直すと、同じシードでも選ばれる列が変わる |
+
 ## 決定
 
 | 用途 | 採用 | バージョン | ライセンス | 初出 |
