@@ -2,3 +2,5 @@
 
 require_relative "chapter15/domain"
 require_relative "chapter15/validation"
+require_relative "chapter15/store"
+require_relative "chapter15/service"
