@@ -6,3 +6,4 @@ end
 
 require_relative "getting_started_ml/dataset"
 require_relative "getting_started_ml/chapter01"
+require_relative "getting_started_ml/chapter02"
