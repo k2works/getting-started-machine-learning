@@ -5,3 +5,4 @@ module GettingStartedMl
 end
 
 require_relative "getting_started_ml/dataset"
+require_relative "getting_started_ml/chapter01"

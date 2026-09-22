@@ -2,9 +2,10 @@
 
 require "simplecov"
 SimpleCov.start do
-  add_filter "/test/"
-  add_filter "/vendor/"
+  skip "/test/"
+  skip "/vendor/"
 end
 
+require "tmpdir"
 require "minitest/autorun"
 require "getting_started_ml"
