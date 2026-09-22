@@ -1510,10 +1510,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="コンテキスト">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        各章で確かめた結果
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         決定
@@ -1525,7 +1542,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         章ごとのライブラリへの置き換え方針
@@ -1536,7 +1553,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         検討した代替案
@@ -1552,7 +1569,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         影響
@@ -9870,7 +9887,50 @@
 </tr>
 </tbody>
 </table>
-<h2 id="_3">決定<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_3">各章で確かめた結果<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>章</th>
+<th>確かめたこと</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>CSV.foreach</code>／<code>CSV.read</code> はファイルを開くときに BOM を取り除く。<code>module_function</code> のモジュールをテストのクラスに <code>include</code> すると、章の <code>run</code> がプライベートなインスタンスメソッドとして入り、<code>Minitest::Test#run</code> を上書きして全テストが <code>NoMethodError</code> で落ちる。テストでは <code>include</code> せずにモジュールの関数として呼ぶ</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Array#shuffle(random: Random.new(0))</code> の並びは <code>[2, 8, 4, 9, 1, 6, 7, 3, 0, 5]</code>。乱数の並びを決めるのは Ruby 本体なので、固定しているのは <code>Gemfile.lock</code> ではなく Ruby の版（2.6.10 と 3.3.10 で同じ並び）。件数 105 件・45 件はほかの言語版と一致し、訓練データの平均値は一致しない</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>tally</code> は出現順を保ち、<code>max_by</code> は同点のとき最初の要素を返す（Rust の <code>max_by_key</code> は最後）。<code>sort_by</code> は安定ではないので、元の位置を 2 つ目の鍵にする。Rumale の決定木は節ごとに特徴量を <code>Array#sample</code> でランダムな順に並べるので、同じ不純度の分割が並ぶと自作と違う分割を選ぶ（深さ 1〜5 は予測が一致、制限なしで 1 件分かれる）。予測時の比較は自作と同じ <code>&lt;=</code></td>
+</tr>
+<tr>
+<td>4〜6</td>
+<td><strong>Nix の環境で <code>RUBYLIB</code> に Solargraph の依存の gem が並び、<code>bundle exec</code> が <code>Gemfile.lock</code> より古い parser・prism・rubocop-ast を読み込んでいた</strong>（検査は通るので気付けない。<code>rubocop -V</code> の表示で気付いた）。環境定義の <code>shellHook</code> で <code>unset RUBYLIB</code> して直した。RuboCop 1.91 は <code>NewCops: enable</code> を書かないと 163 個の cop について警告が出る。<code>Gemfile.lock</code> には <code>bundle lock --add-platform x86_64-linux</code> で CI 用の Linux を加えた</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong><code>Rumale::LinearModel::LinearRegression</code> は <code>Numo::Linalg</code> が読み込まれていないと L-BFGS（<code>tol</code> 1e-4）で解き、<code>solver: "svd"</code> を指定しても黙って L-BFGS に落ちる。</strong> 既定のままでは切片 0.0044（自作は 6035.99）、テストの決定係数 −1.246 になり、例外も警告も出ない。<code>tol: 1e-10</code> で自作との差は 3.5e-5 以内になる。Numo の <code>work[i, true]</code> はビューを返すので、行の入れ替えで <code>dup</code> を忘れると黙って同じ行になる</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Rumale に欠損値の補完は無く、<code>OneHotEncoder</code> は整数のカテゴリだけを受け取り、先頭のカテゴリを落とせない。決定木にクラスの重みも無い。前処理と重み付きの決定木は自作が最終実装。<code>Marshal</code> は <code>Data</code>・配列を鍵にした <code>Hash</code>・第 3 章の木をそのまま保存できる（無名クラスは保存できない）。RuboCop の <code>Security/MarshalLoad</code> は理由を書いて 1 行だけ無効にした。<code>Data</code> は属性の差し替えを防ぐだけで、属性が指すオブジェクトは変えられる（同じパイプラインを 2 回学習すると 1 回目のモデルが上書きされた。<code>dup</code> で直した）</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Rumale の <code>StandardScaler</code> は n−1 で割る標本標準偏差</strong>（Numo の <code>stddev</code>）。scikit-learn・linfa（n で割る）とは √((n−1)/n) 倍ずれる。<code>PolynomialFeatures</code> は先頭の定数項を除けば自作と一致する。csv gem は文字コード名を打ち間違えても警告を出して読み進める。Numo に連立方程式を解く関数は無い（<code>numo-linalg</code> が要る）ので、正規方程式は自作</td>
+</tr>
+<tr>
+<td>10</td>
+<td>ロジスティック回帰の既定値は <code>reg_param: 1.0</code>・<code>tol: 1e-4</code> で切片も正則化する。<code>reg_param: 0.0</code>・<code>tol: 1e-8</code> で自作と予測が完全に一致する。ランダムフォレストは節ごとに <code>max_features</code>（既定は √特徴量数）の列を調べる（自作は木ごと）。<strong>Rumale のモデルは <code>random_seed</code> を省くと既定値が <code>srand</code> になり、モデルを作るだけでプロセス全体の乱数の種が入れ替わる</strong>ので、必ずシードを渡す。RuboCop の <code>Style/Sample</code> に従って <code>shuffle(random:).first(n)</code> を <code>sample(n, random:)</code> に直すと、同じシードでも選ばれる列が変わる</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">決定<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -9976,7 +10036,7 @@
 <li><strong>各章は「自作してから Rumale と突き合わせる」構成にする。</strong> Python 版（scikit-learn）と同じ流れ</li>
 <li><strong>Rumale に無いものだけを自作の最終実装とする。</strong> 現時点では PCA の寄与率（第 13 章）が該当する。欠損値の補完・ダミー変数化（第 8 章）の有無は、その章で確かめる</li>
 </ul>
-<h3 id="_4">章ごとのライブラリへの置き換え方針<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h3 id="_5">章ごとのライブラリへの置き換え方針<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -10033,7 +10093,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_5">検討した代替案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<h3 id="_6">検討した代替案<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -10068,7 +10128,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="_6">影響<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_7">影響<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <ul>
 <li>良い影響: Rumale がそろっているので、Python 版と同じ「自作してからライブラリと突き合わせる」流れをほぼ全章で書ける</li>
 <li>良い影響: <code>CSV.read</code> が BOM を取り除くので、ほかの言語版との差自体が記事の題材になる</li>

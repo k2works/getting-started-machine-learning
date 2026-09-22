@@ -9919,14 +9919,21 @@ apps/ruby/.gitignore:8:model/   apps/ruby/model/
 <span class="w">  </span><span class="nt">EnforcedStyle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">native</span>
 </code></pre></div>
 <p>つまり、<strong>Windows では CRLF を、それ以外では LF を求めます</strong>。Windows の Git が CRLF に変えてチェックアウトしても、Windows の RuboCop はそれを正しいと見なすので、検査はどちらの OS でも通ります。その代わり、同じファイルが OS によって違うバイト列になります。</p>
-<p>Rust 版・Go 版などは、ルートの <code>.gitattributes</code> で <code>apps/&lt;言語&gt;/** text=auto eol=lf</code> と書き、改行コードを LF に固定しています。執筆時点では Ruby 版の行はまだありません。</p>
+<p>Rust 版・Go 版などは、ルートの <code>.gitattributes</code> で <code>apps/&lt;言語&gt;/** text=auto eol=lf</code> と書き、改行コードを LF に固定しています。Ruby 版も同じ行を足しました。</p>
+<div class="highlight"><pre><span></span><code>apps/ruby/** text=auto eol=lf
+</code></pre></div>
+<p><code>.gitattributes</code> だけを変えると、Windows では「LF でチェックアウトしたのに、RuboCop が CRLF を求める」食い違いが起きます。そこで、RuboCop の <code>Layout/EndOfLine</code> も LF にそろえました。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 改行は LF にそろえる（.gitattributes の apps/ruby/** eol=lf と合わせる）。</span>
+<span class="nt">Layout/EndOfLine</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">EnforcedStyle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lf</span>
+</code></pre></div>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-files<span class="w"> </span>--eol<span class="w"> </span>apps/ruby/Gemfile<span class="w"> </span>apps/ruby/Gemfile.lock<span class="w"> </span>apps/ruby/lib/getting_started_ml/dataset.rb
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>i/lf    w/lf    attr/                   apps/ruby/Gemfile
-i/lf    w/lf    attr/                   apps/ruby/Gemfile.lock
-i/lf    w/lf    attr/                   apps/ruby/lib/getting_started_ml/dataset.rb
+<div class="highlight"><pre><span></span><code>i/lf    w/lf    attr/text=auto eol=lf   apps/ruby/Gemfile
+i/lf    w/lf    attr/text=auto eol=lf   apps/ruby/Gemfile.lock
+i/lf    w/lf    attr/text=auto eol=lf   apps/ruby/lib/getting_started_ml/dataset.rb
 </code></pre></div>
-<p><code>i/</code> がリポジトリの中の改行コード、<code>w/</code> が作業ディレクトリの改行コード、<code>attr/</code> が当てはまった属性です。<code>attr/</code> が空なので、Windows では <code>core.autocrlf</code> の設定しだいで CRLF になります。LF に固定するなら、<code>.gitattributes</code> に行を足すのと同時に、RuboCop の <code>Layout/EndOfLine</code> を <code>EnforcedStyle: lf</code> にする必要があります。片方だけにすると、Windows で「LF でチェックアウトしたのに RuboCop が CRLF を求める」食い違いが起きます。</p>
+<p><code>i/</code> がリポジトリの中の改行コード、<code>w/</code> が作業ディレクトリの改行コード、<code>attr/</code> が当てはまった属性です。</p>
 <h2 id="45">4.5 データの入手手順をコードにする<a class="headerlink" href="#45" title="Permanent link">&para;</a></h2>
 <p>データをコミットしない代わりに、<strong>データの入手と配置の手順</strong> をリポジトリに残します。手順が文章だけだと、人によって置き場所がずれたり、ファイルが足りないまま実行して分かりにくいエラーになったりします。</p>
 <p>本リポジトリでは、配置と確認を Gulp のタスクにしています（<code>ops/scripts/data.js</code>）。このタスクは言語に依存しないので、全言語版で同じものを使います。</p>
@@ -10177,7 +10184,7 @@ Expected: [9, 3, 6, 4, 8, 1, 5, 2, 0, 7]
 <li><strong>Conventional Commits</strong> — type と scope で、変更の種類と対象が分かるコミットメッセージを書く。理由は本文に書く</li>
 <li><strong>コミットしないものを決める</strong> — 再配布できない学習データ、再生成できる <code>vendor/</code>・<code>coverage/</code>・モデルを <code>.gitignore</code> で除外する</li>
 <li><strong><code>.bundle/config</code> と <code>Gemfile.lock</code> はコミットする</strong> — gem の置き場所はプロジェクトの取り決め、lock は読者が同じ数値を再現するための記録。lock には CI の Linux のプラットフォームも入れる</li>
-<li><strong>改行コード</strong> — RuboCop の <code>Layout/EndOfLine</code> は既定で OS ごとの改行（Windows は CRLF、それ以外は LF）を求める。LF に固定するなら <code>.gitattributes</code> と RuboCop の設定を一緒に変える</li>
+<li><strong>改行コード</strong> — RuboCop の <code>Layout/EndOfLine</code> は既定で OS ごとの改行（Windows は CRLF、それ以外は LF）を求める。<code>.gitattributes</code> と RuboCop の設定を一緒に LF に固定する</li>
 <li><strong>入手手順をコードにする</strong> — データを置く場所と確認方法を Gulp タスクにし、プログラムからは <code>Dataset.dir</code> で場所を解決する。<code>rake test</code> は <code>apps/ruby</code> で走るので、既定の相対パスが届く</li>
 <li><strong>Minitest の <code>skip</code></strong> — データが無ければスキップし、件数が結果の行に出る。理由は <code>--verbose</code> で見る</li>
 <li><strong>乱数の並びは処理系が決める</strong> — <code>Random</code> と <code>Array#shuffle</code> は Ruby 本体の機能なので、<code>Gemfile.lock</code> ではなく Ruby の版が並びを固定する。並びそのものをテストで固定しておく</li>
