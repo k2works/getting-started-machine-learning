@@ -1715,6 +1715,61 @@ Ruby 版の全 15 章が完成した（B51〜B54）。実装は `apps/ruby/lib/g
 - [x] 実装を `apps/ruby/`、記事を `docs/article/getting-start-ml/ruby/` に置くこと
 - [x] B50 のステップ 1〜8
 
+## Clojure 版執筆計画
+
+第 3 波の 2 番目の言語。実装は `apps/clojure/`、記事は `docs/article/getting-start-ml/clojure/`、ライブラリの選定は ADR 011 に記録する。
+
+### 対比の軸
+
+| 軸 | 相手 | 見どころ |
+| :--- | :--- | :--- |
+| JVM で同じライブラリを使う | [Scala 版](scala/index.md)・[Java 版](java/index.md)（Smile） | Smile を Clojure から呼べるなら、数値が Java 版・Scala 版と一致するはず。Java との相互運用（`.` と `new` の書き方）を見る |
+| 不変のデータと関数 | [F# 版](fsharp/index.md)・[Elixir 版](elixir/index.md)（第 3 波） | マップとベクタで表を表す。`Data.define` のような型の宣言を持たない書き方 |
+| 動的型付けの LISP | [Ruby 版](ruby/index.md)・[Python 版](python/index.md) | 型を宣言しない点は同じだが、S 式・スレッディングマクロ・REPL が書き方を変える |
+
+Smile を使えるか、`tech.ml.dataset`・`scicloj.ml` を使うかはステップ 1 で確かめ、見込みが外れたら承認を得て軸を差し替える。
+
+### 確認した事実（B55 のステップ 1 で埋める）
+
+| 項目 | 結果 | 確認方法 |
+| :--- | :--- | :--- |
+| Nix 環境 | Clojure CLI 1.12.3.1577、Leiningen 2.11.2、babashka 1.12.209、clj-kondo 2025.10.24-SNAPSHOT。`java` は 25.0.2 だが、**Leiningen は「on Java 21.0.8」と表示する**（どの JDK で動くかは要確認） | `nix develop .#clojure` |
+| ビルドの道具 | 未検証（`deps.edn`（Clojure CLI）と Leiningen のどちらを使うか。テストの走らせ方） | 使い捨てのプロジェクト |
+| テスト | 未検証（`clojure.test` と kaocha のどちらを使うか。スキップの書き方） | 同上 |
+| 機械学習 | 未検証（Smile を Java の相互運用で呼べるか、版とライセンス。`scicloj.ml`・`tech.ml.dataset`・`tablecloth` の保守状況と対応範囲） | 同上 |
+| 行列 | 未検証（`tech.ml.dataset` の列、`core.matrix`、素のベクタのどれで表すか） | 同上 |
+| 乱数 | 未検証（`java.util.Random` を使えば Java 版・Scala 版と並びが一致するはず） | 同上 |
+| CSV | 未検証（`clojure.data.csv` の BOM の扱いと Shift_JIS） | 同上 |
+| API | 未検証（第 15 章。Ring＋Jetty、`reitit` を使うか） | 同上 |
+| 直列化 | 未検証（EDN と `nippy` のどちらで学習済みモデルを保存するか） | 同上 |
+| 整形・静的解析 | 未検証（clj-kondo の既定の指摘、`cljfmt` が Nix にあるか） | わざと崩したファイル |
+| カバレッジ | 未検証（cloverage が動くか） | 同上 |
+
+### B55 のステップ計画（Clojure のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：上の表の各項目を、スクラッチパッドの使い捨てのプロジェクトで実際に動かして確かめ、「確認した事実」に書き足す。JDK の版の食い違い（`java` 25 と Leiningen の Java 21）も確かめる | 「未検証」の項目が無くなる |
+| 2 | ADR 011 を書く（ビルドの道具・テスト・機械学習・章ごとの置き換えの範囲。ライブラリに無いもの・保守が止まっているものは自作とする） | ADR 011 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/clojure/` の雛形：ビルドの定義・`src/`・`test/`・`.gitignore`、最初のテストが 1 本通る | `nix develop .#clojure` でテストが成功する |
+| 4 | 整形・静的解析・カバレッジ：clj-kondo・整形・テスト・カバレッジを検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストはデータが無ければスキップする | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Clojure 版トップ（`clojure/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/clojure-ci.yml`（Nix → 整形 → clj-kondo → テスト → カバレッジ。Maven のキャッシュ）、`ops/scripts/apps.js` への `clojure` の追加 | push 後に Clojure CI がグリーン。`apps:check:clojure` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Clojure）
+
+次の点を確認した（2026-09-23 承認）。
+
+- [x] Clojure 版の対比の軸（Scala 版・Java 版＝JVM と Smile、F# 版＝不変のデータと関数、Ruby 版・Python 版＝動的型付け）
+- [x] 機械学習は Smile（Java の相互運用）を第一候補とし、`scicloj.ml`・`tech.ml.dataset` の保守状況をステップ 1 で確かめてから ADR 011 で確定すること
+- [x] Notebook（Clerk など）・可視化の節・付録 A を作らず、Python 版・Kotlin 版へ案内すること（第 3 波の共通の方針のまま）
+- [x] 実装を `apps/clojure/`、記事を `docs/article/getting-start-ml/clojure/` に置くこと
+- [x] B55 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
