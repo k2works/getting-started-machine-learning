@@ -1,5 +1,8 @@
 # Docs Update Log
 
+## 2026-09-23
+* **Creation**: Clojure 版の全 15 章（[トップ](/article/getting-start-ml/clojure/index.md)・第 1〜15 章）と [ADR 011](/adr/011-clojure-ml-libraries.md) を新規作成し、シリーズ索引・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Clojure 版執筆計画・確認した事実・B55〜B59 の完了を反映し、ADR 011 を承認済み（stable）にした。機械学習は Smile 3.1.1 が GPL-3.0 だったため Java 版・Scala 版と同じ Tribuo 4.3.2 を採用し、第 2〜15 章の数値が Java 版・Scala 版と一致することを確かめた。Nix の Clojure 環境に clj-kondo と cljfmt を追加し、`.gitattributes` に `apps/clojure/**` の改行の指定を足した。Clojure 版が完了し、シリーズは 11 言語になった。
+
 ## 2026-09-22
 * **Creation**: Ruby 版の第 2〜15 章を新規作成し、[シリーズ索引](/article/getting-start-ml/index.md)・[Ruby 版トップ](/article/getting-start-ml/ruby/index.md)・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に B51〜B54 の完了を、[ADR 010](/adr/010-ruby-ml-libraries.md) に各章で確かめた Rumale・Numo・Sinatra の振る舞いを反映し、ADR 010 を承認済み（stable）にした。Nix の Ruby の環境で `RUBYLIB` を外し、`bundle exec` が `Gemfile.lock` の版を読むようにした。Ruby 版が完了し、シリーズは 10 言語になった。
 * **Creation**: Ruby 版の[トップ](/article/getting-start-ml/ruby/index.md)・[第 1 章](/article/getting-start-ml/ruby/01-machine-learning-and-first-test.md)・[ADR 010](/adr/010-ruby-ml-libraries.md) を新規作成し、シリーズ索引と nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Ruby 版執筆計画・確認した事実・B50 の完了を反映。

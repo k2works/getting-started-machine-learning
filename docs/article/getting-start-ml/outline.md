@@ -1574,7 +1574,7 @@ Rust 版の全 15 章が完成した（B44〜B48）。実装は `apps/rust/src/{
 | B52（完了） | Ruby | 第 4〜6 章 | ビルド・静的解析・カバレッジ・CI が記事どおりに動く |
 | B53（完了） | Ruby | 第 7〜14 章 | 各章のテストが通り、記事がそろっている |
 | B54（完了） | Ruby | 第 15 章 | Ruby 版の全章完了。Python 版と節構成がそろっている |
-| B55〜B59 | Clojure | B50〜B54 と同じ区切り（ADR 011、`apps/clojure/`） | Clojure 版の全章完了 |
+| B55〜B59（完了） | Clojure | B50〜B54 と同じ区切り（ADR 011、`apps/clojure/`） | Clojure 版の全章完了（2026-09-23 完了） |
 | B60〜B64 | Elixir | 同上（ADR 012、`apps/elixir/`） | Elixir 版の全章完了 |
 | B65〜B69 | PHP | 同上（ADR 013、`apps/php/`） | PHP 版の全章完了 |
 | B70〜B74 | Haskell | 同上（ADR 014、`apps/haskell/`） | Haskell 版の全章完了 |
@@ -1791,6 +1791,24 @@ B55 のステップ 1（2026-09-23）で、使い捨ての `deps.edn` のプロ�
 | 失敗 | `IllegalArgumentException`（値や列が不正）などの Java の例外 | 例外で表す |
 
 乱数は `java.util.Random` と Fisher-Yates を使う。シード 0 の並びは `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]` で、**Java 版・Scala 版と同じ**。第 2 章の訓練データの平均値（がく片長さ 0.4215384615384616 など）も一致した。第 3 章は深さごとの正解率・深さ 2 の木の境界（0.2950・0.6500）・Tribuo との全件一致まで Java 版・Scala 版と同じになった。
+
+#### B56〜B59 の完了記録（2026-09-23）
+
+Clojure 版の全 15 章が完成した（B56〜B59）。実装は `apps/clojure/src/getting_started_ml/`、記事は `docs/article/getting-start-ml/clojure/`、検査は `npx gulp apps:check:clojure`（cljfmt → clj-kondo（`--fail-level warning`）→ `clojure -M:test` → `clojure -M:coverage`）。テストは 200 件・546 アサーションで、学習データが無い環境でも 200 件が通る（アサーションが 457 件に減る）。
+
+| 決めたこと | 結果 |
+| :--- | :--- |
+| ライブラリ | **Smile 3.1.1 は GPL-3.0 だったので採用せず、Java 版・Kotlin 版・Scala 版と同じ Tribuo 4.3.2（Apache-2.0）にした**（B55 のステップ 1 で POM を確認。ADR 011） |
+| ライブラリと突き合わせた章 | 第 3・7〜12・14 章。Tribuo に無い**主成分分析（第 13 章。固有値分解だけを借りる）・クラスの重み付きの決定木・前処理（第 8・9 章）**が自作の最終実装 |
+| 数値の一致 | **第 2〜15 章のすべての数値が Java 版・Scala 版と一致した。** 第 7 章の予測値は浮動小数点のビット単位まで同じで、第 15 章の API の応答（EDN で保存・復元したモデル）も一致した |
+| 想定外だったこと | **`clojure.core/max-key` は同値のとき後ろを返す**（Scala の `maxBy`・Kotlin の `maxByOrNull` と逆）ので、最頻値・分割・モデル選択は厳密な `>` で畳む。**マップは 9 件目から挿入順を保たない**ので、列の順はベクタで持ち回る。`get` の既定値は先に評価される。`map` はチャンクする。`{:keys [tp fn]}` は `clojure.core/fn` を隠す |
+| 環境 | `java` は 25.0.2 だが Clojure は **JDK 21** で動く（Java 版・Kotlin 版・Scala 版と同じ）。clj-kondo と cljfmt は Nix の環境に無かったので `shell.nix` に足した。cljfmt も clj-kondo も改行コードを検査しないので、`.gitattributes` の `apps/clojure/** text=auto eol=lf` が唯一の防御になる |
+| 第 15 章 | Ring 1.12＋Jetty と Cheshire。経路の振り分けのライブラリを使わず、ハンドラーを関数として書いた。置き場の約束は `defprotocol`、モデルは関数。学習済みモデルは EDN で往復できる |
+| 進め方 | 第 2〜3 章の実装は親、ほかはサブエージェント。衝突は `main.clj` と `deps.edn` の追記だけで、親がまとめた |
+
+各章で確かめたライブラリの癖は [ADR 011](../../adr/011-clojure-ml-libraries.md) の「各章で確かめた結果」に記録した。
+
+**Clojure 版が完了した。** シリーズは 11 言語になった。第 3 波の次の言語は Elixir（B60〜）。
 
 ### 承認が必要な事項（Clojure）
 

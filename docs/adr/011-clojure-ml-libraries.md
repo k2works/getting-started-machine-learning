@@ -117,4 +117,5 @@ B55 のステップ 1 で、使い捨ての `deps.edn` のプロジェクトを 
 - 良い影響: 表を素のマップとベクタで表すので、Clojure のデータ操作（`map`・`filter`・スレッディングマクロ）がそのまま記事の題材になる
 - 悪い影響: `deps.edn` には lock ファイルが無いので、再現性は版を固定して書くことに頼る
 - 悪い影響: 検査の道具（clj-kondo・cljfmt）が Nix 環境に無いため、環境定義に手を入れる必要がある
+- 悪い影響: `clojure.core/format` はロケールを渡さずに `String/format` を呼ぶので、小数点の表し方が既定のロケールに依る（Java 版・Scala 版は `Locale.ROOT` を明示している）。表示の書式をテストで固定しているので気づけるが、移植性を重んじるなら `(String/format java.util.Locale/ROOT ...)` と書く
 - 悪い影響: Tribuo の API は可変なオブジェクト（`MutableDataset`）と Java の配列が中心で、Clojure の不変のデータとの間で変換が要る。その変換自体は第 3 章以降の題材にする

@@ -181,7 +181,7 @@ Scala 版・Java 版は、ここで `split(",", -1)` の `-1` に苦しみまし
 **`clojure.data.csv` ではこの問題は起きません。** 確かめました。
 
 ```clojure
-(spit "/tmp/trail.csv" "﻿a,b,c\n1,,3\n4,5,\n")
+(spit "/tmp/trail.csv" "\uFEFFa,b,c\n1,,3\n4,5,\n")
 (with-open [r (io/reader "/tmp/trail.csv")]
   (println "行 =" (pr-str (vec (rest (csv/read-csv r))))))
 ```
@@ -199,7 +199,7 @@ Scala 版・Java 版は、ここで `split(",", -1)` の `-1` に苦しみまし
 ```clojure
 (def ^:private bom
   "UTF-8 の BOM。data.csv は取り除かないので、先頭の列名から自分で取り除く。"
-  "﻿")
+  "\uFEFF")
 
 (defn load-table
   "CSV を読み込んで表にする。列の順は CSV の順のまま。"
