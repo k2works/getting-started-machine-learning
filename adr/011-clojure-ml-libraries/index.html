@@ -1545,10 +1545,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="コンテキスト">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        各章で確かめた結果
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         決定
@@ -1560,7 +1577,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         章ごとのライブラリへの置き換え方針
@@ -1571,7 +1588,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         検討した代替案
@@ -1587,7 +1604,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         影響
@@ -10400,7 +10417,50 @@
 </tr>
 </tbody>
 </table>
-<h2 id="_3">決定<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_3">各章で確かめた結果<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>章</th>
+<th>確かめたこと</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>clojure.data.csv</code> は BOM を取り除かないので、先頭の列名から自分で取り除く。<code>clojure.test</code> にスキップが無いので、実データのテストは理由を標準エラーに出して早く戻る（テストの数は変わらず、表明の数が 18→16 と動く）。Rust 版のようにカバレッジの差でスキップを見分ける手は使えない（第 1 章では実データの経路を一時ファイルのテストが覆うため、カバレッジが変わらない）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>java.util.Random</code> と Fisher-Yates の並び（シード 0 で <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code>）が Java 版・Scala 版と一致し、<strong>訓練データの平均値も一致した</strong>（がく片長さ 0.4215384615384616 ほか）。<code>get</code> の既定値は先に評価されるので、「無ければ例外」は <code>when-not</code> で書く。標準の <code>shuffle</code> はシードを渡せず再現しない</td>
+</tr>
+<tr>
+<td>3</td>
+<td>深さごとの正解率・深さ 2 の木の境界（0.2950・0.6500）・Tribuo の CART との全件一致まで、Java 版・Scala 版と同じになった。<code>max-key</code> は同値のとき<strong>後ろ</strong>を返すので（Scala の <code>maxBy</code>・Kotlin の <code>maxByOrNull</code> と逆）、最頻値・分割・葉のラベルは厳密な <code>&gt;</code> で畳む。<code>frequencies</code> は順を保たないので、<code>distinct</code> の順でたどる</td>
+</tr>
+<tr>
+<td>4〜6</td>
+<td>cljfmt（違反で終了コード 1）・clj-kondo（警告で終了コード 2。<code>--fail-level error</code> にすると警告が出ても 0）・cloverage（<code>:extra-paths ["test"]</code> が無いと <code>FileNotFoundException</code>）。<strong>cljfmt も clj-kondo も改行コードを検査しない</strong>ので、<code>.gitattributes</code> の <code>apps/clojure/** text=auto eol=lf</code> が唯一の防御になる（Ruby 版の <code>Layout/EndOfLine</code> に当たる層が無い）。カバレッジは学習データの有無で 64.72%↔75.04%（forms）と動くので下限は設けない</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>SLMTrainer(true)</code> と <code>LARSTrainer</code> の予測は自作の正規方程式と小数第 13 位まで一致し、<code>SLMTrainer(false)</code> は一致しない（Java 版・Scala 版と同じ癖）。架空データの予測値は <strong>Java 版・Scala 版と 1 ビットも違わない</strong>。<code>SparseLinearModel.getWeights</code> は正規化した空間の重みなので、中心化ノルムの比で自作の係数に戻す。<code>SLMTrainer</code> は学習のたびに <code>java.util.logging</code> に「Feature selected: …」を出す</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Tribuo の CART にクラスの重みを渡す口が無いので、重み付きの決定木は自作が最終実装。自作と CART の相違件数（深さ 1〜10 で <code>0,0,0,0,2,0,0,0,1,0</code>）まで Java 版・Scala 版と一致した。学習済みパイプラインがマップ・ベクタ・キーワードだけなので、<strong>EDN の <code>pr-str</code>／<code>read-string</code> で往復でき、値として <code>=</code> で比べられる</strong>（Scala 版が必要とした自作のテキスト形式は要らない）</td>
+</tr>
+<tr>
+<td>9</td>
+<td>決定係数 8 個と天気ごとの平均利用者数が Java 版・Scala 版と完全に一致。Tribuo の標準化は<strong>不偏標準偏差</strong>（n−1 で割る）。<strong><code>java.io.InputStreamReader</code> は文字コードを間違えても例外を投げず、置換文字に置き換えて読み進む</strong>（Java 版・Scala 版の <code>Files.readAllLines</code> は <code>MalformedInputException</code> を投げる）。<strong>Clojure のマップは 9 件目からハッシュマップになり挿入順を保たない</strong>ので、列の順は <code>:columns</code> のベクタで持ち回る</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10 個の数値が Java 版と完全に一致。Tribuo のロジスティック回帰の既定は <strong>5 エポック</strong>で、500 エポックにすると自作と一致する。ランダムフォレストの <code>minChildWeight</code> の既定 5 が木の深さを抑えている（1.0 にすると訓練 1.0000・テスト 0.9333）。<strong>乱数は <code>mapv</code> で即座に評価する</strong>（<code>repeatedly</code> の遅延シーケンスと <code>java.util.Random</code> を混ぜると呼ぶ順が変わり、Java 版と並びが合わなくなる）。分類器は「学習して予測する関数を返す関数」で表し、<code>defprotocol</code> もアダプターも使わなかった</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">決定<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -10514,7 +10574,7 @@
 <li><strong>各章は「自作してから Tribuo と突き合わせる」構成にする。</strong> Java 版・Scala 版と同じ流れ。数値が Java 版・Scala 版と一致するかを各章で確かめ、一致しない場合は理由を書く</li>
 <li><strong>Tribuo に無いものだけを自作の最終実装とする。</strong> Java 版・Scala 版の ADR 005・007 に、章ごとの対応範囲が記録されている</li>
 </ul>
-<h3 id="_4">章ごとのライブラリへの置き換え方針<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h3 id="_5">章ごとのライブラリへの置き換え方針<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -10571,7 +10631,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_5">検討した代替案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<h3 id="_6">検討した代替案<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -10610,7 +10670,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="_6">影響<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_7">影響<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <ul>
 <li>良い影響: Java 版・Kotlin 版・Scala 版と同じ Tribuo を同じ JDK で呼ぶので、数値が一致するかどうかを言語をまたいで確かめられる。乱数の並びも一致する（第 2 章の訓練データの平均値が Java 版・Scala 版と一致することを実測で確かめた）</li>
 <li>良い影響: 表を素のマップとベクタで表すので、Clojure のデータ操作（<code>map</code>・<code>filter</code>・スレッディングマクロ）がそのまま記事の題材になる</li>
