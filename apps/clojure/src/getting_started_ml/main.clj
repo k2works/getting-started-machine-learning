@@ -2,11 +2,13 @@
   "章を選んで実行する。使い方: clojure -M:run chapter01"
   (:require [clojure.string :as str]
             [getting-started-ml.chapter01 :as chapter01]
-            [getting-started-ml.chapter02 :as chapter02]))
+            [getting-started-ml.chapter02 :as chapter02]
+            [getting-started-ml.chapter03 :as chapter03]))
 
 (def ^:private chapters
   {"chapter01" chapter01/run
-   "chapter02" chapter02/run})
+   "chapter02" chapter02/run
+   "chapter03" chapter03/run})
 
 (defn -main
   "章の名前を受け取り、その章を実行する。"
