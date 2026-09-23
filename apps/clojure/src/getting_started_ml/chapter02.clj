@@ -12,7 +12,7 @@
 
 (def ^:private bom
   "UTF-8 の BOM。data.csv は取り除かないので、先頭の列名から自分で取り除く。"
-  "﻿")
+  "\uFEFF")
 
 (defn text
   "文字列の列を読む。列が無ければ失敗する。"

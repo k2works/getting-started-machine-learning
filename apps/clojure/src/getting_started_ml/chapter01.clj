@@ -14,7 +14,7 @@
 
 (def ^:private bom
   "UTF-8 の BOM。data.csv は取り除かないので、先頭の列名から自分で取り除く。"
-  "﻿")
+  "\uFEFF")
 
 (def ^:private feature-keys
   "判定の手がかりになる列。"

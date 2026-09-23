@@ -15,7 +15,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-23T00:51:13Z }
 
 この章ではまだ機械学習のアルゴリズムを使いません。人間が考えたルールで判定し、その正解率を測るところまで進みます。「ルールを人間が書く」とはどういうことかを先に体験しておくと、第 3 章で「ルールをデータから学ばせる」ことの意味がはっきりします。
 
-[Python 版の第 1 章](../python/01-machine-learning-and-first-test.md) と同じ題材・同じ TODO リストで進めます。Clojure 版では次の 3 つと対比します。1 つは [Scala 版](../scala/01-machine-learning-and-first-test.md) と [Java 版](../java/01-machine-learning-and-first-test.md) で、同じ JVM・同じ JDK 21 の上で動き、第 3 章からは同じ機械学習ライブラリ Smile を使います（[ADR 011](../../../adr/011-clojure-ml-libraries.md)）。2 つめは [F# 版](../fsharp/01-machine-learning-and-first-test.md) で、不変のデータと関数でデータを変換する流儀が近いところです。3 つめは [Ruby 版](../ruby/01-machine-learning-and-first-test.md) と [Python 版](../python/01-machine-learning-and-first-test.md) で、型を宣言しない言語としてテストが安全網になる点が同じです。
+[Python 版の第 1 章](../python/01-machine-learning-and-first-test.md) と同じ題材・同じ TODO リストで進めます。Clojure 版では次の 3 つと対比します。1 つは [Scala 版](../scala/01-machine-learning-and-first-test.md) と [Java 版](../java/01-machine-learning-and-first-test.md) で、同じ JVM・同じ JDK 21 の上で動き、第 3 章からは同じ機械学習ライブラリ Tribuo を使います（[ADR 011](../../../adr/011-clojure-ml-libraries.md)）。2 つめは [F# 版](../fsharp/01-machine-learning-and-first-test.md) で、不変のデータと関数でデータを変換する流儀が近いところです。3 つめは [Ruby 版](../ruby/01-machine-learning-and-first-test.md) と [Python 版](../python/01-machine-learning-and-first-test.md) で、型を宣言しない言語としてテストが安全網になる点が同じです。
 
 ## 1.2 機械学習とは
 
@@ -47,7 +47,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-23T00:51:13Z }
 
 1. **データを集める・読み込む** — この章で CSV を読み込みます
 2. **前処理する** — 欠損値を埋め、訓練データとテストデータに分けます（第 2 章）
-3. **モデルを学習させる** — 決定木・回帰などを自作し、Smile と突き合わせます（第 3 章以降）
+3. **モデルを学習させる** — 決定木・回帰などを自作し、Tribuo と突き合わせます（第 3 章以降）
 4. **評価する** — 正解率などの指標で測ります（この章で正解率から始めます）
 5. **改善する** — 特徴量を作り直し、ハイパーパラメータを調整します（第 9 章以降）
 
@@ -193,7 +193,7 @@ java.version = 21.0.8
 clojure-version = 1.12.0
 ```
 
-`clojure` コマンドのラッパーが自分の JDK 21 を持っているためで、上の起動メッセージにある Leiningen の行（`on Java 21.0.8`）とも一致します。**つまり Clojure 版は Java 版・Kotlin 版・Scala 版と同じ JDK 21 の世界で動きます。** 第 3 章以降で Smile を呼んだときに数値が一致するかどうかを比べる前提になるので、ここで確かめておきます。「シェルの `java` の版が、その言語処理系の使う JDK とは限らない」ことは、JVM 言語を Nix のような環境で動かすときに繰り返し出会う話です。
+`clojure` コマンドのラッパーが自分の JDK 21 を持っているためで、上の起動メッセージにある Leiningen の行（`on Java 21.0.8`）とも一致します。**つまり Clojure 版は Java 版・Kotlin 版・Scala 版と同じ JDK 21 の世界で動きます。** 第 3 章以降で Tribuo を呼んだときに数値が一致するかどうかを比べる前提になるので、ここで確かめておきます。「シェルの `java` の版が、その言語処理系の使う JDK とは限らない」ことは、JVM 言語を Nix のような環境で動かすときに繰り返し出会う話です。
 
 なお、起動メッセージに出ている clj-kondo と cljfmt は、もともとこの環境に入っていませんでした（起動メッセージに「clj-kondo …」の行があったのは clojure-lsp の出力の一部で、紛らわしい罠でした）。検査に使う道具が環境に無いままでは CI と手元で同じ検査ができないので、環境定義（`ops/nix/environments/clojure/shell.nix`）に足しています。Ruby 版で `RUBYLIB` を足したのと同じ扱いで、この経緯は第 5〜6 章で扱います。
 
@@ -438,7 +438,7 @@ Clojure には検査例外の宣言がありません。関数のシグネチャ
 BOM 付きの CSV を `clojure.data.csv` で素直に読むと、先頭の列名に BOM が残ります。確かめました。
 
 ```clojure
-(spit "/tmp/bomdemo.csv" "﻿身長,体重,年代,派閥\n170,60,20,きのこ\n")
+(spit "/tmp/bomdemo.csv" "\uFEFF身長,体重,年代,派閥\n170,60,20,きのこ\n")
 (with-open [r (io/reader "/tmp/bomdemo.csv")]
   (let [[header] (csv/read-csv r)]
     (println "列名 =" (pr-str header))
@@ -447,12 +447,12 @@ BOM 付きの CSV を `clojure.data.csv` で素直に読むと、先頭の列名
 ```
 
 ```text
-列名 = ["﻿身長" "体重" "年代" "派閥"]
+列名 = ["\uFEFF身長" "体重" "年代" "派閥"]
 先頭の列名のバイト列 = [-17 -69 -65 -24 -70 -85 -23 -107 -73]
 身長 で引けるか = false
 ```
 
-（実際の出力では先頭の列名に見えない BOM が入っています。ここでは読めるように `﻿` のエスケープで示しました。）
+（実際の出力では先頭の列名に見えない BOM が入っています。ここでは読めるように `\uFEFF` のエスケープで示しました。）
 
 バイト列の先頭 3 つ `-17 -69 -65` が BOM です。JVM の `byte` は符号つきなので負の数に見えますが、符号なしに直すと `EF BB BF`、UTF-8 の BOM そのものです。そして **`"身長"` では引けません**。Python 版の `encoding='utf-8-sig'`、Java 版・C# 版の対処、Go 版の `TrimPrefix` と同じ場面に来ました。
 
@@ -471,7 +471,7 @@ BOM 付きの CSV を `clojure.data.csv` で素直に読むと、先頭の列名
 ```clojure
 (def ^:private bom
   "UTF-8 の BOM。data.csv は取り除かないので、先頭の列名から自分で取り除く。"
-  "﻿")
+  "\uFEFF")
 
 (defn load-people
   "CSV を読み込み、列名で値を取り出して人物のリストにする。"
@@ -535,7 +535,7 @@ BOM 付きの CSV を `clojure.data.csv` で素直に読むと、先頭の列名
 (testing "BOM 付きの CSV を列名で読み込む"
   (let [file (java.io.File/createTempFile "people" ".csv")]
     (try
-      (spit file "﻿身長,体重,年代,派閥\n170,60,20,きのこ\n")
+      (spit file "\uFEFF身長,体重,年代,派閥\n170,60,20,きのこ\n")
       (is (= [{:身長 170 :体重 60 :年代 20 :派閥 ch/kinoko}] (ch/load-people (.getPath file))))
       (finally (io/delete-file file true)))))
 ```
