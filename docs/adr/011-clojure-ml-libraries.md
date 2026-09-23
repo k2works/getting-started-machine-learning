@@ -31,7 +31,7 @@ B55 のステップ 1 で、使い捨ての `deps.edn` のプロジェクトを 
 | Tribuo | 4.3.2、Apache License 2.0。Java 版（[ADR 005](005-java-ml-libraries.md)）・Kotlin 版・Scala 版（[ADR 007](007-scala-ml-libraries.md)）で各アルゴリズムの癖を確認済み。Clojure からは `ArrayExample`・`MutableDataset`・`CARTClassificationTrainer` を Java の相互運用で呼ぶ | Maven Central |
 | Smile の DataFrame | `DataFrame/of` に `DoubleVector/of`・`IntVector/of` の配列を渡して作る。`DecisionTree/fit` は `Formula`・`DataFrame`・`SplitRule/GINI`・深さなどを受け取る | 同上 |
 | 乱数 | `java.util.Random` と Fisher-Yates で `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`。**Java 版・Scala 版と同じ並び** | 同上 |
-| CSV | `clojure.data.csv` 1.1.0 は BOM を取り除かない（先頭の列名が `"﻿身長"` になる）。Shift_JIS は `InputStreamReader` に文字コードを渡せば読めるが、UTF-8 として読むと例外を投げずに文字化けする | ヘッダーを表示 |
+| CSV | `clojure.data.csv` 1.1.0 は BOM を取り除かない（先頭の列名が `"\uFEFF身長"` になる）。Shift_JIS は `InputStreamReader` に文字コードを渡せば読めるが、UTF-8 として読むと例外を投げずに文字化けする | ヘッダーを表示 |
 | `tech.ml.dataset` | 7.032 は動き、BOM も取り除く。ただし依存が大きい（OpenBLAS のネイティブライブラリを含む） | 同上 |
 | テスト | `clojure.test` と cognitect-labs/test-runner を `:test` の別名にして `clojure -M:test` で走らせられる | 同上 |
 | 整形・静的解析 | **cljfmt も clj-kondo も Nix 環境に入っていない**（環境の起動メッセージの「clj-kondo …」は clojure-lsp の出力の一部）。nixpkgs には cljfmt 0.15.6 と clj-kondo 2025.10.23 があり、字下げの崩れと未使用の束縛をそれぞれ指摘することを確かめた | `nix shell` で試用 |
