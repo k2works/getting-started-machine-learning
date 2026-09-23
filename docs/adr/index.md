@@ -16,5 +16,6 @@
 | [008](008-go-ml-libraries.md) | Go 版のライブラリに標準の testing・gofmt・go vet・golangci-lint・gonum・net/http を採用し、gonum に無いアルゴリズムを自作する | 承認済み |
 | [009](009-rust-ml-libraries.md) | Rust 版のライブラリに Cargo 標準のテスト・rustfmt・clippy・linfa 0.8.1・ndarray 0.16・axum を採用し、クレートの版をそろえる | 承認済み |
 | [010](010-ruby-ml-libraries.md) | Ruby 版のライブラリに Bundler・Minitest・RuboCop・SimpleCov・Rumale 2.2・numo-narray-alt・Sinatra を採用し、Nix の Ruby 3.3 を前提にする | 承認済み |
+| [011](011-clojure-ml-libraries.md) | Clojure 版のライブラリに Clojure CLI・clojure.test・clj-kondo・cljfmt・cloverage・Smile 3.1・data.csv・Ring を採用し、表を素のマップとベクタで表す | 提案中 |
 
 ADR の作成には `creating-adr` スキルを使用してください。
