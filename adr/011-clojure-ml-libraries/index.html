@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Clojure 版のライブラリに Clojure CLI・clojure.test・clj-kondo・cljfmt・cloverage・Smile 3.1・data.csv・Ring と Jetty を採用し、表を素のマップとベクタで表す方針と自作する範囲を決める。">
+        <meta name="description" content="Clojure 版のライブラリに Clojure CLI・clojure.test・clj-kondo・cljfmt・cloverage・Tribuo 4.3・data.csv・Ring と Jetty を採用し、GPL-3.0 の Smile を使わない理由と表を素のマップとベクタで表す方針を決める。">
       
       
         <meta name="author" content="Project Team">
@@ -10350,12 +10350,17 @@
 </tr>
 <tr>
 <td>Smile</td>
-<td>3.1.1 を Java の相互運用でそのまま呼べる。決定木・重回帰・K-means・主成分分析（寄与率つき）・リッジ・ラッソ・ロジスティック回帰・ランダムフォレスト・評価指標（<code>Accuracy</code>・<code>ConfusionMatrix</code>・<code>AUC</code>）がある</td>
-<td>使い捨てのプロジェクトで実行</td>
+<td>3.1.1 を Java の相互運用でそのまま呼べ、決定木・重回帰・K-means・主成分分析（寄与率つき）・リッジ・ラッソ・ロジスティック回帰・ランダムフォレスト・評価指標が動いた。<strong>しかし POM のライセンスは GPL-3.0</strong>（2.6.0 は LGPL-3.0）で、<a href="../007-scala-ml-libraries/">ADR 007</a> が Scala 版で Smile を採用しなかった理由と同じ。採用しない</td>
+<td>使い捨てのプロジェクトで実行、Maven Central の POM</td>
+</tr>
+<tr>
+<td>Tribuo</td>
+<td>4.3.2、Apache License 2.0。Java 版（<a href="../005-java-ml-libraries/">ADR 005</a>）・Kotlin 版・Scala 版（<a href="../007-scala-ml-libraries/">ADR 007</a>）で各アルゴリズムの癖を確認済み。Clojure からは <code>ArrayExample</code>・<code>MutableDataset</code>・<code>CARTClassificationTrainer</code> を Java の相互運用で呼ぶ</td>
+<td>Maven Central</td>
 </tr>
 <tr>
 <td>Smile の DataFrame</td>
-<td><code>DataFrame/of</code> に <code>DoubleVector/of</code>・<code>IntVector/of</code> の配列を渡して作る。<code>DecisionTree/fit</code> は <code>Formula</code>・<code>DataFrame</code>・<code>SplitRule/GINI</code>・深さなどを受け取る（<code>Properties</code> でも渡せる）</td>
+<td><code>DataFrame/of</code> に <code>DoubleVector/of</code>・<code>IntVector/of</code> の配列を渡して作る。<code>DecisionTree/fit</code> は <code>Formula</code>・<code>DataFrame</code>・<code>SplitRule/GINI</code>・深さなどを受け取る</td>
 <td>同上</td>
 </tr>
 <tr>
@@ -10479,9 +10484,9 @@
 </tr>
 <tr>
 <td>機械学習</td>
-<td>Smile（<code>smile-core</code>。Java の相互運用で呼ぶ）</td>
-<td>3.1.1</td>
-<td>BSD-3-Clause</td>
+<td>Tribuo（Java の相互運用で呼ぶ）</td>
+<td>4.3.2</td>
+<td>Apache-2.0</td>
 <td>第 3 章</td>
 </tr>
 <tr>
@@ -10502,11 +10507,12 @@
 </table>
 <ul>
 <li><strong><code>tech.ml.dataset</code> を使わない。</strong> BOM を取り除いてくれる利点はあるが、データフレームのライブラリを使わないのはシリーズ全体の方針であり、依存に OpenBLAS のネイティブライブラリが入る。表は素のマップとベクタで表し、Smile に渡すところだけ <code>DataFrame</code> に変換する</li>
-<li><strong><code>scicloj.ml</code> も使わない。</strong> Smile を直に呼べるので、包み直す層を増やす理由が無い。Java 版・Scala 版と同じライブラリを同じ設定で呼べることが、この版の対比の軸である</li>
+<li><strong>機械学習は Tribuo にする。</strong> Smile は Clojure から問題なく呼べたが、3.x のライセンスが GPL-3.0 で、記事のサンプルコードとして配るには合わない。Tribuo は Apache-2.0 で、Java 版・Kotlin 版・Scala 版が同じ 4.3.2 を使っている。<strong>同じライブラリを同じ設定で呼ぶことが、この版の対比の軸である</strong></li>
+<li><strong><code>scicloj.ml</code> も使わない。</strong> Tribuo を直に呼べるので、包み直す層を増やす理由が無い</li>
 <li><strong>Nix の環境定義に clj-kondo と cljfmt を足す。</strong> 検査に使う道具が環境に無いままでは、CI と手元で同じ検査ができない。環境定義を変えた経緯は第 5〜6 章の題材にする（Ruby 版の <code>RUBYLIB</code> と同じ扱い）</li>
 <li><strong>JDK 21 で動くことを前提にする。</strong> <code>java</code> コマンドの版（25）とは違うので、記事の環境構築の節に書く</li>
-<li><strong>各章は「自作してから Smile と突き合わせる」構成にする。</strong> Java 版・Scala 版と同じ流れ。数値が Java 版・Scala 版と一致するかを各章で確かめ、一致しない場合は理由を書く</li>
-<li><strong>Smile に無いものだけを自作の最終実装とする。</strong> 章に入ってから確かめる（Java 版・Scala 版の ADR 005・007 の記述が手がかりになる）</li>
+<li><strong>各章は「自作してから Tribuo と突き合わせる」構成にする。</strong> Java 版・Scala 版と同じ流れ。数値が Java 版・Scala 版と一致するかを各章で確かめ、一致しない場合は理由を書く</li>
+<li><strong>Tribuo に無いものだけを自作の最終実装とする。</strong> Java 版・Scala 版の ADR 005・007 に、章ごとの対応範囲が記録されている</li>
 </ul>
 <h3 id="_4">章ごとのライブラリへの置き換え方針<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <table>
@@ -10520,48 +10526,48 @@
 <tbody>
 <tr>
 <td>3</td>
-<td><code>smile.classification.DecisionTree</code></td>
-<td>自作のジニ不純度の決定木と突き合わせる。<code>SplitRule/GINI</code> と深さの指定、<code>.importance</code> も比べる</td>
+<td><code>org.tribuo.classification.dtree.CARTClassificationTrainer</code>（<code>GiniIndex</code>）</td>
+<td>自作のジニ不純度の決定木と突き合わせる。深さの指定と、同じ不純度の分割候補の選び方の違いを見る</td>
 </tr>
 <tr>
 <td>7</td>
-<td><code>smile.regression.OLS</code></td>
+<td><code>org.tribuo.regression.slm</code> の線形回帰</td>
 <td>正規方程式を自作してから、Smile の重回帰と突き合わせる</td>
 </tr>
 <tr>
 <td>8</td>
-<td>Smile の決定木。前処理は自作</td>
-<td>欠損値の補完・ダミー変数化・クラスの重みは Smile の対応範囲を確かめ、無ければ自作</td>
+<td>Tribuo の CART。前処理は自作</td>
+<td>欠損値の補完・ダミー変数化・クラスの重みは Tribuo の対応範囲を確かめ、無ければ自作</td>
 </tr>
 <tr>
 <td>9</td>
-<td>Smile の標準化（<code>smile.feature.transform</code>）</td>
+<td>Tribuo の標準化</td>
 <td>自作の標準化と突き合わせる（母標準偏差か標本標準偏差かを実測で確かめる）</td>
 </tr>
 <tr>
 <td>10</td>
-<td><code>smile.classification.LogisticRegression</code>・<code>RandomForest</code></td>
+<td>Tribuo のロジスティック回帰・ランダムフォレスト</td>
 <td>自作と突き合わせる。正則化の既定値を確かめる</td>
 </tr>
 <tr>
 <td>11</td>
-<td><code>smile.validation.metric</code> の <code>Accuracy</code>・<code>ConfusionMatrix</code>・<code>AUC</code></td>
+<td>Tribuo の評価指標</td>
 <td>自作の評価指標・ROC・交差検証と突き合わせる</td>
 </tr>
 <tr>
 <td>12</td>
-<td><code>smile.regression.RidgeRegression</code>・<code>LASSO</code></td>
+<td>Tribuo の正則化つき線形モデル</td>
 <td>自作のリッジ・ラッソと突き合わせる（目的関数の流儀の違いに注意する）</td>
 </tr>
 <tr>
 <td>13</td>
-<td><code>smile.feature.extraction.PCA</code></td>
-<td>自作の固有値分解と突き合わせる。寄与率は <code>.varianceProportion</code> で取れる</td>
+<td>Tribuo の主成分分析（対応範囲を確かめる）</td>
+<td>自作の固有値分解と突き合わせる。Tribuo に無ければ自作が最終実装</td>
 </tr>
 <tr>
 <td>14</td>
-<td><code>smile.clustering.KMeans</code></td>
-<td>自作の K-means と突き合わせる。SSE は <code>.distortion</code> で取れる</td>
+<td><code>org.tribuo.clustering.kmeans</code> の K-means</td>
+<td>自作の K-means と突き合わせる</td>
 </tr>
 </tbody>
 </table>
@@ -10575,6 +10581,10 @@
 </thead>
 <tbody>
 <tr>
+<td>Smile 3.1.1（機械学習）</td>
+<td>POM のライセンスが GPL-3.0。LGPL-3.0 の 2.6.0 は古い。Scala 版（ADR 007）と同じ判断で採用しない</td>
+</tr>
+<tr>
 <td>Leiningen（ビルド）</td>
 <td>Clojure CLI の <code>deps.edn</code> のほうが依存の指定が素直で、別名でテスト・カバレッジを分けられる。Nix には両方ある</td>
 </tr>
@@ -10584,7 +10594,7 @@
 </tr>
 <tr>
 <td><code>scicloj.ml</code>（機械学習の包み）</td>
-<td>Smile を直に呼べる。包む層を増やすと Java 版・Scala 版との対比がぼやける</td>
+<td>Tribuo を直に呼べる。包む層を増やすと Java 版・Scala 版との対比がぼやける</td>
 </tr>
 <tr>
 <td>kaocha（テスト）</td>
@@ -10602,11 +10612,11 @@
 </table>
 <h2 id="_6">影響<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <ul>
-<li>良い影響: Java 版・Scala 版と同じ Smile を同じ JDK で呼ぶので、数値が一致するかどうかを言語をまたいで確かめられる。乱数の並びも一致する</li>
+<li>良い影響: Java 版・Kotlin 版・Scala 版と同じ Tribuo を同じ JDK で呼ぶので、数値が一致するかどうかを言語をまたいで確かめられる。乱数の並びも一致する（第 2 章の訓練データの平均値が Java 版・Scala 版と一致することを実測で確かめた）</li>
 <li>良い影響: 表を素のマップとベクタで表すので、Clojure のデータ操作（<code>map</code>・<code>filter</code>・スレッディングマクロ）がそのまま記事の題材になる</li>
 <li>悪い影響: <code>deps.edn</code> には lock ファイルが無いので、再現性は版を固定して書くことに頼る</li>
 <li>悪い影響: 検査の道具（clj-kondo・cljfmt）が Nix 環境に無いため、環境定義に手を入れる必要がある</li>
-<li>悪い影響: Smile の API は Java の静的メソッドと配列が中心で、Clojure の不変のデータとの間で変換が要る。その変換自体は第 3 章以降の題材にする</li>
+<li>悪い影響: Tribuo の API は可変なオブジェクト（<code>MutableDataset</code>）と Java の配列が中心で、Clojure の不変のデータとの間で変換が要る。その変換自体は第 3 章以降の題材にする</li>
 </ul>
 
 
