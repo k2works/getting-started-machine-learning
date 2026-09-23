@@ -3,7 +3,7 @@ type: ADR
 title: "011 Clojure 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定"
 description: "Clojure 版のライブラリに Clojure CLI・clojure.test・clj-kondo・cljfmt・cloverage・Tribuo 4.3・data.csv・Ring と Jetty を採用し、GPL-3.0 の Smile を使わない理由と表を素のマップとベクタで表す方針を決める。"
 tags: [adr,getting-start-ml,clojure]
-status: draft
+status: stable
 generated: { by: claude-code/claude-opus-5, at: 2026-09-23T00:00:00Z }
 ---
 
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-23T00:00:00Z }
 ## ステータス
 
 2026-09-23 提案されました
+
+2026-09-23 承認されました（第 1〜15 章の執筆で確かめました）
 
 ## コンテキスト
 
@@ -50,6 +52,12 @@ B55 のステップ 1 で、使い捨ての `deps.edn` のプロジェクトを 
 | 8 | Tribuo の CART にクラスの重みを渡す口が無いので、重み付きの決定木は自作が最終実装。自作と CART の相違件数（深さ 1〜10 で `0,0,0,0,2,0,0,0,1,0`）まで Java 版・Scala 版と一致した。学習済みパイプラインがマップ・ベクタ・キーワードだけなので、**EDN の `pr-str`／`read-string` で往復でき、値として `=` で比べられる**（Scala 版が必要とした自作のテキスト形式は要らない） |
 | 9 | 決定係数 8 個と天気ごとの平均利用者数が Java 版・Scala 版と完全に一致。Tribuo の標準化は**不偏標準偏差**（n−1 で割る）。**`java.io.InputStreamReader` は文字コードを間違えても例外を投げず、置換文字に置き換えて読み進む**（Java 版・Scala 版の `Files.readAllLines` は `MalformedInputException` を投げる）。**Clojure のマップは 9 件目からハッシュマップになり挿入順を保たない**ので、列の順は `:columns` のベクタで持ち回る |
 | 10 | 10 個の数値が Java 版と完全に一致。Tribuo のロジスティック回帰の既定は **5 エポック**で、500 エポックにすると自作と一致する。ランダムフォレストの `minChildWeight` の既定 5 が木の深さを抑えている（1.0 にすると訓練 1.0000・テスト 0.9333）。**乱数は `mapv` で即座に評価する**（`repeatedly` の遅延シーケンスと `java.util.Random` を混ぜると呼ぶ順が変わり、Java 版と並びが合わなくなる）。分類器は「学習して予測する関数を返す関数」で表し、`defprotocol` もアダプターも使わなかった |
+| 11 | 正解率・適合率・再現率・F 値・RMSE・MAE が Java 版と完全に一致。**`clojure.core/map` はチャンクする**（ベクタを渡すと 32 件を一度に実現するので「1 件取り出せば 1 回だけ計算」は成り立たない。リストならチャンクされない）。**`{:keys [tp fn]}` は `clojure.core/fn` を隠す**ので、混同行列の `:fn` は受け側で改名する。Tribuo の `TrainTestFold` の `train`／`test` は public フィールドなので `(.-test fold)` で読む。`KFoldSplitter.split` は `Iterator` を返す |
+| 12 | alpha の表・選んだ alpha（10.0）・テストの決定係数（線形 0.5224、リッジ 0.6243）・ラッソで 0 になった列が Java 版と完全に一致。`ElasticNetCDTrainer` の `l1Ratio` に 0 を渡すと OLCUT の `PropertyException` になるので 1e-12 を使う。**Tribuo は特徴量を列名の順に並べ替える**ので、名前は `x%02d` と桁をそろえる。同じ章の中で標準偏差の流儀が 2 つ混ざる（標準化は n、外れ値の z スコアは n−1）が、Java 版・Scala 版と同じ使い分けで数値が一致する |
+| 13 | **Tribuo 4.3.2 に主成分分析のモジュールは無い**ので、`DenseMatrix.eigenDecomposition` だけを使い、中心化・分散共分散行列・並べ替え・符号・射影は自作した。固有値は大きい順に返り、対称でない行列では空の `Optional` になる。寄与率・主成分・符号まで Java 版・Scala 版と一致した |
+| 14 | `KMeansTrainer` は初期化が `RANDOM`／`PLUSPLUS` だけで**初期中心を渡せない**ので、比較は同じ定義の SSE の大きさで行う（Kotlin 版の ADR 002 と同じ結論）。SSE の表・クラスタの件数・平均支出額が Java 版・Scala 版と一致した |
+| 15 | Ring 1.12.2＋Jetty 11 と Cheshire で、経路の振り分けのライブラリを使わずに書けた。置き場の約束は `defprotocol`、モデルは関数（操作が 1 つなら関数、複数で名前が要るなら protocol）。protocol は名前と引数の数しか守らないので、「無ければ例外」は本物と偽物の両方に走らせる約束のテストで守る。**Jetty は `Content-Type` を組み立て直す**（`application/json; charset=utf-8` が空白なしで届く）。Cheshire の `parse-string` は空文字列で例外を投げずに `nil` を返す。**EDN は `Double` を往復しても桁が落ちない**ので、保存・読み込みを挟んだ予測値が Java 版・Scala 版と完全に一致した。経路を自前で振り分けると 405 は自動で出ず、許可メソッドの表を二重に持つことになる |
+
 
 ## 決定
 
@@ -88,7 +96,7 @@ B55 のステップ 1 で、使い捨ての `deps.edn` のプロジェクトを 
 | 10 | Tribuo のロジスティック回帰・ランダムフォレスト | 自作と突き合わせる。正則化の既定値を確かめる |
 | 11 | Tribuo の評価指標 | 自作の評価指標・ROC・交差検証と突き合わせる |
 | 12 | Tribuo の正則化つき線形モデル | 自作のリッジ・ラッソと突き合わせる（目的関数の流儀の違いに注意する） |
-| 13 | Tribuo の主成分分析（対応範囲を確かめる） | 自作の固有値分解と突き合わせる。Tribuo に無ければ自作が最終実装 |
+| 13 | Tribuo の `DenseMatrix.eigenDecomposition`（主成分分析そのものは無い） | 中心化・分散共分散行列・射影・寄与率は自作が最終実装 |
 | 14 | `org.tribuo.clustering.kmeans` の K-means | 自作の K-means と突き合わせる |
 
 ### 検討した代替案
