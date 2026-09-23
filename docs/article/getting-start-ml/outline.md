@@ -1731,19 +1731,24 @@ Smile を使えるか、`tech.ml.dataset`・`scicloj.ml` を使うかはステ�
 
 ### 確認した事実（B55 のステップ 1 で埋める）
 
+B55 のステップ 1（2026-09-23）で、使い捨ての `deps.edn` のプロジェクトを `nix develop .#clojure` の中で動かして次を確かめた。
+
 | 項目 | 結果 | 確認方法 |
 | :--- | :--- | :--- |
-| Nix 環境 | Clojure CLI 1.12.3.1577、Leiningen 2.11.2、babashka 1.12.209、clj-kondo 2025.10.24-SNAPSHOT。`java` は 25.0.2 だが、**Leiningen は「on Java 21.0.8」と表示する**（どの JDK で動くかは要確認） | `nix develop .#clojure` |
-| ビルドの道具 | 未検証（`deps.edn`（Clojure CLI）と Leiningen のどちらを使うか。テストの走らせ方） | 使い捨てのプロジェクト |
-| テスト | 未検証（`clojure.test` と kaocha のどちらを使うか。スキップの書き方） | 同上 |
-| 機械学習 | 未検証（Smile を Java の相互運用で呼べるか、版とライセンス。`scicloj.ml`・`tech.ml.dataset`・`tablecloth` の保守状況と対応範囲） | 同上 |
-| 行列 | 未検証（`tech.ml.dataset` の列、`core.matrix`、素のベクタのどれで表すか） | 同上 |
-| 乱数 | 未検証（`java.util.Random` を使えば Java 版・Scala 版と並びが一致するはず） | 同上 |
-| CSV | 未検証（`clojure.data.csv` の BOM の扱いと Shift_JIS） | 同上 |
-| API | 未検証（第 15 章。Ring＋Jetty、`reitit` を使うか） | 同上 |
-| 直列化 | 未検証（EDN と `nippy` のどちらで学習済みモデルを保存するか） | 同上 |
-| 整形・静的解析 | 未検証（clj-kondo の既定の指摘、`cljfmt` が Nix にあるか） | わざと崩したファイル |
-| カバレッジ | 未検証（cloverage が動くか） | 同上 |
+| Nix 環境 | Clojure CLI 1.12.3.1577、Leiningen 2.11.2、babashka 1.12.209、clojure-lsp 2025.11.28。**`java` は 25.0.2 だが、Clojure も Leiningen も JDK 21.0.8 で動く**（`clojure` のラッパーが JDK 21 を持つ）。Java 版・Kotlin 版・Scala 版と同じ JDK 21 の世界になる | `nix develop .#clojure`、`(System/getProperty "java.version")` |
+| ビルドの道具 | Clojure CLI（`deps.edn`）を使う。テストは cognitect-labs/test-runner を `:test` の別名にして `clojure -M:test` で走らせられる（`-X:test` は `:exec-fn` が要る） | 使い捨てのプロジェクト |
+| テスト | `clojure.test`（`deftest`・`is`・`testing`）。テスト名に日本語を使える | 同上 |
+| 機械学習 | **Smile 3.1.1 を Java の相互運用でそのまま呼べる。** 決定木（`DecisionTree/fit` に `Formula`・`DataFrame`・`SplitRule/GINI` と深さなどを渡す。`Properties` でも渡せる）・重回帰（`OLS/fit`）・K-means（`KMeans/fit`、`.distortion` で SSE）・主成分分析（`PCA/fit(double[][], String[])`、`.varianceProportion` と `.cumulativeVarianceProportion`）・リッジ・ラッソ・ロジスティック回帰・ランダムフォレスト・評価指標（`Accuracy`・`ConfusionMatrix`・`AUC`）がある | 使い捨てのプロジェクトで実行 |
+| Smile の DataFrame | `DataFrame/of` に `DoubleVector/of`・`IntVector/of` の配列を渡して作る（CSV から直に作る形は引数が合わなかった）。列名で引ける | 同上 |
+| 行列 | `tech.ml.dataset` 7.032 は動く（`ds/->dataset`・`ds/column-names`）。表の表し方は素のマップとベクタにするか、`tech.ml.dataset` にするかを ADR 011 で決める | 同上 |
+| 乱数 | `java.util.Random` の `nextInt` と Fisher-Yates で `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`。**Java 版・Scala 版と同じ並び**なので、分割も一致するはず | 同上 |
+| CSV | `clojure.data.csv` 1.1.0 は **BOM を取り除かない**（先頭の列名が `"\uFEFF身長"` になる）。`tech.ml.dataset` は取り除く。Shift_JIS は `InputStreamReader` に文字コードを渡せば読めるが、**UTF-8 として読むと例外を投げずに文字化けする**（Ruby の `CSV::InvalidEncodingError` とは違い、Go 版に近い） | ヘッダーを表示して確認 |
+| 直列化 | EDN（`pr-str`／`read-string`）でマップとベクタをそのまま保存・復元できる | 同上 |
+| 整形 | **cljfmt は Nix 環境に入っていない**（nixpkgs には 0.15.6 がある）。字下げの崩れを差分で指摘することを確認した | `nix shell` で試用 |
+| 静的解析 | **clj-kondo も Nix 環境に入っていない**（環境の起動メッセージの「clj-kondo …」の行は clojure-lsp の出力の一部。nixpkgs には 2025.10.23 がある）。未使用の束縛を警告することを確認した | 同上 |
+| カバレッジ | cloverage 1.2.4 が `deps.edn` の別名から動く。`:paths` に `test` を含めないと「Could not locate …_test.clj」で落ちる | 使い捨てのプロジェクト |
+
+**ステップ 3〜4 で `ops/nix/environments/clojure/shell.nix` に clj-kondo と cljfmt を足す。** Ruby 版の `RUBYLIB` と同じく、環境定義の変更は記事（第 5〜6 章）の題材にする。
 
 ### B55 のステップ計画（Clojure のウォーキングスケルトン）
 
