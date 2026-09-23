@@ -6,8 +6,10 @@ defmodule GettingStartedMl.Csv do
   """
 
   NimbleCSV.define(GettingStartedMl.Csv.Parser, separator: ",", escape: "\"")
+  NimbleCSV.define(GettingStartedMl.Csv.TabParser, separator: "\t", escape: "\"")
 
   alias GettingStartedMl.Csv.Parser
+  alias GettingStartedMl.Csv.TabParser
 
   @bom "\uFEFF"
 
@@ -31,13 +33,27 @@ defmodule GettingStartedMl.Csv do
   """
   def read_table(path), do: path |> File.read!() |> parse_table()
 
-  @doc "文字列を「列名の並び」と「行のリスト」にする。"
-  def parse_table(contents) do
-    [header | rows] = Parser.parse_string(contents, skip_headers: false)
+  @doc """
+  文字列を「列名の並び」と「行のリスト」にする。
+
+  区切り文字はカンマ（`","`）とタブ（`"\\t"`）を選べる。NimbleCSV のパーサーは
+  マクロで作るので、区切り文字は実行時ではなくコンパイル時に決まる。
+  """
+  def parse_table(contents, separator \\ ",") do
+    [header | rows] = parser(separator).parse_string(contents, skip_headers: false)
     columns = header |> strip_bom() |> Enum.map(&String.to_atom/1)
 
-    {columns, Enum.map(rows, fn row -> columns |> Enum.zip(row) |> Map.new() end)}
+    rows =
+      rows
+      |> Enum.reject(fn row -> Enum.all?(row, &(String.trim(&1) == "")) end)
+      |> Enum.map(fn row -> columns |> Enum.zip(row) |> Map.new() end)
+
+    {columns, rows}
   end
+
+  defp parser(","), do: Parser
+  defp parser("\t"), do: TabParser
+  defp parser(separator), do: raise(ArgumentError, "区切り文字に対応していません: #{separator}")
 
   defp strip_bom([first | rest]), do: [String.replace_prefix(first, @bom, "") | rest]
 end

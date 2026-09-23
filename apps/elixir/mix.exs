@@ -11,7 +11,10 @@ defmodule GettingStartedMl.MixProject do
       deps: deps(),
       # NimbleCSV.define/2 が生成するパーサーはこちらが書いたコードではないので、
       # カバレッジの集計から外す（入れると総計が 47% まで落ちる）
-      test_coverage: [ignore_modules: [GettingStartedMl.Csv.Parser], summary: [threshold: 70]]
+      test_coverage: [
+        ignore_modules: [GettingStartedMl.Csv.Parser, GettingStartedMl.Csv.TabParser],
+        summary: [threshold: 70]
+      ]
     ]
   end
 
