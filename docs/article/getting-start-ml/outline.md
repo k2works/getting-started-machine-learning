@@ -1723,11 +1723,11 @@ Ruby 版の全 15 章が完成した（B51〜B54）。実装は `apps/ruby/lib/g
 
 | 軸 | 相手 | 見どころ |
 | :--- | :--- | :--- |
-| JVM で同じライブラリを使う | [Scala 版](scala/index.md)・[Java 版](java/index.md)（Smile） | Smile を Clojure から呼べるなら、数値が Java 版・Scala 版と一致するはず。Java との相互運用（`.` と `new` の書き方）を見る |
+| JVM で同じライブラリを使う | [Scala 版](scala/index.md)・[Java 版](java/index.md)（Tribuo） | Java 版・Scala 版と同じ Tribuo 4.3.2 を呼ぶので、数値が一致するはず。Java との相互運用（`.` と `new` の書き方）を見る |
 | 不変のデータと関数 | [F# 版](fsharp/index.md)・Elixir 版（第 3 波・未着手） | マップとベクタで表を表す。`Data.define` のような型の宣言を持たない書き方 |
 | 動的型付けの LISP | [Ruby 版](ruby/index.md)・[Python 版](python/index.md) | 型を宣言しない点は同じだが、S 式・スレッディングマクロ・REPL が書き方を変える |
 
-Smile を使えるか、`tech.ml.dataset`・`scicloj.ml` を使うかはステップ 1 で確かめ、見込みが外れたら承認を得て軸を差し替える。
+ステップ 1 で Smile 3.1.1 のライセンスが GPL-3.0 であることを確かめたので、機械学習は Scala 版と同じ Tribuo 4.3.2 に差し替えた（ADR 011）。対比の軸は「JVM で同じライブラリを使う」のまま強まった。
 
 ### 確認した事実（B55 のステップ 1 で埋める）
 
@@ -1738,7 +1738,7 @@ B55 のステップ 1（2026-09-23）で、使い捨ての `deps.edn` のプロ�
 | Nix 環境 | Clojure CLI 1.12.3.1577、Leiningen 2.11.2、babashka 1.12.209、clojure-lsp 2025.11.28。**`java` は 25.0.2 だが、Clojure も Leiningen も JDK 21.0.8 で動く**（`clojure` のラッパーが JDK 21 を持つ）。Java 版・Kotlin 版・Scala 版と同じ JDK 21 の世界になる | `nix develop .#clojure`、`(System/getProperty "java.version")` |
 | ビルドの道具 | Clojure CLI（`deps.edn`）を使う。テストは cognitect-labs/test-runner を `:test` の別名にして `clojure -M:test` で走らせられる（`-X:test` は `:exec-fn` が要る） | 使い捨てのプロジェクト |
 | テスト | `clojure.test`（`deftest`・`is`・`testing`）。テスト名に日本語を使える | 同上 |
-| 機械学習 | **Smile 3.1.1 を Java の相互運用でそのまま呼べる。** 決定木（`DecisionTree/fit` に `Formula`・`DataFrame`・`SplitRule/GINI` と深さなどを渡す。`Properties` でも渡せる）・重回帰（`OLS/fit`）・K-means（`KMeans/fit`、`.distortion` で SSE）・主成分分析（`PCA/fit(double[][], String[])`、`.varianceProportion` と `.cumulativeVarianceProportion`）・リッジ・ラッソ・ロジスティック回帰・ランダムフォレスト・評価指標（`Accuracy`・`ConfusionMatrix`・`AUC`）がある | 使い捨てのプロジェクトで実行 |
+| 機械学習 | **Smile 3.1.1 を Java の相互運用でそのまま呼べる（ただしライセンスは GPL-3.0 なので採用せず、Java 版・Scala 版と同じ Tribuo 4.3.2 にする。ADR 011）。** 決定木（`DecisionTree/fit` に `Formula`・`DataFrame`・`SplitRule/GINI` と深さなどを渡す。`Properties` でも渡せる）・重回帰（`OLS/fit`）・K-means（`KMeans/fit`、`.distortion` で SSE）・主成分分析（`PCA/fit(double[][], String[])`、`.varianceProportion` と `.cumulativeVarianceProportion`）・リッジ・ラッソ・ロジスティック回帰・ランダムフォレスト・評価指標（`Accuracy`・`ConfusionMatrix`・`AUC`）がある | 使い捨てのプロジェクトで実行 |
 | Smile の DataFrame | `DataFrame/of` に `DoubleVector/of`・`IntVector/of` の配列を渡して作る（CSV から直に作る形は引数が合わなかった）。列名で引ける | 同上 |
 | 行列 | `tech.ml.dataset` 7.032 は動く（`ds/->dataset`・`ds/column-names`）。表の表し方は素のマップとベクタにするか、`tech.ml.dataset` にするかを ADR 011 で決める | 同上 |
 | 乱数 | `java.util.Random` の `nextInt` と Fisher-Yates で `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`。**Java 版・Scala 版と同じ並び**なので、分割も一致するはず | 同上 |
