@@ -1478,7 +1478,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--stable"></span>
   
 
   
@@ -1503,7 +1503,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--stable"></span>
   
 
   
@@ -10343,6 +10343,7 @@
 <p>日付: 2026-09-23</p>
 <h2 id="_1">ステータス<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>2026-09-23 提案されました</p>
+<p>2026-09-23 承認されました（第 1〜15 章の執筆で確かめました）</p>
 <h2 id="_2">コンテキスト<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p><a href="../../article/getting-start-ml/outline/">執筆計画</a> の「第 3 波の執筆計画」では、Clojure 版の機械学習ライブラリの第一候補を Smile（Java の相互運用）とし、<code>scicloj.ml</code>・<code>tech.ml.dataset</code> の保守状況を B55 のステップ 1 で確かめてから確定するとした。Clojure 版の対比の相手は Scala 版・Java 版（JVM と Smile）、F# 版（不変のデータと関数）、Ruby 版・Python 版（動的型付け）である。</p>
 <p>B55 のステップ 1 で、使い捨ての <code>deps.edn</code> のプロジェクトを <code>nix develop .#clojure</code> の中で動かして次を確かめた。</p>
@@ -10457,6 +10458,26 @@
 <tr>
 <td>10</td>
 <td>10 個の数値が Java 版と完全に一致。Tribuo のロジスティック回帰の既定は <strong>5 エポック</strong>で、500 エポックにすると自作と一致する。ランダムフォレストの <code>minChildWeight</code> の既定 5 が木の深さを抑えている（1.0 にすると訓練 1.0000・テスト 0.9333）。<strong>乱数は <code>mapv</code> で即座に評価する</strong>（<code>repeatedly</code> の遅延シーケンスと <code>java.util.Random</code> を混ぜると呼ぶ順が変わり、Java 版と並びが合わなくなる）。分類器は「学習して予測する関数を返す関数」で表し、<code>defprotocol</code> もアダプターも使わなかった</td>
+</tr>
+<tr>
+<td>11</td>
+<td>正解率・適合率・再現率・F 値・RMSE・MAE が Java 版と完全に一致。<strong><code>clojure.core/map</code> はチャンクする</strong>（ベクタを渡すと 32 件を一度に実現するので「1 件取り出せば 1 回だけ計算」は成り立たない。リストならチャンクされない）。<strong><code>{:keys [tp fn]}</code> は <code>clojure.core/fn</code> を隠す</strong>ので、混同行列の <code>:fn</code> は受け側で改名する。Tribuo の <code>TrainTestFold</code> の <code>train</code>／<code>test</code> は public フィールドなので <code>(.-test fold)</code> で読む。<code>KFoldSplitter.split</code> は <code>Iterator</code> を返す</td>
+</tr>
+<tr>
+<td>12</td>
+<td>alpha の表・選んだ alpha（10.0）・テストの決定係数（線形 0.5224、リッジ 0.6243）・ラッソで 0 になった列が Java 版と完全に一致。<code>ElasticNetCDTrainer</code> の <code>l1Ratio</code> に 0 を渡すと OLCUT の <code>PropertyException</code> になるので 1e-12 を使う。<strong>Tribuo は特徴量を列名の順に並べ替える</strong>ので、名前は <code>x%02d</code> と桁をそろえる。同じ章の中で標準偏差の流儀が 2 つ混ざる（標準化は n、外れ値の z スコアは n−1）が、Java 版・Scala 版と同じ使い分けで数値が一致する</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>Tribuo 4.3.2 に主成分分析のモジュールは無い</strong>ので、<code>DenseMatrix.eigenDecomposition</code> だけを使い、中心化・分散共分散行列・並べ替え・符号・射影は自作した。固有値は大きい順に返り、対称でない行列では空の <code>Optional</code> になる。寄与率・主成分・符号まで Java 版・Scala 版と一致した</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>KMeansTrainer</code> は初期化が <code>RANDOM</code>／<code>PLUSPLUS</code> だけで<strong>初期中心を渡せない</strong>ので、比較は同じ定義の SSE の大きさで行う（Kotlin 版の ADR 002 と同じ結論）。SSE の表・クラスタの件数・平均支出額が Java 版・Scala 版と一致した</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Ring 1.12.2＋Jetty 11 と Cheshire で、経路の振り分けのライブラリを使わずに書けた。置き場の約束は <code>defprotocol</code>、モデルは関数（操作が 1 つなら関数、複数で名前が要るなら protocol）。protocol は名前と引数の数しか守らないので、「無ければ例外」は本物と偽物の両方に走らせる約束のテストで守る。<strong>Jetty は <code>Content-Type</code> を組み立て直す</strong>（<code>application/json; charset=utf-8</code> が空白なしで届く）。Cheshire の <code>parse-string</code> は空文字列で例外を投げずに <code>nil</code> を返す。<strong>EDN は <code>Double</code> を往復しても桁が落ちない</strong>ので、保存・読み込みを挟んだ予測値が Java 版・Scala 版と完全に一致した。経路を自前で振り分けると 405 は自動で出ず、許可メソッドの表を二重に持つことになる</td>
 </tr>
 </tbody>
 </table>
@@ -10621,8 +10642,8 @@
 </tr>
 <tr>
 <td>13</td>
-<td>Tribuo の主成分分析（対応範囲を確かめる）</td>
-<td>自作の固有値分解と突き合わせる。Tribuo に無ければ自作が最終実装</td>
+<td>Tribuo の <code>DenseMatrix.eigenDecomposition</code>（主成分分析そのものは無い）</td>
+<td>中心化・分散共分散行列・射影・寄与率は自作が最終実装</td>
 </tr>
 <tr>
 <td>14</td>
