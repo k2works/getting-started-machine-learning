@@ -75,9 +75,9 @@ mix test
 
 | 章 | テーマ | 状態 |
 |----|--------|------|
-| 第 4 章 | バージョン管理とデータ管理 | 執筆中 |
-| 第 5 章 | パッケージ管理と静的解析 | 執筆中 |
-| 第 6 章 | タスクランナーと CI/CD | 執筆中 |
+| [第 4 章](04-version-control-and-data-management.md) | バージョン管理とデータ管理 | 公開済み |
+| [第 5 章](05-package-management-and-static-analysis.md) | パッケージ管理と静的解析 | 公開済み |
+| [第 6 章](06-task-runner-and-ci-cd.md) | タスクランナーと CI/CD | 公開済み |
 
 ### 第 3 部: 回帰と実践的な前処理
 
