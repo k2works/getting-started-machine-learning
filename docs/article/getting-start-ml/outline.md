@@ -1724,7 +1724,7 @@ Ruby 版の全 15 章が完成した（B51〜B54）。実装は `apps/ruby/lib/g
 | 軸 | 相手 | 見どころ |
 | :--- | :--- | :--- |
 | JVM で同じライブラリを使う | [Scala 版](scala/index.md)・[Java 版](java/index.md)（Smile） | Smile を Clojure から呼べるなら、数値が Java 版・Scala 版と一致するはず。Java との相互運用（`.` と `new` の書き方）を見る |
-| 不変のデータと関数 | [F# 版](fsharp/index.md)・[Elixir 版](elixir/index.md)（第 3 波） | マップとベクタで表を表す。`Data.define` のような型の宣言を持たない書き方 |
+| 不変のデータと関数 | [F# 版](fsharp/index.md)・Elixir 版（第 3 波・未着手） | マップとベクタで表を表す。`Data.define` のような型の宣言を持たない書き方 |
 | 動的型付けの LISP | [Ruby 版](ruby/index.md)・[Python 版](python/index.md) | 型を宣言しない点は同じだが、S 式・スレッディングマクロ・REPL が書き方を変える |
 
 Smile を使えるか、`tech.ml.dataset`・`scicloj.ml` を使うかはステップ 1 で確かめ、見込みが外れたら承認を得て軸を差し替える。
