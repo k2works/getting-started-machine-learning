@@ -38,6 +38,19 @@ B55 のステップ 1 で、使い捨ての `deps.edn` のプロジェクトを 
 | カバレッジ | cloverage 1.2.4 が `deps.edn` の別名から動く（`:paths` に `test` を含めないと落ちる） | 使い捨てのプロジェクト |
 | 直列化 | EDN（`pr-str`／`read-string`）でマップとベクタをそのまま保存・復元できる | 同上 |
 
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 1 | `clojure.data.csv` は BOM を取り除かないので、先頭の列名から自分で取り除く。`clojure.test` にスキップが無いので、実データのテストは理由を標準エラーに出して早く戻る（テストの数は変わらず、表明の数が 18→16 と動く）。Rust 版のようにカバレッジの差でスキップを見分ける手は使えない（第 1 章では実データの経路を一時ファイルのテストが覆うため、カバレッジが変わらない） |
+| 2 | `java.util.Random` と Fisher-Yates の並び（シード 0 で `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`）が Java 版・Scala 版と一致し、**訓練データの平均値も一致した**（がく片長さ 0.4215384615384616 ほか）。`get` の既定値は先に評価されるので、「無ければ例外」は `when-not` で書く。標準の `shuffle` はシードを渡せず再現しない |
+| 3 | 深さごとの正解率・深さ 2 の木の境界（0.2950・0.6500）・Tribuo の CART との全件一致まで、Java 版・Scala 版と同じになった。`max-key` は同値のとき**後ろ**を返すので（Scala の `maxBy`・Kotlin の `maxByOrNull` と逆）、最頻値・分割・葉のラベルは厳密な `>` で畳む。`frequencies` は順を保たないので、`distinct` の順でたどる |
+| 4〜6 | cljfmt（違反で終了コード 1）・clj-kondo（警告で終了コード 2。`--fail-level error` にすると警告が出ても 0）・cloverage（`:extra-paths ["test"]` が無いと `FileNotFoundException`）。**cljfmt も clj-kondo も改行コードを検査しない**ので、`.gitattributes` の `apps/clojure/** text=auto eol=lf` が唯一の防御になる（Ruby 版の `Layout/EndOfLine` に当たる層が無い）。カバレッジは学習データの有無で 64.72%↔75.04%（forms）と動くので下限は設けない |
+| 7 | `SLMTrainer(true)` と `LARSTrainer` の予測は自作の正規方程式と小数第 13 位まで一致し、`SLMTrainer(false)` は一致しない（Java 版・Scala 版と同じ癖）。架空データの予測値は **Java 版・Scala 版と 1 ビットも違わない**。`SparseLinearModel.getWeights` は正規化した空間の重みなので、中心化ノルムの比で自作の係数に戻す。`SLMTrainer` は学習のたびに `java.util.logging` に「Feature selected: …」を出す |
+| 8 | Tribuo の CART にクラスの重みを渡す口が無いので、重み付きの決定木は自作が最終実装。自作と CART の相違件数（深さ 1〜10 で `0,0,0,0,2,0,0,0,1,0`）まで Java 版・Scala 版と一致した。学習済みパイプラインがマップ・ベクタ・キーワードだけなので、**EDN の `pr-str`／`read-string` で往復でき、値として `=` で比べられる**（Scala 版が必要とした自作のテキスト形式は要らない） |
+| 9 | 決定係数 8 個と天気ごとの平均利用者数が Java 版・Scala 版と完全に一致。Tribuo の標準化は**不偏標準偏差**（n−1 で割る）。**`java.io.InputStreamReader` は文字コードを間違えても例外を投げず、置換文字に置き換えて読み進む**（Java 版・Scala 版の `Files.readAllLines` は `MalformedInputException` を投げる）。**Clojure のマップは 9 件目からハッシュマップになり挿入順を保たない**ので、列の順は `:columns` のベクタで持ち回る |
+| 10 | 10 個の数値が Java 版と完全に一致。Tribuo のロジスティック回帰の既定は **5 エポック**で、500 エポックにすると自作と一致する。ランダムフォレストの `minChildWeight` の既定 5 が木の深さを抑えている（1.0 にすると訓練 1.0000・テスト 0.9333）。**乱数は `mapv` で即座に評価する**（`repeatedly` の遅延シーケンスと `java.util.Random` を混ぜると呼ぶ順が変わり、Java 版と並びが合わなくなる）。分類器は「学習して予測する関数を返す関数」で表し、`defprotocol` もアダプターも使わなかった |
+
 ## 決定
 
 | 用途 | 採用 | バージョン | ライセンス | 初出 |
