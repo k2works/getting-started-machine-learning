@@ -92,8 +92,8 @@ mix test
 | 章 | テーマ | 状態 |
 |----|--------|------|
 | [第 10 章](10-logistic-regression-and-ensemble.md) | ロジスティック回帰とアンサンブル学習 | 公開済み |
-| 第 11 章 | 評価指標と交差検証 | 執筆中 |
-| 第 12 章 | 正則化とモデル選択 | 執筆中 |
+| [第 11 章](11-evaluation-metrics-and-cross-validation.md) | 評価指標と交差検証 | 公開済み |
+| [第 12 章](12-regularization-and-model-selection.md) | 正則化とモデル選択 | 公開済み |
 
 ### 第 5 部: 教師なし学習と実運用
 
