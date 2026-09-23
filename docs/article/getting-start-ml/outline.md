@@ -1820,6 +1820,83 @@ Clojure 版の全 15 章が完成した（B56〜B59）。実装は `apps/clojure
 - [x] 実装を `apps/clojure/`、記事を `docs/article/getting-start-ml/clojure/` に置くこと
 - [x] B55 のステップ 1〜8
 
+## Elixir 版執筆計画
+
+第 3 波の 3 番目の言語。実装は `apps/elixir/`、記事は `docs/article/getting-start-ml/elixir/`、ライブラリの選定は ADR 012 に記録する。
+
+### 対比の軸
+
+| 軸 | 相手 | 見どころ |
+| :--- | :--- | :--- |
+| 不変のデータと関数 | [F# 版](fsharp/index.md)・[Clojure 版](clojure/index.md) | 表をマップとリストで表す。パイプライン演算子（`\|>`）は F# の `\|>`・Clojure のスレッディングマクロと何が違うか |
+| テンソルの言語 | [Python 版](python/index.md)（NumPy・scikit-learn） | Nx は NumPy、Explorer は pandas、Scholar は scikit-learn にあたる。自作 → Scholar で突き合わせる |
+| 動的型付けで型を宣言しない | [Ruby 版](ruby/index.md)・[Clojure 版](clojure/index.md) | パターンマッチと関数節、ガード。`@spec` と Dialyzer を使うかどうか |
+
+ステップ 1 で **Scholar に決定木とランダムフォレストが無い**ことを確かめたので、「scikit-learn にあたるもの」との突き合わせは線形回帰・ロジスティック回帰・K-means・主成分分析・評価指標・前処理に限られる。代わりに**乱数生成器（`java.util.Random` と同じ線形合同法）を自作して JVM の言語版と並びをそろえる**軸が加わった（ADR 012）。
+
+### 確認した事実（B60 のステップ 1）
+
+B60 のステップ 1（2026-09-23）で、使い捨ての Mix プロジェクトを `nix develop .#elixir` の中で動かして次を確かめた。
+
+| 項目 | 結果 | 確認方法 |
+| :--- | :--- | :--- |
+| Nix 環境 | Elixir 1.18.4、Mix 1.18.4。**`erl` は OTP 28（erts 16.2）だが、Elixir は自分が持つ OTP 27（erts 15.2.7.4）で動く**（`System.otp_release()` は `"27"`）。Clojure 版の「`java` は 25 だが Clojure は JDK 21」と同じ形。`elixir-ls` は環境変数を汚さない（`ERL_LIBS` などは空） | `nix develop .#elixir`、`erl -eval`、`System.otp_release/0` |
+| ビルドの道具 | Mix（`mix new`・`mix deps.get`）。`mix local.hex --force`／`mix local.rebar --force` を先に走らせる必要がある。依存は `deps/`、ビルドは `_build/` に置かれる | 使い捨てのプロジェクト |
+| テスト | ExUnit。**テスト名に日本語を使える。** データが無いときのスキップは `@tag :data` と `test_helper.exs` の `ExUnit.configure(exclude: [:data])` で書ける（「1 excluded」と出る） | 同上 |
+| 機械学習 | Scholar 0.4.2、Apache-2.0。線形回帰・リッジ・ロジスティック回帰・SVM・K-means・主成分分析（`explained_variance_ratio` を**持っている**）・標準化・混同行列・適合率／再現率／F 値・ROC 曲線・AUC・交差検証（`ModelSelection.cross_validate`・`k_fold_split`）・欠損値の補完（`SimpleImputer`）・ダミー変数化（`OneHotEncoder`）がある | ビーム表の一覧、使い捨てのプロジェクトで実行 |
+| **Scholar に無いもの** | **決定木とランダムフォレストが無い。** ラッソも無い（あるのはリッジと Bayesian Ridge）。本書の背骨である決定木が丸ごと無いので、**第 3〜6 章・第 12 章・第 14 章は自作が最終実装になる**。ほかの言語版で最も置き換えの範囲が狭い | `Scholar.*` のビーム表の一覧 |
+| テンソル | Nx 0.13.1。既定のバックエンドは `Nx.BinaryBackend` で、EXLA は要らなかった。**`Nx.tensor([1.0])` の既定の型は f32。** そのまま使うと重回帰の係数が `0.9999998807907104` になる。`type: :f64` を明示すると `0.9999999999999997` になり、ほかの言語版と突き合わせられる。ただし `roc_curve` など一部の指標は f64 を渡しても内部で f32 に落ちる | 使い捨てのプロジェクトで実行 |
+| データフレーム | Explorer 0.12.0。**Rust のネイティブ拡張は `rustler_precompiled` が既成の NIF を取ってくるので、Nix の中でも Rust のビルドは起きなかった。** ただし表の表し方は素のマップとリストにし、Explorer は CSV の読み込みに限って使う | `mix deps.get`・`mix compile` |
+| 乱数 | `Nx.Random.key(0)` の `shuffle` で `[2, 7, 9, 6, 0, 8, 1, 3, 4, 5]`（Threefry）。Erlang の `:rand.seed(:exsss, 0)` は別の並び。**どの言語版とも一致しない** | 同上 |
+| CSV | NimbleCSV 1.3.0 は **BOM を取り除かない**（先頭の列名が `"\uFEFF身長"` になる）。Explorer は取り除く。**Shift_JIS は Erlang/Elixir の標準では読めない**（`String.valid?/1` が `false` になるだけ）。Explorer に読ませると**例外を投げずに文字化けする**（Clojure 版・Go 版と同じ）。第 9 章のために **codepagex 0.1**（`config :codepagex, :encodings, ["VENDORS/MICSFT/WINDOWS/CP932"]` の設定が要る）で CP932 から変換する | BOM つき・Shift_JIS のファイルを作って確認 |
+| API | Plug 1.20＋Bandit 1.12＋Jason 1.4。`Bandit.start_link(plug: ..., port: ...)` で上がり、JSON を返せた。Phoenix は使わない | 使い捨ての Plug を立てて `:httpc` で叩いた |
+| 直列化 | `:erlang.term_to_binary`／`binary_to_term` でマップの決定木をそのまま保存・復元できた | 同上 |
+| 整形 | `mix format --check-formatted` が差分を出して終了コード 1 になる。設定は `.formatter.exs` | わざと崩したファイル |
+| 静的解析 | Credo 1.7.19。`mix credo --strict` は指摘があると**終了コード 4** になる。未使用の変数は Credo ではなくコンパイラが警告するので、`mix compile --warnings-as-errors`（終了コード 1）と組み合わせる | 同上 |
+| カバレッジ | 標準の `mix test --cover` に**既定で 90% のしきい値**があり、下回ると失敗する。excoveralls は入れなくてよい | 覆っていないモジュールを置いて確認 |
+
+**Scholar に決定木が無いことが、この言語版の性格を決めた。** ライブラリとの突き合わせは線形回帰・ロジスティック回帰・K-means・主成分分析・評価指標・前処理に限られ、決定木の章は自作のまま終わる。記事ではこれを「ライブラリが育っていない領域で、自作がそのまま本番の実装になる」例として扱う。
+
+### B60 のステップ計画（Elixir のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：上の表の各項目を、スクラッチパッドの使い捨ての Mix プロジェクトで実際に動かして確かめ、「確認した事実」に書き足す。とくに Explorer と EXLA のネイティブ拡張が Nix の中でビルドできるかを先に確かめる | 「未検証」の項目が無くなる |
+| 2 | ADR 012 を書く（ビルドの道具・テスト・機械学習・章ごとの置き換えの範囲。ライブラリに無いもの・保守が止まっているものは自作とする） | ADR 012 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/elixir/` の雛形：`mix.exs`・`mix.lock`・`lib/`・`test/`・`.gitignore`、最初のテストが 1 本通る | `nix develop .#elixir` でテストが成功する |
+| 4 | 整形・静的解析・カバレッジ：`mix format --check-formatted`・Credo・ExUnit・カバレッジを検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストはデータが無ければスキップする | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Elixir 版トップ（`elixir/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/elixir-ci.yml`（Nix → 整形 → Credo → テスト → カバレッジ。`deps`・`_build` のキャッシュ）、`ops/scripts/apps.js` への `elixir` の追加 | push 後に Elixir CI がグリーン。`apps:check:elixir` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### B61〜B64 の進め方（2026-09-23、目標「Elixir 執筆完了」による）
+
+2026-09-23 に人から「Elixir 執筆完了」を目標として受け取ったので、B60 の完了後から B64 までを続けて進める。割り当ては Clojure 版（B56〜B59）と同じ形にする。
+
+| 範囲 | 担当 | 前提 |
+| :--- | :--- | :--- |
+| 第 2〜3 章の実装 | 親 | — |
+| 第 1〜3 章の記事 | サブエージェント | 第 1〜3 章の実装 |
+| 第 4〜6 章（実装と記事） | サブエージェント | 第 1〜3 章 |
+| 第 7〜8 章・第 9〜10 章（実装と記事） | サブエージェント | 第 1〜3 章 |
+| 第 11〜12 章・第 13〜14 章・第 15 章（実装と記事） | サブエージェント | 第 7 章・第 9 章の取り込み後 |
+| 索引・nav・執筆計画・ログ・ADR 012 の統合 | 親 | 各章の取り込み |
+
+### 承認が必要な事項（Elixir）
+
+次の点を確認した（2026-09-23、目標「Elixir 執筆完了」として承認）。
+
+- [x] Elixir 版の対比の軸（F# 版・Clojure 版＝不変のデータと関数、Python 版＝テンソルと scikit-learn にあたるもの、Ruby 版・Clojure 版＝動的型付け）
+- [x] 機械学習は Nx・Scholar を第一候補とし、Explorer の採否（Rust のネイティブ拡張が Nix で通るか）をステップ 1 で確かめてから ADR 012 で確定すること
+- [x] 型（`@spec`・Dialyzer）は使わず、使わない理由を記事に書くこと（Ruby 版の RBS・Steep と同じ扱い）
+- [x] 第 15 章の API は Phoenix ではなく Plug＋Bandit で書くこと
+- [x] Livebook・可視化の節・付録 A を作らず、Python 版・Kotlin 版へ案内すること（第 3 波の共通の方針のまま）
+- [x] 実装を `apps/elixir/`、記事を `docs/article/getting-start-ml/elixir/` に置くこと
+- [x] B60 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
