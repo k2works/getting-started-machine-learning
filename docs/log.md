@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-23
+* **Creation**: Elixir 版の全 15 章（[トップ](/article/getting-start-ml/elixir/index.md)・第 1〜15 章）と [ADR 012](/adr/012-elixir-ml-libraries.md) を新規作成し、シリーズ索引・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Elixir 版執筆計画・確認した事実・B60〜B64 の完了を反映し、ADR 012 を承認済み（stable）にした。Scholar 0.4.2 に決定木・ランダムフォレスト・ラッソが無いため、これらは自作が最終実装になった（置き換えの範囲はシリーズで最も狭い）。乱数は `java.util.Random` と同じ線形合同法を自作し、第 2〜14 章の数値が Java 版・Scala 版・Clojure 版と一致した。`ops/nix/environments/elixir/` の環境で `apps:check:elixir` と Elixir CI を整え、`.gitattributes` に `apps/elixir/**` の改行の指定を足した。Elixir 版が完了し、シリーズは 12 言語になった。
 * **Creation**: Clojure 版の全 15 章（[トップ](/article/getting-start-ml/clojure/index.md)・第 1〜15 章）と [ADR 011](/adr/011-clojure-ml-libraries.md) を新規作成し、シリーズ索引・nav に登録。[執筆計画](/article/getting-start-ml/outline.md) に Clojure 版執筆計画・確認した事実・B55〜B59 の完了を反映し、ADR 011 を承認済み（stable）にした。機械学習は Smile 3.1.1 が GPL-3.0 だったため Java 版・Scala 版と同じ Tribuo 4.3.2 を採用し、第 2〜15 章の数値が Java 版・Scala 版と一致することを確かめた。Nix の Clojure 環境に clj-kondo と cljfmt を追加し、`.gitattributes` に `apps/clojure/**` の改行の指定を足した。Clojure 版が完了し、シリーズは 11 言語になった。
 
 ## 2026-09-22

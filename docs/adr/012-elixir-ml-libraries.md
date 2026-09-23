@@ -3,7 +3,7 @@ type: ADR
 title: "012 Elixir 版のビルド・テスト・静的解析・機械学習・API ライブラリの選定"
 description: "Elixir 版のライブラリに Mix・ExUnit・mix format・Credo・mix test --cover・Nx・Scholar・NimbleCSV・codepagex・Plug と Bandit を採用し、Scholar に決定木が無いため第 3〜6 章・第 12 章・第 14 章を自作の最終実装とする方針を決める。"
 tags: [adr,getting-start-ml,elixir]
-status: proposed
+status: stable
 generated: { by: claude-code/claude-opus-5, at: 2026-09-23T00:00:00Z }
 ---
 
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-23T00:00:00Z }
 ## ステータス
 
 2026-09-23 提案されました
+
+2026-09-23 承認されました（第 1〜15 章の執筆で確かめました）
 
 ## コンテキスト
 
@@ -38,6 +40,25 @@ B60 のステップ 1 で、使い捨ての Mix プロジェクトを `nix devel
 | 直列化 | `:erlang.term_to_binary`／`binary_to_term` でマップの決定木を往復できた | 同上 |
 | 整形・静的解析 | `mix format --check-formatted` は終了コード 1。Credo 1.7.19 の `mix credo --strict` は指摘があると**終了コード 4**。未使用の変数は Credo ではなくコンパイラが警告するので `mix compile --warnings-as-errors` と組み合わせる | わざと崩したファイル |
 | テスト・カバレッジ | ExUnit（テスト名に日本語を使える。`@tag` と `ExUnit.configure(exclude: ...)` でスキップできる）。標準の `mix test --cover` に**既定で 90% のしきい値**がある | 使い捨てのプロジェクト |
+
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 1 | NimbleCSV は BOM を取り除かないので、先頭の列名から自分で取り除く。`NimbleCSV.define/2` はモジュールを生成するので、区切り文字は実行時ではなくコンパイル時に決まる。実データのテストは `@tag :data` と `ExUnit.start(exclude: ...)` で外せる。**`mix test --cover` のしきい値は `test_coverage: [summary: [threshold: N]]` に書く。`[threshold: N]` と直に書くと黙って無視され、既定の 90% のまま失敗する**（同じ `test_coverage` の `ignore_modules` は効くので気づきにくい）。生成されたパーサーのモジュールもカバレッジの集計に入るので `ignore_modules` で外す |
+| 2 | **`java.util.Random` と同じ 48 ビットの線形合同法を自作した。** シード 0 の並びが `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]` で Java 版・Kotlin 版・Scala 版・Clojure 版と一致し、訓練データの平均（がく片長さ 0.4215384615384616）も 1e-15 まで一致した。**Elixir のマップはキーの順を保たない**（Erlang の flatmap から hashmap に変わる 32 件を境に崩れる）ので、列の順はリストで持ち回る。`||` は補完する値が `nil` のとき黙って `nil` を返すので、「無ければ例外」は `Map.fetch/2` で書く |
+| 3 | **Scholar に決定木が無い**ので、自作の木が最終実装。深さごとの正解率・深さ 2 の木の境界（0.2950・0.6500）・テストの正解率 0.9556 が Java 版・Scala 版・Clojure 版と一致した。**`Enum.max_by/2`・`min_by/2` は同値なら先のものを返す**ので、Clojure の `max-key`（同値なら後ろ）で必要だった書き直しが要らない。`Enum.sort_by/2` は安定。木はマップで表し `is_map_key/2` で見分ける（網羅性は検査されない）。`:io_lib.format` はロケールに依らない |
+| 4〜6 | `mix format --check-formatted`（違反で終了コード 1。**CRLF も検査する**）・`mix compile --warnings-as-errors`（未使用の変数は Credo ではなくコンパイラが警告する。1）・`mix credo --strict`（**指摘があると 4**）・`mix test --cover`（しきい値未満で 3）。4 つとも実際に壊して落ちることを確かめた。`.gitattributes` の `apps/elixir/** text=auto eol=lf` は `.formatter.exs` の対象外（`mix.lock`・YAML・Markdown）を守る二層目。**`npx gulp apps:check:elixir` は手元に `mix` があると Nix に切り替わらない**ので、手元の Elixir の版で走る |
+| 7 | 切片 6114.60・R² 0.6184・MAE 302.20・RMSE 376.14 が Java 版・Scala 版・Clojure 版と一致。**`Scholar.Linear.LinearRegression` は `Nx.LinAlg.pinv`（SVD）で解くので、条件の悪いデータでは最小二乗解に届かない**（特異値 `[12988, 2648, 1589, 4.28]` のデータで残差平方和が 自作 11083165.68 < Scholar 14073810.01）。列を標準化してから渡すと有効数字 4 桁までそろう。**f32 と f64 の違いは丸めた表示では気づけない**（切片が f64 `6114.595505694404`、f32 `6114.59716796875` で、どちらも `6114.60` になる） |
+| 8 | 前処理は自作が最終実装。`SimpleImputer` は**グループ別の統計量を持てず**、`OneHotEncoder` は**最初のカテゴリを落とせない**（`drop="first"` 相当が無い）。どちらも部分的には自作と一致することを確かめた。`OneHotEncoder.fit/2` は 1 次元の整数のテンソルしか取らない。学習済みパイプラインは `:erlang.term_to_binary` で往復できる。**大文字始まりのキーは `row.Sex_male` と書けない**（`invalid alias`） |
+| 9 | 決定係数 8 個が Java 版・Scala 版・Clojure 版と一致。**`Scholar.Preprocessing.StandardScaler` は n で割る母標準偏差**で、自作と一致した（JVM 版が Tribuo の n−1 で踏んだずれが起きない）。**Shift_JIS を `:utf8` として読むと例外も置換文字も出ず**、`String.valid?/1` が `false` の不正バイナリが値に入る（Java の `MalformedInputException`、Clojure の U+FFFD 置換とは違う第 3 の振る舞い）。逆に UTF-8 を CP932 として読むと codepagex が `{:error, ...}` を返すので、取り違えは片方向だけ静かに通る |
+| 10 | 自作の正解率 8 個が Java 版・Clojure 版と一致。**Scholar のロジスティック回帰は既定の `alpha: 1.0`（L2 正則化）が 105 件のデータに強すぎる**（訓練 0.6571）。`alpha: 0.0` にすると自作と完全一致する。ランダムフォレストは Scholar に無いので自作。**特徴量の重要度だけがわずかにずれる**（1558 回の分割のうち 269 回が同点で、`Enum.frequencies/1` の走査順の違いから同点が 1 ulp 崩れる。木の分け方は変わらないので正解率は一致する）。**勾配降下法は `Nx.BinaryBackend` より素のリストのほうが 7 倍速い**。`:math.exp(1000.0)` と `:math.log(0.0)` は `:badarith` を投げる（Erlang に Infinity と NaN が無い） |
+| 11 | 正解率 0.7811・適合率 0.7759・再現率 0.6306・F 値 0.6833・RMSE 405.77・MAE 321.53 が Java 版・Scala 版・Clojure 版と一致。**`Scholar.Metrics.Classification` は f64 を渡しても f32 を返す**（`Nx.equal` を経由して型が落ちる）ので 1e-7 までしか比べられない。`Regression` は f64 のまま。`roc_auc_score/4` だけは正解を f64 で渡せば f64 で返る。`confusion_matrix/3` は `[tn, fp, fn, tp]` の順。**`ModelSelection.k_fold_split/2` は余りを捨てる**（891 件を 5 分割すると 1 件がどの分割でもテストされない。Tribuo も Rumale も余りを配る）。`Stream.map/2` は 1 件ずつ実現する（Clojure の 32 件チャンクと違う） |
+| 12 | alpha ごとの表 5 行・テストの決定係数（線形 0.5224、リッジ 0.6243）・ラッソが 0 にした 3 列が Java 版・Scala 版・Clojure 版と一致。**`RidgeRegression` の既定の solver は `:svd` で自作と 5.06e-6 ずれるが、`solver: :cholesky` にすると 1 ビットも違わない**（第 7 章の `LinearRegression` のずれと同じ原因が、リッジでは呼ぶ側が選べる形で露出している）。**ラッソは Scholar に無い**ので座標降下法を自作。自作の目的関数は件数で割らないので、Tribuo の `alpha=0.5` は訓練 47 件では `23.5` にあたる |
+| 13 | 寄与率（PC1 0.4110、累積 0.8427）と主成分の係数が Java 版・Scala 版・Clojure 版と一致。**Scholar の PCA は寄与率を持つので全面的に突き合わせられる**（寄与率の差 6.9e-17、主成分の差 1.1e-14）。**`Nx.LinAlg.eigh` は対称でない行列を黙って受ける**（上三角だけを使う。例外も警告も出ない）ので、対称かどうかは自分で確かめる。固有値は降順で返り、固有ベクトルは列に並ぶ。Scholar の符号規則は U ベース（scikit-learn と同じ）。固有値が縮退したデータでは向きが一意でないので比較できない |
+| 14 | 自作の SSE 列（2640.00〜618.17）とクラスタごとの件数・平均支出額が Java 版・Scala 版・Clojure 版と一致。**`Scholar.Cluster.KMeans` は初期中心を渡せない**（`:init` は `:k_means_plus_plus` と `:random` のみ）ので、同じ定義の SSE の大きさで比べる。`:key` を渡さないと `System.system_time()` で鍵を作るので結果が毎回変わる。**Scholar の KMeans は k=1〜10 で約 80 秒、自作のリスト実装は 2.4 秒**（30 倍以上遅い）。`:io_lib.format` は `~.0f` を受け付けない |
+| 15 | 置き場の約束は behaviour（`@callback`）で表すが、behaviour はモジュールへの約束なので、置き場は **`{モジュール, 状態}` の組**になる（Plug 自身の `plug: {Api, store}` と同じ形）。振る舞いの約束は本物と偽物の両方に走らせるテストで守る。例外は `defexception` の構造体にすると `rescue` の節で種類ごとに振り分けられる。**`:erlang.term_to_binary` は f64 をビット列で書くので、保存・復元の往復は完全一致する。ただしほかの言語版とは一致しない**（`7730.457421687016` 対 `7730.457421687023`。正規方程式を解く実装の丸めの順の違い）。Bandit はヘッダー名を小文字に正規化し、Plug が `vary`・`cache-control` を足す。`Plug.Test.conn/3` でサーバーを立てずに統合テストが書ける |
+
 
 ## 決定
 
