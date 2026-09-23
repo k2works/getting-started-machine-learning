@@ -8,6 +8,8 @@
             [getting-started-ml.chapter08 :as chapter08]
             [getting-started-ml.chapter09 :as chapter09]
             [getting-started-ml.chapter10 :as chapter10]
+            [getting-started-ml.chapter11 :as chapter11]
+            [getting-started-ml.chapter12 :as chapter12]
             [getting-started-ml.chapter13 :as chapter13]
             [getting-started-ml.chapter14 :as chapter14]
             [getting-started-ml.chapter15 :as chapter15]))
@@ -20,6 +22,8 @@
    "chapter08" chapter08/run
    "chapter09" chapter09/run
    "chapter10" chapter10/run
+   "chapter11" chapter11/run
+   "chapter12" chapter12/run
    "chapter13" chapter13/run
    "chapter14" chapter14/run
    "chapter15" chapter15/run})
