@@ -1,0 +1,56 @@
+name: Elixir CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/elixir/**'
+      - 'ops/nix/environments/elixir/**'
+      - '.github/workflows/elixir-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/elixir/**'
+      - 'ops/nix/environments/elixir/**'
+      - '.github/workflows/elixir-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache deps and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/elixir/deps
+            apps/elixir/_build
+          key: ${{ runner.os }}-elixir-${{ hashFiles('apps/elixir/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-elixir-
+
+      - name: Fetch dependencies
+        run: |
+          nix develop .#elixir --command bash -c 'cd apps/elixir && mix local.hex --force && mix local.rebar --force && mix deps.get'
+
+      - name: Check formatting
+        run: |
+          nix develop .#elixir --command bash -c 'cd apps/elixir && mix format --check-formatted'
+
+      # 未使用の変数などは Credo ではなくコンパイラが警告するので、警告を失敗にする
+      - name: Compile with warnings as errors
+        run: |
+          nix develop .#elixir --command bash -c 'cd apps/elixir && mix compile --warnings-as-errors'
+
+      - name: Credo
+        run: |
+          nix develop .#elixir --command bash -c 'cd apps/elixir && mix credo --strict'
+
+      # 実データのテストは学習データが無ければ :data のタグごと外される
+      - name: Test with coverage
+        run: |
+          nix develop .#elixir --command bash -c 'cd apps/elixir && mix test --cover'

@@ -72,6 +72,16 @@ const APPS = [
       'cljfmt check src test && clj-kondo --lint src test --fail-level warning && clojure -M:test && clojure -M:coverage',
   },
   {
+    name: 'elixir',
+    nix: 'elixir',
+    dir: path.join('apps', 'elixir'),
+    tools: [{ cmd: 'mix', version: 'mix --version' }],
+    setup: 'mix deps.get',
+    // CI（.github/workflows/elixir-ci.yml）と同じ順に、整形・警告・静的解析・テスト・カバレッジを検査する
+    check:
+      'mix format --check-formatted && mix compile --warnings-as-errors && mix credo --strict && mix test --cover',
+  },
+  {
     name: 'ruby',
     nix: 'ruby',
     dir: path.join('apps', 'ruby'),
