@@ -4,6 +4,8 @@
             [getting-started-ml.chapter01 :as chapter01]
             [getting-started-ml.chapter02 :as chapter02]
             [getting-started-ml.chapter03 :as chapter03]
+            [getting-started-ml.chapter07 :as chapter07]
+            [getting-started-ml.chapter08 :as chapter08]
             [getting-started-ml.chapter09 :as chapter09]
             [getting-started-ml.chapter10 :as chapter10]))
 
@@ -11,6 +13,8 @@
   {"chapter01" chapter01/run
    "chapter02" chapter02/run
    "chapter03" chapter03/run
+   "chapter07" chapter07/run
+   "chapter08" chapter08/run
    "chapter09" chapter09/run
    "chapter10" chapter10/run})
 
