@@ -61,6 +61,17 @@ const APPS = [
       'cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test && cargo llvm-cov --summary-only',
   },
   {
+    name: 'clojure',
+    nix: 'clojure',
+    dir: path.join('apps', 'clojure'),
+    // clj-kondo と cljfmt は Nix の環境にしかないので、そろっていなければ Nix の中で実行する
+    tools: [{ cmd: 'clojure', version: 'clojure --version' }, { cmd: 'clj-kondo', version: 'clj-kondo --version' }],
+    setup: 'clojure -P -M:test',
+    // CI（.github/workflows/clojure-ci.yml）と同じ順に、整形・静的解析・テスト・カバレッジを検査する
+    check:
+      'cljfmt check src test && clj-kondo --lint src test --fail-level warning && clojure -M:test && clojure -M:coverage',
+  },
+  {
     name: 'ruby',
     nix: 'ruby',
     dir: path.join('apps', 'ruby'),

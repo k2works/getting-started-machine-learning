@@ -1,0 +1,53 @@
+name: Clojure CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/clojure/**'
+      - 'ops/nix/environments/clojure/**'
+      - '.github/workflows/clojure-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/clojure/**'
+      - 'ops/nix/environments/clojure/**'
+      - '.github/workflows/clojure-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # deps.edn には lock ファイルが無いので、依存の記述そのものを鍵にする
+      - name: Cache maven and gitlibs
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+          key: ${{ runner.os }}-clojure-${{ hashFiles('apps/clojure/deps.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-clojure-
+
+      - name: Check formatting
+        run: |
+          nix develop .#clojure --command bash -c 'cd apps/clojure && cljfmt check src test'
+
+      # clj-kondo は警告でも失敗させる
+      - name: clj-kondo
+        run: |
+          nix develop .#clojure --command bash -c 'cd apps/clojure && clj-kondo --lint src test --fail-level warning'
+
+      # 実データのテストは学習データが無ければスキップされる
+      - name: Test
+        run: |
+          nix develop .#clojure --command bash -c 'cd apps/clojure && clojure -M:test'
+
+      - name: Coverage
+        run: |
+          nix develop .#clojure --command bash -c 'cd apps/clojure && clojure -M:coverage'
