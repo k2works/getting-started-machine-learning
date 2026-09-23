@@ -159,7 +159,7 @@
 
 (def ^:private bom
   "UTF-8 の BOM。data.csv は取り除かないので、先頭の列名から自分で取り除く。"
-  "﻿")
+  "\uFEFF")
 
 (defn load-delimited
   "文字コードと区切り文字を指定して読み込み、1 行目を列名にする。
