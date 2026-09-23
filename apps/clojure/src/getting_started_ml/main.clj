@@ -9,7 +9,8 @@
             [getting-started-ml.chapter09 :as chapter09]
             [getting-started-ml.chapter10 :as chapter10]
             [getting-started-ml.chapter13 :as chapter13]
-            [getting-started-ml.chapter14 :as chapter14]))
+            [getting-started-ml.chapter14 :as chapter14]
+            [getting-started-ml.chapter15 :as chapter15]))
 
 (def ^:private chapters
   {"chapter01" chapter01/run
@@ -20,7 +21,8 @@
    "chapter09" chapter09/run
    "chapter10" chapter10/run
    "chapter13" chapter13/run
-   "chapter14" chapter14/run})
+   "chapter14" chapter14/run
+   "chapter15" chapter15/run})
 
 (defn -main
   "章の名前を受け取り、その章を実行する。"
