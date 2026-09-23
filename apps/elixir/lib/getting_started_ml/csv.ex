@@ -21,11 +21,22 @@ defmodule GettingStartedMl.Csv do
   end
 
   @doc "文字列を列名つきのマップのリストにする。"
-  def parse(contents) do
+  def parse(contents), do: contents |> parse_table() |> elem(1)
+
+  @doc """
+  CSV を読み、列名の並びと行のリストを返す。
+
+  Elixir のマップはキーの順を保たない（大きくなると並びが崩れる）ので、
+  列の順を保ちたいときはこちらを使って列名のリストを持ち回る。
+  """
+  def read_table(path), do: path |> File.read!() |> parse_table()
+
+  @doc "文字列を「列名の並び」と「行のリスト」にする。"
+  def parse_table(contents) do
     [header | rows] = Parser.parse_string(contents, skip_headers: false)
     columns = header |> strip_bom() |> Enum.map(&String.to_atom/1)
 
-    Enum.map(rows, fn row -> columns |> Enum.zip(row) |> Map.new() end)
+    {columns, Enum.map(rows, fn row -> columns |> Enum.zip(row) |> Map.new() end)}
   end
 
   defp strip_bom([first | rest]), do: [String.replace_prefix(first, @bom, "") | rest]

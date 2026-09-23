@@ -20,10 +20,11 @@
 | 2 | [C#](csharp/index.md) | .NET | record・LINQ・ML.NET の IDataView、F# 版との対比 | 完了 |
 | 2 | [Scala](scala/index.md) | JVM | case class・不変のコレクション・enum、Java 版との対比 | 完了 |
 | 2 | [Go](go/index.md) | Go | 構造体・error の戻り値、ライブラリが限られる環境での自作 | 完了 |
-| 2 | [Rust](rust/index.md) | Rust | 所有権と借用・`Result` と `?`・linfa、Java 版／C# 版との対比 | 完了 | [Ruby](ruby/02-data-preprocessing-and-triangulation.md) | [Clojure](clojure/02-data-preprocessing-and-triangulation.md) |
+| 2 | [Rust](rust/index.md) | Rust | 所有権と借用・`Result` と `?`・linfa、Java 版／C# 版との対比 | 完了 |
 | 3 | [Ruby](ruby/index.md) | CRuby | 動的型付け・ブロックと Enumerable・Rumale、Python 版との対比 | 完了 |
 | 3 | [Clojure](clojure/index.md) | JVM（JDK 21） | 不変のマップとベクタ・S 式・Java の相互運用・Tribuo、Java 版／Scala 版との対比 | 完了 |
-| 3 | Elixir / PHP / Haskell | — | — | 未着手 |
+| 3 | [Elixir](elixir/index.md) | BEAM（OTP 27） | パターンマッチと関数節・パイプライン・Nx と Scholar、F# 版／Clojure 版との対比 | 執筆中 |
+| 3 | PHP / Haskell | — | — | 未着手 |
 
 ## 章構成
 
