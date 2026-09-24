@@ -38,6 +38,14 @@ B65 のステップ 1 で、使い捨ての Composer プロジェクトを `nix 
 | 整形・静的解析 | PHP-CS-Fixer 3.x の `check` は違反があると**終了コード 8**（1 ではない）。PHPStan 2.x は 1。**level 8 はテストコードの `assertTrue(true)` も指摘する** | わざと崩したファイル |
 | しきい値 | **PHPUnit には最低カバレッジのしきい値の機能が無い。** `--coverage-clover` の XML の `project/metrics` を読んで自分で判定する | clover.xml |
 
+### 各章で確かめた結果
+
+| 章 | 確かめたこと |
+|----|------------|
+| 1 | `fgetcsv` は BOM を取り除かないので、先頭の列名から自分で取り除く。`escape: ''` を明示しないと RFC 4180 と違う解釈になる（PHP 8.4 で非推奨）。`(int) '高い'` は 0 を返して落ちないので `filter_var(..., FILTER_VALIDATE_INT)` で厳密に検査する。**素の Nix 環境にカバレッジドライバが無かった**ので pcov を足し、composer も同じ PHP から取って版（8.4 と 8.3）をそろえた。**PHPUnit に最低カバレッジのしきい値の機能が無い**ので clover の XML を読む判定を自作した（終了コードは 3 と自分で決めた）。`failOnDeprecation="true"` が `string $csvFile = null` の非推奨を見つけた。終了コードは PHP-CS-Fixer が **8**、PHPStan が 1、PHPUnit が 1 |
+| 2 | **`java.util.Random` と同じ 48 ビットの線形合同法を自作した。** `shuffle(0..9, 0)` が `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]` で Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版と一致し、訓練データのがく片長さの平均（0.4215384615384616）も 1e-15 まで一致した。**PHP の整数は溢れると float に化けて静かに精度を失う**（Java のように折り返さず、Elixir のように多倍長にもならない。`Deprecated: Implicit conversion from float ... loses precision` が出るだけ）ので、state を上下 24 ビットに分けて掛ける。**`?:` と `if ($value)` は 0.0 を偽とする**ので、0.0〜1.0 に正規化されたデータでは欠損値の判定に使えない（`!== null` で書く）。配列は値としてコピーされるので `shuffle` の中で書き換えても元の配列は変わらない。`array_filter` は添字を保つので `list<T>` には `array_values` が要る |
+| 3 | 自作の木の深さごとの正解率と深さ 2 の境界（0.2950・0.6500）が Elixir 版・Java 版・Scala 版・Clojure 版と一致した。**`ClassificationTree` は既定値のままでは決定的でない。** `CART::split()` が使う列を `array_rand` で毎回選び（`maxFeatures` の既定は `round(sqrt(n))`）、**シードを渡す口が無い**（既定のまま 5 回走らせて `0.8889 0.8889 0.8889 0.8889 0.8222` と揺れた）。連続値の候補も分位点で丸める（`maxBins` の既定は `1 + round(log2(m))`）。`maxLeafSize: 1`・`minPurityIncrease: 0.0`・`maxFeatures: 列数`・`maxBins: 大きい値` を明示して初めて比べられ、深さ 1〜5 で完全一致した。**「ライブラリにある」と「そのまま比べられる」は別である。** 深さ制限なしのときだけ 0.9333 対 0.9111 で食い違い、原因は**境界の取り方**（自作＝隣り合う値の中点、Rubix ML＝データに実在する値）だった。**PHP の配列は「数字だけの文字列」の鍵を整数に変える**ので、`@return array<string, int>` と書いても PHPStan レベル 9 は通してしまい、テストで初めて見つかった（型の道具を最高レベルまで使っても言語の癖は型では守れない） |
+
 ## 決定
 
 | 用途 | 採用 | バージョン | ライセンス | 初出 |
