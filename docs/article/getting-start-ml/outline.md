@@ -1926,6 +1926,67 @@ Elixir 版の全 15 章が完成した（B61〜B64）。実装は `apps/elixir/l
 - [x] 実装を `apps/elixir/`、記事を `docs/article/getting-start-ml/elixir/` に置くこと
 - [x] B60 のステップ 1〜8
 
+## PHP 版執筆計画
+
+第 3 波の 4 番目の言語。実装は `apps/php/`、記事は `docs/article/getting-start-ml/php/`、ライブラリの選定は ADR 013 に記録する。
+
+### 対比の軸
+
+| 軸 | 相手 | 見どころ |
+| :--- | :--- | :--- |
+| 漸進的な型付け | [Python 版](python/index.md)・[TypeScript 版](typescript/index.md) | 実行時に効く型（`declare(strict_types=1)` の引数・戻り値）と、静的解析だけが見る型（PHPStan の配列の形）を分けて使う。Ruby 版が型を使わないと決めたのと逆の選択 |
+| 動的型付けの仲間 | [Ruby 版](ruby/index.md) | 同じスクリプト言語で、値の持ち方（Ruby の `Data.define` と PHP の `readonly class`）と検査の重さがどう違うか |
+| ライブラリがそろっている | [Elixir 版](elixir/index.md)（Scholar に決定木が無い） | Rubix ML は決定木もランダムフォレストも持つ。**Elixir 版と正反対に、置き換えの範囲が広い**。ライブラリの有無で記事の重心がどう動くかを並べる |
+
+### 確認した事実（B65 のステップ 1）
+
+B65 のステップ 1（2026-09-24）で、使い捨ての Composer プロジェクトを `nix develop .#php` の中で動かして次を確かめた。
+
+| 項目 | 結果 | 確認方法 |
+| :--- | :--- | :--- |
+| Nix 環境 | **もとの `shell.nix` は `php`（8.4.16）と `php83Packages.composer`（PHP 8.3.29 で動く）を混ぜていた。** Clojure 版・Elixir 版の「道具が別の版で動く」と同じ形だが、こちらは版をそろえられるので、`php.withExtensions` で pcov を足した PHP と、その `packages.composer` に置き換えて 8.4.16 に統一した | `php --version`・`composer --version` |
+| ビルドの道具 | Composer 2.9.2。依存は `vendor/`、オートロードは PSR-4 | 使い捨てのプロジェクト |
+| テスト | PHPUnit 11.5.56。**テスト名（メソッド名）に日本語を使える。** `#[TestDox]` で読みやすい名前も付く。データが無いときのスキップは `#[Group('data')]` と `--exclude-group data` で書ける | 使い捨てのプロジェクト |
+| カバレッジ | **素の Nix 環境には xdebug も pcov も無く、カバレッジを取れなかった。** `php.withExtensions` で **pcov** を足して解決した（xdebug より軽く、カバレッジ専用）。**PHPUnit には最低カバレッジのしきい値の機能が無い**ので、`--coverage-clover` の XML を読んで自分で判定する（Elixir の `mix test --cover` に既定のしきい値があるのと対照的） | `php -m`、clover.xml の `project/metrics` |
+| 機械学習 | **Rubix ML 2.6.0（MIT）。決定木（`ClassificationTree`・`RegressionTree`）・ランダムフォレスト・ロジスティック回帰・K-means・主成分分析・標準化・ダミー変数化・欠損値の補完・交差検証（KFold）・混同行列・適合率／再現率／F 値・決定係数・`PersistentModel` がある。** ネイティブ拡張（`tensor`）は任意で、入れなくても純 PHP の `rubix/tensor` で動いた | ビーム表ならぬ `class_exists` の一覧、`composer install` |
+| **Rubix ML に無いもの** | **素の線形回帰（`LinearRegression`）とラッソが無い。** 線形回帰は `Ridge(0.0)` が最小二乗にあたる（`[[1,2],[2,1],…]` の当てはめで 2.999999999999993 を返した）。ラッソは自作が最終実装になる（第 12 章） | 同上 |
+| 数学 | MathPHP 2.x（MIT）。行列・統計・回帰を持つ。正規方程式を自分で解く章で使うかを章ごとに決める | `class_exists` |
+| CSV | `fgetcsv` は **BOM を取り除かない**（先頭の列名が `"﻿身長"` になる。Go 版・Clojure 版・Elixir 版と同じ）。**Shift_JIS は mbstring の `CP932` で標準のまま変換できる**（Elixir 版が codepagex を足したのと違い、追加の依存が要らない）。`mb_check_encoding` で UTF-8 でないことを先に判定できる | BOM つき・Shift_JIS のファイルを作って確認 |
+| 乱数 | `mt_srand(0)` の並びはどの言語版とも一致しない。**`PHP_INT_SIZE` が 8 なので、`java.util.Random` と同じ 48 ビットの線形合同法を自作できる**（Elixir 版と同じ手で JVM の言語版に並びをそろえる） | `PHP_INT_SIZE`・`mt_rand` |
+| 直列化 | `serialize`／`unserialize` で配列の決定木がそのまま往復した（`===` で一致）。`json_encode`／`json_decode(assoc)` も往復する | 使い捨てのプロジェクト |
+| 整形 | PHP-CS-Fixer 3.x（`@PSR12`）。`check` は違反があると**終了コード 8**（Elixir の Credo 4 と同じく 1 ではない） | わざと崩したファイル |
+| 静的解析 | PHPStan 2.x。違反があると終了コード 1。**level 8 はテストコードの `assertTrue(true)` のような書き方も指摘する**ので、テストの書き方をそれに合わせる | 同上 |
+| 浮動小数点 | `0.1 + 0.2` は `0.30000000000000004`（IEEE 754 倍精度）。整数は 64 ビットで、溢れると float になる | 使い捨てのプロジェクト |
+
+**Rubix ML が決定木を持っていることが、この言語版の性格を決めた。** Elixir 版が「ライブラリに無いので自作が最終実装」だったのに対し、PHP 版は**ほぼ全章でライブラリとの突き合わせができる**。記事では第 3 波の 2 つの版を対照させ、「ライブラリの成熟度が記事の重心をどう動かすか」を扱う。
+
+### B65 のステップ計画（PHP のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：上の表の各項目を、スクラッチパッドの使い捨ての Composer プロジェクトで実際に動かして確かめ、「確認した事実」に書き足す。とくにカバレッジドライバの有無を先に確かめる | 「未検証」の項目が無くなる |
+| 2 | ADR 013 を書く（ビルドの道具・テスト・機械学習・章ごとの置き換えの範囲。ライブラリに無いものは自作とする） | ADR 013 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/php/` の雛形：`composer.json`・`composer.lock`・`src/`・`tests/`・`.gitignore`、最初のテストが 1 本通る | `nix develop .#php` でテストが成功する |
+| 4 | 整形・静的解析・カバレッジ：PHP-CS-Fixer・PHPStan・PHPUnit・clover のしきい値判定を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストはデータが無ければスキップする | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、PHP 版トップ（`php/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/php-ci.yml`（Nix → 整形 → 静的解析 → テスト → カバレッジ。`vendor` のキャッシュ）、`ops/scripts/apps.js` への `php` の追加 | push 後に PHP CI がグリーン。`apps:check:php` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（PHP）
+
+次の点を確認した（2026-09-24、目標「PHP 執筆完成」として承認）。
+
+- [x] PHP 版の対比の軸（Python 版・TypeScript 版＝漸進的な型付け、Ruby 版＝動的型付けの仲間、Elixir 版＝ライブラリの成熟度の対照）
+- [x] 機械学習は Rubix ML を第一候補とし、素の線形回帰とラッソが無いことを踏まえて ADR 013 で確定すること
+- [x] 型は使う（`declare(strict_types=1)` と PHPStan の最高レベル）。Ruby 版が RBS・Steep を使わないと決めたのと逆の選択にし、その理由を記事に書くこと
+- [x] カバレッジのために Nix の PHP に pcov を足し、composer も同じ PHP から取って版をそろえること
+- [x] Notebook・可視化の節・付録 A を作らず、Python 版・Kotlin 版へ案内すること（第 3 波の共通の方針のまま）
+- [x] 実装を `apps/php/`、記事を `docs/article/getting-start-ml/php/` に置くこと
+- [x] B65 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |

@@ -18,5 +18,6 @@
 | [010](010-ruby-ml-libraries.md) | Ruby 版のライブラリに Bundler・Minitest・RuboCop・SimpleCov・Rumale 2.2・numo-narray-alt・Sinatra を採用し、Nix の Ruby 3.3 を前提にする | 承認済み |
 | [011](011-clojure-ml-libraries.md) | Clojure 版のライブラリに Clojure CLI・clojure.test・clj-kondo・cljfmt・cloverage・Tribuo 4.3・data.csv・Ring を採用し、GPL-3.0 の Smile を使わない | 承認済み |
 | [012](012-elixir-ml-libraries.md) | Elixir 版のライブラリに Mix・ExUnit・mix format・Credo・Nx・Scholar・NimbleCSV・codepagex・Plug と Bandit を採用し、Scholar に決定木が無いため決定木の章を自作の最終実装とする | 承認済み |
+| [013](013-php-ml-libraries.md) | PHP 版のライブラリに Composer・PHPUnit・PHP-CS-Fixer・PHPStan・pcov・Rubix ML・MathPHP を採用し、素の線形回帰とラッソが無いため代用・自作とする | 提案中 |
 
 ADR の作成には `creating-adr` スキルを使用してください。

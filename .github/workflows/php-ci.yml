@@ -1,0 +1,56 @@
+name: PHP CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/php/**'
+      - 'ops/nix/environments/php/**'
+      - '.github/workflows/php-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/php/**'
+      - 'ops/nix/environments/php/**'
+      - '.github/workflows/php-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/php/vendor
+            ~/.cache/composer
+          key: ${{ runner.os }}-php-${{ hashFiles('apps/php/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: |
+          nix develop .#php --command bash -c 'cd apps/php && composer install --no-interaction --no-progress'
+
+      - name: Check formatting
+        run: |
+          nix develop .#php --command bash -c 'cd apps/php && php vendor/bin/php-cs-fixer check --diff'
+
+      - name: PHPStan
+        run: |
+          nix develop .#php --command bash -c 'cd apps/php && php vendor/bin/phpstan analyse --no-progress'
+
+      # 実データのテストは学習データが無ければ data のグループごとスキップされる
+      - name: Test with coverage
+        run: |
+          nix develop .#php --command bash -c 'cd apps/php && php vendor/bin/phpunit --coverage-clover build/clover.xml'
+
+      # PHPUnit には最低カバレッジのしきい値の機能が無いので、clover の XML を読んで判定する
+      - name: Check coverage threshold
+        run: |
+          nix develop .#php --command bash -c 'cd apps/php && php tools/coverage-threshold.php build/clover.xml 90'

@@ -82,6 +82,16 @@ const APPS = [
       'mix format --check-formatted && mix compile --warnings-as-errors && mix credo --strict && mix test --cover',
   },
   {
+    name: 'php',
+    nix: 'php',
+    dir: path.join('apps', 'php'),
+    // カバレッジに pcov が要るので、pcov のある Nix の環境でなければ切り替える
+    tools: [{ cmd: 'php', version: `php -r 'exit(extension_loaded("pcov") ? 0 : 1);'` }, { cmd: 'composer', version: 'composer --version --no-interaction' }],
+    setup: 'composer install --no-interaction',
+    // CI（.github/workflows/php-ci.yml）と同じ順に、整形・静的解析・テスト・カバレッジを検査する
+    check: 'composer check --no-interaction',
+  },
+  {
     name: 'ruby',
     nix: 'ruby',
     dir: path.join('apps', 'ruby'),
