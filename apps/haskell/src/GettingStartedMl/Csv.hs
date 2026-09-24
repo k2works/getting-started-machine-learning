@@ -12,8 +12,11 @@ UTF-8 として符号化・復号する。
 module GettingStartedMl.Csv (
   Row,
   parseRows,
+  parseTable,
   column,
+  text,
   number,
+  optionalNumber,
 ) where
 
 import qualified Data.ByteString as BS
@@ -43,6 +46,20 @@ parseRows contents =
     Left err -> Left err
     Right (_, rows) -> Right (filter (not . isBlank) (V.toList rows))
 
+{- | CSV を読み、列名の並びと行のリストを返す。
+
+'M.Map' はキーの順で並ぶので、CSV に現れた順を保ちたいときはこちらを使う。
+-}
+parseTable :: BL.ByteString -> Either String ([Text], [Row])
+parseTable contents =
+  case Csv.decodeByName (stripBom contents) of
+    Left err -> Left err
+    Right (header, rows) ->
+      Right
+        ( map TE.decodeUtf8Lenient (V.toList header)
+        , filter (not . isBlank) (V.toList rows)
+        )
+
 -- | 先頭の BOM を取り除く。
 stripBom :: BL.ByteString -> BL.ByteString
 stripBom contents
@@ -59,6 +76,24 @@ column row name =
   case HM.lookup (TE.encodeUtf8 name) row of
     Nothing -> Left ("列がありません: " <> T.unpack name)
     Just value -> Right (TE.decodeUtf8Lenient (trim value))
+
+-- | 列名で値を読む。'column' の別名で、数値でない列を読むときに使う。
+text :: Row -> Text -> Either String Text
+text = column
+
+{- | 列名で小数を読む。空欄なら 'Nothing' を返す。
+
+「値が無いかもしれない」ことを 'Maybe' で表す。呼ぶ側は取り出す前に
+場合分けを書くことになり、欠損の扱いを忘れられない。
+-}
+optionalNumber :: Row -> Text -> Either String (Maybe Double)
+optionalNumber row name = do
+  cell <- column row name
+  if T.null (T.strip cell)
+    then Right Nothing
+    else case reads (T.unpack cell) of
+      [(value, rest)] | all (== ' ') rest -> Right (Just value)
+      _ -> Left (T.unpack name <> " を数値として読めません: " <> T.unpack cell)
 
 -- | 列名で整数を読む。読めなければ 'Left' を返す。
 number :: Row -> Text -> Either String Int
