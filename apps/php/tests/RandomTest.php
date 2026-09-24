@@ -21,7 +21,7 @@ final class RandomTest extends TestCase
             $values[] = $random->nextInt(100);
         }
 
-        // Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版と同じ並び。
+        // Java 版・Scala 版・Clojure 版・Elixir 版と同じ並び。
         $this->assertSame([60, 48, 29, 47, 15], $values);
     }
 

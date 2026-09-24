@@ -2,7 +2,7 @@
 
 @System.Random@ はほかの言語版と並びが合わない。そこで @java.util.Random@ と
 同じ 48 ビットの線形合同法をそのまま書く。こうすると訓練データとテストデータの
-分割が Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版・PHP 版と一致するので、
+分割が Java 版・Scala 版・Clojure 版・Elixir 版・PHP 版と一致するので、
 章をまたいで数値を突き合わせられる。
 
 Haskell の 'Int' は 64 ビットで、溢れると折り返す（PHP のように float に

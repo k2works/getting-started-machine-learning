@@ -418,7 +418,7 @@ ROC 曲線は、閾値を高いほうから下げていったときの「偽陽�
     end
 ```
 
-並べ替えは第 2 章の `GettingStartedMl.Random.shuffle/2`（`java.util.Random` と同じ線形合同法）を使います。これで、Java 版・Kotlin 版・Scala 版・Clojure 版と **行の割り当てまで一致** します。11.10 節の 6 つの数値がそろうのは、このおかげです。
+並べ替えは第 2 章の `GettingStartedMl.Random.shuffle/2`（`java.util.Random` と同じ線形合同法）を使います。これで、Java 版・Scala 版・Clojure 版と **行の割り当てまで一致** します。11.10 節の 6 つの数値がそろうのは、このおかげです。
 
 ## 11.9 評価関数もモデルも、ただの関数
 

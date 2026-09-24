@@ -14,7 +14,7 @@ spec :: Spec
 spec = do
   describe "線形合同法" $ do
     it "java.util.Random と同じ並びを返す" $
-      -- Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版・PHP 版と同じ並び。
+      -- Java 版・Scala 版・Clojure 版・Elixir 版・PHP 版と同じ並び。
       takeInts 100 0 5 `shouldBe` [60, 48, 29, 47, 15]
 
     it "二の冪の範囲でも同じ並びを返す" $

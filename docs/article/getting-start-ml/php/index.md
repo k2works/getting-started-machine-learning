@@ -18,7 +18,7 @@ PHP 版は 3 つの軸で対比します。1 つは [Python 版](../python/index
 - 総合演習（付録 A）の解答例は作りません。演習問題は言語に依存しないので、[Python 版の付録 A](../python/appendix-a-bank-exercise.md) の問題に PHP で取り組んでください
 - **Rubix ML には決定木もランダムフォレストもあります。** 直前に書いた [Elixir 版](../elixir/index.md) では Scholar に決定木が無く、自作した決定木がそのまま最終実装になりました。同じ第 3 波の 2 つの版が、ライブラリの成熟度という点で正反対の性格を持ちます。PHP 版ではほぼ全章で「自作してからライブラリと突き合わせる」ことができます
 - **ただし素の線形回帰とラッソはありません。** 線形回帰は正則化を 0 にしたリッジ（`Ridge(0.0)`）で代用し、ラッソは自作します（[ADR 013](../../../adr/013-php-ml-libraries.md)）
-- **乱数は `java.util.Random` と同じ線形合同法を自作します。** `mt_rand` はほかの言語版と並びが合いません。自作すると、第 2 章以降の分割が [Java 版](../java/index.md)・[Kotlin 版](../kotlin/index.md)・[Scala 版](../scala/index.md)・[Clojure 版](../clojure/index.md)・[Elixir 版](../elixir/index.md) と一致します
+- **乱数は `java.util.Random` と同じ線形合同法を自作します。** `mt_rand` はほかの言語版と並びが合いません。自作すると、第 2 章以降の分割が [Java 版](../java/index.md)・[Scala 版](../scala/index.md)・[Clojure 版](../clojure/index.md)・[Elixir 版](../elixir/index.md) と一致します
 - CSV は標準の `fgetcsv` を使いますが、**BOM は取り除かれません**。先頭の列名から自分で取り除きます
 - **カバレッジには拡張（pcov）が要ります。** 素の Nix 環境には xdebug も pcov も入っておらず、環境定義に手を入れました。**さらに PHPUnit には最低カバレッジのしきい値の機能が無い**ので、clover の XML を読んで判定する短いスクリプトを自作します
 

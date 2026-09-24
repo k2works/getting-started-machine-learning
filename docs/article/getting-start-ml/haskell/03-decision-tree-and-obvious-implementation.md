@@ -13,7 +13,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-24T00:00:00Z }
 
 第 1 章では「20 代ならきのこ派」というルールを人間が書き、第 2 章では欠損値を補完した特徴量を用意しました。この章では、「どの特徴量のどこで区切るか」をデータから自動で探すアルゴリズム、**決定木** を自作します。
 
-ほかの言語版は、ここで自作したあとに機械学習ライブラリの決定木と突き合わせます。Java 版・Kotlin 版・Scala 版・Clojure 版は Tribuo の CART と、Python 版は scikit-learn と、PHP 版は Rubix ML と。**Haskell 版には、突き合わせる相手がいません。**
+ほかの言語版は、ここで自作したあとに機械学習ライブラリの決定木と突き合わせます。Java 版・Scala 版・Clojure 版は Tribuo の CART と、Python 版は scikit-learn と、PHP 版は Rubix ML と。**Haskell 版には、突き合わせる相手がいません。**
 
 **Haskell に scikit-learn にあたるものはありません。** `hlearn` は保守が止まっており、現在の GHC ではビルドできません（[ADR 014](../../../adr/014-haskell-ml-libraries.md)）。Haskell 版で突き合わせられるのは線形代数の層（第 7・12・13 章の hmatrix）だけで、決定木・ランダムフォレスト・K-means はすべて自作のままです。これは [Elixir 版](../elixir/index.md)（Scholar に決定木が無い）よりさらに狭い範囲です。
 

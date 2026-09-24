@@ -17,7 +17,7 @@ Elixir 版は 3 つの軸で対比します。1 つは [F# 版](../fsharp/index.
 - Livebook による探索と可視化の節は設けません。グラフは [Python 版](../python/index.md) と [Kotlin 版](../kotlin/index.md) の可視化の節を参照してください
 - 総合演習（付録 A）の解答例は作りません。演習問題は言語に依存しないので、[Python 版の付録 A](../python/appendix-a-bank-exercise.md) の問題に Elixir で取り組んでください
 - **Scholar には決定木とランダムフォレストがありません。** 本シリーズの背骨である決定木が丸ごと無いので、第 3 章の決定木は自作したものがそのまま最終実装になります。ライブラリと突き合わせられるのは線形回帰・ロジスティック回帰・K-means・主成分分析・評価指標・前処理の章だけです。これはほかのどの言語版よりも狭い範囲です（[ADR 012](../../../adr/012-elixir-ml-libraries.md)）
-- **乱数は `java.util.Random` と同じ線形合同法を自作します。** Nx の `Nx.Random`（Threefry）も Erlang の `:rand` も、ほかの言語版と並びが合いません。そこで乱数生成器そのものを自作することにしました。その結果、第 2 章以降の分割は [Java 版](../java/index.md)・[Kotlin 版](../kotlin/index.md)・[Scala 版](../scala/index.md)・[Clojure 版](../clojure/index.md) と一致します
+- **乱数は `java.util.Random` と同じ線形合同法を自作します。** Nx の `Nx.Random`（Threefry）も Erlang の `:rand` も、ほかの言語版と並びが合いません。そこで乱数生成器そのものを自作することにしました。その結果、第 2 章以降の分割は [Java 版](../java/index.md)・[Scala 版](../scala/index.md)・[Clojure 版](../clojure/index.md) と一致します
 - **Nx のテンソルは既定が単精度（f32）です。** `type: :f64` を明示しないと、重回帰の係数が `0.9999998807907104` のようにずれます。NumPy が既定で倍精度なのとちょうど裏返しです
 - CSV は NimbleCSV を使いますが、**BOM は取り除かれません**。先頭の列名から自分で取り除きます
 - `erl` コマンドは OTP 28 ですが、**Elixir は自分が持つ OTP 27 で動きます**（`System.otp_release()` が `"27"` を返します）

@@ -682,7 +682,7 @@ public static function trainAndSaveModels(string $dataDir, FileStore $store): vo
 
 差は Java 版に対して約 4e-12 です。第 3 波の 2 つの版は、**どちらも JVM の言語版とはずれ、しかもお互いにもずれました**（PHP 版と Elixir 版の差は約 3e-12）。
 
-原因は分割ではありません。**どの行が訓練データに入るかは完全に一致しています。** 第 2 章で `java.util.Random` と同じ 48 ビットの線形合同法を自作し、`shuffle(0..9, 0)` の並びが Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版と一致することを確かめてあるからです。係数を求める手順（正規方程式 `(Xᵀ X) w = Xᵀ t` を解く）も同じです。
+原因は分割ではありません。**どの行が訓練データに入るかは完全に一致しています。** 第 2 章で `java.util.Random` と同じ 48 ビットの線形合同法を自作し、`shuffle(0..9, 0)` の並びが Java 版・Scala 版・Clojure 版・Elixir 版と一致することを確かめてあるからです。係数を求める手順（正規方程式 `(Xᵀ X) w = Xᵀ t` を解く）も同じです。
 
 違うのは **解く実装** だけです。PHP 版は MathPHP の LU 分解、Elixir 版は `Nx.LinAlg.solve/2`、Java・Scala・Clojure 版はそれぞれの行列ライブラリを使っています。ガウスの消去法のピボットの選び方や、積を足し合わせる順が変われば、最後の 1〜2 桁は動きます。
 

@@ -976,6 +976,6 @@ OK (20 tests, 30 assertions)
 - [x] 正解率を計算する
 - [x] 実データで正解率を表示する
 
-次の章では、アヤメのデータを読み込み、欠損値を補完して、訓練データとテストデータに分けます。ここで PHP 版も [Elixir 版](../elixir/02-data-preprocessing-and-triangulation.md) と同じく**乱数生成器そのものを自作します**。`mt_rand` はほかの言語版と並びが合わないためです。`java.util.Random` と同じ 48 ビットの線形合同法を書くと、分割の結果が [Java 版](../java/index.md)・[Kotlin 版](../kotlin/index.md)・[Scala 版](../scala/index.md)・[Clojure 版](../clojure/index.md)・[Elixir 版](../elixir/index.md) と一致します。
+次の章では、アヤメのデータを読み込み、欠損値を補完して、訓練データとテストデータに分けます。ここで PHP 版も [Elixir 版](../elixir/02-data-preprocessing-and-triangulation.md) と同じく**乱数生成器そのものを自作します**。`mt_rand` はほかの言語版と並びが合わないためです。`java.util.Random` と同じ 48 ビットの線形合同法を書くと、分割の結果が [Java 版](../java/index.md)・[Scala 版](../scala/index.md)・[Clojure 版](../clojure/index.md)・[Elixir 版](../elixir/index.md) と一致します。
 
 PHP 版のほかの章は [PHP 版のトップ](index.md) から辿れます。

@@ -56,7 +56,7 @@ PHP の `?float` は Scala の `Option[Double]` ほど強くありません。`n
 | `mt_rand`（`mt_srand` でシードを指定） | メルセンヌ・ツイスタ。**ほかの言語版と並びが合わない** |
 | `random_int` | 暗号論的に安全だが**シードを指定できない**ので再現しない |
 | `Random\Randomizer`（PHP 8.2 から） | エンジンを選べるが、`java.util.Random` のエンジンは無い |
-| **Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版** | **シード 0 で `0..9` を並べ替えると `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`** |
+| **Java 版・Scala 版・Clojure 版・Elixir 版** | **シード 0 で `0..9` を並べ替えると `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]`** |
 
 **どれもほかの言語版と一致しません。** 一致しなければ訓練データに入る 105 行が変わり、そこから求まる平均値も、第 3 章の決定木の境界も変わります。章をまたいだ突き合わせができなくなります。
 
@@ -285,7 +285,7 @@ public function testFisherYatesの並べ替えが一致する(): void
 OK
 ```
 
-**通りました。** JVM を持たない PHP から、`java.util.Random` とビット単位で同じ数列が出ています。[Java 版](../java/02-data-preprocessing-and-triangulation.md)・[Kotlin 版](../kotlin/02-data-preprocessing-and-triangulation.md)・[Scala 版](../scala/02-data-preprocessing-and-triangulation.md)・[Clojure 版](../clojure/02-data-preprocessing-and-triangulation.md)・[Elixir 版](../elixir/02-data-preprocessing-and-triangulation.md) と同じ並びです。
+**通りました。** JVM を持たない PHP から、`java.util.Random` とビット単位で同じ数列が出ています。[Java 版](../java/02-data-preprocessing-and-triangulation.md)・[Scala 版](../scala/02-data-preprocessing-and-triangulation.md)・[Clojure 版](../clojure/02-data-preprocessing-and-triangulation.md)・[Elixir 版](../elixir/02-data-preprocessing-and-triangulation.md) と同じ並びです。
 
 乱数生成器は魔法ではなく、**48 ビットの漸化式と、剰余の偏りへの手当てだけ**でできています。
 
@@ -601,7 +601,7 @@ PHP 版には Notebook による探索と可視化の節を設けません。グ
 
 ## 2.12 まとめ
 
-この章では前処理を TDD で実装し、訓練データの平均値をほかの 5 言語版と一致させました。PHP に固有の論点は次のとおりです。
+この章では前処理を TDD で実装し、訓練データの平均値をほかの 4 言語版（Java・Scala・Clojure・Elixir）と一致させました。PHP に固有の論点は次のとおりです。
 
 1. **整数は溢れると float に化ける** — Java のように折り返さず、Elixir のように多倍長にもならず、**静かに精度を失う**。しかも例外ではなく非推奨の警告。`failOnDeprecation="true"` が気づかせてくれた
 2. **48 ビットの掛け算は桁を分けて書く** — 上位 24 ビットと下位 24 ビットに分ければ、どちらも 59 ビットに収まる。筆算の繰り上がりをコードにしたもの

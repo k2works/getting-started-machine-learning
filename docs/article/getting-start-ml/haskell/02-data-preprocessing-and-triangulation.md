@@ -283,7 +283,7 @@ shuffle items seed
 ```haskell
   describe "線形合同法" $ do
     it "java.util.Random と同じ並びを返す" $
-      -- Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版・PHP 版と同じ並び。
+      -- Java 版・Scala 版・Clojure 版・Elixir 版・PHP 版と同じ並び。
       takeInts 100 0 5 `shouldBe` [60, 48, 29, 47, 15]
 
   describe "Fisher-Yates の並べ替え" $ do
@@ -506,7 +506,7 @@ Haskell 版には Notebook による探索と可視化の節を設けません�
 
 ## 2.12 まとめ
 
-この章では前処理を TDD で実装し、訓練データの平均値をほかの 5 言語版と一致させました。Haskell に固有の論点は次のとおりです。
+この章では前処理を TDD で実装し、訓練データの平均値をほかの 5 言語版（Java・Scala・Clojure・Elixir・PHP）と一致させました。Haskell に固有の論点は次のとおりです。
 
 1. **乱数の状態を値として持ち回る** — 純粋関数は状態を持てないので `(Int, Seed)` を返す。手間は増えるが、**どこが乱数に依存しているかが型に現れ**、大域の状態による「実行ごとに結果が変わる」問題が起きない
 2. **`Int` は Java と同じく折り返す** — PHP 版で必要だった乗算の分割が要らず、仕様の式をそのまま書ける。`Integer`（多倍長）を選ぶこともでき、**型を選ぶことが「どの数の世界で計算するか」を選ぶことになる**

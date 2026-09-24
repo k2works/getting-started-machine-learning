@@ -11,7 +11,7 @@ use InvalidArgumentException;
  *
  * PHP の mt_rand はほかの言語版と並びが合わない。そこで java.util.Random と同じ
  * 48 ビットの線形合同法をそのまま書く。こうすると訓練データとテストデータの分割が
- * Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版と一致するので、章をまたいで
+ * Java 版・Scala 版・Clojure 版・Elixir 版と一致するので、章をまたいで
  * 数値を突き合わせられる。
  *
  * PHP の整数は 64 ビットなので、48 ビットの状態をそのまま扱える。

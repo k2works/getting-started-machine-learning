@@ -4,7 +4,7 @@ defmodule GettingStartedMl.Random do
 
   Nx の `Nx.Random`（Threefry）も Erlang の `:rand` も、ほかの言語版と並びが合わない。
   そこで `java.util.Random` と同じ 48 ビットの線形合同法をそのまま書く。
-  こうすると訓練データとテストデータの分割が Java 版・Kotlin 版・Scala 版・Clojure 版と
+  こうすると訓練データとテストデータの分割が Java 版・Scala 版・Clojure 版と
   一致するので、章をまたいで数値を突き合わせられる。
   """
 
