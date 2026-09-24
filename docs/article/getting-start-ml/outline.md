@@ -2079,6 +2079,18 @@ B70 のステップ 1（2026-09-24）で、使い捨ての cabal プロジェク
 | 7 | CI とタスク：`.github/workflows/haskell-ci.yml`（Nix → 整形 → hlint → テスト → カバレッジ。`dist-newstyle` と `~/.cabal` のキャッシュ）、`ops/scripts/apps.js` への `haskell` の追加 | push 後に Haskell CI がグリーン。`apps:check:haskell` が手元で成功する |
 | 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
 
+B70（Haskell のウォーキングスケルトン）は 2026-09-24 に完了した。第 1 章の正解率は 0.7368 で、ほかの 13 言語版と一致した。
+
+- **素の Nix 環境に fourmolu も hlint も無く、手元の `/usr/local/bin` のものが見えていた。** PHP 版で pcov が無かったのと同じ形で、第 3 波で 2 回続いた。環境の側で版を固定した
+- **hmatrix は BLAS/LAPACK の C ライブラリを要求し、素の環境では configure で止まる。** `openblas` を足し `LIBRARY_PATH`・`PKG_CONFIG_PATH` を `shellHook` で通して解決した。Elixir 版で EXLA を避けたのとは逆の判断で、**足さなければ突き合わせる相手が 1 つも無くなる**ことが理由
+- **`ByteString` のリテラルに日本語を書くと壊れる。** `OverloadedStrings` も `Data.ByteString.Char8` の `unpack` も 1 文字を 1 バイトとして扱う。**実装で 1 回、テストで 1 回、同じ間違いを踏んだ**（型は合っていて中身の解釈だけが違うので型検査では捕まらない）。列名と値は `Text` で持ち、境界でだけ符号化・復号する
+- **BOM は「バイト列か文字列か」で書き方が変わる。** `Text` のリテラルでは U+FEFF の 1 文字（`\65279`）で、`\239\187\191` は別物。記事にも BOM の実物が入ってしまい、実測の表記に直した
+- **cassava も BOM を取り除かない**（Go 版・Clojure 版・Elixir 版・PHP 版と同じ）
+- **`Int` は溢れると折り返す**（`maxBound + 1` が `minBound`）ので、自作の線形合同法は仕様をそのまま書ける。シード 0 の並びが PHP 版と一致した
+- **テストスイートの `build-depends` はライブラリと別に書く。** ライブラリに書いた依存はテストから見えない
+- 検査の終了コードは **fourmolu 100**・hlint 1・`cabal test` 1・カバレッジ 3（自作）。4 つとも実際に壊して確かめた
+- **cabal にも最低カバレッジのしきい値の機能が無い。** HPC の HTML の総計を読む判定を自作した（第 3 波で 3 回続けてカバレッジの仕組みに手を入れた）
+
 ### 承認が必要な事項（Haskell）
 
 次の点を確認した（2026-09-24 承認）。

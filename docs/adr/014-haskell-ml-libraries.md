@@ -3,7 +3,7 @@ type: ADR
 title: "014 Haskell 版のビルド・テスト・静的解析・線形代数・API ライブラリの選定"
 description: "Haskell 版のライブラリに cabal・Hspec・fourmolu・hlint・HPC・hmatrix・cassava・statistics・Scotty を採用し、hmatrix のために Nix の環境に openblas を足す方針を決める。機械学習のアルゴリズムは自作が最終実装になる。"
 tags: [adr,getting-start-ml,haskell]
-status: proposed
+status: draft
 generated: { by: claude-code/claude-opus-5, at: 2026-09-24T00:00:00Z }
 ---
 
