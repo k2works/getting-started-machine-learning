@@ -385,7 +385,9 @@ Perhaps:
 
 ```haskell
 -- | 予測が正解ラベルと一致した割合を返す。件数が違えば 'Left' を返す。
-accuracy :: [Faction] -> [Faction] -> Either String Double
+--
+-- 「同じかどうかを比べられる」ことだけが要るので、派閥に固定せず Eq の型クラスで書く。
+accuracy :: (Eq a) => [a] -> [a] -> Either String Double
 accuracy predictions labels
   | length predictions /= length labels =
       Left (printf "予測と正解ラベルの件数が違います: %d と %d" (length predictions) (length labels))
@@ -397,6 +399,8 @@ accuracy predictions labels
 ```
 
 戻り値の型が `Double` ではなく `Either String Double` になっています。「`String` の失敗か、`Double` の成功か、どちらか」という意味です。
+
+引数の型が `[Faction]` ではなく `(Eq a) => [a]` になっている点にも触れておきます。この関数に必要なのは「2 つの値が同じかどうかを比べられる」ことだけで、それが派閥である必要はありません。`Eq` という**型クラス**（「等しいかを比べられる型」の集まり）で条件だけを書いておくと、第 3 章で決定木の予測（アヤメの品種）を測るときにも同じ関数が使えます。型クラスは第 3 章で改めて扱います。
 
 ```haskell
     it "件数が違えば正解率を求められない" $

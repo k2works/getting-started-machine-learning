@@ -91,8 +91,13 @@ predictByRule features
   | featuresAgeGroup features == kinokoAgeGroup = Kinoko
   | otherwise = Takenoko
 
--- | 予測が正解ラベルと一致した割合を返す。件数が違えば 'Left' を返す。
-accuracy :: [Faction] -> [Faction] -> Either String Double
+{- | 予測が正解ラベルと一致した割合を返す。件数が違えば 'Left' を返す。
+
+「同じかどうかを比べられる」ことだけが要るので、派閥に固定せず 'Eq' の型クラスで
+書く。こうしておくと、第 3 章で決定木の予測（文字列のラベル）を測るときも
+そのまま使える。
+-}
+accuracy :: (Eq a) => [a] -> [a] -> Either String Double
 accuracy predictions labels
   | length predictions /= length labels =
       Left (printf "予測と正解ラベルの件数が違います: %d と %d" (length predictions) (length labels))
