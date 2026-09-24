@@ -45,7 +45,7 @@ Notebook による探索と可視化の節は設けません。年齢の分布�
 | Cabin | 客室番号 | **687 件** |
 | Embarked | 乗船した港（`C` / `Q` / `S`） | **2 件** |
 
-[第 2 章](02-data-preprocessing.md) の `countMissing` をそのまま使って数えたところ、`Age=177`・`Cabin=687`・`Embarked=2` でした。ほかの言語版と同じです。
+[第 2 章](02-data-preprocessing-and-triangulation.md) の `countMissing` をそのまま使って数えたところ、`Age=177`・`Cabin=687`・`Embarked=2` でした。ほかの言語版と同じです。
 
 `Survived.csv` は BOM 付きです。第 1 章で書いた `Csv.parseTable` が先頭の BOM を落とすので、先頭の列名は `PassengerId` として読めます。cassava は BOM を取り除かないので、この処理は自分で書いてあります。
 
@@ -158,7 +158,7 @@ data Frame = Frame
   deriving (Eq, Show)
 ```
 
-列名の並びを `M.Map` と別に持っているのは、[第 2 章](02-data-preprocessing.md) と同じ理由です。**`M.Map` はキーの順で並ぶ**ので、「CSV に現れた順」や「ダミー変数化のあとの順」を保ちたければ、順そのものをリストで持ち回るしかありません。Elixir 版・Clojure 版もまったく同じ扱いをしています。
+列名の並びを `M.Map` と別に持っているのは、[第 2 章](02-data-preprocessing-and-triangulation.md) と同じ理由です。**`M.Map` はキーの順で並ぶ**ので、「CSV に現れた順」や「ダミー変数化のあとの順」を保ちたければ、順そのものをリストで持ち回るしかありません。Elixir 版・Clojure 版もまったく同じ扱いをしています。
 
 ## 8.5 中央値と、グループごとの補完
 
@@ -325,7 +325,7 @@ Pclass, Age, SibSp, Parch, Fare, Sex_male, Embarked_Q, Embarked_S
 
 ### なぜ自作するのか
 
-Haskell には決定木のライブラリがありません。`hlearn` は保守が止まっていて、現在の GHC ではビルドできません（[ADR 014](../../../adr/014-haskell-ml-libraries.md)）。[第 3 章](03-decision-tree.md) で書いた決定木を、「1 件ごとの重み」を通す形に書き直したものが、この章の最終実装になります。
+Haskell には決定木のライブラリがありません。`hlearn` は保守が止まっていて、現在の GHC ではビルドできません（[ADR 014](../../../adr/014-haskell-ml-libraries.md)）。[第 3 章](03-decision-tree-and-obvious-implementation.md) で書いた決定木を、「1 件ごとの重み」を通す形に書き直したものが、この章の最終実装になります。
 
 もっとも、**クラスの重みに関しては、ライブラリがある言語版でも自作でした**。PHP 版は Rubix ML の分類器にも前処理にも重みの口が無く、Elixir 版は決定木そのものが Scholar に無く、どちらも自作しています。
 
@@ -379,7 +379,7 @@ it "重みを変えると不純度が変わる" $
   weightedGini [0, 1] [3.0, 1.0] `shouldBe` Right 0.375
 ```
 
-重みをすべて 1 にすると、[第 3 章](03-decision-tree.md) のジニ不純度と同じ値になります。**重みなしの木は、第 3 章の木と同じ木になる** — これが自作の正しさを支える 1 本目の柱です。
+重みをすべて 1 にすると、[第 3 章](03-decision-tree-and-obvious-implementation.md) のジニ不純度と同じ値になります。**重みなしの木は、第 3 章の木と同じ木になる** — これが自作の正しさを支える 1 本目の柱です。
 
 ### balanced の重み
 
@@ -613,7 +613,7 @@ it "実データの結果を表示する" $ do
 
 ### ほかの言語版と数値が一致するか
 
-分割は [第 2 章](02-data-preprocessing.md) で `java.util.Random` と同じ線形合同法と Fisher-Yates にそろえてあるので、Java 版・Scala 版・Clojure 版・Elixir 版・PHP 版とまったく同じ行が訓練データとテストデータに入ります。実測した結果は次のとおりで、**すべて一致しました**。
+分割は [第 2 章](02-data-preprocessing-and-triangulation.md) で `java.util.Random` と同じ線形合同法と Fisher-Yates にそろえてあるので、Java 版・Scala 版・Clojure 版・Elixir 版・PHP 版とまったく同じ行が訓練データとテストデータに入ります。実測した結果は次のとおりで、**すべて一致しました**。
 
 | 指標 | Haskell 版 | Java 版・Scala 版・Clojure 版・Elixir 版・PHP 版 |
 |------|-----------|-------------------------------------------|

@@ -80,7 +80,7 @@ featureColumns :: [Text]
 featureColumns = ["SNS1", "SNS2", "actor", "original"]
 ```
 
-[第 2 章](02-data-preprocessing.md) の `Csv` はセルを `Text` のまま持ち、`optionalNumber` で読むときに `Maybe Double` にします。列の型を推論する段階が無いので、Kotlin 版が Kotlin DataFrame の型推論で困った問題（SNS1 が `Int?` と推論され、補完した平均値が入らない）は起きません。
+[第 2 章](02-data-preprocessing-and-triangulation.md) の `Csv` はセルを `Text` のまま持ち、`optionalNumber` で読むときに `Maybe Double` にします。列の型を推論する段階が無いので、Kotlin 版が Kotlin DataFrame の型推論で困った問題（SNS1 が `Int?` と推論され、補完した平均値が入らない）は起きません。
 
 ## 7.4 TODO リストの作成
 
@@ -172,7 +172,7 @@ data LinearModel = LinearModel
   deriving (Eq, Show)
 ```
 
-`M.Map Text Double` で持ちたくなりますが、そうしません。**`M.Map` はキーの順で並ぶ**ので、表示したい順（SNS1, SNS2, actor, original）が保てないからです。[第 2 章](02-data-preprocessing.md) で列の順をリストで持ち回ったのと同じ理由です。
+`M.Map Text Double` で持ちたくなりますが、そうしません。**`M.Map` はキーの順で並ぶ**ので、表示したい順（SNS1, SNS2, actor, original）が保てないからです。[第 2 章](02-data-preprocessing-and-triangulation.md) で列の順をリストで持ち回ったのと同じ理由です。
 
 作るときに数が合っていることを確かめます。
 
@@ -310,7 +310,7 @@ fit x t columns
 
 最後の `case` は要ります。`weights` が空リストでないことはコードを読めば分かりますが、**型としては空リストがありえる**ので、`-Wincomplete-uni-patterns` が `-Werror` で止めます。「起こらないはずの場合」も、型が要求するなら書きます。
 
-さらに `-Wall` は、**書いた節が網羅していないかどうかを全部見ています**。「[第 2 章](02-data-preprocessing.md) でテストの中の `let Right x = ...` が止められた」のと同じ仕組みが、実装でも効いています。
+さらに `-Wall` は、**書いた節が網羅していないかどうかを全部見ています**。「[第 2 章](02-data-preprocessing-and-triangulation.md) でテストの中の `let Right x = ...` が止められた」のと同じ仕組みが、実装でも効いています。
 
 ## 7.9 hmatrix と突き合わせる——ビルドは通るのに実行すると落ちる
 
@@ -508,7 +508,7 @@ prepareCinema contents testSize seed = do
   pure split {xTrain = filledTrain, xTest = filledTest}
 ```
 
-順番が重要です。**外れ値を除いてから分割し、訓練データだけから平均を求めて、両方を補完します。** テストデータの平均を補完に混ぜると、テストデータの情報が訓練に漏れます（リーク）。[第 2 章](02-data-preprocessing.md) で立てた約束をそのまま使っています。
+順番が重要です。**外れ値を除いてから分割し、訓練データだけから平均を求めて、両方を補完します。** テストデータの平均を補完に混ぜると、テストデータの情報が訓練に漏れます（リーク）。[第 2 章](02-data-preprocessing-and-triangulation.md) で立てた約束をそのまま使っています。
 
 `do` の 7 行が、そのまま前処理の手順になっています。どこか 1 つでも失敗すれば `Left` が返り、残りは実行されません。**「失敗したら以降を飛ばす」を書かなくてよい** のが `Either` のモナドです。
 
@@ -566,7 +566,7 @@ hmatrix の切片: 6114.60, 係数: SNS1=1.3804, SNS2=0.5218, actor=0.2900, orig
 
 一致した理由は 2 つです。
 
-1. **分割が同じ** — [第 2 章](02-data-preprocessing.md) で `java.util.Random` と同じ 48 ビットの線形合同法を自作し、Fisher-Yates も同じ手順にそろえました。同じシードなら同じ行が同じ側に入ります
+1. **分割が同じ** — [第 2 章](02-data-preprocessing-and-triangulation.md) で `java.util.Random` と同じ 48 ビットの線形合同法を自作し、Fisher-Yates も同じ手順にそろえました。同じシードなら同じ行が同じ側に入ります
 2. **倍精度で計算している** — Haskell の `Double` は IEEE 754 の倍精度で、JVM の `double` と同じ表現・同じ丸めです。Nx のように「既定が単精度」という罠がありません。**型を書かなくても倍精度なのは、型推論が `Double` に決めてくれるから** です（`Float` にしたければ、そう書く必要があります）
 
 ただし、**「同じ計算をしている」わけではありません**。Java 版・Clojure 版はガウスの消去法、Haskell 版はガウス・ジョルダン法、Elixir 版は `Nx.LinAlg.solve/2`、PHP 版は MathPHP の LU 分解です。**表示の桁（小数第 2 位・第 4 位）で一致していることを確かめたうえで、完全な精度でも 12 桁まで一致することを別に確かめた** という二段構えになっています。
