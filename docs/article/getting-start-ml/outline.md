@@ -2029,6 +2029,68 @@ PHP 版の全 15 章が完成した（B66〜B69）。実装は `apps/php/src/`�
 - [x] 実装を `apps/php/`、記事を `docs/article/getting-start-ml/php/` に置くこと
 - [x] B65 のステップ 1〜8
 
+## Haskell 版執筆計画
+
+第 3 波の 5 番目、シリーズ最後の言語。実装は `apps/haskell/`、記事は `docs/article/getting-start-ml/haskell/`、ライブラリの選定は ADR 014 に記録する。
+
+### 対比の軸
+
+| 軸 | 相手 | 見どころ |
+| :--- | :--- | :--- |
+| 型でエラーを表す | [Rust 版](rust/index.md)・[F# 版](fsharp/index.md) | `Either String a` と `Maybe a` で失敗と欠損を表す。Rust の `Result`／`?` と何が違うか。例外で表す Ruby 版・Elixir 版・PHP 版とは正反対 |
+| 純粋関数と遅延評価 | [F# 版](fsharp/index.md)・[Clojure 版](clojure/index.md)・[Elixir 版](elixir/index.md) | 副作用が `IO` として型に現れる。**データの読み込みだけが `IO` で、前処理から学習までは純粋関数**になる。遅延評価が計算量とメモリにどう効くか |
+| 型クラスによる抽象 | [Rust 版](rust/index.md)（トレイト）・[Scala 版](scala/index.md)（型クラス） | モデルを型クラスで抽象する。PHP 版の interface・Elixir 版の behaviour と、同じ「約束」をどう表すか |
+
+### 確認した事実（B70 のステップ 1）
+
+B70 のステップ 1（2026-09-24）で、使い捨ての cabal プロジェクトを `nix develop .#haskell` の中で動かして次を確かめた。
+
+| 項目 | 結果 | 確認方法 |
+| :--- | :--- | :--- |
+| Nix 環境 | GHC 9.10.3、cabal 3.16.0.0、stack 3.7.1（hpack 0.38.1） | `nix develop .#haskell` |
+| GHC 同梱 | `array`・`bytestring`・`containers`・`text`・`deepseq` はあるが **`vector` は無い**（依存に書く） | `ghc-pkg list` |
+| 整形・静的解析 | **素の環境に `fourmolu` も `hlint` も無く、手元の `/usr/local/bin` のものが見えていた。** PHP 版で pcov が無かったのと同じ形なので、環境定義に `haskellPackages.fourmolu`（0.19.0.1）・`hlint`（3.10）・`hspec-discover`（2.11.14）を足した | `which fourmolu hlint` |
+| 検査の終了コード | **fourmolu の `--mode check` は違反があると 100**（PHP-CS-Fixer の 8、Credo の 4 に続く特殊値）。hlint は指摘があると 1 | わざと崩したファイル・`map id` を含むファイル |
+| テスト | Hspec 2.11。**テスト名（`it` の文字列）に日本語を使える。** `hspec-discover` でテストファイルを自動で集められる。**テストスイートの `build-depends` はライブラリとは別に書く**（ライブラリに入れた依存はテストから見えない） | 使い捨てのプロジェクト |
+| カバレッジ | HPC（`cabal test --enable-coverage`）。GHC に組み込まれていて追加の依存が要らない | 同上 |
+| 線形代数 | **hmatrix 0.20.2 は BLAS/LAPACK の C ライブラリを要求し、素の環境では configure で止まる**（`Missing (or bad) C libraries: blas, lapack`）。環境に `openblas` を足し、`LIBRARY_PATH` と `PKG_CONFIG_PATH` を `shellHook` で通すとビルドできた（`ld: warning` は出るが成功する） | 使い捨てのプロジェクト |
+| CSV | **cassava は BOM を取り除かない**（先頭の列名が `"\xEF\xBB\xBFshincho"` になる。Go 版・Clojure 版・Elixir 版・PHP 版と同じ）。`decodeByName` で列名つきの `NamedRecord` として読める | BOM つきのファイルを作って確認 |
+| 統計 | statistics 0.16.5.0。BLAS/LAPACK 不要の純 Haskell で入る | 使い捨てのプロジェクト |
+| 整数 | **`Int` は 64 ビットで、溢れると折り返す**（`maxBound + 1` が `minBound` になる）。PHP のように float に化けない | `cabal repl` |
+| 乱数 | `java.util.Random` と同じ 48 ビットの線形合同法を素直に書ける。**シード 0 の `nextInt(100)` の並びが `[60, 48, 29, 47, 15]` で PHP 版と一致した**（整数が折り返すので、PHP で必要だった乗算の分割が要らない） | 同上 |
+| 直列化 | `Data.Binary` の `encode`／`decode` で連想リストがそのまま往復した | 同上 |
+| API | Scotty 0.30。aeson 2.3.2.0 とあわせて JSON を返せる | ビルドの成功を確認 |
+| 言語拡張 | `ScopedTypeVariables` はパターン中の型注釈に必要（GHC 9.10 でも既定では有効でない）。`OverloadedStrings` は cassava・Scotty で要る | コンパイルエラーの実測 |
+
+**hmatrix が使えることを確かめたうえで採用した。** 素の環境では止まるので、`openblas` を環境定義に足す判断が要る。Elixir 版で EXLA（巨大な XLA のバイナリ）を避けたのとは違い、BLAS/LAPACK は数値計算の標準的な土台で Nix でも軽く入るため、依存を足す側に倒した。これにより**第 7・12・13 章でライブラリと突き合わせられる**（Elixir 版の決定木のように「突き合わせる相手がいない」状態を避けられる）。
+
+### B70 のステップ計画（Haskell のウォーキングスケルトン）
+
+各ステップは TDD で進め、ステップごとにコミットする。
+
+| ステップ | 内容 | 完了条件 |
+|---------|------|---------|
+| 1 | ライブラリの事実確認：上の表の各項目を、スクラッチパッドの使い捨ての cabal プロジェクトで実際に動かして確かめ、「確認した事実」に書き足す。とくに hmatrix が C ライブラリ無しで入るかを先に確かめる | 「未検証」の項目が無くなる |
+| 2 | ADR 014 を書く（ビルドの道具・テスト・線形代数・章ごとの置き換えの範囲。ライブラリに無いものは自作とする） | ADR 014 が `docs/adr/` と索引・nav にある |
+| 3 | `apps/haskell/` の雛形：`*.cabal`・`cabal.project`・`src/`・`test/`・`.gitignore`、最初のテストが 1 本通る | `nix develop .#haskell` でテストが成功する |
+| 4 | 整形・静的解析・カバレッジ：fourmolu・hlint・GHC の `-Wall`・HPC を検査に組み込む。わざと違反を入れて失敗することを確かめてから戻す | 違反を入れると検査が失敗し、戻すと成功する |
+| 5 | 第 1 章の実装：ほかの言語版と同じ TODO リストを TDD で進める。実データのテストはデータが無ければスキップする | データありで全テストが通り、データなしではスキップされる。正解率が 0.7368 でほかの言語版と一致する |
+| 6 | 記事：第 1 章、Haskell 版トップ（`haskell/index.md`）、シリーズ索引の言語一覧、`mkdocs.yml` の nav | ローカルのプレビューで表示される。記事の数値が実装の実測値と一致する |
+| 7 | CI とタスク：`.github/workflows/haskell-ci.yml`（Nix → 整形 → hlint → テスト → カバレッジ。`dist-newstyle` と `~/.cabal` のキャッシュ）、`ops/scripts/apps.js` への `haskell` の追加 | push 後に Haskell CI がグリーン。`apps:check:haskell` が手元で成功する |
+| 8 | 仕上げ：学習データの行の混入・BOM の文字・絶対パスの検査、記事への OKF の適用、本計画の状態と Bolt の完了、`docs/log.md` の更新 | 検査に指摘が無く、`okf:check` が ERROR 0 |
+
+### 承認が必要な事項（Haskell）
+
+次の点を確認した（2026-09-24 承認）。
+
+- [x] Haskell 版の対比の軸（Rust 版・F# 版＝型でエラーを表す、F# 版・Clojure 版・Elixir 版＝純粋関数と遅延評価、Rust 版・Scala 版＝型クラスによる抽象）
+- [x] **線形代数は hmatrix を使い、そのために Nix の環境に openblas を足すこと**（自作する案と比べたうえでの判断。2026-09-24 に人が選択）
+- [x] CSV は cassava、統計は statistics、テストは Hspec、API は Scotty を第一候補とし、ステップ 1 で確かめてから ADR 014 で確定すること
+- [x] 乱数は `java.util.Random` と同じ線形合同法を自作すること（ほかの言語版と並びをそろえるため）
+- [x] Notebook・可視化の節・付録 A を作らず、Python 版・Kotlin 版へ案内すること（第 3 波の共通の方針のまま）
+- [x] 実装を `apps/haskell/`、記事を `docs/article/getting-start-ml/haskell/` に置くこと
+- [x] B70 のステップ 1〜8
+
 ## リスクと対応
 
 | リスク | 影響 | 対応 |
