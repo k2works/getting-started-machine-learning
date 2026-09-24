@@ -39,9 +39,18 @@ final class StoreContract
      */
     public static function check(ModelStore $withModels, ModelStore $withoutModels): void
     {
-        // 約束: モデルがあれば予測するモデルを返す
-        Assert::assertIsFloat($withModels->loadSalesModel()->predict(self::movie()));
-        Assert::assertIsBool($withModels->loadSurvivalModel()->predict(self::passenger()));
+        // 約束: モデルがあれば予測するモデルを返し、同じ入力には同じ答えを返す。
+        // 「float を返す」「bool を返す」は interface が型で約束しているので、
+        // ここで書くと PHPStan に「常に真である」と言われる。型で守れるものは書かない。
+        Assert::assertTrue(is_finite($withModels->loadSalesModel()->predict(self::movie())));
+        Assert::assertSame(
+            $withModels->loadSalesModel()->predict(self::movie()),
+            $withModels->loadSalesModel()->predict(self::movie()),
+        );
+        Assert::assertSame(
+            $withModels->loadSurvivalModel()->predict(self::passenger()),
+            $withModels->loadSurvivalModel()->predict(self::passenger()),
+        );
 
         // 約束: モデルが無ければ ModelNotFoundException を投げる
         $loads = [

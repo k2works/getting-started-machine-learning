@@ -35,7 +35,7 @@ final readonly class FakeStore implements ModelStore
             throw new ModelNotFoundException(Domain::SALES_MODEL);
         }
 
-        return new class implements SalesModel {
+        return new class () implements SalesModel {
             public function predict(Movie $movie): float
             {
                 return FakeStore::FIXED_SALES;
@@ -49,7 +49,7 @@ final readonly class FakeStore implements ModelStore
             throw new ModelNotFoundException(Domain::SURVIVAL_MODEL);
         }
 
-        return new class implements SurvivalModel {
+        return new class () implements SurvivalModel {
             public function predict(Passenger $passenger): bool
             {
                 return true;
