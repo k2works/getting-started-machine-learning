@@ -32,8 +32,9 @@ B70 のステップ 1 で、使い捨ての cabal プロジェクトを `nix dev
 | テスト | Hspec 2.11。**テスト名に日本語を使える**。`hspec-discover` で自動収集できる。**テストスイートの `build-depends` はライブラリと別に書く** | 使い捨てのプロジェクト |
 | カバレッジ | HPC（`cabal test --enable-coverage`）。GHC 組み込みで追加の依存が要らない | 同上 |
 | 線形代数 | **hmatrix 0.20.2 は BLAS/LAPACK を要求し、素の環境では configure で止まる**（`Missing (or bad) C libraries: blas, lapack`）。**しかもビルドが通っただけでは足りなかった。** 最初に足した `openblas` は nixpkgs の既定が `blas64 = true`（ILP64。整数引数が 64 ビット）で、**32 ビット整数で呼ぶ hmatrix と ABI が噛み合わず、2×2 の連立方程式すら解けなかった**（`linearSolve` が `Nothing` を返し `** On entry to DGESV parameter number 1 had an illegal value`、`<\>` は `code -7`、`pinv` は `code -2`）。`strings libopenblas...dylib \| grep USE64BITINT` で ILP64 でビルドされていることを直接確認した。`blas` と `lapack`（`isILP64 = false`）に差し替えて解決 | 使い捨てのプロジェクトで**実際に呼び出して**確認 |
-| **ビルドと実行は別** | **B70 のステップ 1 では「hmatrix がビルドできた」ことしか確かめておらず、LAPACK の呼び出しを一度も実行していなかった。** C のライブラリに依存するパッケージでは、リンクが通っても実行時に壊れうる。**2×2 の `DGESV` で「行列の次数が不正」と言われたら、数値の問題ではなく ABI の不一致を疑う** | 第 7〜9 章の執筆中に発覚（2 体のエージェントが独立に同じ診断に到達した） |
-| **成果物が古い環境を覚えている** | **環境定義を直しても、cabal の store に残った成果物は作り直されない。** `LIBRARY_PATH` は環境ごとに変わるのに、**cabal はそれをパッケージのハッシュに含めない**ので `store/ghc-9.10.3-*/hmtrx-0.20.2-*` が「configuration changed」と判定されず、ILP64 の BLAS にリンク済みのものが使われ続ける。store の該当エントリを退避してから作り直す必要がある | 同上 |
+| **C ライブラリの確認は 3 段ある（1/3 ビルド）** | **`configure` が C ライブラリを見つけられるか。** hmatrix は素の環境では `Missing (or bad) C libraries: blas, lapack` で止まる。**ここを通っただけで採用を決めたのが B70 のステップ 1 の誤りだった** | 使い捨てのプロジェクト |
+| **C ライブラリの確認は 3 段ある（2/3 呼び出し）** | **整数幅などの ABI が噛み合っているか。** リンクが通っても実行時に壊れうる。`openblas`（ILP64）と hmatrix（32 ビット整数）の組み合わせでは、ビルドは成功するのに 2×2 の連立方程式すら解けなかった。**2×2 の `DGESV` で「行列の次数が不正」と言われたら、数値の問題ではなく ABI の不一致を疑う** | 第 7〜9 章の執筆中に発覚（2 体のエージェントが独立に同じ診断に到達した） |
+| **C ライブラリの確認は 3 段ある（3/3 作り直し）** | **環境定義を直しても、cabal の store に残った成果物は作り直されない。** `LIBRARY_PATH` は環境ごとに変わるのに、**cabal はそれをパッケージのハッシュに含めない**ので `store/ghc-9.10.3-*/hmtrx-0.20.2-*` が「configuration changed」と判定されず、ILP64 の BLAS にリンク済みのものが使われ続ける。store の該当エントリを退避してから作り直す必要がある | 同上 |
 | CSV | **cassava は BOM を取り除かない**（Go 版・Clojure 版・Elixir 版・PHP 版と同じ）。`decodeByName` で列名つきに読める | BOM つきのファイルで確認 |
 | 統計 | statistics 0.16.5.0。純 Haskell で入る | 使い捨てのプロジェクト |
 | 整数 | **`Int` は 64 ビットで溢れると折り返す**（`maxBound + 1` が `minBound`）。PHP のように float に化けない | `cabal repl` |
