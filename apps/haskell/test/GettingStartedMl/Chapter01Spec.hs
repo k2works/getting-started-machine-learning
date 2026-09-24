@@ -41,7 +41,9 @@ spec = do
         `shouldBe` Left "予測と正解ラベルの件数が違います: 1 と 2"
 
     it "正解ラベルが無ければ正解率を求められない" $
-      accuracy [] [] `shouldBe` Left "正解ラベルがありません"
+      -- accuracy は (Eq a) => なので、空のリストだけでは型が決まらない。
+      -- 何の正解率を測っているのかを型注釈で示す。
+      accuracy ([] :: [Faction]) [] `shouldBe` Left "正解ラベルがありません"
 
   describe "特徴量と正解ラベルに分ける" $ do
     it "人物のリストを特徴量と正解ラベルに分ける" $
