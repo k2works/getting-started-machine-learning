@@ -414,9 +414,7 @@ data LinearModel = LinearModel
 {- | 先頭に 1 の列を加えた計画行列 X で、正規方程式 XᵀX β = Xᵀt を解く。
 
 解くのは第 7 章で自作したガウス・ジョルダン法（'C7.solveLinearSystem'）である。
-第 7 章では hmatrix と突き合わせたが、**この環境の hmatrix は LAPACK との
-整数幅が合わず `DGESV parameter number 1 had an illegal value` で解けない**
-ので、この章では自作の解法だけを使う。
+ライブラリと突き合わせるのは第 7 章の役目なので、この章は自作の解法だけを使う。
 -}
 linearFit :: [[Double]] -> [Double] -> Either String LinearModel
 linearFit [] _ = Left "特徴量が 1 件もありません"
