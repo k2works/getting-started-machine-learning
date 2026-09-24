@@ -310,4 +310,22 @@ final class Chapter07Test extends TestCase
 
         Chapter07::isOutlier(['SNS2' => '', 'sales' => '100']);
     }
+
+    #[TestDox('列の順に並んだ値からも予測できる')]
+    public function test列の順に並んだ値からも予測できる(): void
+    {
+        $model = new LinearModel(1.0, ['a', 'b'], [2.0, 3.0]);
+
+        $this->assertEqualsWithDelta(1.0 + 2.0 * 10.0 + 3.0 * 100.0, $model->predictRow([10.0, 100.0]), 1e-9);
+        $this->assertEqualsWithDelta([6.0, 1.0], $model->predictRows([[1.0, 1.0], [0.0, 0.0]]), 1e-9);
+    }
+
+    #[TestDox('値の数が係数と違えば予測できない')]
+    public function test値の数が係数と違えば予測できない(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('特徴量と係数の数が違います: 1 と 2');
+
+        (new LinearModel(1.0, ['a', 'b'], [2.0, 3.0]))->predictRow([10.0]);
+    }
 }

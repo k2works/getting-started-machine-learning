@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace GettingStartedMl;
 
 use GettingStartedMl\Chapter09\BostonSplit;
-use GettingStartedMl\Chapter09\LinearModel;
 use GettingStartedMl\Chapter09\Standardizer;
 use InvalidArgumentException;
 use MathPHP\LinearAlgebra\MatrixFactory;
@@ -418,10 +417,14 @@ final class Chapter09
     /**
      * 先頭に 1 の列を加えた計画行列 X で、正規方程式 XᵀX β = Xᵀt を解く。
      *
+     * 第 7 章の `LinearModel` をそのまま使う。この章は列名を持たない行列を扱うので、
+     * 列名は呼ぶ側から受け取って値の並びと対応させる。
+     *
      * @param list<list<float>> $rows
      * @param list<float>       $t
+     * @param list<string>      $columns
      */
-    public static function linearFit(array $rows, array $t): LinearModel
+    public static function linearFit(array $rows, array $t, array $columns): LinearModel
     {
         if ($rows === []) {
             throw new InvalidArgumentException('特徴量が 1 件もありません');
@@ -453,30 +456,7 @@ final class Chapter09
             }
         }
 
-        return new LinearModel($beta[0], array_slice($beta, 1));
-    }
-
-    /**
-     * 行ごとに予測する。
-     *
-     * @param list<list<float>> $rows
-     *
-     * @return list<float>
-     */
-    public static function linearPredict(LinearModel $model, array $rows): array
-    {
-        return array_map(
-            static function (array $row) use ($model): float {
-                $sum = $model->intercept;
-
-                foreach ($model->weights as $i => $weight) {
-                    $sum += $weight * $row[$i];
-                }
-
-                return $sum;
-            },
-            $rows,
-        );
+        return new LinearModel($beta[0], $columns, array_slice($beta, 1));
     }
 
     /**
@@ -550,11 +530,11 @@ final class Chapter09
         $standardizer = Standardizer::fit($train, $terms);
         $xTrain = Standardizer::toRows($standardizer->transformAll($train), $terms);
         $xTest = Standardizer::toRows($standardizer->transformAll($test), $terms);
-        $model = self::linearFit($xTrain, $split->tTrain);
+        $model = self::linearFit($xTrain, $split->tTrain, $terms);
 
         return [
-            'train' => self::rSquared($split->tTrain, self::linearPredict($model, $xTrain)),
-            'test' => self::rSquared($split->tTest, self::linearPredict($model, $xTest)),
+            'train' => self::rSquared($split->tTrain, $model->predictRows($xTrain)),
+            'test' => self::rSquared($split->tTest, $model->predictRows($xTest)),
         ];
     }
 

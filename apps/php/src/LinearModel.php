@@ -73,4 +73,41 @@ final readonly class LinearModel
     {
         return array_map($this->predictOne(...), $x);
     }
+
+    /**
+     * 列の順に並んだ値 1 行ぶんの予測値。
+     *
+     * 第 9 章のように列名を持たない行列（`list<list<float>>`）を扱う章のための口。
+     * 値の並びは `$columns` と同じ順であることを呼ぶ側が守る。
+     *
+     * @param list<float> $values
+     */
+    public function predictRow(array $values): float
+    {
+        if (count($values) !== count($this->columns)) {
+            throw new InvalidArgumentException(
+                sprintf('特徴量と係数の数が違います: %d と %d', count($values), count($this->columns)),
+            );
+        }
+
+        $sum = $this->intercept;
+
+        foreach ($values as $index => $value) {
+            $sum += $this->coefficients[$index] * $value;
+        }
+
+        return $sum;
+    }
+
+    /**
+     * 列の順に並んだ値の行ごとの予測値。
+     *
+     * @param list<list<float>> $rows
+     *
+     * @return list<float>
+     */
+    public function predictRows(array $rows): array
+    {
+        return array_map($this->predictRow(...), $rows);
+    }
 }

@@ -75,7 +75,6 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-24T00:00:00Z }
 |---------|------|
 | `src/Chapter09.php` | 技法ごとの関数（`categories`・`encode`・`expand`・`quantile`・`joinWeather`・`linearFit` など） |
 | `src/Chapter09/Standardizer.php` | 平均と標準偏差を覚える `readonly class` |
-| `src/Chapter09/LinearModel.php` | 切片と重みを持つ `readonly class` |
 | `src/Chapter09/BostonSplit.php` | 分割の結果（列名・訓練・テスト）を持つ `readonly class` |
 
 `BostonSplit` を作ったのには理由があります。第 2 章の `splitTrainTest()` は `array{xTrain: ..., xTest: ..., tTrain: ..., tTest: ...}` という形の連想配列を返しました。この章では列名も一緒に持ち回るので、同じ書き方を続けると PHPDoc の 1 行が 150 文字を超え、渡す関数ごとに同じ形を書き写すことになります。**名前の付いた型にすれば、形は 1 か所にだけ書けば済みます。**
@@ -745,7 +744,7 @@ Elixir 版は `term_name({left, left})` と `term_name({left, right})` の 2 つ
 作った特徴量が効いたかを測るために、線形回帰と決定係数を用意します。正規方程式 `XᵀX β = Xᵀt` を、MathPHP の行列で解きます。
 
 ```php
-    public static function linearFit(array $rows, array $t): LinearModel
+    public static function linearFit(array $rows, array $t, array $columns): LinearModel
     {
         if ($rows === []) {
             throw new InvalidArgumentException('特徴量が 1 件もありません');
@@ -777,11 +776,34 @@ Elixir 版は `term_name({left, left})` と `term_name({left, right})` の 2 つ
             }
         }
 
-        return new LinearModel($beta[0], array_slice($beta, 1));
+        return new LinearModel($beta[0], $columns, array_slice($beta, 1));
     }
 ```
 
 `[1.0, ...$row]` の展開で、先頭に切片用の 1 の列を足します。
+
+**モデルの器は第 7 章の `LinearModel` をそのまま使います。** この章は列名を持たない行列（`list<list<float>>`）を扱うので、最初は「切片と重みだけを持つ器」を別に作りました。しかし中身は第 7 章のものと同じで、**同じ概念に 2 つの名前がある**状態になります。そこで第 7 章の `LinearModel` に「列の順に並んだ値から予測する」口（`predictRow`・`predictRows`）を足し、列名は呼ぶ側から渡す形に寄せました。
+
+```php
+    public function predictRow(array $values): float
+    {
+        if (count($values) !== count($this->columns)) {
+            throw new InvalidArgumentException(
+                sprintf('特徴量と係数の数が違います: %d と %d', count($values), count($this->columns)),
+            );
+        }
+
+        $sum = $this->intercept;
+
+        foreach ($values as $index => $value) {
+            $sum += $this->coefficients[$index] * $value;
+        }
+
+        return $sum;
+    }
+```
+
+寄せたことで、この章でも列名で係数を読めるようになりました（`$model->coefficient('LSTAT')`）。**「列名を持たない行列で計算する」ことと「モデルが列名を覚えている」ことは両立します。**
 
 **失敗の捕まえ方を 2 段構えにしました。** MathPHP は特異行列に対して例外を投げることもあれば、`NaN` や `Infinity` を含むベクトルを返すこともあります（解法によって変わります）。どちらでも同じ `InvalidArgumentException` になるようにしておかないと、呼ぶ側が 2 通りの失敗を扱う羽目になります。Elixir 版の Nx も「例外を投げずに NaN を返す」側だったので、同じ確認が要りました。
 
@@ -791,7 +813,7 @@ Elixir 版は `term_name({left, left})` と `term_name({left, right})` の 2 つ
     {
         $this->expectException(InvalidArgumentException::class);
 
-        Chapter09::linearFit([[1.0, 2.0], [2.0, 4.0]], [1.0, 2.0]);
+        Chapter09::linearFit([[1.0, 2.0], [2.0, 4.0]], [1.0, 2.0], ['a', 'b']);
     }
 ```
 
@@ -823,11 +845,11 @@ Elixir 版は `term_name({left, left})` と `term_name({left, right})` の 2 つ
         $standardizer = Standardizer::fit($train, $terms);
         $xTrain = Standardizer::toRows($standardizer->transformAll($train), $terms);
         $xTest = Standardizer::toRows($standardizer->transformAll($test), $terms);
-        $model = self::linearFit($xTrain, $split->tTrain);
+        $model = self::linearFit($xTrain, $split->tTrain, $terms);
 
         return [
-            'train' => self::rSquared($split->tTrain, self::linearPredict($model, $xTrain)),
-            'test' => self::rSquared($split->tTest, self::linearPredict($model, $xTest)),
+            'train' => self::rSquared($split->tTrain, $model->predictRows($xTrain)),
+            'test' => self::rSquared($split->tTest, $model->predictRows($xTest)),
         ];
     }
 ```

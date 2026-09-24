@@ -346,11 +346,13 @@ final class Chapter09Test extends TestCase
         $rows = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]];
         $t = [1.0, 3.0, 4.0, 6.0];
 
-        $model = Chapter09::linearFit($rows, $t);
+        $model = Chapter09::linearFit($rows, $t, ['a', 'b']);
 
         $this->assertEqualsWithDelta(1.0, $model->intercept, 1e-9);
-        $this->assertEqualsWithDelta([2.0, 3.0], $model->weights, 1e-9);
-        $this->assertEqualsWithDelta($t, Chapter09::linearPredict($model, $rows), 1e-9);
+        $this->assertEqualsWithDelta([2.0, 3.0], $model->coefficients, 1e-9);
+        $this->assertEqualsWithDelta($t, $model->predictRows($rows), 1e-9);
+        // 第 7 章の LinearModel をそのまま使うので、列名で係数を読むこともできる。
+        $this->assertEqualsWithDelta(2.0, $model->coefficient('a'), 1e-9);
     }
 
     #[TestDox('互いに独立でない列があれば正規方程式を解けない')]
@@ -358,7 +360,7 @@ final class Chapter09Test extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        Chapter09::linearFit([[1.0, 2.0], [2.0, 4.0]], [1.0, 2.0]);
+        Chapter09::linearFit([[1.0, 2.0], [2.0, 4.0]], [1.0, 2.0], ['a', 'b']);
     }
 
     #[TestDox('完全に当てた予測の決定係数は 1')]
