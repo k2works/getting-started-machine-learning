@@ -355,7 +355,7 @@ echo "EXIT=$?"
       ----------- end diff -----------
 
 
-Found 1 of 55 files that can be fixed in 1.142 seconds, 38.00 MB memory used
+Found 1 of 89 files that can be fixed in 1.142 seconds, 38.00 MB memory used
 EXIT=8
 ```
 
@@ -700,8 +700,8 @@ echo "EXIT=$?"
 ```
 
 ```text
-行カバレッジ: 98.91% (1358/1373), しきい値: 99.90%
-カバレッジがしきい値を下回りました: 98.91% < 99.90%
+行カバレッジ: 99.17% (2391/2411), しきい値: 99.90%
+カバレッジがしきい値を下回りました: 99.17% < 99.90%
 EXIT=3
 ```
 

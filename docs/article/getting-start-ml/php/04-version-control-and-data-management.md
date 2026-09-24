@@ -226,7 +226,7 @@ echo "EXIT=$?"
       ----------- end diff -----------
 
 
-Found 1 of 55 files that can be fixed in 0.811 seconds, 38.00 MB memory used
+Found 1 of 89 files that can be fixed in 0.811 seconds, 38.00 MB memory used
 EXIT=8
 ```
 
@@ -408,10 +408,10 @@ ML_DATA_DIR=/nonexistent php vendor/bin/phpunit --testdox
 ...
 
 OK, but some tests were skipped!
-Tests: 205, Assertions: 3376, Skipped: 15.
+Tests: 360, Assertions: 3660, Skipped: 34.
 ```
 
-`↩` がスキップされたテストで、`Skipped: 15` と **数に出ます**（テストの数は章が増えるたびに動きます）。Clojure 版で問題にした「アサーションの数の差にしか表れない」が起きません。`markTestSkipped` に渡したメッセージは `--display-skipped` を付けると表示されます。
+`↩` がスキップされたテストで、`Skipped: 34` と **数に出ます**（テストの数は章が増えるたびに動きます）。Clojure 版で問題にした「アサーションの数の差にしか表れない」が起きません。`markTestSkipped` に渡したメッセージは `--display-skipped` を付けると表示されます。
 
 もう 1 つ、PHP らしいのは **グループの粒度が自由** なことです。`#[Group('data')]` はメソッドにもクラスにも付けられます。実データのテストと、架空の値の単体テストが同じクラスに同居していても、属性で分けられます。
 

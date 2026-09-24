@@ -18,6 +18,16 @@ use Rubix\ML\Exceptions\InvalidArgumentException as RubixInvalidArgumentExceptio
 
 final class Chapter11Test extends TestCase
 {
+    /** 学習データが無ければテストを外す。実データのテストはすべてこれを先に呼ぶ。 */
+    private function requireData(string ...$names): void
+    {
+        foreach ($names as $name) {
+            if (!Dataset::exists($name)) {
+                $this->markTestSkipped('学習データがありません: ' . Dataset::path($name));
+            }
+        }
+    }
+
     /**
      * 答えの分かっている 6 件。正例は「はい」。
      *
@@ -490,6 +500,8 @@ final class Chapter11Test extends TestCase
     #[TestDox('Survived の指標は Rubix ML の指標と一致する')]
     public function testSurvivedの指標はRubixMlの指標と一致する(): void
     {
+        $this->requireData('Survived.csv', 'cinema.csv');
+
         ['x' => $x, 't' => $t] = $this->survivedData();
         $fold = Chapter11::kFold(count($x), Chapter11::N_SPLITS, Chapter11::SEED)[0];
         $predict = (Chapter11::treeTrainer(Chapter11::SURVIVED_COLUMNS, Chapter11::TREE_DEPTH))(
@@ -516,6 +528,8 @@ final class Chapter11Test extends TestCase
     #[TestDox('cinema の分割ごとの MSE は第 7 章の RMSE の 2 乗と一致する')]
     public function testCinemaの分割ごとのMseは第7章のRmseの2乗と一致する(): void
     {
+        $this->requireData('Survived.csv', 'cinema.csv');
+
         ['x' => $x, 't' => $t] = Chapter11::prepareCinema(
             Chapter02::loadTable(Dataset::path('cinema.csv')),
         );
@@ -534,6 +548,8 @@ final class Chapter11Test extends TestCase
     #[TestDox('Rubix ML の KFold は 0 と 1 のラベルを連続値と見なして落ちる')]
     public function testRubixMlのKFoldは0と1のラベルを連続値と見なして落ちる(): void
     {
+        $this->requireData('Survived.csv', 'cinema.csv');
+
         ['x' => $x, 't' => $t] = $this->survivedData();
 
         // stratifiedFold がラベルを配列のキーにするので、'0' と '1' が整数 0 と 1 に化ける。
@@ -548,6 +564,8 @@ final class Chapter11Test extends TestCase
     #[TestDox('数字でないラベルに付け替えれば Rubix ML の KFold も動くが値は毎回変わる')]
     public function test数字でないラベルに付け替えればRubixMlのKFoldも動くが値は毎回変わる(): void
     {
+        $this->requireData('Survived.csv', 'cinema.csv');
+
         ['x' => $x, 't' => $t] = $this->survivedData();
         $named = array_map(static fn (string $label): string => $label === '1' ? '生存' : '死亡', $t);
 
@@ -575,6 +593,8 @@ final class Chapter11Test extends TestCase
     #[TestDox('実行すると交差検証の平均を表示する')]
     public function test実行すると交差検証の平均を表示する(): void
     {
+        $this->requireData('Survived.csv', 'cinema.csv');
+
         $this->assertSame(
             "Survived（決定木、5 分割交差検証の平均）\n"
             . "  正解率: 0.7811\n"

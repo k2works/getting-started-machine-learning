@@ -18,6 +18,16 @@ use PHPUnit\Framework\TestCase;
 
 final class Chapter12Test extends TestCase
 {
+    /** 学習データが無ければテストを外す。実データのテストはすべてこれを先に呼ぶ。 */
+    private function requireData(string ...$names): void
+    {
+        foreach ($names as $name) {
+            if (!Dataset::exists($name)) {
+                $this->markTestSkipped('学習データがありません: ' . Dataset::path($name));
+            }
+        }
+    }
+
     /** @var list<string> */
     private const array COLUMNS = ['a', 'b'];
 
@@ -272,6 +282,8 @@ final class Chapter12Test extends TestCase
     #[TestDox('外れ値を除いてから 3 つに分ける')]
     public function test外れ値を除いてから3つに分ける(): void
     {
+        $this->requireData('Boston.csv');
+
         $total = count(Chapter02::loadTable(Dataset::path('Boston.csv'))->rows);
         $data = $this->boston();
 
@@ -290,6 +302,8 @@ final class Chapter12Test extends TestCase
     #[TestDox('検証データで選んだリッジ回帰はテストデータで線形回帰を上回る')]
     public function test検証データで選んだリッジ回帰はテストデータで線形回帰を上回る(): void
     {
+        $this->requireData('Boston.csv');
+
         $data = $this->boston();
         $best = Chapter12::bestExperiment(Chapter12::runRidgeExperiments($data, Chapter12::ALPHAS));
 
@@ -304,6 +318,8 @@ final class Chapter12Test extends TestCase
     #[TestDox('ラッソ回帰は 9 列のうち 3 列の係数をちょうど 0 にする')]
     public function testラッソ回帰は9列のうち3列の係数をちょうど0にする(): void
     {
+        $this->requireData('Boston.csv');
+
         $data = $this->boston();
         $lasso = Chapter12::lassoFit(
             $data->xTrain,
@@ -322,6 +338,8 @@ final class Chapter12Test extends TestCase
     #[TestDox('実データでも自作のリッジ回帰は Rubix ML と一致する')]
     public function test実データでも自作のリッジ回帰はRubixMlと一致する(): void
     {
+        $this->requireData('Boston.csv');
+
         $data = $this->boston();
         $mine = Chapter12::ridgeFit($data->xTrain, $data->tTrain, $data->featureNames, 10.0);
         $theirs = Chapter12::rubixRidgeFit($data->xTrain, $data->tTrain, $data->featureNames, 10.0);
@@ -337,6 +355,8 @@ final class Chapter12Test extends TestCase
     #[TestDox('実行すると実験の表とモデル選択の結果を表示する')]
     public function test実行すると実験の表とモデル選択の結果を表示する(): void
     {
+        $this->requireData('Boston.csv');
+
         $this->assertSame(
             "データ件数: 98（外れ値 2 件を除外）\n"
             . "訓練データ: 47 件, 検証データ: 21 件, テストデータ: 30 件\n"
