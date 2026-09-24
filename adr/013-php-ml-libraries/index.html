@@ -12990,7 +12990,7 @@
 </tr>
 <tr>
 <td>2</td>
-<td><strong><code>java.util.Random</code> と同じ 48 ビットの線形合同法を自作した。</strong> <code>shuffle(0..9, 0)</code> が <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code> で Java 版・Kotlin 版・Scala 版・Clojure 版・Elixir 版と一致し、訓練データのがく片長さの平均（0.4215384615384616）も 1e-15 まで一致した。<strong>PHP の整数は溢れると float に化けて静かに精度を失う</strong>（Java のように折り返さず、Elixir のように多倍長にもならない。<code>Deprecated: Implicit conversion from float ... loses precision</code> が出るだけ）ので、state を上下 24 ビットに分けて掛ける。<strong><code>?:</code> と <code>if ($value)</code> は 0.0 を偽とする</strong>ので、0.0〜1.0 に正規化されたデータでは欠損値の判定に使えない（<code>!== null</code> で書く）。配列は値としてコピーされるので <code>shuffle</code> の中で書き換えても元の配列は変わらない。<code>array_filter</code> は添字を保つので <code>list&lt;T&gt;</code> には <code>array_values</code> が要る</td>
+<td><strong><code>java.util.Random</code> と同じ 48 ビットの線形合同法を自作した。</strong> <code>shuffle(0..9, 0)</code> が <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code> で Java 版・Scala 版・Clojure 版・Elixir 版と一致し、訓練データのがく片長さの平均（0.4215384615384616）も 1e-15 まで一致した。<strong>PHP の整数は溢れると float に化けて静かに精度を失う</strong>（Java のように折り返さず、Elixir のように多倍長にもならない。<code>Deprecated: Implicit conversion from float ... loses precision</code> が出るだけ）ので、state を上下 24 ビットに分けて掛ける。<strong><code>?:</code> と <code>if ($value)</code> は 0.0 を偽とする</strong>ので、0.0〜1.0 に正規化されたデータでは欠損値の判定に使えない（<code>!== null</code> で書く）。配列は値としてコピーされるので <code>shuffle</code> の中で書き換えても元の配列は変わらない。<code>array_filter</code> は添字を保つので <code>list&lt;T&gt;</code> には <code>array_values</code> が要る</td>
 </tr>
 <tr>
 <td>3</td>
@@ -13013,10 +13013,6 @@
 <td>自作モデルの正解率 8 個が Java 版・Clojure 版・Elixir 版と一致。<strong>特徴量の重要度 4 個（0.1882/0.1271/0.2708/0.4140）が Java 版・Clojure 版と完全に一致した</strong>（Elixir 版だけ 4 桁目がずれた原因＝ジニ不純度の和を取る順で同点に 1 ulp の差が付く、を PHP は踏まない。<strong>PHP の連想配列が挿入順を保つ</strong>ため）。<strong><code>Rubix\ML\Classifiers\LogisticRegression</code> は 2 クラス専用</strong>で、3 品種を渡すと <code>Number of classes must be 2, 3 given.</code> で落ちる（多クラスは <code>SoftmaxClassifier</code>）。既定の学習率 0.01 では訓練 0.6762 と自作（0.9143）に遠く、1.0 にすると 0.9333。<strong>Elixir 版で犯人だった正則化はここでは効いていない</strong>（<code>l2Penalty</code> の既定が 1e-4 で、Scholar の <code>alpha: 1.0</code> より 4 桁小さい）。<code>RandomForest</code> の正解率はテストデータ 0.9333 で自作と一致したが（<code>ratio</code> の既定 0.2、<code>maxFeatures</code> が「節ごと」対 自作「木ごと」を揃えたうえで）、<strong>重要度は一致しない</strong>（森の作り方と重要度の定義が違う）。<strong>Rubix ML のモデルはシードを受け取らず大域の <code>mt_rand</code> から引く</strong>ので、種を付けないと実行のたびに正解率が変わる（softmax で 0.4889〜0.7556）。<strong><code>exp(1000)</code> も <code>log(0)</code> も落ちず <code>INF</code>/<code>-INF</code> を返す</strong>ので、静かに NaN が後段に混ざる（Elixir の <code>ArithmeticError</code> と逆）</td>
 </tr>
 <tr>
-<td>15</td>
-<td><strong>置き場の約束は interface で表せる。</strong> Elixir 版が behaviour のために <code>{モジュール, 状態}</code> の組と振り分け関数を必要とした回り道が消え、偽物のモデルは無名クラスでその場に書ける（Clojure の <code>reify</code> に近い）。本物と偽物の両方に同じ約束のテストを走らせる。<strong>予測値は 7730.457421687019 で、Java 版・Scala 版・Clojure 版（…023）とも Elixir 版（…016）とも一致しなかった</strong>（分割は自作の乱数で完全一致しており、差は正規方程式を解く実装の丸めの順。第 7 章の 13 桁目のずれが、特徴量を掛けて足すぶん 12 桁目に出た）。<strong>保存・読み込みの往復は実データでも 1 ビット一致する</strong>（<code>serialize_precision</code> の既定 <code>-1</code> が最短往復表記を選ぶ）。<strong>PHP は JSON のオブジェクトと配列を区別しない</strong>ので <code>json_decode(..., true)</code> の結果を <code>array_is_list</code> で弾く（しかも <code>{"0": 1}</code> はリスト扱いになる）。<strong><code>json_decode</code> は失敗を <code>null</code> で返す</strong>ので「読めなかった」と「本文が null」を区別できず、<code>JSON_THROW_ON_ERROR</code> が必須。<strong>組み込みサーバーはプログラムから起動できない</strong>（<code>php -S</code> 自体がサーバーで、要求ごとにスクリプトを最初から走らせる）ので、学習・保存と待ち受けがコマンドとして分かれ、結果として組み立てのクラスまで 100% テストできた。プロセスに状態が残らず置き場は毎回ファイルから読むが、実測 0.12 ミリ秒。<strong>型で守れるものを約束のテストに書くと PHPStan に「常に真である」と叱られる</strong>ので、「同じ入力には同じ答え」「値が有限」という型では書けない約束に書き換えた</td>
-</tr>
-<tr>
 <td>11</td>
 <td>6 指標（正解率 0.7811・適合率 0.7759・再現率 0.6306・F 値 0.6833・RMSE 405.77・MAE 321.53）が Java 版・Scala 版・Clojure 版・Elixir 版と一致。<code>Accuracy</code>・<code>MulticlassBreakdown</code> の正例の行・誤差指標は自作と 1e-12 で一致した（ただし <strong>Rubix の <code>Metric</code> は「大きいほどよい」に統一されているので誤差指標は負値を返す</strong>）。<strong><code>FBeta</code> は 2 値でもマクロ平均</strong>（クラスごとの適合率・再現率を平均してから調和平均）なので自作 0.8 対 Rubix 0.7895 と食い違う。どちらも正しい F 値で定義が違う。<strong><code>Labeled::fold()</code> は <code>floor(件数/分割数)</code> で余りを捨てる</strong>（891 件 5 分割で自作 179,178,178,178,178 対 Rubix 178×5。<strong>Elixir 版の Scholar <code>k_fold_split/2</code> と完全に同じ振る舞い</strong>）。<strong><code>KFold::test()</code> は <code>randomize()</code> を呼ぶがシードを渡す口が無い</strong>（5 回で 0.7718〜0.7819 と揺れる）。<strong><code>Reports\ConfusionMatrix</code> は行が予測・列が正解</strong>（教科書や Scholar とは逆向き）。<strong>ROC 曲線・AUC は Rubix ML に無い</strong>ので自作が最終実装。<strong><code>stratifiedFold()</code> はラベルを配列のキーにするので <code>'0'</code>/<code>'1'</code> が整数に化けて落ちる</strong>（第 3 章で自分のコードに見つけた癖に、ライブラリのほうが落ちた）。<strong>配列のキーに float は使えない</strong>ので ROC のグループ化は <code>usort</code> で書く</td>
 </tr>
@@ -13031,6 +13027,14 @@
 <tr>
 <td>14</td>
 <td>自作の SSE 列・シード別の局所解の表・クラスタごとの件数と平均支出額が Java 版・Scala 版・Clojure 版・Elixir 版と一致。<strong>初期中心は <code>Seeders\Preset</code> で渡せた</strong>（シリーズ初。Scholar は渡せなかった）。ただし <strong><code>KMeans</code> はミニバッチ K-means</strong> なので同じ初期中心から始めても一致せず（<code>n_init</code> にあたる引数も無い）、同じ定義の SSE で比べた。<strong>10 のクラスタ数すべてで Rubix ML のほうが SSE が大きい</strong>（Elixir 版で k=4 以降 Scholar が小さかったのと逆）。最も明快なのは k=1 で、答えが全点の平均に決まっているのに 2640.00 対 2664.04。<strong><code>sprintf('%.0f')</code> と <code>round()</code> で 0.5 の丸め方向が違う</strong>（<code>Milk</code> の平均がちょうど 34708.5 で、<code>sprintf</code> は偶数側の 34708、Java・Elixir の <code>round</code> は 34709）。<strong>配列の <code>===</code> が入れ子を再帰的に比べる</strong>ので K-means の収束判定がそのまま書ける（Java の <code>deepEquals</code> ＋ <code>clone</code> が要らない）。<strong><code>&lt;=&gt;</code> が配列どうしを比べる</strong>ので「件数の降順、同数なら番号の昇順」が 1 行。<code>usort()</code> が安定ソートになったのは PHP 8.0 から</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>置き場の約束は interface で表せる。</strong> Elixir 版が behaviour のために <code>{モジュール, 状態}</code> の組と振り分け関数を必要とした回り道が消え、偽物のモデルは無名クラスでその場に書ける（Clojure の <code>reify</code> に近い）。本物と偽物の両方に同じ約束のテストを走らせる。<strong>予測値は 7730.457421687019 で、Java 版・Scala 版・Clojure 版（…023）とも Elixir 版（…016）とも一致しなかった</strong>（分割は自作の乱数で完全一致しており、差は正規方程式を解く実装の丸めの順。第 7 章の 13 桁目のずれが、特徴量を掛けて足すぶん 12 桁目に出た）。<strong>保存・読み込みの往復は実データでも 1 ビット一致する</strong>（<code>serialize_precision</code> の既定 <code>-1</code> が最短往復表記を選ぶ）。<strong>PHP は JSON のオブジェクトと配列を区別しない</strong>ので <code>json_decode(..., true)</code> の結果を <code>array_is_list</code> で弾く（しかも <code>{"0": 1}</code> はリスト扱いになる）。<strong><code>json_decode</code> は失敗を <code>null</code> で返す</strong>ので「読めなかった」と「本文が null」を区別できず、<code>JSON_THROW_ON_ERROR</code> が必須。<strong>組み込みサーバーはプログラムから起動できない</strong>（<code>php -S</code> 自体がサーバーで、要求ごとにスクリプトを最初から走らせる）ので、学習・保存と待ち受けがコマンドとして分かれ、結果として組み立てのクラスまで 100% テストできた。プロセスに状態が残らず置き場は毎回ファイルから読むが、実測 0.12 ミリ秒。<strong>型で守れるものを約束のテストに書くと PHPStan に「常に真である」と叱られる</strong>ので、「同じ入力には同じ答え」「値が有限」という型では書けない約束に書き換えた</td>
+</tr>
+<tr>
+<td><strong>しきい値は環境ごとに測り直す</strong></td>
+<td><strong>カバレッジのしきい値 90% は CI で必ず落ちた。</strong> 手元（配布データあり）は 99.17% だが、<strong>CI には学習データが無く実データのテストが 34 件スキップされるので 78.35% まで落ちる</strong>。しきい値は「どの環境でも保てる水準」でなければ意味がないので 75% に下げた。<strong>CI を動かして初めて分かった</strong>（手元では最後まで 99% だった）</td>
 </tr>
 </tbody>
 </table>
@@ -13076,7 +13080,7 @@
 </tr>
 <tr>
 <td>カバレッジ</td>
-<td>pcov ＋ PHPUnit の clover 出力。<strong>しきい値は自作のスクリプトで判定する</strong></td>
+<td>pcov ＋ PHPUnit の clover 出力。<strong>しきい値は自作のスクリプトで判定する</strong>（75%。学習データの無い CI で保てる水準にそろえた）</td>
 <td>pcov 1.0</td>
 <td>BSD-3-Clause</td>
 <td>第 1 章（記事での解説は第 5 章）</td>

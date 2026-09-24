@@ -13872,7 +13872,7 @@ Package coverage report written to
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>式カバレッジ: 94% (626/663), しきい値: 80%
 </code></pre></div>
-<p>しきい値を割ると終了コード 3 で落ちます。</p>
+<p>しきい値を割ると終了コード 3 で落ちます。この出力はこの章を書いた時点（第 1〜3 章まで、663 式）のもので、<strong>いま使っているしきい値は 65% です</strong>。下げた理由は<a href="../06-task-runner-and-ci-cd/">第 6 章</a>で扱います。</p>
 <div class="highlight"><pre><span></span><code>./tools/coverage-threshold.sh<span class="w"> </span><span class="m">99</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"EXIT=</span><span class="nv">$?</span><span class="s2">"</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>式カバレッジ: 83% (554/663), しきい値: 99%
@@ -13890,7 +13890,7 @@ EXIT=3
 </code></pre></div>
 <p><code>loadTable</code> が <code>Left</code> を返したときの流れは <code>do</code> 記法に隠れていて、行としては見えません。しかし <strong>HPC は式として数えます</strong>。失敗の場合のテストを書いていなければ、カバレッジに穴として出ます。<strong>「失敗を型で表す」設計と「式を数えるカバレッジ」は相性がよい</strong>、ということです。行を数える道具では、この穴は見えません。</p>
 <h2 id="57-4-1">5.7 検査の 4 つを 1 行にする<a class="headerlink" href="#57-4-1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>fourmolu<span class="w"> </span>--mode<span class="w"> </span>check<span class="w"> </span>src<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>hlint<span class="w"> </span>src<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cabal<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--enable-coverage<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./tools/coverage-threshold.sh<span class="w"> </span><span class="m">80</span>
+<div class="highlight"><pre><span></span><code>fourmolu<span class="w"> </span>--mode<span class="w"> </span>check<span class="w"> </span>src<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>hlint<span class="w"> </span>src<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cabal<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--enable-coverage<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./tools/coverage-threshold.sh<span class="w"> </span><span class="m">65</span>
 </code></pre></div>
 <p><code>&amp;&amp;</code> でつないであるので、前が失敗したらそこで止まります。4 つの並びは CI（<code>.github/workflows/haskell-ci.yml</code>）とも、Gulp のタスク（<code>ops/scripts/apps.js</code>）とも同じです。</p>
 <p><code>cabal test</code> の中に、<strong>5 つめの検査が隠れています</strong>。<code>-Wall -Werror</code> によるコンパイルです。テストを走らせるにはライブラリとテストをコンパイルする必要があるので、警告が 1 つでもあればここで止まります。</p>

@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="素のマップとリストで表を自作し、nil で欠損値を表して iris データを前処理する。java.util.Random と同じ 48 ビットの線形合同法を自作して JVM の 4 言語版と並びをそろえ、タプルと put_elem による Fisher-Yates を Elixir の TDD で実装する。マップがキーの順を保たないことも実測で確かめる。">
+        <meta name="description" content="素のマップとリストで表を自作し、nil で欠損値を表して iris データを前処理する。java.util.Random と同じ 48 ビットの線形合同法を自作して JVM の 3 言語版と並びをそろえ、タプルと put_elem による Fisher-Yates を Elixir の TDD で実装する。マップがキーの順を保たないことも実測で確かめる。">
       
       
         <meta name="author" content="Project Team">
@@ -8340,10 +8340,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#jvm-4" class="md-nav__link">
+  <a href="#jvm-3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        山場のテスト: JVM の 4 言語版と一致する
+        山場のテスト: JVM の 3 言語版と一致する
       
     </span>
   </a>
@@ -13263,7 +13263,7 @@
 <p><a href="../../python/02-data-preprocessing-and-triangulation/">Python 版の第 2 章</a>・<a href="../../clojure/02-data-preprocessing-and-triangulation/">Clojure 版の第 2 章</a> と同じ TODO リストで進めます。Python 版は pandas、Kotlin 版は Kotlin DataFrame を使いましたが、Elixir 版は Java 版・Scala 版・Clojure 版と同じく <strong>データフレームのライブラリを使わず</strong>、小さな表を自分で組み立てます。Elixir では、その表が<strong>素のマップとリスト</strong>になります。</p>
 <p>そしてこの章には、シリーズを通していちばん変わった山場があります。<strong>乱数生成器そのものを自作します。</strong> ライブラリが無いからではありません。ほかの言語版と数値を突き合わせるためです。次の 4 点に注目してください。</p>
 <ul>
-<li><strong>乱数生成器を 3 行の漸化式として書く</strong> — <code>Nx.Random</code>（Threefry）も Erlang の <code>:rand</code> も、ほかの言語版と並びが合いません。そこで <code>java.util.Random</code> と同じ 48 ビットの線形合同法を写し取ります。結果として並びが JVM の 4 言語版と一致します（<a href="../../../../adr/012-elixir-ml-libraries/">ADR 012</a>）</li>
+<li><strong>乱数生成器を 3 行の漸化式として書く</strong> — <code>Nx.Random</code>（Threefry）も Erlang の <code>:rand</code> も、ほかの言語版と並びが合いません。そこで <code>java.util.Random</code> と同じ 48 ビットの線形合同法を写し取ります。結果として並びが JVM の 3 言語版（Java・Scala・Clojure）と一致します（<a href="../../../../adr/012-elixir-ml-libraries/">ADR 012</a>）</li>
 <li><strong>欠損値は <code>nil</code> で表す</strong> — Elixir には <code>Option</code> も <code>Maybe</code> もありません。Ruby 版・Python 版・Clojure 版と同じ <code>nil</code>／<code>None</code> の世界です</li>
 <li><strong>マップはキーの順を保たない</strong> — Ruby の <code>Hash</code> とは違います。列の順が要るところでは、CSV から取った<strong>リスト</strong>で持ち回ります</li>
 <li><strong>タプルと <code>put_elem</code> で交換する</strong> — リストは添字での更新が苦手なので、Fisher-Yates ではいったんタプルに変換します</li>
@@ -13366,7 +13366,7 @@
 <td>さらに別の並び</td>
 </tr>
 <tr>
-<td><strong>Java 版・Kotlin 版・Scala 版・Clojure 版</strong></td>
+<td><strong>Java 版・Scala 版・Clojure 版</strong></td>
 <td><strong><code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code></strong></td>
 </tr>
 </tbody>
@@ -13560,12 +13560,12 @@
 <p><code>Enum.reduce</code> の畳み込みの値が <code>{配列, 乱数の状態}</code> の 2 要素タプルになっているところも読みどころです。<strong>Elixir には「その場で書き換える変数」が無いので、繰り返しの中で変わっていくものはすべて畳み込みの値に載せます。</strong> ここでは配列と乱数の状態の 2 つが変わるので、タプルで束ねて持ち回ります。可変の言語なら「配列を書き換えつつ <code>random.nextInt()</code> を呼ぶ」で済むところが、状態を明示的に運ぶ形になりました。</p>
 <p><code>last..1//-1</code> は「<code>last</code> から 1 まで 1 ずつ減らす」範囲です。Elixir 1.12 以降、逆向きの範囲には <code>//-1</code> の刻み幅を明示する必要があります（書かないと空の範囲になります）。<strong>後ろから前へ進む</strong>のは Fisher-Yates の定義そのままで、この向きを変えると並びが変わります。</p>
 <p><code>last &lt; 1</code> の早期リターンは、要素が 0 個か 1 個のときです。<code>0..1//-1</code> のような空の範囲を畳み込んでも結果は同じですが、<code>tuple_size</code> が 0 のときに <code>-1..1//-1</code> を作ることになるので、素直に分けました。</p>
-<h3 id="jvm-4">山場のテスト: JVM の 4 言語版と一致する<a class="headerlink" href="#jvm-4" title="Permanent link">&para;</a></h3>
+<h3 id="jvm-3">山場のテスト: JVM の 3 言語版と一致する<a class="headerlink" href="#jvm-3" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">test</span><span class="w"> </span><span class="s2">"シード 0 の並びが Java 版・Scala 版・Clojure 版と一致する"</span><span class="w"> </span><span class="k">do</span>
 <span class="w">  </span><span class="n">assert</span><span class="w"> </span><span class="nc">Random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="mi">9</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
 <span class="k">end</span>
 </code></pre></div>
-<p><strong>通りました。</strong> <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code> は、Java 版・Kotlin 版・Scala 版・Clojure 版とまったく同じ並びです。</p>
+<p><strong>通りました。</strong> <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code> は、Java 版・Scala 版・Clojure 版とまったく同じ並びです。</p>
 <p>JVM を持たない言語が、JVM の乱数と同じ数列を出しました。<strong>乱数生成器は、定数 3 つと 1 行の漸化式でできています。</strong> 「乱数」という言葉の響きに反して、中身は完全に決定的で、写し取れます。</p>
 <p>この 1 行のテストが、言語をまたいだ約束の見張り番になります。ここを壊せば、第 3 章の正解率も木の境界も合わなくなります。</p>
 <h2 id="26">2.6 不変の表で読み込む<a class="headerlink" href="#26" title="Permanent link">&para;</a></h2>
@@ -13978,11 +13978,11 @@
 </code></pre></div>
 <p>（第 1 章・第 3 章のテストも含めた数です。）</p>
 <h2 id="212">2.12 可視化について<a class="headerlink" href="#212" title="Permanent link">&para;</a></h2>
-<p>Elixir 版には Livebook の節を設けません。欠損値の分布や、品種ごとの特徴量の散布図は、<a href="../../python/02-data-preprocessing-and-triangulation/">Python 版の第 2 章</a> と <a href="../../kotlin/02-data-preprocessing-and-triangulation/">Kotlin 版の第 2 章</a> の「Notebook で探索する」の節を参照してください。訓練データに入る行は言語ごとに違いますが（Elixir 版は Java 版・Kotlin 版・Scala 版・Clojure 版と同じです）、「<code>Iris-setosa</code> は花弁長さ・花弁幅がほかの 2 品種よりはっきり小さい」という傾向は同じで、第 3 章の決定木はこの傾向を自動で見つけます。</p>
+<p>Elixir 版には Livebook の節を設けません。欠損値の分布や、品種ごとの特徴量の散布図は、<a href="../../python/02-data-preprocessing-and-triangulation/">Python 版の第 2 章</a> と <a href="../../kotlin/02-data-preprocessing-and-triangulation/">Kotlin 版の第 2 章</a> の「Notebook で探索する」の節を参照してください。訓練データに入る行は言語ごとに違いますが（Elixir 版は Java 版・Scala 版・Clojure 版と同じです）、「<code>Iris-setosa</code> は花弁長さ・花弁幅がほかの 2 品種よりはっきり小さい」という傾向は同じで、第 3 章の決定木はこの傾向を自動で見つけます。</p>
 <h2 id="213">2.13 まとめ<a class="headerlink" href="#213" title="Permanent link">&para;</a></h2>
 <p>この章では、乱数生成器を自作し、データフレームのライブラリを使わずに欠損値を含むデータを前処理して、訓練データとテストデータに分けました。Elixir に固有の論点は次のとおりです。</p>
 <ol>
-<li><strong>乱数生成器は 3 行の漸化式である</strong> — <code>java.util.Random</code> の 48 ビット線形合同法（乗数 <code>0x5DEECE66D</code>、加数 11、<code>bxor</code> によるシードの撹拌、2 の冪のときだけ別式、剰余の偏りを避ける棄却）を写し取った。結果、シード 0 の並び <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code> と、訓練データの平均値 <code>0.4215384615384616</code> が <strong>Java 版・Kotlin 版・Scala 版・Clojure 版と一致</strong>した。ライブラリが無いから自作したのではなく、<strong>数値を突き合わせるために自作した</strong>（<a href="../../../../adr/012-elixir-ml-libraries/">ADR 012</a>）</li>
+<li><strong>乱数生成器は 3 行の漸化式である</strong> — <code>java.util.Random</code> の 48 ビット線形合同法（乗数 <code>0x5DEECE66D</code>、加数 11、<code>bxor</code> によるシードの撹拌、2 の冪のときだけ別式、剰余の偏りを避ける棄却）を写し取った。結果、シード 0 の並び <code>[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]</code> と、訓練データの平均値 <code>0.4215384615384616</code> が <strong>Java 版・Scala 版・Clojure 版と一致</strong>した。ライブラリが無いから自作したのではなく、<strong>数値を突き合わせるために自作した</strong>（<a href="../../../../adr/012-elixir-ml-libraries/">ADR 012</a>）</li>
 <li><strong>Java の整数の性質は写せない</strong> — 棄却の条件を Java は <code>int</code> のオーバーフローで書いているが、Elixir の整数は多倍長でオーバーフローしない。<code>0x80000000</code> と直接比べる形に書き換えた。<strong>アルゴリズムを写すとは、コードを貼ることではない</strong></li>
 <li><strong>状態は戻り値で持ち回る</strong> — <code>next_int/2</code> が <code>{値, 次の状態}</code> を返し、<code>Enum.reduce</code> の畳み込みの値が <code>{配列, 乱数の状態}</code> になる。可変の変数が無い言語では、変わるものがすべて畳み込みの値に載る</li>
 <li><strong>Fisher-Yates はタプルと <code>put_elem/3</code></strong> — リストは添字の更新が苦手なので、いったんタプルに変換する。<code>put_elem/3</code> は新しいタプルを返すので<strong>不変性は保たれる</strong>。Clojure 版が可変の配列を使ったところを、Elixir は不変のまま書ける</li>

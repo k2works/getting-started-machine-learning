@@ -13950,7 +13950,7 @@ Tests: 20, Assertions: 29, Skipped: 1.
 <span class="k">declare</span><span class="p">(</span><span class="nx">strict_types</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
 
 <span class="c1">// PHPUnit には最低カバレッジのしきい値の機能が無いので、clover の XML を読んで自分で判定する（ADR 013）。</span>
-<span class="c1">// 使い方: php tools/coverage-threshold.php build/clover.xml 90</span>
+<span class="c1">// 使い方: php tools/coverage-threshold.php build/clover.xml 75</span>
 
 <span class="nv">$path</span> <span class="o">=</span> <span class="nv">$argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">??</span> <span class="s1">'build/clover.xml'</span><span class="p">;</span>
 <span class="nv">$threshold</span> <span class="o">=</span> <span class="p">(</span><span class="nx">float</span><span class="p">)</span> <span class="p">(</span><span class="nv">$argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">??</span> <span class="s1">'90'</span><span class="p">);</span>
@@ -13978,12 +13978,14 @@ Tests: 20, Assertions: 29, Skipped: 1.
 <p>clover の XML は <code>project/metrics</code> に全体の集計を持っているので、2 つの属性を読むだけで済みます。</p>
 <div class="highlight"><pre><span></span><code>php<span class="w"> </span>tools/coverage-threshold.php<span class="w"> </span>build/clover.xml<span class="w"> </span><span class="m">90</span>
 </code></pre></div>
+<p>（この章を書いた時点のしきい値です。いま使っているのは 75% です。理由は後述します。）</p>
 <div class="highlight"><pre><span></span><code>行カバレッジ: 100.00% (61/61), しきい値: 90.00%
 </code></pre></div>
 <p>わざとテストされないコードを足して、しきい値割れを確かめました。</p>
 <div class="highlight"><pre><span></span><code>行カバレッジ: 87.14% (61/70), しきい値: 90.00%
 カバレッジがしきい値を下回りました: 87.14% &lt; 90.00%
 </code></pre></div>
+<p>この章を書いた時点では、しきい値を 90% にしていました。<strong>この値は後で下げることになります。</strong> 学習データの無い CI では実データのテストがスキップされ、カバレッジが 78% まで落ちるためです。経緯は<a href="../06-task-runner-and-ci-cd/">第 6 章</a>で扱います。「最初に決めた数字がそのまま通用するとは限らない」という、しきい値そのものについての話です。</p>
 <p>終了コードは 3 にしました。<strong>この数字に決まりはありません。</strong>「しきい値は言語の標準ではなくプロジェクトの約束である」ことが、PHP ではむき出しになっています。この話は第 6 章（タスクランナーと CI/CD）で改めて扱います。</p>
 <p>なお <code>&lt;source&gt;&lt;include&gt;&lt;directory&gt;src&lt;/directory&gt;&lt;/include&gt;&lt;/source&gt;</code> を設定してあるので、<strong>一度も読み込まれなかったファイルもカバレッジの集計に入ります</strong>。これが無いと「テストしていないファイルは分母にも入らない」ため、カバレッジが実態より高く出ます。</p>
 <h3 id="_16">まとめて検査する<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
@@ -13994,7 +13996,7 @@ Tests: 20, Assertions: 29, Skipped: 1.
 <span class="w">    </span><span class="nt">"test"</span><span class="p">:</span><span class="w"> </span><span class="s2">"phpunit --exclude-group data"</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">"coverage"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="s2">"phpunit --coverage-clover build/clover.xml"</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">"php tools/coverage-threshold.php build/clover.xml 90"</span>
+<span class="w">        </span><span class="s2">"php tools/coverage-threshold.php build/clover.xml 75"</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">"check"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="s2">"@format"</span><span class="p">,</span>
@@ -14067,7 +14069,7 @@ OK (20 tests, 30 assertions)
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 正解率を計算する</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 実データで正解率を表示する</li>
 </ul>
-<p>次の章では、アヤメのデータを読み込み、欠損値を補完して、訓練データとテストデータに分けます。ここで PHP 版も <a href="../../elixir/02-data-preprocessing-and-triangulation/">Elixir 版</a> と同じく<strong>乱数生成器そのものを自作します</strong>。<code>mt_rand</code> はほかの言語版と並びが合わないためです。<code>java.util.Random</code> と同じ 48 ビットの線形合同法を書くと、分割の結果が <a href="../../java/">Java 版</a>・<a href="../../kotlin/">Kotlin 版</a>・<a href="../../scala/">Scala 版</a>・<a href="../../clojure/">Clojure 版</a>・<a href="../../elixir/">Elixir 版</a> と一致します。</p>
+<p>次の章では、アヤメのデータを読み込み、欠損値を補完して、訓練データとテストデータに分けます。ここで PHP 版も <a href="../../elixir/02-data-preprocessing-and-triangulation/">Elixir 版</a> と同じく<strong>乱数生成器そのものを自作します</strong>。<code>mt_rand</code> はほかの言語版と並びが合わないためです。<code>java.util.Random</code> と同じ 48 ビットの線形合同法を書くと、分割の結果が <a href="../../java/">Java 版</a>・<a href="../../scala/">Scala 版</a>・<a href="../../clojure/">Clojure 版</a>・<a href="../../elixir/">Elixir 版</a> と一致します。</p>
 <p>PHP 版のほかの章は <a href="../">PHP 版のトップ</a> から辿れます。</p>
 
 

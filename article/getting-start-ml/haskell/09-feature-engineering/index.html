@@ -13449,19 +13449,35 @@
 <span class="w">          </span><span class="kt">Left</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">`</span><span class="n">shouldSatisfy</span><span class="p">`</span><span class="w"> </span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"cannot decode byte sequence"</span>
 <span class="w">          </span><span class="kt">Right</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">expectationFailure</span><span class="w"> </span><span class="p">(</span><span class="s">"読めてしまいました: "</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">show</span><span class="w"> </span><span class="n">value</span><span class="p">)</span>
 
-<span class="w">    </span><span class="n">it</span><span class="w"> </span><span class="s">"UTF-8 を CP932 として読んでも失敗せず、文字化けする"</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">    </span><span class="n">it</span><span class="w"> </span><span class="s">"UTF-8 を CP932 として読むと、正しくは読めない（振る舞いは環境による）"</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">      </span><span class="c1">-- 取り違えたときに何が起きるかは、同じ Haskell でも iconv の実装で変わる。</span>
+<span class="w">      </span><span class="c1">-- Linux（glibc）は不正なバイト列として例外にし、macOS（BSD）は通して</span>
+<span class="w">      </span><span class="c1">-- 文字化けした文字列を返す。**どちらにせよ正しくは読めない**ことだけが</span>
+<span class="w">      </span><span class="c1">-- 環境によらず言えるので、それをテストにする。</span>
 <span class="w">      </span><span class="n">withTempFile</span><span class="w"> </span><span class="s">"weather.csv"</span><span class="w"> </span><span class="kt">Utf8</span><span class="w"> </span><span class="s">"weather_id,weather</span><span class="se">\n</span><span class="s">1,晴れ</span><span class="se">\n</span><span class="s">"</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">file</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
 <span class="w">        </span><span class="n">result</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">readDecoded</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="kt">Cp932</span>
 <span class="w">        </span><span class="kr">case</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="kr">of</span>
-<span class="w">          </span><span class="kt">Left</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">expectationFailure</span><span class="w"> </span><span class="p">(</span><span class="s">"失敗しました: "</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">err</span><span class="p">)</span>
+<span class="w">          </span><span class="kt">Left</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">`</span><span class="n">shouldSatisfy</span><span class="p">`</span><span class="w"> </span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"cannot decode byte sequence"</span>
 <span class="w">          </span><span class="kt">Right</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
 <span class="w">            </span><span class="n">value</span><span class="w"> </span><span class="p">`</span><span class="n">shouldNotSatisfy</span><span class="p">`</span><span class="w"> </span><span class="kt">T</span><span class="o">.</span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"晴れ"</span>
 <span class="w">            </span><span class="kt">T</span><span class="o">.</span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"weather_id"</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="p">`</span><span class="n">shouldBe</span><span class="p">`</span><span class="w"> </span><span class="kt">True</span>
 </code></pre></div>
 <ul>
 <li><strong>Shift_JIS を <code>UTF-8</code> として読むと例外になります。</strong> <code>hGetContents': invalid argument (cannot decode byte sequence starting from 144)</code> です。Java 版と同じ側で、<strong>バイト位置まで教えてくれます</strong></li>
-<li><strong>UTF-8 を <code>CP932</code> として読んでも例外になりません。</strong> UTF-8 の 3 バイトが Shift_JIS の 2 バイト文字として解釈できてしまうので、黙って文字化けします。改行までが直前の文字に吸い込まれることもありました</li>
+<li><strong>UTF-8 を <code>CP932</code> として読んだときは、環境によって結果が変わりました。</strong> 手元の macOS では例外にならず、UTF-8 の 3 バイトが Shift_JIS の 2 バイト文字として解釈されて黙って文字化けします（改行までが直前の文字に吸い込まれることもありました）。ところが <strong>CI の Linux では例外になります</strong>（<code>cannot decode byte sequence starting from 140</code>）</li>
 </ul>
+<p>この食い違いは CI が教えてくれました。手元で通ったテストが Linux で落ちたのです。原因は <strong><code>mkTextEncoding</code> が OS の iconv をそのまま使う</strong>ことでした。macOS は BSD の iconv、Linux は glibc の iconv で、<strong>同じ「CP932 として読む」でも不正なバイト列の扱いが違います</strong>。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 取り違えたときに何が起きるかは、同じ Haskell でも iconv の実装で変わる。</span>
+<span class="c1">-- Linux（glibc）は不正なバイト列として例外にし、macOS（BSD）は通して</span>
+<span class="c1">-- 文字化けした文字列を返す。**どちらにせよ正しくは読めない**ことだけが</span>
+<span class="c1">-- 環境によらず言えるので、それをテストにする。</span>
+<span class="kr">case</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="kr">of</span>
+<span class="w">  </span><span class="kt">Left</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">`</span><span class="n">shouldSatisfy</span><span class="p">`</span><span class="w"> </span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"cannot decode byte sequence"</span>
+<span class="w">  </span><span class="kt">Right</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">    </span><span class="n">value</span><span class="w"> </span><span class="p">`</span><span class="n">shouldNotSatisfy</span><span class="p">`</span><span class="w"> </span><span class="kt">T</span><span class="o">.</span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"晴れ"</span>
+<span class="w">    </span><span class="kt">T</span><span class="o">.</span><span class="n">isInfixOf</span><span class="w"> </span><span class="s">"weather_id"</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="p">`</span><span class="n">shouldBe</span><span class="p">`</span><span class="w"> </span><span class="kt">True</span>
+</code></pre></div>
+<p><strong>テストに書ける「確かなこと」が、環境をまたぐと狭くなる</strong>という例です。最初は「例外にならず文字化けする」と書けると思っていましたが、実際に言えるのは「<strong>正しくは読めない</strong>」ことだけでした。文字コードの取り違えを検知したいなら、<strong>言語の既定の振る舞いに頼らず、読む前に自分で確かめる</strong>ほうが確実です</p>
 <p>さらに Haskell では、<strong>取り違えたときの振る舞いを名前で選べます</strong>。</p>
 <table>
 <thead>

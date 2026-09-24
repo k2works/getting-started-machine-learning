@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="同じアルゴリズムを 9 言語でどう書いたかを比べる。決定木の木の型（dataclass・sealed interface・判別可能なユニオン・判別共用体・enum・非公開メソッドの interface）と場合分けの漏れの見つけ方、線形回帰の行列、モデルと評価関数の共通の型、交差検証の遅延評価、K-means の繰り返し、失敗の表し方と API の入力の検証を整理する。">
+        <meta name="description" content="同じアルゴリズムを 14 言語でどう書いたかを比べる。決定木の木の型（代数的データ型・共用型・マップ・クラス・判別可能なユニオン・非公開メソッドの interface）と場合分けの漏れの見つけ方、線形回帰の行列、モデルと評価関数の共通の型、交差検証の遅延評価、K-means の繰り返し、失敗の表し方と API の入力の検証を整理する。">
       
       
         <meta name="author" content="Project Team">
@@ -12903,9 +12903,33 @@
 
 <h1 id="3">第 3 章: アルゴリズムの実装の比較<a class="headerlink" href="#3" title="Permanent link">&para;</a></h1>
 <h2 id="31">3.1 同じアルゴリズム、違う書き方<a class="headerlink" href="#31" title="Permanent link">&para;</a></h2>
-<p>9 言語とも、同じ TODO リストから同じアルゴリズム（決定木・正規方程式・ソフトマックス・K 分割交差検証・K-means など）を TDD で自作しました。アルゴリズムの手順は同じなので、違いは「その言語で、同じ手順をどんな型と制御構造で書いたか」に表れます。本章では、違いがはっきり表れた場面を比べます。</p>
+<p>14 言語とも、同じ TODO リストから同じアルゴリズム（決定木・正規方程式・ソフトマックス・K 分割交差検証・K-means など）を TDD で自作しました。アルゴリズムの手順は同じなので、違いは「その言語で、同じ手順をどんな型と制御構造で書いたか」に表れます。本章では、違いがはっきり表れた場面を比べます。</p>
+<p>言語は 3 つの波に分けて書きました。表が横に広がりすぎるところは、波ごとに分けています。</p>
+<table>
+<thead>
+<tr>
+<th>波</th>
+<th>言語</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第 1 波</td>
+<td>Python・Kotlin・TypeScript・F#</td>
+</tr>
+<tr>
+<td>第 2 波</td>
+<td>Java・C#・Scala・Go・Rust</td>
+</tr>
+<tr>
+<td>第 3 波</td>
+<td>Ruby・Clojure・Elixir・PHP・Haskell</td>
+</tr>
+</tbody>
+</table>
 <h2 id="32-3">3.2 決定木の木の型（第 3 章）<a class="headerlink" href="#32-3" title="Permanent link">&para;</a></h2>
-<p>決定木は「葉（予測するラベル）」か「節（分け方と左右の部分木）」のどちらかです。この「どちらか」の表し方は、9 言語で次のようになりました。</p>
+<p>決定木は「葉（予測するラベル）」か「節（分け方と左右の部分木）」のどちらかです。この「どちらか」の表し方は、14 言語で次のようになりました。</p>
+<p><strong>第 1 波</strong></p>
 <table>
 <thead>
 <tr>
@@ -12940,6 +12964,19 @@
 <td><code>match tree with</code></td>
 <td>何も書かなくてもコンパイラが検査する（FS0025。F# 版は警告をエラーにしている）</td>
 </tr>
+</tbody>
+</table>
+<p><strong>第 2 波</strong></p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>木の型</th>
+<th>場合分け</th>
+<th>場合分けの漏れ</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td>Java</td>
 <td><code>sealed interface Tree</code> と <code>record Leaf</code>・<code>record Node</code></td>
@@ -12972,6 +13009,49 @@
 </tr>
 </tbody>
 </table>
+<p><strong>第 3 波</strong></p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>木の型</th>
+<th>場合分け</th>
+<th>場合分けの漏れ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td><code>Data.define</code> で作った <code>Leaf</code> と <code>Node</code> の 2 つの型。<strong>互いに関係の無い 2 つの型</strong>で、「木はどちらかである」はどこにも宣言されない</td>
+<td><code>case</code>/<code>in</code> のパターンマッチ（<code>Data</code> は <code>deconstruct_keys</code> を持つのでそのままパターンに書ける）</td>
+<td><strong>検査されない</strong></td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td>素のマップ。<code>{:label "setosa"}</code> が葉、<code>{:split ... :left ... :right ...}</code> が節</td>
+<td><code>leaf?</code>（<code>contains? tree :label</code>）で判定してから値を取り出す</td>
+<td><strong>検査されない</strong></td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td>素のマップ。<code>%{label: ...}</code> が葉、<code>%{split: ..., left: ..., right: ...}</code> が節</td>
+<td><strong>関数節のパターンマッチ</strong>（<code>%{label: label}</code> に一致したらその場で <code>label</code> が束縛される）</td>
+<td><strong>検査されない</strong></td>
+</tr>
+<tr>
+<td>PHP</td>
+<td><strong>共用型 <code>Leaf\|Node</code></strong>。<code>final readonly class</code> を 2 つ作り、<code>Node</code> の <code>$left</code>・<code>$right</code> を <code>Leaf\|Node</code> と宣言する</td>
+<td><code>instanceof</code></td>
+<td><strong>実行時に「葉か節か」は検査され、PHPStan は絞り込みをするが、網羅性は強制しない</strong></td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td>代数的データ型 <code>data Tree = Leaf Text \| Branch Split Tree Tree</code></td>
+<td>パターンマッチの等式</td>
+<td><strong>コンパイルエラー</strong>（<code>-Wall</code> を <code>-Werror</code> にしているので <code>-Wincomplete-patterns</code> が止める）</td>
+</tr>
+</tbody>
+</table>
 <div class="highlight"><pre><span></span><code><span class="c1"># Python</span>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Leaf</span><span class="p">:</span>
@@ -12983,11 +13063,6 @@
     <span class="n">split</span><span class="p">:</span> <span class="n">Split</span>
     <span class="n">left</span><span class="p">:</span> <span class="s2">"Leaf | Node"</span>
     <span class="n">right</span><span class="p">:</span> <span class="s2">"Leaf | Node"</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1">// TypeScript</span>
-<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">Tree</span><span class="o">&lt;</span><span class="nx">K</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span>
-<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">"leaf"</span><span class="p">;</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
-<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">"node"</span><span class="p">;</span><span class="w"> </span><span class="nx">split</span><span class="o">:</span><span class="w"> </span><span class="kt">Split</span><span class="o">&lt;</span><span class="nx">K</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="nx">left</span><span class="o">:</span><span class="w"> </span><span class="kt">Tree</span><span class="o">&lt;</span><span class="nx">K</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="nx">right</span><span class="o">:</span><span class="w"> </span><span class="kt">Tree</span><span class="o">&lt;</span><span class="nx">K</span><span class="o">&gt;</span><span class="w"> </span><span class="p">};</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">// F#</span>
 <span class="k">type</span><span class="w"> </span><span class="nc">Tree</span><span class="o">&lt;</span><span class="k">'</span><span class="n">L</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span>
@@ -13013,21 +13088,48 @@
 
 <span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">Leaf</span><span class="p">)</span><span class="w"> </span><span class="nx">isTree</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
 </code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Haskell。場合分けを 1 つ忘れるとコンパイルが止まる</span>
+<span class="kr">data</span><span class="w"> </span><span class="kt">Tree</span>
+<span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kt">Leaf</span><span class="w"> </span><span class="kt">Text</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="kt">Branch</span><span class="w"> </span><span class="kt">Split</span><span class="w"> </span><span class="kt">Tree</span><span class="w"> </span><span class="kt">Tree</span>
+<span class="w">  </span><span class="kr">deriving</span><span class="w"> </span><span class="p">(</span><span class="kt">Eq</span><span class="p">,</span><span class="w"> </span><span class="kt">Show</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="x">// PHP。判別共用体は無いが、共用型はある</span>
+<span class="x">final readonly class Node</span>
+<span class="x">{</span>
+<span class="x">    public function __construct(</span>
+<span class="x">        public Split $split,</span>
+<span class="x">        public Leaf|Node $left,</span>
+<span class="x">        public Leaf|Node $right,</span>
+<span class="x">    ) {</span>
+<span class="x">    }</span>
+<span class="x">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># Elixir。木はマップ。葉と節を 2 つの関数節のパターンで見分ける</span>
+<span class="kd">defp</span><span class="w"> </span><span class="n">predict_one</span><span class="p">(%{</span><span class="ss">label</span><span class="p">:</span><span class="w"> </span><span class="n">label</span><span class="p">},</span><span class="w"> </span><span class="n">_row</span><span class="p">),</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">label</span>
+
+<span class="kd">defp</span><span class="w"> </span><span class="n">predict_one</span><span class="p">(%{</span><span class="ss">split</span><span class="p">:</span><span class="w"> </span><span class="n">split</span><span class="p">,</span><span class="w"> </span><span class="ss">left</span><span class="p">:</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="ss">right</span><span class="p">:</span><span class="w"> </span><span class="n">right</span><span class="p">},</span><span class="w"> </span><span class="n">row</span><span class="p">)</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="n">predict_one</span><span class="p">(</span><span class="k">if</span><span class="p">(</span><span class="n">goes_left?</span><span class="p">(</span><span class="n">split</span><span class="p">,</span><span class="w"> </span><span class="n">row</span><span class="p">),</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="n">right</span><span class="p">),</span><span class="w"> </span><span class="n">row</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div>
 <ul>
-<li>9 言語とも、木を「不変な値」で表しました。Python は <code>frozen=True</code>、Kotlin は <code>data class</code>（<code>val</code>）、TypeScript はオブジェクトリテラル、F#・Scala・Rust は判別共用体、Java・C# は record です</li>
+<li>14 言語とも、木を「不変な値」で表しました。Python は <code>frozen=True</code>、Kotlin は <code>data class</code>（<code>val</code>）、TypeScript はオブジェクトリテラル、F#・Scala・Rust・Haskell は代数的データ型、Java・C# は record、Ruby は <code>Data.define</code>、PHP は <code>readonly class</code>、Clojure と Elixir は不変のマップです</li>
 <li><strong>網羅性の検査は 4 段階に分かれました。</strong><ol>
-<li><strong>何も書かなくても検査する</strong> — F#・Scala・Rust（判別共用体が言語の中核）</li>
+<li><strong>何も書かなくても検査する</strong> — F#・Scala・Rust・<strong>Haskell</strong>（代数的データ型が言語の中核）</li>
 <li><strong>書き方を選べば検査する</strong> — Kotlin（<code>when</code> を式にする）・Java（<code>switch</code> を式にする）</li>
-<li><strong>自分で仕込めば検査する</strong> — TypeScript（<code>never</code> に代入する書き方）</li>
-<li><strong>検査されない</strong> — Python（mypy が絞り込みはするが網羅は知らせない）・C#（<code>_ =&gt;</code> の分岐を強制される）・Go（型スイッチの既定の分岐でエラーを返すしかない）</li>
+<li><strong>自分で仕込むか、別の道具を走らせれば絞り込める</strong> — TypeScript（<code>never</code> に代入する書き方）・<strong>PHP</strong>（共用型を書けば実行時の型検査と PHPStan の絞り込みが効く。ただし網羅性そのものは強制されない）</li>
+<li><strong>検査されない</strong> — Python（mypy が絞り込みはするが網羅は知らせない）・C#（<code>_ =&gt;</code> の分岐を強制される）・Go（型スイッチの既定の分岐でエラーを返すしかない）・<strong>Ruby・Clojure・Elixir</strong></li>
 </ol>
 </li>
-<li><strong>Go だけが判別共用体を持ちません。</strong> 非公開のメソッド（<code>isTree()</code>）を持つインターフェースにすると、そのパッケージの外から新しい実装を足せなくなるので「閉じた集合」は表せます。しかし網羅性はコンパイラが検査しないので、既定の分岐で「知らない木です」というエラーを返して備えました</li>
-<li><strong>Rust だけが <code>Box</code> を要求します。</strong> 再帰する型はサイズがコンパイル時に決まらないので、部分木をヒープに置く必要があります（忘れると <code>E0072</code>）。ほかの 8 言語は参照やポインタが既定なので、この一手間がありません</li>
-<li>学習の API も分かれました。Python・Kotlin・TypeScript・Java・C#・Go・Rust は、<code>DecisionTree</code> の <code>fit</code> が木を中に持ち、<code>fit</code> の前に <code>predict</code> を呼ぶとエラーにしました。F# と Scala は、<code>fit</code> が木を <strong>値として返し</strong>、<code>predict</code> が木を引数に取るので、「学習する前に予測する」誤りをそもそも書けません</li>
+<li><strong>第 3 波で、この軸の幅がいちばん広がりました。</strong> Haskell は <code>data</code> を 1 つ書くだけで漏れがコンパイルエラーになり、PHP は「型としては書けるが網羅性までは守らせない」という中間に立ち、Ruby・Clojure・Elixir は型で書くこと自体をしません。<strong>同じ動的型付けの言語の中でも、PHP と Ruby で判断が分かれた</strong>のがこの章です（<a href="../04-library-ecosystem-comparison/">第 4 章</a> の型の道具の話につながります）</li>
+<li><strong>Clojure と Elixir は、木を型にしないことの見返りを取りました。</strong> 木がただのマップなので、<code>=</code>／<code>==</code> でそのまま比べられ、<code>println</code>／<code>IO.inspect</code> でそのまま読め、部分木を <code>(:left tree)</code>／<code>tree.left.label</code> と辿れます。木を表示する関数のテストが、木を組み立て直さずに書けるのはそのおかげです。Haskell も <code>deriving (Eq, Show)</code> で同じ見返りを、型を保ったまま得ています</li>
+<li><strong>Clojure と Elixir の違いは「判定と取り出しが同じ場所で起きるか」です。</strong> Clojure は <code>leaf?</code> で判定してから <code>:label</code> を取り出す 2 段階、Elixir は関数節のパターンが一致した時点で <code>label</code> が束縛される 1 段階になりました</li>
+<li><strong>Rust だけが <code>Box</code> を要求します。</strong> 再帰する型はサイズがコンパイル時に決まらないので、部分木をヒープに置く必要があります（忘れると <code>E0072</code>）。ほかの 13 言語は参照やポインタが既定なので、この一手間がありません。Ruby 版・Haskell 版はこの点を明示的に「Rust で要った <code>Box</code> が要らない」と書いています</li>
+<li>学習の API も分かれました。Python・Kotlin・TypeScript・Java・C#・Go・Rust・Ruby・PHP は、<code>DecisionTree</code> の <code>fit</code> が木を中に持ち、<code>fit</code> の前に <code>predict</code> を呼ぶとエラーにしました。F#・Scala・Clojure・Elixir・Haskell は、<code>fit</code> が木を <strong>値として返し</strong>、<code>predict</code> が木を引数に取るので、「学習する前に予測する」誤りをそもそも書けません</li>
 </ul>
 <h2 id="33-7">3.3 線形回帰の行列（第 7 章）<a class="headerlink" href="#33-7" title="Permanent link">&para;</a></h2>
 <p>正規方程式 (XᵀX) w = Xᵀt を解くための行列の扱いです。</p>
+<p><strong>第 1 波・第 2 波</strong></p>
 <table>
 <thead>
 <tr>
@@ -13084,11 +13186,51 @@
 </tr>
 </tbody>
 </table>
-<p><strong>行列を自作したかどうかで 2 つに分かれました。</strong> Python（NumPy）・Go（gonum の <code>mat</code>）・Rust（ndarray）は標準的な数値計算ライブラリを使い、ほかの 6 言語は小さな行列の型を自作しています。Go と Rust で自作しなかったのは、その言語で事実上の標準と言える行列ライブラリがあり、そちらを使うほうが読者にとって実践的だからです（<a href="../../../../adr/008-go-ml-libraries/">ADR 008</a>・<a href="../../../../adr/009-rust-ml-libraries/">ADR 009</a>）。</p>
-<p>Kotlin は演算子オーバーロードで、自作の行列でも数式に近い見た目にしました。TypeScript・F#・Java・C#・Scala は、演算子を定義せずに関数で書いています。F# 版の第 12 章では、第 7 章の行列のモジュールを書き換えずに、足し算・定数倍・単位行列を別のモジュールで足しました。</p>
-<p>Rust 版では、<strong>ndarray に連立方程式を解く関数がありません</strong>（<code>ndarray-linalg</code> は LAPACK を要求します）。そのため行列は借りつつ、解く部分は掃き出し法を自作するという組み合わせになりました。「ライブラリがある」と「必要な関数がある」は別だということです。</p>
+<p><strong>第 3 波</strong></p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>行列</th>
+<th>連立方程式の解き方</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td><strong>numo-narray-alt の <code>Numo::DFloat</code></strong>（積と転置はある）</td>
+<td><strong>自作の掃き出し法</strong>（Numo に連立方程式を解く関数が無い。<code>numo-linalg</code> が要る）</td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td><strong>ベクタのベクタをそのまま行列として扱う</strong>（包まない）</td>
+<td>自作</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td><strong>Nx のテンソル</strong>（<code>type: :f64</code> を明示する）</td>
+<td><code>Nx.LinAlg.solve</code></td>
+</tr>
+<tr>
+<td>PHP</td>
+<td><strong>MathPHP の <code>NumericMatrix</code></strong></td>
+<td>MathPHP の <code>solve()</code>。<strong><code>NumericMatrix::LU</code> を明示して解き方を固定した</strong></td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td><strong>hmatrix</strong>（BLAS/LAPACK を要求する）</td>
+<td>自作のガウス・ジョルダン法と、hmatrix の <code>&lt;\&gt;</code>・<code>linearSolveLS</code> の両方</td>
+</tr>
+</tbody>
+</table>
+<p><strong>行列を自作したかどうかで 2 つに分かれました。</strong> Python（NumPy）・Go（gonum）・Rust（ndarray）・Ruby（Numo）・Elixir（Nx）・PHP（MathPHP）・Haskell（hmatrix）は数値計算のライブラリを使い、Kotlin・TypeScript・F#・Java・C#・Scala は小さな行列の型を自作しています。</p>
+<p><strong>Clojure は、そのどちらでもない 3 つめの道を取りました。</strong> 行列を包む型を作らず、<strong>ベクタのベクタをそのまま行列として扱います</strong>。Clojure のベクタは変更できないので、Java 版・C# 版が配列のために書いた「写して守る」「深く比べる」コードがどちらも要らず、<code>=</code> がそのまま値の比較になります。そのかわり「行によって列数が違わないか」は自分で確かめる関数を持ちました。</p>
+<p><strong>「ライブラリがある」と「必要な関数がある」は別です。</strong> Rust の ndarray には連立方程式を解く関数がなく（<code>ndarray-linalg</code> は LAPACK を要求します）、Ruby の Numo も同じでした。どちらも「行列は借りて、解く部分だけ自作する」という組み合わせになっています。</p>
+<p><strong>Haskell だけが、同じ実データを 4 通りで解いて比べました。</strong> 自作のガウス・ジョルダン法（正規方程式）・<code>&lt;\&gt;</code>（計画行列をそのまま）・<code>linearSolveLS</code>（計画行列）の 3 つは 12 桁まで一致し、<strong><code>&lt;\&gt;</code> に正規方程式を渡したものだけが 9 桁に落ちます</strong>（<code>XᵀX</code> を作ると条件数が 2 乗になるため）。同じ関数に別の入れ物で渡しただけで精度が動くことを、1 つのライブラリの中で見せられた章でした（<a href="../04-library-ecosystem-comparison/">第 4 章</a> で、Elixir 版・PHP 版の結果と並べます）。</p>
+<p>Kotlin は演算子オーバーロードで、自作の行列でも数式に近い見た目にしました。F# 版の第 12 章では、第 7 章の行列のモジュールを書き換えずに、足し算・定数倍・単位行列を別のモジュールで足しました。</p>
 <h2 id="34-1011">3.4 モデルと評価関数の共通の型（第 10・11 章）<a class="headerlink" href="#34-1011" title="Permanent link">&para;</a></h2>
 <p>第 10 章では、自作の分類器とライブラリの分類器を同じ手順で評価するために、共通の型を決めました。第 11 章の交差検証でも、モデルと評価関数を差し替えられるようにしています。</p>
+<p><strong>第 1 波・第 2 波</strong></p>
 <table>
 <thead>
 <tr>
@@ -13145,15 +13287,54 @@
 </tr>
 </tbody>
 </table>
+<p><strong>第 3 波</strong></p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>モデルの型</th>
+<th>評価関数の型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td><strong>何も宣言しない</strong>（ダックタイピング。<code>fit</code> と <code>predict</code> に応答すればよい）</td>
+<td><strong><code>call</code> に応えるもの</strong>（lambda と <code>Method</code> オブジェクト。第 7 章の関数は <code>Chapter07.method(...)</code> でそのまま渡せる）</td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td><strong>「学習して、予測する関数を返す関数」</strong>。第 10 章では <code>defprotocol</code> もアダプターも使わなかった</td>
+<td>関数</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td><strong>behaviour（<code>@callback</code>）</strong>。behaviour は<strong>モジュールへの約束</strong>なので、状態を持つには <code>{モジュール, 状態}</code> の組が要る</td>
+<td>無名関数</td>
+</tr>
+<tr>
+<td>PHP</td>
+<td><strong><code>interface</code></strong></td>
+<td><code>Closure</code>（<strong>関数を返す関数の PHPDoc は戻り値側を括弧で包まないと構文誤りになる</strong>）</td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td>第 10 章は<strong>型クラス＋存在型</strong>（<code>ExistentialQuantification</code>）、第 11 章は<strong>ただの関数</strong>（<code>type Trainer x t p = ...</code>）、第 15 章は<strong>レコード</strong></td>
+<td>関数</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li><strong>構造的か、名前的か</strong>が分かれました。Python の <code>Protocol</code>・TypeScript の <code>interface</code>・Go の <code>interface</code> は <strong>構造的</strong> で、<code>fit</code>・<code>predict</code> を持っていれば宣言しなくてもその型として扱えます。ライブラリの分類器を、アダプターを薄く書くだけで同じ型にできました</li>
-<li>Kotlin・Java・Scala・Rust の <code>interface</code>／<code>trait</code> は <strong>名前的</strong> で、<code>implements</code>／<code>impl ... for ...</code> と書く必要があります。書く量は増えますが、「この型はこの約束を満たすつもりだ」という意図がコードに残ります</li>
-<li>F# は、モデルを「学習して、予測する関数を返す関数」という <strong>1 つの関数の型</strong> で表しました。学習した状態は、返した関数が覚えています（クロージャ）。学習の状態を持つオブジェクトが無いので、交差検証で「分割ごとに新しいモデルを作る」ための工場も要りません</li>
-<li>Rust では、<code>trait</code> の値を返すときに <code>Box&lt;dyn Trait&gt;</code> と書きます。動的なディスパッチとヒープへの確保を型に明示させる言語は 9 言語で Rust だけでした</li>
+<li><strong>構造的か、名前的か、宣言しないか</strong>の 3 通りに分かれました。Python の <code>Protocol</code>・TypeScript の <code>interface</code>・Go の <code>interface</code> は <strong>構造的</strong> で、<code>fit</code>・<code>predict</code> を持っていれば宣言しなくてもその型として扱えます。Kotlin・Java・Scala・Rust・PHP の <code>interface</code>／<code>trait</code> は <strong>名前的</strong> で、<code>implements</code>／<code>impl ... for ...</code> と書く必要があります。<strong>Ruby は 3 つめで、そもそも何も宣言しません。</strong> 第 3 章の決定木はもともと <code>fit</code> と <code>predict</code> を持っているので、第 10 章にも第 11 章にも何も足さずに渡せました</li>
+<li><strong>関数そのものをモデルの型にした言語が 3 つあります。</strong> F#・Clojure・Haskell（第 11 章）は、モデルを「学習して、予測する関数を返す関数」という 1 つの関数の型で表しました。学習した状態は、返した関数が覚えています（クロージャ）。学習の状態を持つオブジェクトが無いので、交差検証で「分割ごとに新しいモデルを作る」ための工場も要りません</li>
+<li><strong>Haskell は、同じシリーズの中で 3 通りを使い分けた唯一の版です。</strong> 第 10 章で <code>TreeModel</code> と <code>ForestModel</code> を 1 つのリストに並べるには存在型（<code>ExistentialQuantification</code>）が要りました。<strong>型クラスは「1 つの型に 1 つのインスタンス」</strong>なので、PHP の <code>interface</code> や Elixir の関数には無かった手間です。ところが第 11 章の「予測する側」は関数そのものなので <code>type Predictor = ...</code> の 1 行で済み、アダプターが 1 つも要りませんでした。第 15 章の置き場では、型クラス版も実際に書いてコンパイルしたうえでレコードを選んでいます（理由は 3.7 節）</li>
+<li><strong>Elixir の behaviour だけが、状態の持ち方を変えました。</strong> behaviour はモジュールへの約束なので、値としての置き場を表せません。そこで置き場が <code>{モジュール, 状態}</code> の組になりました（Plug 自身の <code>plug: {Api, store}</code> と同じ形です）。PHP 版はこの回り道が要らず、偽物のモデルを無名クラスでその場に書けています</li>
+<li>Rust では、<code>trait</code> の値を返すときに <code>Box&lt;dyn Trait&gt;</code> と書きます。動的なディスパッチとヒープへの確保を型に明示させる言語は 14 言語で Rust だけでした</li>
 </ul>
-<p>評価関数を引数で渡す設計は、9 言語で共通でした。混同行列から求める指標（<code>ConfusionMatrix -&gt; float</code>）を、正解と予測から求める評価関数に変える高階関数も、9 言語それぞれで書いています。</p>
+<p>評価関数を引数で渡す設計は、14 言語で共通でした。混同行列から求める指標（<code>ConfusionMatrix -&gt; float</code>）を、正解と予測から求める評価関数に変える高階関数も、14 言語それぞれで書いています。</p>
 <h2 id="35-11">3.5 交差検証の遅延評価（第 11 章）<a class="headerlink" href="#35-11" title="Permanent link">&para;</a></h2>
 <p>交差検証は、分割ごとに学習と評価を繰り返します。スコアを「すぐに全部計算する」か「取り出したときに計算する」かが分かれました。</p>
+<p><strong>第 1 波・第 2 波</strong></p>
 <table>
 <thead>
 <tr>
@@ -13170,7 +13351,7 @@
 </tr>
 <tr>
 <td>Kotlin</td>
-<td><code>Sequence&lt;Double&gt;</code>（<code>folds.asSequence().map { ... }</code>）</td>
+<td><code>Sequence&lt;Double&gt;</code></td>
 <td>取り出したときに計算する</td>
 </tr>
 <tr>
@@ -13180,7 +13361,7 @@
 </tr>
 <tr>
 <td>F#</td>
-<td>シーケンス式（<code>seq { for ... do yield ... }</code>）</td>
+<td>シーケンス式（<code>seq { ... }</code>）</td>
 <td>取り出したときに計算する</td>
 </tr>
 <tr>
@@ -13210,8 +13391,50 @@
 </tr>
 </tbody>
 </table>
-<p><strong>遅延評価の道具があるかどうか</strong>で分かれました。Kotlin・TypeScript・F#・Java・C#・Scala は言語やライブラリに遅延の列があるので、「最初の分割のスコアだけを取り出せば、学習は 1 回で済む」ことをテストで確かめました。Python・Go・Rust は、すべての分割を計算してから返します（Rust のイテレータは遅延ですが、<code>collect</code> で確定させました）。</p>
-<p>F# 版では、同じシーケンスから 2 回取り出すと学習もやり直されることと、<code>Seq.cache</code> で結果を覚えさせられることもテストに残しています。遅延評価は、重い学習を必要な分だけ行える一方で、「何度も取り出すと何度も計算する」ことに気を付ける必要があります。</p>
+<p><strong>第 3 波</strong></p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>戻り値</th>
+<th>評価の時期</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td>配列</td>
+<td>すぐにすべての分割を計算する</td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td>遅延シーケンス</td>
+<td><strong>取り出したときに計算する。ただし <code>map</code> はベクタを 32 件ずつまとめて実現する</strong></td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td><code>Stream</code></td>
+<td>取り出したときに計算する（<strong>1 件ずつ</strong>）</td>
+</tr>
+<tr>
+<td>PHP</td>
+<td>配列（<code>array_map</code>）</td>
+<td>すぐにすべての分割を計算する（<code>Generator</code> にはできるが、この章では要らなかった）</td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td><code>Either String [Double]</code></td>
+<td><strong>すぐにすべての分割を計算する</strong>（遅延評価の言語なのに、<code>traverse</code> が全部を要求する）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>遅延評価の道具があるかどうか</strong>で、まず分かれました。Kotlin・TypeScript・F#・Java・C#・Scala・Clojure・Elixir は言語やライブラリに遅延の列があるので、「最初の分割のスコアだけを取り出せば、学習は 1 回で済む」ことをテストで確かめました。Python・Go・Rust・Ruby・PHP は、すべての分割を計算してから返します。</p>
+<p><strong>第 3 波で、「遅延だから 1 件」が 2 回裏切られました。</strong></p>
+<ul>
+<li><strong>Clojure の <code>map</code> はチャンクします。</strong> ベクタに対しては 32 件を一度に実現するので、分割が 4 個しかない交差検証では、1 つ目を取り出した時点で 4 回とも学習されていました。テストに <code>(= 1 @trained)</code> と書いて <code>4</code> が返ったところで気付き、リスト（<code>(apply list folds)</code>）に変えると 1 回になります。<strong>遅延の細かさは言語ごとに実測して仕様として書く</strong>という教訓が、ここで初めて出ました</li>
+<li><strong>Haskell の <code>traverse</code> は全分割を要求します。</strong> Elixir 版の <code>Stream.map/2</code> が「取り出した分だけ学習する」ものだったのに対し、<code>Either</code> を 1 つにまとめるには全部の結果が要ります。「どれか 1 つでも失敗したら全体が失敗」と言うには全部を見るしかないからです。<strong>遅延評価と、型で失敗を表すことは、ここでぶつかります</strong>。遅延させたいなら戻り値を <code>[Either String Double]</code> にして判断を呼ぶ側に渡すことになりますが、この章ではそこまで要りませんでした</li>
+</ul>
+<p>Elixir の <code>Stream.map/2</code> は 1 件ずつ実現することを、プロセスのメッセージで学習の回数を数えて確かめています。F# 版では、同じシーケンスから 2 回取り出すと学習もやり直されることと、<code>Seq.cache</code> で結果を覚えさせられることもテストに残しました。</p>
 <h2 id="36-k-means-14">3.6 K-means の繰り返し（第 14 章）<a class="headerlink" href="#36-k-means-14" title="Permanent link">&para;</a></h2>
 <p>K-means は、「割り当て」と「中心の更新」を、中心が変わらなくなるまで繰り返します。</p>
 <table>
@@ -13239,11 +13462,7 @@
 <td>末尾再帰の関数。<code>[&lt;TailCall&gt;]</code> でコンパイラに末尾呼び出しを確かめさせる</td>
 </tr>
 <tr>
-<td>Java</td>
-<td><code>for</code> のループと <code>break</code></td>
-</tr>
-<tr>
-<td>C#</td>
+<td>Java・C#・Go</td>
 <td><code>for</code> のループと <code>break</code></td>
 </tr>
 <tr>
@@ -13251,28 +13470,45 @@
 <td><code>LazyList.iterate</code> で中心の列を作り、前後が等しくなる位置で止める</td>
 </tr>
 <tr>
-<td>Go</td>
-<td><code>for</code> のループと <code>break</code></td>
-</tr>
-<tr>
 <td>Rust</td>
 <td><code>for _ in 0..max_iterations</code> のループと <code>break</code></td>
 </tr>
+<tr>
+<td>Ruby</td>
+<td><code>max_iterations.times do ... break if updated == centers</code></td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td><strong><code>loop</code>/<code>recur</code></strong>（可変の変数を使わない末尾再帰）</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td>末尾再帰の <code>converge/3</code>。<strong>残りの回数が 0 になる節を先に書く</strong></td>
+</tr>
+<tr>
+<td>PHP</td>
+<td><code>for</code> のループと <code>break</code></td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td><code>where</code> 節の中の末尾再帰 <code>converge</code>。<strong>終了条件が <code>next == current</code> の 1 つの式</strong></td>
+</tr>
 </tbody>
 </table>
-<p>Kotlin と Scala の書き方は、繰り返しを「中心の列」というデータとして扱っています。F# の末尾再帰は、コンパイラがループに変換するので、何回繰り返してもスタックを使い切りません。命令型のループで書いた 5 言語（Python・TypeScript・Java・C#・Go・Rust）は、読む人にとっていちばん素直です。</p>
-<p>中心が変わらなくなったかの判定は、9 言語とも<strong>浮動小数点の厳密な比較</strong>にしました。同じ計算から同じ値が出るので変化が無ければビット単位で同じになり、許容誤差を入れるとかえって微小な振動で止まらなくなるためです。F# 版では、第 5 章で有効にした FSharpLint の FL0085 が <code>let rec</code> に <code>[&lt;TailCall&gt;]</code> を求めるので、末尾再帰でない再帰（決定木の <code>fit</code> など）には理由を書いて警告を抑えています。</p>
-<p>9 言語とも、K-means は <strong>初期中心を引数で受け取る</strong> 設計にしました。乱数で初期中心を選ぶ関数と、初期中心からクラスタリングする関数を分けたので、局所解に陥る例を乱数に頼らずにテストで再現できました。</p>
+<p>Kotlin と Scala の書き方は、繰り返しを「中心の列」というデータとして扱っています。F#・Clojure・Elixir・Haskell の末尾再帰は、可変の変数を使わずに「中心が動かなくなるまで」を表します。命令型のループで書いた 7 言語（Python・TypeScript・Java・C#・Go・Rust・Ruby・PHP）は、読む人にとっていちばん素直です。</p>
+<p>中心が変わらなくなったかの判定は、14 言語とも<strong>浮動小数点の厳密な比較</strong>にしました。同じ計算から同じ値が出るので変化が無ければビット単位で同じになり、許容誤差を入れるとかえって微小な振動で止まらなくなるためです。</p>
+<p><strong>「値としての比較がそのまま書けるか」が、ここで分かれました。</strong> Java 版は <code>Arrays.deepEquals</code> を呼び、写し（<code>clone()</code>）を取る必要がありました。Clojure（<code>=</code>）・Elixir（<code>==</code>）・PHP（<code>===</code> が入れ子の配列を再帰的に比べる）・Haskell（<code>Eq</code> がそのまま使える）・Ruby（Numo の <code>==</code> がすべての要素の一致を返す）では、その悩みが起きません。<strong>不変の値を既定にした言語ほど、収束の判定が短くなる</strong>という形で現れています。</p>
+<p>F# 版では、第 5 章で有効にした FSharpLint の FL0085 が <code>let rec</code> に <code>[&lt;TailCall&gt;]</code> を求めるので、末尾再帰でない再帰（決定木の <code>fit</code> など）には理由を書いて警告を抑えています。Haskell 版では、<code>meanPoint</code> の空リストの場合を書き忘れると <code>-Wincomplete-patterns</code> がコンパイルを止めるので、「空だったらどうするか」を決めないままでは先へ進めませんでした。</p>
+<p>14 言語とも、K-means は <strong>初期中心を引数で受け取る</strong> 設計にしました。乱数で初期中心を選ぶ関数と、初期中心からクラスタリングする関数を分けたので、局所解に陥る例を乱数に頼らずにテストで再現できました。Haskell 版では、この局所解のテストが最初に落ちています——2 つのかたまりを k=2 で分けるだけなら K-means は自分で直るので、3 つのかたまりと 3 つの中心が要りました。</p>
 <h2 id="37-api-15">3.7 失敗の表し方と API の入力の検証（第 15 章）<a class="headerlink" href="#37-api-15" title="Permanent link">&para;</a></h2>
-<p>第 15 章の API では、「モデルが無い」「入力が不正」という失敗を扱いました。</p>
+<p>第 15 章の API では、「モデルが無い」「入力が不正」という失敗を扱いました。どの版でも、不正な入力は 422、モデルが無い場合は 503 に割り当てています。</p>
+<p><strong>第 1 波・第 2 波</strong></p>
 <table>
 <thead>
 <tr>
 <th>言語</th>
 <th>モデルが無いとき</th>
 <th>入力の検証</th>
-<th>不正な入力の状態コード</th>
-<th>モデルが無いときの状態コード</th>
 </tr>
 </thead>
 <tbody>
@@ -13280,85 +13516,157 @@
 <td>Python</td>
 <td>例外 <code>ModelNotFoundError</code> を投げる</td>
 <td>Pydantic の <code>BaseModel</code> と <code>Field(ge=0)</code></td>
-<td>422（FastAPI の既定）</td>
-<td>FastAPI の <code>exception_handler</code> で 503</td>
 </tr>
 <tr>
 <td>Kotlin</td>
-<td>標準ライブラリの <code>Result&lt;T&gt;</code> の失敗（中身は例外 <code>ModelNotFoundException</code>）</td>
+<td>標準ライブラリの <code>Result&lt;T&gt;</code> の失敗（中身は例外）</td>
 <td><code>sealed interface Validated&lt;T&gt;</code> を自作</td>
-<td>422</td>
-<td>Ktor の <code>StatusPages</code> で 503</td>
 </tr>
 <tr>
 <td>TypeScript</td>
-<td>自作の判別可能なユニオン <code>Result&lt;T&gt;</code> の失敗（中身は <code>Error</code> を継承したクラス）</td>
+<td>自作の判別可能なユニオン <code>Result&lt;T&gt;</code> の失敗</td>
 <td>zod のスキーマと <code>safeParse</code></td>
-<td>422</td>
-<td>Hono の <code>app.onError</code> で 503</td>
 </tr>
 <tr>
 <td>F#</td>
-<td>組み込みの <code>Result&lt;'T, PredictionError&gt;</code> の <code>Error</code>（中身は判別共用体）</td>
+<td>組み込みの <code>Result&lt;'T, PredictionError&gt;</code> の <code>Error</code></td>
 <td><code>and!</code> の計算式を自作</td>
-<td>422</td>
-<td>失敗の型ごとに状態コードを決める（例外を使わない）</td>
 </tr>
 <tr>
 <td>Java</td>
 <td><strong>検査例外</strong> <code>ModelNotFoundException</code>（<code>throws</code> に現れる）</td>
 <td>sealed interface の <code>Validated&lt;T&gt;</code> を自作</td>
-<td>422</td>
-<td>Javalin の例外ハンドラーで 503</td>
 </tr>
 <tr>
 <td>C#</td>
 <td>例外 <code>ModelNotFoundException</code></td>
 <td>record と自作の検証</td>
-<td>422</td>
-<td>例外ハンドラーで 503</td>
 </tr>
 <tr>
 <td>Scala</td>
 <td><code>Either[PredictionError, T]</code></td>
 <td>自作の検証</td>
-<td>422</td>
-<td>失敗の型で状態コードを決める</td>
 </tr>
 <tr>
 <td>Go</td>
 <td><strong>番兵のエラー</strong> <code>ErrModelNotFound</code> を <code>%w</code> で包み、<code>errors.Is</code> で判別</td>
 <td>構造体と自作の検証（ポインタで欠落を表す）</td>
-<td>422</td>
-<td><code>errors.Is</code> で分岐して 503</td>
 </tr>
 <tr>
 <td>Rust</td>
 <td><code>enum Error</code> の <code>ModelNotFound</code></td>
 <td><code>enum Validated&lt;T&gt;</code> を自作（<code>Option</code> で欠落を表す）</td>
-<td>422</td>
-<td><code>match</code> で分岐して 503</td>
+</tr>
+</tbody>
+</table>
+<p><strong>第 3 波</strong></p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>モデルが無いとき</th>
+<th>入力の検証</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ruby</td>
+<td>例外。<code>rescue</code> の節で 503 と 500 に分ける</td>
+<td>自作（<code>Numeric</code>・<code>Integer</code> で型を見分け、理由を並べる）</td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td>例外</td>
+<td>自作（規則は「理由の文字列か、問題なしの <code>nil</code>」を返す）</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td>例外（<code>defexception</code> の構造体にすると <code>rescue</code> の節で種類ごとに振り分けられる）</td>
+<td>自作（同上）</td>
+</tr>
+<tr>
+<td>PHP</td>
+<td>例外（<code>ValidationException</code> を別の型にして 422 と分ける）</td>
+<td>自作（規則は <code>null</code> か理由を返す静的メソッド）</td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td><strong><code>Either</code> と直和型の <code>LoadError</code></strong>（<code>ModelNotFound</code> と <code>ModelUnreadable</code> を分ける）</td>
+<td>自作（<code>Nothing</code> か理由を返す関数。<strong>aeson の <code>FromJSON</code> はあえて使わなかった</strong>）</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>Python は失敗を例外で表し、フレームワークの例外ハンドラーで状態コードに変えました。Kotlin と TypeScript は、アプリケーション層（予測サービス）が <code>Result</code> を返し、プレゼンテーション層で例外に戻してから状態コードに変えています</li>
-<li>F# は、失敗を最後まで <code>Result</code> の値のまま扱いました。検証の失敗（<code>string list</code>）は 422、予測の失敗（<code>PredictionError</code>）は 503 と、失敗の <strong>型</strong> で状態コードが決まります。エラーの種類を増やしたときには、網羅性の検査が説明の書き忘れを知らせました</li>
-<li>入力の検証は、Python（Pydantic）と TypeScript（zod）がライブラリのスキーマで、ほかの 7 言語は自作で書きました。F# の <code>and!</code> の計算式は、不正な項目がいくつあっても理由をまとめて集めます。どの言語も、検証を通った値だけをドメインの型に変換しています</li>
-<li><strong>「JSON に値が無かった」の表し方</strong>も分かれました。Java はボックス化した型（<code>Integer</code>）、C# は <code>int?</code>、Go は<strong>ポインタ</strong>（<code>*float64</code>）、Rust は <code>Option&lt;f64&gt;</code>、F# は <code>option</code> です。値の既定値（0）と「値が無い」を区別できないと、必須の検査そのものが書けません</li>
-<li><strong>検証の結果の型</strong>は、判別共用体がある言語（Kotlin・F#・Java・Scala・Rust）は「正しい値」か「理由の一覧」の 2 択で表し、Go は構造体 1 つ（理由の一覧が空なら正しい）で代用しました。Go では不正なのに値を読めてしまいますが、分岐が 2 つで片方が「値がある」だけなら構造体のほうが読みやすい、という判断です</li>
+<li><strong>失敗を「無視できない」側と、そうでない側に分かれます。</strong> Haskell・Rust・F#（と Scala・Kotlin・TypeScript の <code>Result</code>）は、失敗が戻り値の型に現れるので取り出さずには使えません。Go の <code>error</code> は <code>_</code> で捨てられます。例外を使う 9 言語（Python・Java・C#・Ruby・Clojure・Elixir・PHP・および Kotlin／TypeScript の中身）は、捕まえ忘れても呼び出し側のコンパイルは通ります</li>
+<li><strong>Haskell 版は、失敗を直和型で表すことの見返りをいちばんはっきり示しました。</strong> <code>LoadError</code> に節を 1 つ増やすと、ステータスコードへの変換の関数が<strong>その場でコンパイルエラーになります</strong>。PHP 版の <code>catch</code> の節、Elixir 版の <code>rescue</code> の節は、書き漏らしても通ります。「まだ学習していない（503、時間が経てば直る）」と「置き場が壊れている（500、人が直すしかない）」を分ける設計が、例外の版では例外クラスを増やす仕事に、Haskell では節を増やすだけの仕事になりました</li>
+<li><strong>F# は、失敗を最後まで <code>Result</code> の値のまま扱いました。</strong> 検証の失敗（<code>string list</code>）は 422、予測の失敗（<code>PredictionError</code>）は 503 と、失敗の <strong>型</strong> で状態コードが決まります</li>
+<li>入力の検証は、Python（Pydantic）と TypeScript（zod）がライブラリのスキーマで、ほかの 12 言語は自作で書きました。<strong>Haskell 版は、aeson の <code>FromJSON</code> を使える立場にありながら使いませんでした。</strong> この API は「型が違えば 422、値が範囲の外でも 422 で理由を並べる」という二段の振る舞いを求めるのに、<code>FromJSON</code> の失敗は文字列 1 本になるので、理由を並べるところが書けないためです。<strong>型の道具があっても、仕様が求める粒度に合わなければ使わない</strong>という判断です</li>
+<li><strong>「JSON に値が無かった」の表し方</strong>も分かれました。Java はボックス化した型（<code>Integer</code>）、C# は <code>int?</code>、Go は<strong>ポインタ</strong>（<code>*float64</code>）、Rust は <code>Option&lt;f64&gt;</code>、F#・Haskell は <code>option</code>／<code>Maybe</code> です。値の既定値（0）と「値が無い」を区別できないと、必須の検査そのものが書けません。<strong>PHP 版はここで言語の癖に当たりました</strong>——<code>?:</code> と <code>if ($value)</code> は <code>0.0</code> を偽とするので、0.0〜1.0 に正規化されたデータでは欠損の判定に使えず、<code>!== null</code> で書く必要があります</li>
+<li><strong>JSON のオブジェクトと配列の区別</strong>も版によって仕事の量が違いました。<strong>PHP は両方を配列として受けるので</strong>、<code>json_decode(..., true)</code> の結果を <code>array_is_list</code> で弾く必要があり、しかも <code>{"0": 1}</code> はリスト扱いになります。Haskell の aeson は <code>Value</code> が両者を取り違えようがないので、この判定が要りません</li>
 </ul>
-<p>モデルの置き場は、9 言語とも差し替えられる形にして、テストではスタブを使いました。Python は <code>Protocol</code>、Kotlin・Java・C# は <code>interface</code>、TypeScript はオブジェクトリテラル、F# は関数のレコード、Scala は <code>trait</code>、Go は <code>interface</code>、Rust は <code>trait</code>（<code>Box&lt;dyn ModelStore + Send + Sync&gt;</code>）です。</p>
-<p><strong>Rust だけが、並行性を型で要求しました。</strong> axum のハンドラーは複数のスレッドで同時に走るので、共有する状態は <code>Arc</code> で包み、置き場の trait に <code>+ Send + Sync</code> を課します。満たさない型を入れるとコンパイルが通りません。ほかの 8 言語では、スレッドセーフは設計の約束として守るものでした。</p>
-<p>API の統合テストは、9 言語ともサーバーを起動せずに書けました（第 1 章の表を参照）。</p>
+<p><strong>置き場（モデルストア）の約束の表し方</strong>も 14 通りに分かれました。</p>
+<table>
+<thead>
+<tr>
+<th>言語</th>
+<th>置き場の約束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td><code>Protocol</code></td>
+</tr>
+<tr>
+<td>Kotlin・Java・C#・PHP</td>
+<td><code>interface</code></td>
+</tr>
+<tr>
+<td>TypeScript</td>
+<td>オブジェクトリテラル</td>
+</tr>
+<tr>
+<td>F#</td>
+<td>関数のレコード</td>
+</tr>
+<tr>
+<td>Scala・Go・Rust</td>
+<td><code>trait</code>／<code>interface</code>（Rust は <code>Box&lt;dyn ModelStore + Send + Sync&gt;</code>）</td>
+</tr>
+<tr>
+<td>Ruby</td>
+<td><strong>型では表さない。本物と偽物の両方に走らせる約束のテストのモジュール</strong></td>
+</tr>
+<tr>
+<td>Clojure</td>
+<td><code>defprotocol</code> ＋ 約束のテスト（protocol は名前と引数の数しか守らない）</td>
+</tr>
+<tr>
+<td>Elixir</td>
+<td>behaviour ＋ 約束のテスト。置き場は <code>{モジュール, 状態}</code> の組になる</td>
+</tr>
+<tr>
+<td>Haskell</td>
+<td><strong>関数を詰めたレコード</strong>（型クラス版も書いて比べたうえで選んだ）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>第 3 波の 5 言語は、そろって「約束のテスト」を足しました。</strong> 型で書けるのは「メソッドの名前と引数の数」までで、「無ければ例外を投げる」という取り決めは型に書けないからです。本物と偽物の両方に同じテストを走らせることで守っています。Ruby 版はこの手だけで通し、Clojure・Elixir・PHP は型の道具と併用しました</li>
+<li><strong>Haskell だけが、2 つの選択肢から選びました。</strong> 型クラス版も使い捨ての module に書いて実際にコンパイルし、レコードを選んでいます。理由は 2 つ——<strong>型クラスは 1 つの型に 1 つのインスタンス</strong>なので、偽物を「モデルを持っている／持っていない」で作り分けるのに型が 2 つ要ること、そして<strong>型クラスの制約は全層に伝播する</strong>のに対し、レコードは <code>ModelStore -&gt;</code> の 1 語で止まることです</li>
+<li><strong>Rust だけが、並行性を型で要求しました。</strong> axum のハンドラーは複数のスレッドで同時に走るので、共有する状態は <code>Arc</code> で包み、置き場の trait に <code>+ Send + Sync</code> を課します。満たさない型を入れるとコンパイルが通りません。ほかの 13 言語では、スレッドセーフは設計の約束として守るものでした</li>
+<li><strong>Haskell では、<code>IO</code> を境界に閉じ込める構造がそのまま層の分離になりました。</strong> 「データの読み込みだけが <code>IO</code> で、前処理も学習も評価も純粋関数」という構造が型で保証されるので、<code>Service.run</code> の 5 行に層の境界が書けています。ほかの版が設計の規律として守っていたものが、この版だけ型で守られました。<strong>遅延評価がクロージャの代わりにもなり</strong>、検証で「理由があるときに値を作らせない」ために他版がクロージャを渡していたところが、第 2 引数にそのまま書けています</li>
+</ul>
+<p>API の統合テストは、14 言語ともサーバーを起動せずに書けました（第 1 章の表を参照）。<strong>PHP 版だけは事情が逆向きです</strong>——組み込みサーバーはプログラムから起動できない（<code>php -S</code> 自体がサーバーで、要求ごとにスクリプトを最初から走らせる）ので、学習・保存と待ち受けがコマンドとして分かれ、結果として組み立てのクラスまで 100% テストできました。</p>
 <h2 id="38">3.8 まとめ<a class="headerlink" href="#38" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>場合分けの型</strong> — 9 言語とも木を不変な値で表した。網羅性の検査は 4 段階に分かれ、判別共用体を持つ F#・Scala・Rust は何も書かなくても検査し、Go は言語に判別共用体が無いので既定の分岐でエラーを返した</li>
-<li><strong>値として返すか、オブジェクトに持たせるか</strong> — F# と Scala は学習の結果を値（木・関数）として返し、「学習前に予測する」誤りを型で防いだ。ほかの 7 言語はオブジェクトに状態を持たせ、実行時に確かめた</li>
-<li><strong>構造的な型と、名前的な型</strong> — Python・TypeScript・Go は構造的な型でライブラリを同じ型に合わせ、Kotlin・Java・Scala・Rust は実装を明示的に宣言した。F# はモデルそのものを関数の型にした</li>
-<li><strong>遅延評価</strong> — 遅延の列がある 6 言語は交差検証を遅延評価にし、必要な分だけ学習した</li>
-<li><strong>失敗の表し方</strong> — 例外（Python・C#）、検査例外（Java）、例外を包んだ <code>Result</code>（Kotlin・TypeScript）、判別共用体の <code>Result</code>／<code>Either</code>（F#・Scala・Rust）、番兵のエラーを包む多値返却（Go）に分かれた。失敗の<strong>種類</strong>をコンパイラが数えてくれるのは判別共用体の 3 言語だけ</li>
-<li><strong>行列とライブラリ</strong> — 行列を自作したのは 6 言語。Python・Go・Rust は標準的な数値計算ライブラリを使った。ただし Rust は「ライブラリはあるが、連立方程式を解く関数は無い」ので、解く部分だけ自作した</li>
+<li><strong>場合分けの型</strong> — 14 言語とも木を不変な値で表した。網羅性の検査は 4 段階に分かれ、代数的データ型を持つ F#・Scala・Rust・Haskell は何も書かなくても検査する。第 3 波で幅が最も広がり、<strong>Haskell（コンパイルエラー）・PHP（共用型で書けるが網羅性は強制しない）・Ruby／Clojure／Elixir（型で書かない）</strong>の 3 つに割れた</li>
+<li><strong>値として返すか、オブジェクトに持たせるか</strong> — F#・Scala・Clojure・Elixir・Haskell は学習の結果を値（木・関数）として返し、「学習前に予測する」誤りを型で防いだ。ほかの 9 言語はオブジェクトに状態を持たせ、実行時に確かめた</li>
+<li><strong>構造的な型、名前的な型、宣言しない</strong> — Python・TypeScript・Go は構造的な型でライブラリを同じ型に合わせ、Kotlin・Java・Scala・Rust・PHP は実装を明示的に宣言し、<strong>Ruby は何も宣言しなかった</strong>。F#・Clojure・Haskell（第 11 章）はモデルそのものを関数の型にした。Haskell は 1 つの版の中で型クラス・関数・レコードを使い分けた唯一の例</li>
+<li><strong>遅延評価</strong> — 遅延の列がある 8 言語は交差検証を遅延評価にした。ただし <strong>Clojure の <code>map</code> は 32 件ずつチャンクし</strong>、<strong>Haskell の <code>traverse</code> は <code>Either</code> のために全分割を要求する</strong>。「遅延だから 1 件」は思い込みで、言語ごとに実測してテストに書いた</li>
+<li><strong>失敗の表し方</strong> — 例外（Python・C#・Ruby・Clojure・Elixir・PHP）、検査例外（Java）、例外を包んだ <code>Result</code>（Kotlin・TypeScript）、判別共用体の <code>Result</code>／<code>Either</code>（F#・Scala・Rust・<strong>Haskell</strong>）、番兵のエラーを包む多値返却（Go）に分かれた。失敗の<strong>種類</strong>をコンパイラが数えてくれるのは代数的データ型の 4 言語だけで、Haskell では失敗の種類を増やすと変換側がその場で止まる</li>
+<li><strong>行列とライブラリ</strong> — 行列を自作したのは 6 言語、ライブラリを使ったのは 7 言語、<strong>包まずにベクタのベクタのまま扱ったのが Clojure</strong>。「ライブラリはあるが連立方程式を解く関数は無い」（Rust の ndarray、Ruby の Numo）という状況も 2 回起きた</li>
+<li><strong>不変の値が既定だと、収束の判定が短くなる</strong> — K-means の停止条件は、Clojure・Elixir・PHP・Haskell・Ruby では値の比較 1 つで書けた。Java 版が <code>deepEquals</code> と <code>clone()</code> を必要とした場所である</li>
 </ol>
 <p>次の章では、ライブラリとの突き合わせで分かったことを比べます。</p>
 
