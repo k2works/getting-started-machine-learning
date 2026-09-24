@@ -99,8 +99,10 @@ const APPS = [
     tools: [{ cmd: 'cabal', version: 'cabal --version' }, { cmd: 'fourmolu', version: 'fourmolu --version' }, { cmd: 'hlint', version: 'hlint --version' }],
     setup: 'cabal build --only-dependencies --enable-tests',
     // CI（.github/workflows/haskell-ci.yml）と同じ順に、整形・静的解析・テスト・カバレッジを検査する
+    // --enable-executable-dynamic は macOS のリンカ対策。HPC の初期化配列が大きくなると
+    // 静的リンクでは「initializer is >4GB from start of image」で落ちる
     check:
-      'fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 80',
+      'fourmolu --mode check src test && hlint src test && cabal test --enable-coverage --enable-executable-dynamic && ./tools/coverage-threshold.sh 80',
   },
   {
     name: 'ruby',
