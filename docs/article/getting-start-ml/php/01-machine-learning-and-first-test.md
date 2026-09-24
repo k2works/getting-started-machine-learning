@@ -1,7 +1,7 @@
 ---
 type: Article
 title: "第 1 章: 機械学習とはじめてのテスト"
-description: "機械学習とルールベースの違いを確認し、きのこ派・たけのこ派の判定を PHP の TDD で実装して正解率を測る。readonly class で値を表し、declare(strict_types=1) と PHPStan の最高レベルで型を検査する書き方を Ruby 版・Python 版と対比する。"
+description: "機械学習とルールベースの違いを確認し、きのこ派・たけのこ派の判定を PHP の TDD で実装して正解率を測る。readonly class で値を表し、declare(strict_types=1) と PHPStan のレベル 9 で型を検査する書き方を Ruby 版・Python 版と対比する。"
 tags: [article,getting-start-ml,php]
 status: draft
 generated: { by: claude-code/claude-opus-5, at: 2026-09-24T00:00:00Z }
@@ -813,11 +813,11 @@ Found 0 of 7 files that can be fixed in 0.132 seconds, 18.00 MB memory used
 
 ### 静的解析
 
-PHPStan を最高レベルで走らせます。
+PHPStan をレベル 9 で走らせます。上限は 10 ですが、10 は `mixed` の扱いがさらに厳しく、本シリーズの題材では実りが少ないので 1 つ下にしました。
 
 ```neon
 parameters:
-    # 最高レベル。配列の形まで検査させる（ADR 013 の「型は使う」）。
+    # 上限は 10（PHPStan 2.2）。その 1 つ下の 9 で、配列の形まで検査させる（ADR 013 の「型は使う」）。
     level: 9
     paths:
         - src
@@ -958,7 +958,7 @@ OK (20 tests, 30 assertions)
 
 この章では、ルールによる判定と正解率を TDD で実装し、実データで 0.7368 という値を得ました。PHP に固有の論点は次のとおりです。
 
-1. **型を使い切る** — `declare(strict_types=1)` で実行時に効かせ、PHPStan のレベル 9 で配列の形まで検査する。[Ruby 版](../ruby/index.md) が RBS・Steep を使わないと決めたのと正反対の選択。同じ動的型付けの言語でも、型の道具が言語本体にどこまで入っているかで手触りが変わる
+1. **型を使い切る** — `declare(strict_types=1)` で実行時に効かせ、PHPStan のレベル 9（上限は 10）で配列の形まで検査する。[Ruby 版](../ruby/index.md) が RBS・Steep を使わないと決めたのと正反対の選択。同じ動的型付けの言語でも、型の道具が言語本体にどこまで入っているかで手触りが変わる
 2. **実行時の型と静的解析の型が分かれている** — 引数の `string` は実行時に効き、`list<string>` は PHPStan だけが見る。この二層構造が PHP の漸進的な型付けの姿
 3. **値は `readonly class` で表す** — コンストラクタプロモーションで 1 か所に書ける。ただし**比較は既定で参照の同一性**なので、テストでは `assertEquals`（中身）と `assertSame`（同一性）を使い分ける
 4. **緩い変換をあえて避ける** — `(int) '高い'` は 0 を返して落ちない。`filter_var(..., FILTER_VALIDATE_INT)` で厳密に検査する。比較も `==` ではなく `===` で書く
