@@ -367,18 +367,38 @@ readDecoded file enc = do
           Left err -> err `shouldSatisfy` isInfixOf "cannot decode byte sequence"
           Right value -> expectationFailure ("読めてしまいました: " <> show value)
 
-    it "UTF-8 を CP932 として読んでも失敗せず、文字化けする" $ do
+    it "UTF-8 を CP932 として読むと、正しくは読めない（振る舞いは環境による）" $ do
+      -- 取り違えたときに何が起きるかは、同じ Haskell でも iconv の実装で変わる。
+      -- Linux（glibc）は不正なバイト列として例外にし、macOS（BSD）は通して
+      -- 文字化けした文字列を返す。**どちらにせよ正しくは読めない**ことだけが
+      -- 環境によらず言えるので、それをテストにする。
       withTempFile "weather.csv" Utf8 "weather_id,weather\n1,晴れ\n" $ \file -> do
         result <- readDecoded file Cp932
         case result of
-          Left err -> expectationFailure ("失敗しました: " <> err)
+          Left err -> err `shouldSatisfy` isInfixOf "cannot decode byte sequence"
           Right value -> do
             value `shouldNotSatisfy` T.isInfixOf "晴れ"
             T.isInfixOf "weather_id" value `shouldBe` True
 ```
 
 - **Shift_JIS を `UTF-8` として読むと例外になります。** `hGetContents': invalid argument (cannot decode byte sequence starting from 144)` です。Java 版と同じ側で、**バイト位置まで教えてくれます**
-- **UTF-8 を `CP932` として読んでも例外になりません。** UTF-8 の 3 バイトが Shift_JIS の 2 バイト文字として解釈できてしまうので、黙って文字化けします。改行までが直前の文字に吸い込まれることもありました
+- **UTF-8 を `CP932` として読んだときは、環境によって結果が変わりました。** 手元の macOS では例外にならず、UTF-8 の 3 バイトが Shift_JIS の 2 バイト文字として解釈されて黙って文字化けします（改行までが直前の文字に吸い込まれることもありました）。ところが **CI の Linux では例外になります**（`cannot decode byte sequence starting from 140`）
+
+この食い違いは CI が教えてくれました。手元で通ったテストが Linux で落ちたのです。原因は **`mkTextEncoding` が OS の iconv をそのまま使う**ことでした。macOS は BSD の iconv、Linux は glibc の iconv で、**同じ「CP932 として読む」でも不正なバイト列の扱いが違います**。
+
+```haskell
+-- 取り違えたときに何が起きるかは、同じ Haskell でも iconv の実装で変わる。
+-- Linux（glibc）は不正なバイト列として例外にし、macOS（BSD）は通して
+-- 文字化けした文字列を返す。**どちらにせよ正しくは読めない**ことだけが
+-- 環境によらず言えるので、それをテストにする。
+case result of
+  Left err -> err `shouldSatisfy` isInfixOf "cannot decode byte sequence"
+  Right value -> do
+    value `shouldNotSatisfy` T.isInfixOf "晴れ"
+    T.isInfixOf "weather_id" value `shouldBe` True
+```
+
+**テストに書ける「確かなこと」が、環境をまたぐと狭くなる**という例です。最初は「例外にならず文字化けする」と書けると思っていましたが、実際に言えるのは「**正しくは読めない**」ことだけでした。文字コードの取り違えを検知したいなら、**言語の既定の振る舞いに頼らず、読む前に自分で確かめる**ほうが確実です
 
 さらに Haskell では、**取り違えたときの振る舞いを名前で選べます**。
 

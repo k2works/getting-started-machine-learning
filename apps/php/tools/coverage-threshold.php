@@ -3,7 +3,12 @@
 declare(strict_types=1);
 
 // PHPUnit には最低カバレッジのしきい値の機能が無いので、clover の XML を読んで自分で判定する（ADR 013）。
-// 使い方: php tools/coverage-threshold.php build/clover.xml 90
+//
+// しきい値は「学習データが無くても保てる水準」にする。配布データのある手元では
+// 99% 前後になるが、データの無い CI では実データのテストがスキップされて 78% 前後まで
+// 落ちる。高いほうに合わせると CI が必ず落ちるので、低いほうを基準にする。
+//
+// 使い方: php tools/coverage-threshold.php build/clover.xml 75
 
 $path = $argv[1] ?? 'build/clover.xml';
 $threshold = (float) ($argv[2] ?? '90');

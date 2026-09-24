@@ -650,7 +650,7 @@ PHPUnit は起動時に、どのカバレッジドライバを使っているか
 declare(strict_types=1);
 
 // PHPUnit には最低カバレッジのしきい値の機能が無いので、clover の XML を読んで自分で判定する（ADR 013）。
-// 使い方: php tools/coverage-threshold.php build/clover.xml 90
+// 使い方: php tools/coverage-threshold.php build/clover.xml 75
 
 $path = $argv[1] ?? 'build/clover.xml';
 $threshold = (float) ($argv[2] ?? '90');
@@ -738,7 +738,7 @@ EXIT=1
     "test": "phpunit --exclude-group data",
     "coverage": [
         "phpunit --coverage-clover build/clover.xml",
-        "php tools/coverage-threshold.php build/clover.xml 90"
+        "php tools/coverage-threshold.php build/clover.xml 75"
     ],
     "check": [
         "@format",

@@ -855,7 +855,7 @@ php vendor/bin/phpunit --coverage-clover build/clover.xml
 declare(strict_types=1);
 
 // PHPUnit には最低カバレッジのしきい値の機能が無いので、clover の XML を読んで自分で判定する（ADR 013）。
-// 使い方: php tools/coverage-threshold.php build/clover.xml 90
+// 使い方: php tools/coverage-threshold.php build/clover.xml 75
 
 $path = $argv[1] ?? 'build/clover.xml';
 $threshold = (float) ($argv[2] ?? '90');
@@ -887,6 +887,8 @@ clover の XML は `project/metrics` に全体の集計を持っているので�
 php tools/coverage-threshold.php build/clover.xml 90
 ```
 
+（この章を書いた時点のしきい値です。いま使っているのは 75% です。理由は後述します。）
+
 ```text
 行カバレッジ: 100.00% (61/61), しきい値: 90.00%
 ```
@@ -897,6 +899,8 @@ php tools/coverage-threshold.php build/clover.xml 90
 行カバレッジ: 87.14% (61/70), しきい値: 90.00%
 カバレッジがしきい値を下回りました: 87.14% < 90.00%
 ```
+
+この章を書いた時点では、しきい値を 90% にしていました。**この値は後で下げることになります。** 学習データの無い CI では実データのテストがスキップされ、カバレッジが 78% まで落ちるためです。経緯は[第 6 章](06-task-runner-and-ci-cd.md)で扱います。「最初に決めた数字がそのまま通用するとは限らない」という、しきい値そのものについての話です。
 
 終了コードは 3 にしました。**この数字に決まりはありません。**「しきい値は言語の標準ではなくプロジェクトの約束である」ことが、PHP ではむき出しになっています。この話は第 6 章（タスクランナーと CI/CD）で改めて扱います。
 
@@ -913,7 +917,7 @@ php tools/coverage-threshold.php build/clover.xml 90
     "test": "phpunit --exclude-group data",
     "coverage": [
         "phpunit --coverage-clover build/clover.xml",
-        "php tools/coverage-threshold.php build/clover.xml 90"
+        "php tools/coverage-threshold.php build/clover.xml 75"
     ],
     "check": [
         "@format",

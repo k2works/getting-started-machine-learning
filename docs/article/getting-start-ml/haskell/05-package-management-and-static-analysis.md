@@ -747,7 +747,7 @@ rate=$(echo "$summary" | grep -oE '<td align="right">[0-9]+%</td><td>[0-9]+/[0-9
 式カバレッジ: 94% (626/663), しきい値: 80%
 ```
 
-しきい値を割ると終了コード 3 で落ちます。
+しきい値を割ると終了コード 3 で落ちます。この出力はこの章を書いた時点（第 1〜3 章まで、663 式）のもので、**いま使っているしきい値は 65% です**。下げた理由は[第 6 章](06-task-runner-and-ci-cd.md)で扱います。
 
 ```bash
 ./tools/coverage-threshold.sh 99; echo "EXIT=$?"
@@ -779,7 +779,7 @@ report contents = do
 ## 5.7 検査の 4 つを 1 行にする
 
 ```bash
-fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 80
+fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 65
 ```
 
 `&&` でつないであるので、前が失敗したらそこで止まります。4 つの並びは CI（`.github/workflows/haskell-ci.yml`）とも、Gulp のタスク（`ops/scripts/apps.js`）とも同じです。

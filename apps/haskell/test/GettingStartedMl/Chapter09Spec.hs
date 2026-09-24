@@ -197,11 +197,15 @@ spec = do
           Left err -> err `shouldSatisfy` isInfixOf "cannot decode byte sequence"
           Right value -> expectationFailure ("読めてしまいました: " <> show value)
 
-    it "UTF-8 を CP932 として読んでも失敗せず、文字化けする" $ do
+    it "UTF-8 を CP932 として読むと、正しくは読めない（振る舞いは環境による）" $ do
+      -- 取り違えたときに何が起きるかは、同じ Haskell でも iconv の実装で変わる。
+      -- Linux（glibc）は不正なバイト列として例外にし、macOS（BSD）は通して
+      -- 文字化けした文字列を返す。**どちらにせよ正しくは読めない**ことだけが
+      -- 環境によらず言えるので、それをテストにする。
       withTempFile "weather.csv" Utf8 "weather_id,weather\n1,晴れ\n" $ \file -> do
         result <- readDecoded file Cp932
         case result of
-          Left err -> expectationFailure ("失敗しました: " <> err)
+          Left err -> err `shouldSatisfy` isInfixOf "cannot decode byte sequence"
           Right value -> do
             value `shouldNotSatisfy` T.isInfixOf "晴れ"
             T.isInfixOf "weather_id" value `shouldBe` True

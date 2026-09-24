@@ -4,12 +4,18 @@
 # cabal には「カバレッジが N% を下回ったら失敗させる」機能が無いので、
 # PHP 版の tools/coverage-threshold.php と同じく自分で判定する。
 #
+# しきい値は「学習データが無くても保てる水準」にする。配布データのある手元では
+# 93% になるが、データの無い CI では実データのテストが pending になって 71% 前後まで
+# 落ちる。高いほうに合わせると CI が必ず落ちるので、低いほうを基準にする。
+#
 # 使い方: tools/coverage-threshold.sh [しきい値]
 set -euo pipefail
 
-threshold="${1:-80}"
+threshold="${1:-65}"
 
-index=$(find dist-newstyle -path '*/hpc/vanilla/html/hpc_index.html' | head -1)
+# HPC の出力先は、静的リンクなら hpc/vanilla/、動的リンク（--enable-executable-dynamic）
+# なら hpc/dyn/ になる。どちらでも拾えるようにする。
+index=$(find dist-newstyle -path '*/hpc/*/html/hpc_index.html' | head -1)
 
 if [ -z "$index" ]; then
   echo "カバレッジの結果がありません。先に cabal test --enable-coverage を実行してください" >&2

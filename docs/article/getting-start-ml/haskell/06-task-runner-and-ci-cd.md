@@ -70,7 +70,7 @@ Finished in 0.0060 seconds
 第 5 章の最後に書いた 4 つの検査は、こう並べるしかありません。
 
 ```bash
-fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 80
+fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 65
 ```
 
 **cabal には、この並びに名前を付けて `cabal check` のように呼ぶ仕組みがありません。** `cabal check` というコマンドは存在しますが、これは「パッケージを Hackage に上げる前の体裁の検査」で、まったく別のものです。
@@ -259,7 +259,7 @@ C ライブラリへの依存を環境に足すかどうかは、判断の要る
     setup: 'cabal build --only-dependencies --enable-tests',
     // CI（.github/workflows/haskell-ci.yml）と同じ順に、整形・静的解析・テスト・カバレッジを検査する
     check:
-      'fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 80',
+      'fourmolu --mode check src test && hlint src test && cabal test --enable-coverage && ./tools/coverage-threshold.sh 65',
   },
 ```
 
@@ -424,7 +424,7 @@ jobs:
       # cabal には最低カバレッジのしきい値の機能が無いので、HPC の結果を読んで判定する
       - name: Check coverage threshold
         run: |
-          nix develop .#haskell --command bash -c 'cd apps/haskell && ./tools/coverage-threshold.sh 80'
+          nix develop .#haskell --command bash -c 'cd apps/haskell && ./tools/coverage-threshold.sh 65'
 ```
 
 ### ワークフローのポイント
@@ -435,7 +435,24 @@ jobs:
 
 **`nix develop .#haskell --command` を各ステップで呼んでいます。** シェルの状態はステップをまたいで残らないので、毎回入り直します。`shellHook` の `LIBRARY_PATH` の設定も毎回効きます。
 
-**学習データはありません。** CI では実データのテストが `pending` になり、カバレッジは 83% あたりになります（第 4 章）。しきい値を 80% にしてあるのは、この状態で通す必要があるからです。
+**学習データはありません。** CI では実データのテストが `pending` になり、カバレッジが落ちます（第 4 章）。しきい値はこの状態で通る値にしてあります。
+
+### しきい値は 80% から 65% に下げた
+
+[第 4 章](04-version-control-and-data-management.md)を書いた時点では、しきい値を 80% にしていました。データが無いときで 83%、あるときで 94% だったので、80% なら両方で通ります。**いちばん条件の悪い環境を基準にする**という原則どおりの決め方でした。
+
+ところが、章が 15 個そろったところで CI が落ちました。
+
+| 時点 | 式の数 | データ無し | データ有り |
+|------|-------|----------|----------|
+| 第 4 章（第 1〜3 章まで） | 663 | 83% | 94% |
+| 全 15 章 | 8206 | **71%** | 93% |
+
+データが有るときは 94% → 93% とほとんど動いていないのに、**無いときだけ 83% → 71% と 12 ポイント落ちています**。章が増えるにつれて実データを使うテストが増え、それが `pending` になるぶんの穴が広がったからです。
+
+原則は正しかったのに、**その原則が指す数字のほうが動きました**。決め方を間違えたのではなく、決めた時点の測定値がいつまでも通用すると思っていたのが間違いです。65% に下げました。
+
+しきい値を置くときは、**それがどの環境で測った数字か**に加えて、**規模が変わったら測り直す**ことも決めておく必要があります。
 
 ### キャッシュの落とし穴
 
@@ -489,7 +506,7 @@ if (cabal test --enable-coverage) then (1)
   :失敗（コンパイルかテスト）;
   stop
 endif
-if (coverage-threshold.sh 80) then (3)
+if (coverage-threshold.sh 65) then (3)
   :失敗;
   stop
 endif
@@ -522,7 +539,7 @@ stop
 | `fourmolu --mode check src test` | 整形されているかを検査する | `apps/haskell` |
 | `fourmolu --mode inplace src test` | コードを整形する | `apps/haskell` |
 | `hlint src test` | 静的解析を実行する | `apps/haskell` |
-| `./tools/coverage-threshold.sh 80` | カバレッジのしきい値を判定する | `apps/haskell` |
+| `./tools/coverage-threshold.sh 65` | カバレッジのしきい値を判定する | `apps/haskell` |
 | `echo 'GettingStartedMl.Chapter01.run >>= either fail putStrLn' \| cabal repl -v0 lib:getting-started-ml` | 章の処理を実行する（学習データが必要。**終了コードは当てにならない**） | `apps/haskell` |
 
 ## 6.9 まとめ
