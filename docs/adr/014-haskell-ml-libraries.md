@@ -31,7 +31,8 @@ B70 のステップ 1 で、使い捨ての cabal プロジェクトを `nix dev
 | 検査の終了コード | **fourmolu の `--mode check` は違反があると 100**。hlint は 1 | わざと崩したファイル |
 | テスト | Hspec 2.11。**テスト名に日本語を使える**。`hspec-discover` で自動収集できる。**テストスイートの `build-depends` はライブラリと別に書く** | 使い捨てのプロジェクト |
 | カバレッジ | HPC（`cabal test --enable-coverage`）。GHC 組み込みで追加の依存が要らない | 同上 |
-| 線形代数 | **hmatrix 0.20.2 は BLAS/LAPACK を要求し、素の環境では configure で止まる**（`Missing (or bad) C libraries: blas, lapack`）。`openblas` を環境に足し `LIBRARY_PATH`・`PKG_CONFIG_PATH` を通すとビルドできた | 同上 |
+| 線形代数 | **hmatrix 0.20.2 は BLAS/LAPACK を要求し、素の環境では configure で止まる**（`Missing (or bad) C libraries: blas, lapack`）。**しかもビルドが通っただけでは足りなかった。** 最初に足した `openblas` は nixpkgs の既定が `blas64 = true`（ILP64。整数引数が 64 ビット）で、**32 ビット整数で呼ぶ hmatrix と ABI が噛み合わず、2×2 の連立方程式すら解けなかった**（`linearSolve` が `Nothing` を返し `** On entry to DGESV parameter number 1 had an illegal value`、`<\>` は `code -7`、`pinv` は `code -2`）。`strings libopenblas...dylib \| grep USE64BITINT` で ILP64 でビルドされていることを直接確認した。`blas` と `lapack`（`isILP64 = false`）に差し替えて解決 | 使い捨てのプロジェクトで**実際に呼び出して**確認 |
+| **ビルドと実行は別** | **B70 のステップ 1 では「hmatrix がビルドできた」ことしか確かめておらず、LAPACK の呼び出しを一度も実行していなかった。** C のライブラリに依存するパッケージでは、リンクが通っても実行時に壊れうる。**2×2 の `DGESV` で「行列の次数が不正」と言われたら、数値の問題ではなく ABI の不一致を疑う** | 第 7〜9 章の執筆中に発覚（2 体のエージェントが独立に同じ診断に到達した） |
 | CSV | **cassava は BOM を取り除かない**（Go 版・Clojure 版・Elixir 版・PHP 版と同じ）。`decodeByName` で列名つきに読める | BOM つきのファイルで確認 |
 | 統計 | statistics 0.16.5.0。純 Haskell で入る | 使い捨てのプロジェクト |
 | 整数 | **`Int` は 64 ビットで溢れると折り返す**（`maxBound + 1` が `minBound`）。PHP のように float に化けない | `cabal repl` |
@@ -59,12 +60,12 @@ B70 のステップ 1 で、使い捨ての cabal プロジェクトを `nix dev
 | データの表現 | レコード（`data Person = Person { ... }`）と `Map`・リスト | — | — | 第 1 章 |
 | CSV | cassava（BOM は自分で取り除く） | 0.5 | BSD-3-Clause | 第 1 章 |
 | 乱数 | **`java.util.Random` と同じ線形合同法を自作する** | — | — | 第 2 章 |
-| 線形代数 | **hmatrix（`openblas` を環境に足す）** | 0.20.2 | BSD-3-Clause | 第 7 章 |
+| 線形代数 | **hmatrix（`blas`・`lapack` を環境に足す。`openblas` は ILP64 なので使えない）** | 0.20.2 | BSD-3-Clause | 第 7 章 |
 | 統計 | statistics | 0.16 | BSD-2-Clause | 第 9 章 |
 | 直列化 | `Data.Binary`（学習済みモデル）、aeson（API の JSON） | binary 0.8・aeson 2.3 | BSD-3-Clause | 第 8 章 |
 | API | Scotty | 0.30 | BSD-3-Clause | 第 15 章 |
 
-- **hmatrix を使う。** 素の環境では BLAS/LAPACK が無くて止まるので、`openblas` を Nix の環境定義に足し、`LIBRARY_PATH` と `PKG_CONFIG_PATH` を `shellHook` で通す。Elixir 版で EXLA（巨大な XLA のバイナリ）を避けたのとは判断が違う。**BLAS/LAPACK は数値計算の標準的な土台で、Nix でも軽く入る**ためである。これにより第 7・12・13 章でライブラリと突き合わせられ、[Elixir 版](../article/getting-start-ml/elixir/index.md) の決定木のように「突き合わせる相手がいない」状態を避けられる
+- **hmatrix を使う。** 素の環境では BLAS/LAPACK が無くて止まるので、`blas` と `lapack` を Nix の環境定義に足し、`LIBRARY_PATH` と `PKG_CONFIG_PATH` を `shellHook` で通す。**`openblas` ではいけない**（nixpkgs の既定が ILP64 で、32 ビット整数で呼ぶ hmatrix と ABI が噛み合わない）。Elixir 版で EXLA（巨大な XLA のバイナリ）を避けたのとは判断が違う。**BLAS/LAPACK は数値計算の標準的な土台で、Nix でも軽く入る**ためである。これにより第 7・12・13 章でライブラリと突き合わせられ、[Elixir 版](../article/getting-start-ml/elixir/index.md) の決定木のように「突き合わせる相手がいない」状態を避けられる
 - **機械学習のアルゴリズムは自作が最終実装になる。** Haskell には scikit-learn にあたるものが無い（`hlearn` は保守が止まっている）。決定木・ランダムフォレスト・ロジスティック回帰・K-means・主成分分析はすべて自作する。**突き合わせられるのは線形代数の層（正規方程式・固有値分解）だけ**で、これは Elixir 版（Scholar に決定木が無い）よりさらに狭い
 - **乱数は `java.util.Random` と同じ線形合同法を自作する。** `System.Random` はほかの言語版と並びが合わない。**Haskell の `Int` は溢れると折り返す**ので、PHP 版で必要だった乗算の分割が要らず、仕様をそのまま書ける
 - **失敗は型で表す。** `Either String a` で失敗を、`Maybe a` で欠損を表す。例外を投げる Ruby 版・Elixir 版・PHP 版とは正反対で、[Rust 版](../article/getting-start-ml/rust/index.md)・[F# 版](../article/getting-start-ml/fsharp/index.md) と同じ流儀になる
@@ -104,6 +105,6 @@ B70 のステップ 1 で、使い捨ての cabal プロジェクトを `nix dev
 - 良い影響: 型でエラーを表す流儀が、Rust 版・F# 版との三者比較になる。例外で表す Ruby 版・Elixir 版・PHP 版との対比も取れる
 - 良い影響: 副作用が `IO` として型に現れるので、「データの読み込みだけが `IO` で、前処理から学習までは純粋関数」という構造を型で示せる
 - 良い影響: `-Wall` をエラーにすることで、網羅していないパターンマッチをコンパイルで捕まえられる
-- 悪い影響: **hmatrix のために C ライブラリ（BLAS/LAPACK）への依存が環境に増える。** 素の環境では configure で止まるので、記事の環境構築の節に明記する必要がある
+- 悪い影響: **hmatrix のために C ライブラリ（BLAS/LAPACK）への依存が環境に増える。** 素の環境では configure で止まるうえ、**整数幅（LP64／ILP64）まで合わせないと実行時に壊れる**。記事の環境構築の節に明記する必要がある
 - 悪い影響: **機械学習のアルゴリズムに突き合わせる相手がほとんど無い。** 線形代数の層だけが hmatrix と比べられ、第 3・8・10・11・14 章は自作だけで完結する。これは Elixir 版よりさらに狭い範囲である
 - 悪い影響: 整形と静的解析の道具が素の Nix 環境に無く、環境定義に足す必要があった（PHP 版の pcov と同じ形で、第 3 波で 2 回続いた）

@@ -2053,7 +2053,8 @@ B70 のステップ 1（2026-09-24）で、使い捨ての cabal プロジェク
 | 検査の終了コード | **fourmolu の `--mode check` は違反があると 100**（PHP-CS-Fixer の 8、Credo の 4 に続く特殊値）。hlint は指摘があると 1 | わざと崩したファイル・`map id` を含むファイル |
 | テスト | Hspec 2.11。**テスト名（`it` の文字列）に日本語を使える。** `hspec-discover` でテストファイルを自動で集められる。**テストスイートの `build-depends` はライブラリとは別に書く**（ライブラリに入れた依存はテストから見えない） | 使い捨てのプロジェクト |
 | カバレッジ | HPC（`cabal test --enable-coverage`）。GHC に組み込まれていて追加の依存が要らない | 同上 |
-| 線形代数 | **hmatrix 0.20.2 は BLAS/LAPACK の C ライブラリを要求し、素の環境では configure で止まる**（`Missing (or bad) C libraries: blas, lapack`）。環境に `openblas` を足し、`LIBRARY_PATH` と `PKG_CONFIG_PATH` を `shellHook` で通すとビルドできた（`ld: warning` は出るが成功する） | 使い捨てのプロジェクト |
+| 線形代数 | **hmatrix 0.20.2 は BLAS/LAPACK の C ライブラリを要求し、素の環境では configure で止まる**（`Missing (or bad) C libraries: blas, lapack`）。**さらに、足すライブラリの整数幅まで合わせる必要があった。** 最初に足した `openblas` は nixpkgs の既定が ILP64（整数 64 ビット）で、**ビルドは通るのに実行すると 2×2 の連立方程式すら解けなかった**（`parameter number 1 had an illegal value`）。`blas`・`lapack`（LP64）に差し替えて解決 | 使い捨てのプロジェクトで**実際に呼び出して**確認 |
+| **ビルドと実行は別** | **ステップ 1 の当初の確認は「ビルドできた」だけで、LAPACK の呼び出しを一度も実行していなかった。** 第 7〜9 章の執筆中に 2 体のエージェントが独立に発見した。C のライブラリに依存するパッケージでは、リンクが通っても実行時に壊れうる | 同上 |
 | CSV | **cassava は BOM を取り除かない**（先頭の列名が `"\xEF\xBB\xBFshincho"` になる。Go 版・Clojure 版・Elixir 版・PHP 版と同じ）。`decodeByName` で列名つきの `NamedRecord` として読める | BOM つきのファイルを作って確認 |
 | 統計 | statistics 0.16.5.0。BLAS/LAPACK 不要の純 Haskell で入る | 使い捨てのプロジェクト |
 | 整数 | **`Int` は 64 ビットで、溢れると折り返す**（`maxBound + 1` が `minBound` になる）。PHP のように float に化けない | `cabal repl` |
