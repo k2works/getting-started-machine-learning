@@ -1,29 +1,33 @@
 ---
 type: Article
 title: "第 5 章: 学習ロードマップ"
-description: "目的別にどの言語版から読むとよいか、5 部 15 章をどの順で読むか、1 つの版を読み終えたあとに別の版のどの章を読み比べると違いが見えるかを案内する。環境の用意と、学習データの配置の手順もまとめる。"
+description: "14 の言語版から目的別にどれを読むとよいか、5 部 15 章をどの順で読むか、1 つの版を読み終えたあとに別の版のどの章を読み比べると違いが見えるかを案内する。環境の用意と、学習データの配置の手順もまとめる。"
 tags: [article,getting-start-ml,integration]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:14:54Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-24T00:00:00Z }
 ---
 
 # 第 5 章: 学習ロードマップ
 
 ## 5.1 どの版から読むか
 
-9 つの言語版は、同じ題材・同じ TODO リストで書いています。どの版から読んでも、機械学習と TDD の内容は同じです。違いは、言語とライブラリで何を学べるかです。
+14 の言語版は、同じ題材・同じ TODO リストで書いています。どの版から読んでも、機械学習と TDD の内容は同じです。違いは、言語とライブラリで何を学べるかです。
 
 | 目的 | おすすめの版 | 理由 |
 |------|------------|------|
 | 機械学習を仕事で使いたい | [Python](../python/index.md) | 参照実装。pandas・scikit-learn・FastAPI という事実上の標準の道具で、多くの章で自作とライブラリの結果が一致するところまで確かめられる。付録 A の総合演習がある |
 | 型のある言語で機械学習を書きたい（JVM） | [Kotlin](../kotlin/index.md) | データフレームと静的型付けを両立する。ライブラリ（Tribuo）との違いを学習用テストで突き止める過程が多い |
-| ライブラリが少ない環境で自作する力をつけたい | [TypeScript](../typescript/index.md) か [Go](../go/index.md) | データフレームも乱数生成器も自作する。Go 版は決定木・ランダムフォレスト・K-means・ロジスティック回帰がすべて自作 |
-| 型で誤りを防ぐ設計を学びたい | [F#](../fsharp/index.md) か [Rust](../rust/index.md) | 判別共用体・`option`／`Option`・`Result`・網羅性の検査で、ありえない状態を型で作れないようにする |
-| Web 開発者で、機械学習を API として組み込みたい | TypeScript か Python の第 15 章から逆にたどる | 第 15 章の API は第 7・8 章のモデルを使う。必要な章に戻りながら読める |
-| 業務で使う JVM の言語で書きたい | [Java](../java/index.md) か [Scala](../scala/index.md) | どちらも Tribuo を使う。Java は record と sealed interface、Scala は case class と enum で同じ木を表す。**数値が完全に一致するので、書き方の違いだけを読み比べられる** |
+| ライブラリが少ない環境で自作する力をつけたい | [Go](../go/index.md)・[TypeScript](../typescript/index.md)・[Elixir](../elixir/index.md)・[Haskell](../haskell/index.md) | 決定木も評価指標も自作が最終実装になる。**Haskell 版は機械学習のライブラリが 1 つも無く、この軸で最も極端** |
+| 型で誤りを防ぐ設計を学びたい | [F#](../fsharp/index.md)・[Rust](../rust/index.md)・[Haskell](../haskell/index.md) | 代数的データ型・`option`／`Option`／`Maybe`・`Result`／`Either`・網羅性の検査で、ありえない状態を型で作れないようにする |
+| Web 開発者で、機械学習を API として組み込みたい | [TypeScript](../typescript/index.md)・[Python](../python/index.md)・[PHP](../php/index.md) の第 15 章から逆にたどる | 第 15 章の API は第 7・8 章のモデルを使う。必要な章に戻りながら読める |
+| 業務で使う JVM の言語で書きたい | [Java](../java/index.md)・[Scala](../scala/index.md)・[Clojure](../clojure/index.md) | どれも同じ Tribuo 4.3.2 を同じ JDK 21 で呼ぶ。**数値が完全に一致するので、書き方の違いだけを読み比べられる** |
 | .NET で書きたい | [C#](../csharp/index.md) か [F#](../fsharp/index.md) | どちらも ML.NET を使う。C# は命令型、F# は関数型。こちらも数値が完全に一致する |
 | 所有権とゼロコスト抽象化を学びたい | [Rust](../rust/index.md) | どこで複製するか、誰がデータを所有するかを毎回決める。並行性を型（`Send`・`Sync`）で保証する |
 | 明示的で小さい言語が好み | [Go](../go/index.md) | 例外も判別共用体もジェネリクスの制約も最小限。標準ライブラリだけで API まで書ける |
+| 動的型付けで、型を書かずに進めたい | [Ruby](../ruby/index.md) | 共通の型を 1 つも宣言しない（ダックタイピング）。RBS・Steep もあえて使わず、型の誤りをテストで捕まえる |
+| 動的型付けだが、型の道具は使いたい | [PHP](../php/index.md) | `declare(strict_types=1)` と PHPStan のレベル 9 で配列の形まで検査する。**Ruby 版と正反対の選択**を、同じ動的型付けの言語で読み比べられる |
+| 不変のデータと関数だけで書きたい | [Clojure](../clojure/index.md)・[Elixir](../elixir/index.md)・[F#](../fsharp/index.md) | 行列も木もパイプラインも素のデータ。Clojure はスレッディングマクロ、Elixir はパイプライン演算子と関数節 |
+| 副作用を型で区切る設計を見たい | [Haskell](../haskell/index.md) | 「データの読み込みだけが `IO` で、前処理も学習も評価も純粋関数」が型で保証され、第 15 章ではそれがそのまま層の分離になる |
 
 迷ったら、Python 版から読み始めてください。Python 版は、本シリーズの章の節構成を決めた版で、ほかの版は Python 版の同じ章を参照しながら書いています。
 
@@ -45,26 +49,41 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:14:54Z }
 
 各章は「TODO リスト → テスト（Red）→ 実装（Green）→ リファクタリング → ライブラリとの突き合わせ → 実データ → Notebook での探索」の順に進みます。記事のコードを写しながら、実際にテストを失敗させてから実装すると、TDD の手触りをつかめます。
 
+**ライブラリとの突き合わせの節が無い章もあります。** Go 版・Elixir 版・Haskell 版は、置き換え先が無い章で「自作が最終実装である」と明記し、代わりに「値の分かっている入力」「満たすべき性質」「ほかの言語版の数値」で正しさを支えました。特に Haskell 版の第 11 章は、**シリーズで唯一、突き合わせの節そのものが存在しない章**です。
+
 ## 5.3 版をまたいで読み比べる
 
 1 つの版を読み終えたら、別の版の同じ章を読み比べると、言語の違いがはっきり見えます。特に違いが大きい章を挙げます。
 
 | 章 | 読み比べると見えること | 参照 |
 |----|---------------------|------|
-| 第 2 章 | データフレーム（Python・Kotlin）と、型でデータを表す（ほかの 7 言語）違い。乱数生成器の自作（TypeScript）。「値が無い」の表し方（`Option`・null 許容・多値返却） | 本解説の [第 2 章](02-data-structure-comparison.md) |
-| 第 3 章 | 木の型と網羅性の検査（4 段階に分かれる）。ライブラリと 1 件だけ予測が違う原因の突き止め方（Kotlin・TypeScript・Rust） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
-| 第 5 章 | パッケージ管理と静的解析の道具の違い。F# 版では、静的解析が何も検査していなかったことに気付く過程。Rust 版では、クレートの版が型を分けること | 本解説の [第 1 章](01-language-and-library-overview.md) |
-| 第 9 章 | 標準偏差の割り方（件数か件数 − 1 か）、Shift_JIS の文字化けの現れ方 | 本解説の [第 2 章](02-data-structure-comparison.md)・[第 4 章](04-library-ecosystem-comparison.md) |
-| 第 11 章 | 評価関数を関数として渡す設計と、交差検証の遅延評価（遅延の列がある 6 言語と、無い 3 言語） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
-| 第 12 章 | 罰則の尺度がライブラリごとに違うこと | 本解説の [第 4 章](04-library-ecosystem-comparison.md) |
-| 第 15 章 | 失敗の表し方（例外・検査例外・`Result`・`Either`・番兵のエラー）と入力の検証、依存の向き。Go だけが標準ライブラリで API を書ける | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
+| 第 2 章 | データフレーム（Python・Kotlin）と、型やマップでデータを表す（ほかの 12 言語）違い。**乱数生成器の自作**（TypeScript・Elixir・PHP・Haskell）。「値が無い」の表し方（`Option`・`Maybe`・null 許容・多値返却） | 本解説の [第 2 章](02-data-structure-comparison.md) |
+| 第 3 章 | 木の型と網羅性の検査（4 段階に分かれる）。ライブラリと 1 件だけ予測が違う原因の突き止め方（Kotlin・TypeScript・Rust・Ruby・PHP） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
+| 第 5 章 | パッケージ管理と静的解析の道具の違い。F# 版では静的解析が何も検査していなかったことに気付く過程、Rust 版ではクレートの版が型を分けること、**Ruby 版では `RUBYLIB` が古い gem を読み込んでいたこと**、**PHP 版ではカバレッジドライバが環境に無かったこと** | 本解説の [第 1 章](01-language-and-library-overview.md) |
+| 第 7 章 | 行列を自作するか、ライブラリを使うか、包まずにそのまま扱うか（Clojure）。**「SVD で解いた」が 3 つの版で 3 通りになる**（Elixir・PHP・Haskell） | 本解説の [第 4 章](04-library-ecosystem-comparison.md) |
+| 第 9 章 | 標準偏差の割り方（件数か件数 − 1 か）、Shift_JIS の取り違えの現れ方（**例外・U+FFFD への置換・不正バイナリ・静かな文字化けの 4 通り**） | 本解説の [第 2 章](02-data-structure-comparison.md)・[第 4 章](04-library-ecosystem-comparison.md) |
+| 第 11 章 | 評価関数を関数として渡す設計と、交差検証の遅延評価（**Clojure の 32 件チャンク、Haskell の `traverse` が遅延しないこと**） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
+| 第 12 章 | 罰則の尺度がライブラリごとに違うこと。ラッソが無い版（Elixir・PHP・Haskell）は座標降下法を自作した | 本解説の [第 4 章](04-library-ecosystem-comparison.md) |
+| 第 15 章 | 失敗の表し方（例外・検査例外・`Result`・`Either`・番兵のエラー）と入力の検証、置き場の約束の表し方（interface・behaviour・protocol・レコード・約束のテスト） | 本解説の [第 3 章](03-algorithm-implementation-comparison.md) |
 
-読み比べの順は、次の 4 つがおすすめです。
+読み比べの順は、次の 8 つがおすすめです。
 
-- **Python → TypeScript（または Go）**: ライブラリがそろった環境と、そろっていない環境の差が分かります。「ライブラリが何をしてくれていたか」が、自作することで見えてきます
-- **Python → F#（または Rust）**: 同じ処理を、実行時のテストで確かめる書き方と、型で防ぐ書き方で比べられます
-- **Java → Scala**: 同じ JVM・同じ Tribuo・**同じ数値**で、命令型と式指向の書き方だけが違います。言語の違いだけを取り出して読めます
+**ライブラリの有無で比べる**
+
+- **Python → Go（または Elixir）**: ライブラリがそろった環境と、そろっていない環境の差が分かります。「ライブラリが何をしてくれていたか」が、自作することで見えてきます
+- **PHP → Elixir**: 同じ第 3 波で、**置き換えの範囲が正反対**です。PHP（Rubix ML）は決定木もランダムフォレストもあり第 3 章から突き合わせられ、Elixir（Scholar）は決定木が無いので第 3 章から自作が最終実装になります。**ライブラリの成熟度が記事の重心をどう動かすか**が、同じ章を並べると一目で分かります
+- **Elixir → Haskell**: さらに狭い側へ進みます。Haskell には機械学習のライブラリが無く、突き合わせられるのは線形代数（hmatrix）と統計（statistics）だけです。**第 11 章は突き合わせの節が存在しません**
+
+**型の使い方で比べる**
+
+- **Python → F#（または Rust・Haskell）**: 同じ処理を、実行時のテストで確かめる書き方と、型で防ぐ書き方で比べられます
+- **Ruby → PHP → Haskell**: 「型をどこまで書くか」の三者比較です。**Ruby は書かない**（RBS・Steep をあえて使わない）、**PHP は書くが飛ばせる**（`declare(strict_types=1)` と PHPStan は自分で選んで導入する）、**Haskell は飛ばせない**（書かなくても推論され、網羅していないパターンマッチは `-Wall -Werror` で止まる）。第 3 章の木の型と第 15 章の置き場の約束を並べると、この差がいちばん出ます
+
+**同じ数値で、書き方だけを比べる**
+
+- **Java → Scala → Clojure**: 同じ JVM・同じ Tribuo 4.3.2・同じ JDK 21・**同じ数値**で、命令型・式指向・データ指向の書き方だけが違います。自作と CART の相違件数まで一致するので、言語の違いだけを取り出して読めます
 - **C# → F#**: 同じ .NET・同じ ML.NET・同じ数値で、命令型と関数型を比べられます
+- **Elixir → PHP → Haskell**: **この 3 つは乱数生成器を自作しました。** `java.util.Random` と同じ 48 ビットの線形合同法を書いたので、シード 0 の並びが `[4, 8, 9, 6, 3, 5, 2, 1, 7, 0]` になり、**JVM の言語版（Java・Kotlin・Scala・Clojure）と一致します**。分割が同じなので、あとの章の数値もそろい、食い違ったときは原因が乱数ではないと分かります。書き方の違いはそこに集中して読めます——PHP は整数が溢れると float に化けるので上下 24 ビットに分けて掛け、Haskell と Java は折り返すので仕様をそのまま書けます
 
 ## 5.4 環境を用意する
 
@@ -81,27 +100,46 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-19T10:14:54Z }
 | Scala | `apps/scala/` | `npx gulp apps:setup:scala` | `npx gulp apps:check:scala` |
 | Go | `apps/go/` | `npx gulp apps:setup:go` | `npx gulp apps:check:go` |
 | Rust | `apps/rust/` | `npx gulp apps:setup:rust` | `npx gulp apps:check:rust` |
+| Ruby | `apps/ruby/` | `npx gulp apps:setup:ruby` | `npx gulp apps:check:ruby` |
+| Clojure | `apps/clojure/` | `npx gulp apps:setup:clojure` | `npx gulp apps:check:clojure` |
+| Elixir | `apps/elixir/` | `npx gulp apps:setup:elixir` | `npx gulp apps:check:elixir` |
+| PHP | `apps/php/` | `npx gulp apps:setup:php` | `npx gulp apps:check:php` |
+| Haskell | `apps/haskell/` | `npx gulp apps:setup:haskell` | `npx gulp apps:check:haskell` |
 
-ツールが見つからないか版が合わない場合、タスクは Nix が導入されていれば対応する Nix の環境（`nix develop .#python`・`.#kotlin`・`.#node`・`.#dotnet`・`.#java`・`.#scala`・`.#go`・`.#rust`）の中で実行します。
+ツールが見つからないか版が合わない場合、タスクは Nix が導入されていれば対応する Nix の環境（`nix develop .#python`・`.#kotlin`・`.#node`・`.#dotnet`・`.#java`・`.#scala`・`.#go`・`.#rust`・`.#ruby`・`.#clojure`・`.#elixir`・`.#php`・`.#haskell`）の中で実行します。
+
+**手元の処理系と Nix の処理系は、版が違うことがあります。** Ruby 版は Nix の Ruby 3.3 を前提にし（macOS 同梱の 2.6 では動きません）、Clojure は `java` コマンドが 25 でも JDK 21 で動き、Elixir は `erl` が OTP 28 でも自分が持つ OTP 27 で動きます。各版の第 1 章の環境構築の節に書いてあります。
+
+**第 3 波では、環境定義そのものに手を入れる必要が 3 回ありました。** Clojure には clj-kondo と cljfmt が、PHP にはカバレッジドライバ（pcov）が、Haskell には fourmolu・hlint と BLAS/LAPACK が、素の環境に入っていませんでした。その経緯は各版の第 5〜6 章の題材になっています。
 
 学習データは、書籍の配布データを使います。ライセンス上の理由でリポジトリには含めていないので、配布 ZIP（`sukkiri-ml-codes.zip`）を入手して `tmp/` に置き、`npx gulp data:setup` で `apps/data/sukkiri-ml/` に配置してください（[シリーズの概要](../index.md) の「学習データ」を参照）。学習データが無い環境でも、自作のテストデータを使うテストは通り、実データを使うテストだけがスキップされます。手順の詳細は、各版の第 1 章の「題材とデータ」を参照してください。
 
 ## 5.5 これからの版
 
-本シリーズは、言語を 3 つの波に分けて追加します。第 1 波・第 2 波の 9 言語は全章を書き終えました。
+本シリーズは、言語を 3 つの波に分けて追加しました。**第 1 波・第 2 波・第 3 波の 14 言語は、すべて全 15 章を書き終えています。**
 
 | 波 | 言語 | 状況 |
 |----|------|------|
 | 第 1 波 | Python・Kotlin・TypeScript・F# | 完了 |
 | 第 2 波 | Java・C#・Scala・Go・Rust | 完了 |
-| 第 3 波 | Ruby・PHP・Elixir・Clojure・Haskell | 未着手 |
+| 第 3 波 | Ruby・Clojure・Elixir・PHP・Haskell | 完了 |
 
-新しい版を追加したら、本解説の各表に行と列を加えて更新します。第 2 波を加えたときは、表が横に広がりすぎたので、波ごとに分けるか、乱数生成器などの「まとまり」で縦持ちに組み替えました。
+3 つの波を通して、比べる軸は次のように増えました。
+
+| 波 | 新しく見えた軸 |
+|----|--------------|
+| 第 1 波 | データフレームを使うか、型でデータを表すか。ライブラリがそろっているか |
+| 第 2 波 | 同じ実行環境の 2 言語は数値が一致する（Java と Scala、C# と F#）。**ライブラリが非決定的なことがある**（linfa） |
+| 第 3 波 | **型をどこまで書くか**（Ruby・PHP・Haskell の三者比較）。**ライブラリの成熟度**（PHP は広い、Elixir は狭い、Haskell は無い）。**乱数生成器を自作すれば言語をまたいで数値がそろう**。**C ライブラリへの依存は 3 段で確認する**（Haskell） |
+
+新しい版を追加するときは、本解説の各表に行と列を加えて更新します。第 2 波・第 3 波を加えたときは、表が横に広がりすぎたので、**波ごとに分けるか、標準偏差の割り方や余りの扱いのような「まとまり」で縦持ちに組み替えました**。
 
 ## 5.6 まとめ
 
-1. **迷ったら Python 版から** — 参照実装で、ライブラリとの突き合わせが最も多い。目的に応じて残りの 8 言語から選ぶ
+1. **迷ったら Python 版から** — 参照実装で、ライブラリとの突き合わせが最も多い。目的に応じて残りの 13 言語から選ぶ
 2. **第 1 部から読む** — 第 2・3 章は後の章で再利用する。第 2 部は後回しにしてもよい
-3. **版をまたいで読み比べる** — 第 2・3・9・11・12・15 章は、言語による違いが特に大きい
-4. **同じ実行環境の 2 言語を読み比べる** — Java と Scala（JVM・Tribuo）、C# と F#（.NET・ML.NET）は数値が完全に一致するので、書き方の違いだけを取り出して読める
-5. **テストを失敗させてから実装する** — 記事の順に Red・Green・Refactor を回すと、TDD の手触りがつかめる
+3. **版をまたいで読み比べる** — 第 2・3・5・7・9・11・12・15 章は、言語による違いが特に大きい
+4. **ライブラリの成熟度で読み比べる** — PHP（広い）→ Elixir（狭い）→ Haskell（無い）と並べると、ライブラリが記事の重心をどう動かすかが見える
+5. **型の使い方で読み比べる** — Ruby（書かない）→ PHP（書くが飛ばせる）→ Haskell（飛ばせない）は、同じ章で三者比較できる
+6. **同じ数値の版を読み比べる** — Java・Scala・Clojure（JVM・Tribuo）、C# と F#（.NET・ML.NET）、Elixir・PHP・Haskell（自作の乱数で JVM 版と一致）は、書き方の違いだけを取り出して読める
+7. **テストを失敗させてから実装する** — 記事の順に Red・Green・Refactor を回すと、TDD の手触りがつかめる

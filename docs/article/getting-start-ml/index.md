@@ -77,7 +77,7 @@
 
 ## 多言語統合解説
 
-第 1 波の 4 言語で同じ 15 章を書いた結果を、横断的に比べます。どの版から読むか迷ったら、[第 5 章 学習ロードマップ](integration/05-learning-roadmap.md) を参照してください。
+14 言語（第 1 波の Python・Kotlin・TypeScript・F#、第 2 波の Java・C#・Scala・Go・Rust、第 3 波の Ruby・Clojure・Elixir・PHP・Haskell）で同じ 15 章を書いた結果を、横断的に比べます。どの版から読むか迷ったら、[第 5 章 学習ロードマップ](integration/05-learning-roadmap.md) を参照してください。
 
 | 章 | テーマ |
 |----|--------|
