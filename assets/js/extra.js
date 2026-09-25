@@ -25,7 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Force render any mermaid diagrams
         setTimeout(function() {
-            mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+            if (typeof mermaid.run === 'function') {
+                mermaid.run({ querySelector: '.mermaid' });
+            } else {
+                mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+            }
         }, 1000);
     } else {
         console.error('Mermaid library not loaded');
