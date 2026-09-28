@@ -3,7 +3,7 @@ type: ADR
 title: "015 なでしこ3 版の処理系・テスト・静的検査の選定"
 description: "番外編のなでしこ3 版に nadesiko3go（gonako）3.8.8 を採用し、Nix の Go から GOTOOLCHAIN で Go 1.26 に切り替えて入れる。テストは自作のテスト補助、静的検査は gonako lint と整形の差分で行い、機械学習のアルゴリズムと線形代数はすべて自作する。"
 tags: [adr,getting-start-ml,nadesiko3]
-status: draft
+status: stable
 generated: { by: claude-code/claude-opus-5, at: 2026-09-28T00:00:00Z }
 ---
 
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-28T00:00:00Z }
 ## ステータス
 
 2026-09-28 提案されました
+
+2026-09-28 承認されました（第 1〜15 章の執筆で確かめました。実データでの実測と CI の初回実行はまだです）
 
 ## コンテキスト
 

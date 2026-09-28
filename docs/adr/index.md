@@ -20,6 +20,6 @@
 | [012](012-elixir-ml-libraries.md) | Elixir 版のライブラリに Mix・ExUnit・mix format・Credo・Nx・Scholar・NimbleCSV・codepagex・Plug と Bandit を採用し、Scholar に決定木が無いため決定木の章を自作の最終実装とする | 承認済み |
 | [013](013-php-ml-libraries.md) | PHP 版のライブラリに Composer・PHPUnit・PHP-CS-Fixer・PHPStan・pcov・Rubix ML・MathPHP を採用し、素の線形回帰とラッソが無いため代用・自作とする | 承認済み |
 | [014](014-haskell-ml-libraries.md) | Haskell 版のライブラリに cabal・Hspec・fourmolu・hlint・HPC・hmatrix・cassava・statistics・Scotty を採用し、hmatrix のため環境に blas・lapack を足す。機械学習のアルゴリズムは自作が最終実装になる | 承認済み |
-| [015](015-nadesiko3-toolchain.md) | なでしこ3 版の処理系に nadesiko3go 3.8.8 を疑似版で固定して採用し、Nix の Go から GOTOOLCHAIN で Go 1.26 に切り替えて入れる。テスト補助を自作し、機械学習と線形代数はすべて自作する | 提案中 |
+| [015](015-nadesiko3-toolchain.md) | なでしこ3 版の処理系に nadesiko3go 3.8.8 を疑似版で固定して採用し、Nix の Go から GOTOOLCHAIN で Go 1.26 に切り替えて入れる。テスト補助を自作し、機械学習と線形代数はすべて自作する | 承認済み |
 
 ADR の作成には `creating-adr` スキルを使用してください。
