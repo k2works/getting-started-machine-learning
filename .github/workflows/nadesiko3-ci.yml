@@ -1,0 +1,54 @@
+name: Nadesiko3 CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/nadesiko3/**"
+      - ".github/workflows/nadesiko3-ci.yml"
+      - "ops/nix/environments/nadesiko3/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/nadesiko3/**"
+      - ".github/workflows/nadesiko3-ci.yml"
+      - "ops/nix/environments/nadesiko3/**"
+      - "flake.nix"
+      - "flake.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      # gonako のソースと、GOTOOLCHAIN で取得する Go 1.26 のツールチェーンを保存する
+      - name: Cache Go modules and toolchain
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-nadesiko3-${{ hashFiles('apps/nadesiko3/tools/install-gonako.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-nadesiko3-
+
+      # タグ 3.8.8 の疑似版を、Go 1.26 のツールチェーンに切り替えて入れる（ADR 015）
+      - name: Install gonako
+        run: nix develop .#nadesiko3 --command bash -c "cd apps/nadesiko3 && ./tools/install-gonako.sh"
+
+      # 学習データは再配布できないため CI には配置しない。実データのテストは保留になる
+      - name: Lint, format and test
+        run: nix develop .#nadesiko3 --command bash -c "cd apps/nadesiko3 && ./tools/check.sh"

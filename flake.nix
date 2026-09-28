@@ -27,6 +27,7 @@
           elixir = import ./ops/nix/environments/elixir/shell.nix { inherit packages; };
           scala = import ./ops/nix/environments/scala/shell.nix { inherit packages; };
           kotlin = import ./ops/nix/environments/kotlin/shell.nix { inherit packages; };
+          nadesiko3 = import ./ops/nix/environments/nadesiko3/shell.nix { inherit packages; };
         };
       }
     );
