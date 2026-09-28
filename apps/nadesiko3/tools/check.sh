@@ -38,7 +38,16 @@ done
 echo "== テスト"
 for file in "${tests[@]}"; do
   echo "-- ${file}"
-  if ! "${GONAKO}" "${file}"; then
+  output="$("${GONAKO}" "${file}" 2>&1)"
+  status=$?
+  echo "${output}"
+  if [ "${status}" -ne 0 ]; then
+    failed=1
+  # 終了コードが 0 でも、最後の「検査結果報告」まで届いていなければ失敗にする。
+  # 「終了」という名前を変数や引数に使うと、プロセスを終わらせる命令が呼ばれ、
+  # エラーも出さずに終了コード 0 で止まるため。
+  elif ! grep -qE '^検査 [0-9]+ 件、失敗 0 件、保留 [0-9]+ 件$' <<< "${output}"; then
+    echo "検査結果報告まで届かずに終わりました: ${file}" >&2
     failed=1
   fi
 done
