@@ -27,6 +27,14 @@
 | 3 | [PHP](php/index.md) | PHP 8.4 | 漸進的な型付け（strict_types と PHPStan レベル 9）・readonly class・Rubix ML、Ruby 版／Elixir 版との対比 | 完了 |
 | 3 | [Haskell](haskell/index.md) | GHC 9.10 | 失敗を Either で表す・IO を境界に閉じ込める・hmatrix、Rust 版／F# 版との対比 | 完了 |
 
+### 番外編（Extra）
+
+14 言語のあとに、日本語プログラミング言語なでしこ3 の版を番外編として書いています。章構成の表と統合解説の比較には含めていません。
+
+| 言語 | 環境 | 特徴 | 状況 |
+|------|------|------|------|
+| [なでしこ3](nadesiko3/index.md) | nadesiko3go 3.8.8（Go） | 日本語で書く・助詞で引数を表す・テストの道具も線形代数も自作、Python 版／Haskell 版との対比 | 執筆中（第 1 章） |
+
 ## 章構成
 
 ### 第 1 部: 機械学習と TDD の基本サイクル
