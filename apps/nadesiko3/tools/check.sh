@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# なでしこ3 版の検査を、CI と同じ順（文法・整形・テスト）でまとめて行う。
+# なでしこ3 版の検査を、CI と同じ順（文法・整形・テスト・関数の網羅）でまとめて行う。
 #
 # gonako には検査をまとめて実行する仕組みが無い。lint は 1 回に 1 ファイルしか受け付けず、
 # format は整形の結果を出力するだけで検査用のモードが無い。テストもファイルごとに
@@ -14,7 +14,7 @@ if [ ! -x "${GONAKO}" ]; then
   exit 1
 fi
 
-mapfile -t sources < <(find main.nako3 src test -name '*.nako3' | sort)
+mapfile -t sources < <(find main.nako3 src test tools -name '*.nako3' | sort)
 mapfile -t tests < <(find test -name '*_test.nako3' | sort)
 
 failed=0
@@ -51,6 +51,12 @@ for file in "${tests[@]}"; do
     failed=1
   fi
 done
+
+echo "== 関数の網羅（tools/function_coverage.nako3）"
+# カバレッジを測る仕組みが無いので、src/ の関数がテストから直接・間接に届くかを静的に数える。
+if ! "${GONAKO}" tools/function_coverage.nako3; then
+  failed=1
+fi
 
 if [ "${failed}" -ne 0 ]; then
   echo "検査が失敗しました" >&2
