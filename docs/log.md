@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-28
+* **Creation**: なでしこ3 版の [トップ](/article/getting-start-ml/nadesiko3/index.md)・[第 1 章](/article/getting-start-ml/nadesiko3/01-machine-learning-and-first-test.md) と [ADR 015](/adr/015-nadesiko3-toolchain.md) を新規作成し、シリーズ索引（番外編の節）・nav・ADR 索引に登録。[執筆計画](/article/getting-start-ml/outline.md) の Extra の節を承認済みにし（第 15 章は案 1）、B76 のステップ 1 で確かめた事実・ステップ計画・完了の記録を追加。[執筆ワークフロー](/article/getting-start-ml/workflow.md) の進捗表になでしこ3 版の行を追加。`apps/nadesiko3/` に第 1 章を TDD で実装し、**テスティングフレームワークが無いためテスト補助を自作**した（`ASSERT等` は最初の失敗で止まる）。nadesiko3go は Go 1.26 を要求するが Nix の Go は 1.25.5 なので `GOTOOLCHAIN=go1.26.8` で切り替え、タグ 3.8.8 は `v` が無く Go の版として読めないため疑似版で固定した。**識別子に助詞を入れられない**（`ルールで判定` が「ルール」の定義に割られる）、**lint はかっこの中の未定義の名前を素通りさせる**、`「170cm」+0` が 170 になる、などを記事にした。学習データの無い環境で書いたため、**実データの正解率 0.7368 はまだ実測していない**（テストは保留、記事に注記）。Nix の `nadesiko3` 環境・`apps:check:nadesiko3`・Nadesiko3 CI を追加した。
 * **Update**: [執筆計画](/article/getting-start-ml/outline.md) に「Extra: なでしこ3（nadesiko3go）版執筆計画」を追加（承認待ち）。nadesiko3go 3.8.8 を手元でビルドして確かめた事実（`go 1.26.0` の要求、テストは `ASSERT等` と終了コードで行いカバレッジも型検査も無いこと、CSV が BOM を取り除かないこと、数値が float64 だけで乱数にシードを渡せないこと、HTTP サーバーの命令が無いこと）をもとに、対比の軸・方針・章ごとの見通し・Bolt 計画（B76〜B81）・リスク・承認事項を定義した。Unit 表に U16 を追加した。
 
 ## 2026-09-24
