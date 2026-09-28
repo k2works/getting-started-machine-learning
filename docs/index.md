@@ -8,7 +8,7 @@ okf_version: "0.2"
 
 ## 記事
 
-- [機械学習から始めるプログラミング入門](./article/getting-start-ml/index.md) - 14 言語で機械学習を体験する記事シリーズ
+- [機械学習から始めるプログラミング入門](./article/getting-start-ml/index.md) - 14 言語と番外編のなでしこ3 で機械学習を体験する記事シリーズ
 - [執筆計画](./article/getting-start-ml/outline.md) - 記事の全体構成と執筆計画
 - [執筆ワークフロー](./article/getting-start-ml/workflow.md) - 執筆・実装の進め方
 - [多言語統合解説](./article/getting-start-ml/integration/index.md) - 言語・ライブラリ・アルゴリズムの横断比較
@@ -24,6 +24,7 @@ okf_version: "0.2"
 | Rust | [概要](./article/getting-start-ml/rust/index.md) | Ruby | [概要](./article/getting-start-ml/ruby/index.md) |
 | Clojure | [概要](./article/getting-start-ml/clojure/index.md) | Elixir | [概要](./article/getting-start-ml/elixir/index.md) |
 | PHP | [概要](./article/getting-start-ml/php/index.md) | Haskell | [概要](./article/getting-start-ml/haskell/index.md) |
+| なでしこ3（番外編） | [概要](./article/getting-start-ml/nadesiko3/index.md) | | |
 
 ### その他の記事シリーズ
 
@@ -55,6 +56,8 @@ okf_version: "0.2"
 - [よいソフトウェアとは](./reference/よいソフトウェアとは.md) - ソフトウェアの価値と品質
 - [ロジカルシンキング](./reference/ロジカルシンキング.md) - 論理的に考えるための道具立て
 - [開発ガイド](./reference/開発ガイド.md) - 開発ライフサイクルの全体像
+- [開発ガイド（AI-DLC 版）](./reference/開発ガイド_AI-DLC版.md) - AI が計画・生成し、人が承認ゲートで検証する開発ライフサイクル
+- [AI-DLC 導入ガイド](./reference/AI-DLC導入ガイド.md) - AI-DLC の原則・成果物・フェーズと、本プロジェクトへの組み込み方
 - [コーディングとテストガイド](./reference/コーディングとテストガイド.md) - TDD の実践ガイド
 - [アーキテクチャ設計ガイド](./reference/アーキテクチャ設計ガイド.md) - アーキテクチャ設計の指針
 - [テスト戦略ガイド](./reference/テスト戦略ガイド.md) - テスト計画と戦略
@@ -64,5 +67,6 @@ okf_version: "0.2"
 ## その他
 
 - [テンプレート](./template/index.md) - 各種ドキュメントの作成テンプレート
+- [更新履歴](./log.md) - ドキュメントの作成・更新の記録
 - `journal/` は作業ログ用のディレクトリです。
 - `assets/` は MkDocs 用のスタイル・スクリプトを格納しています。
