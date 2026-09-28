@@ -105,6 +105,16 @@ const APPS = [
       'fourmolu --mode check src test && hlint src test && cabal test --enable-coverage --enable-executable-dynamic && ./tools/coverage-threshold.sh 65',
   },
   {
+    name: 'nadesiko3',
+    nix: 'nadesiko3',
+    dir: path.join('apps', 'nadesiko3'),
+    // gonako は Go で入れる。Go 1.26 のツールチェーンへの切り替えはスクリプトの中で行う（ADR 015）
+    tools: [{ cmd: 'go', version: 'go version' }],
+    setup: './tools/install-gonako.sh',
+    // CI（.github/workflows/nadesiko3-ci.yml）と同じ順に、文法・整形・テストを検査する
+    check: './tools/check.sh',
+  },
+  {
     name: 'ruby',
     nix: 'ruby',
     dir: path.join('apps', 'ruby'),
