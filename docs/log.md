@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-09-28
+* **Update**: [ADR 015](/adr/015-nadesiko3-toolchain.md) を承認済みにした（なでしこ3 版の第 1〜15 章の執筆で確かめた。実データでの実測と CI の初回実行はまだ）
 * **Update**: [トップ](/index.md)・[記事の一覧](/article/index.md)・`mkdocs.yml` の nav を現在の構成に合わせた。nav に無かったリファレンス 8 件（AI-DLC 版の 4 ガイド・AI-DLC 導入ガイド・AI-DLC 用語集・ドキュメント構成ガイド・OKF 導入ガイド）と更新履歴を加え、トップと記事の一覧になでしこ3 版（番外編）を載せた
 * **Update**: [多言語統合解説](/article/getting-start-ml/integration/index.md) の索引に「番外編」の節を、[第 5 章 学習ロードマップ](/article/getting-start-ml/integration/05-learning-roadmap.md) に「5.8 番外編: なでしこ3 版」を追加し、[執筆計画](/article/getting-start-ml/outline.md)・[進捗表](/article/getting-start-ml/workflow.md) を更新（B81。なでしこ3 版の番外編 B76〜B81 が完了）。14 言語の表・レーダーチャート・総合スコアには含めず、理由を書いた
 * **Creation**: なでしこ3 版の [第 15 章](/article/getting-start-ml/nadesiko3/15-machine-learning-api-and-module-design.md) を新規作成し、[トップ](/article/getting-start-ml/nadesiko3/index.md)・シリーズ索引・nav・[ADR 015](/adr/015-nadesiko3-toolchain.md)・[執筆計画](/article/getting-start-ml/outline.md)・[進捗表](/article/getting-start-ml/workflow.md) を更新（B80。なでしこ3 版の全 15 章がそろった）。HTTP サーバーの命令が無いので、予測 API を JSON の標準入出力でやりとりするコマンドにし、経路・検証の理由・ステータスコードをほかの言語版とそろえた。約束は無名関数の辞書、失敗は結果の辞書で表した。実データでの実測は未確認
