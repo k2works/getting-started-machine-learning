@@ -30,6 +30,7 @@
 | [nadesiko3go](https://github.com/kujirahand/nadesiko3go)（`gonako`）3.8.8 | 言語・処理系（タグ 3.8.8 の疑似版で固定） |
 | Go 1.26（`GOTOOLCHAIN=go1.26.8`） | `gonako` の導入 |
 | 自作のテスト補助（`test/helper.nako3`） | テスト（検査の件数と失敗を数え、最後に報告する） |
+| 自作の関数の網羅（`tools/function_coverage.nako3`） | カバレッジの代わり（テストから届かない関数を見つける） |
 | `gonako lint` | 文法の検査（1 回に 1 ファイル） |
 | `gonako format` | 整形（検査用のモードが無いので、差分で判定する） |
 
@@ -60,11 +61,11 @@ cd apps/nadesiko3
 ./bin/gonako main.nako3 chapter01
 ```
 
-リポジトリのルートで `npx gulp apps:check:nadesiko3` を実行すると、CI と同じ順（文法・整形・テスト）でまとめて検査できます。
+リポジトリのルートで `npx gulp apps:check:nadesiko3` を実行すると、CI と同じ順（文法・整形・テスト・関数の網羅）でまとめて検査できます。
 
 ## 章構成
 
-第 1〜3 章を公開しています。第 4 章以降は執筆中です。
+第 1〜6 章を公開しています。第 7 章以降は執筆中です。
 
 ### 第 1 部: 機械学習と TDD の基本サイクル
 
@@ -78,9 +79,9 @@ cd apps/nadesiko3
 
 | 章 | テーマ | 状態 |
 |----|--------|------|
-| 第 4 章 | バージョン管理とデータ管理 | 未着手 |
-| 第 5 章 | パッケージ管理と静的解析 | 未着手 |
-| 第 6 章 | タスクランナーと CI/CD | 未着手 |
+| [第 4 章](04-version-control-and-data-management.md) | バージョン管理とデータ管理 | 公開済み |
+| [第 5 章](05-package-management-and-static-analysis.md) | パッケージ管理と静的解析 | 公開済み |
+| [第 6 章](06-task-runner-and-ci-cd.md) | タスクランナーと CI/CD | 公開済み（CI はまだ走っていない） |
 
 ### 第 3 部: 回帰と実践的な前処理
 

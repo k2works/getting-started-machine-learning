@@ -111,7 +111,7 @@ const APPS = [
     // gonako は Go で入れる。Go 1.26 のツールチェーンへの切り替えはスクリプトの中で行う（ADR 015）
     tools: [{ cmd: 'go', version: 'go version' }],
     setup: './tools/install-gonako.sh',
-    // CI（.github/workflows/nadesiko3-ci.yml）と同じ順に、文法・整形・テストを検査する
+    // CI（.github/workflows/nadesiko3-ci.yml）と同じ順に、文法・整形・テスト・関数の網羅を検査する
     check: './tools/check.sh',
   },
   {
